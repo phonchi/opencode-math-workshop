@@ -1,6 +1,7 @@
 # 在自己電腦上跑本地模型
 
-> 課後延伸 · 加分項
+> 課後延伸 · **加分項，不是必修**
+> 適用版本：opencode 1.18.30 · Ollama 0.21.2
 
 工作坊主線用的是 `opencode/big-pickle`，免登入、不用設定、速度夠快。這一章講的是另一條路：
 把模型放在自己的筆電上跑。**這不是必修**，做不做都不影響你的作業。
@@ -67,8 +68,10 @@
 
 `q4_K_M` 大約是 4.5 bits/參數（不是剛好 4，因為有些層保留較高精度）。所以：
 
-- 9B 參數 × 4.5 ÷ 8 ≈ **5.1GB** → 實際檔案 6.6GB（還有 embedding 等其他東西）
-- 4B 參數 × 4.5 ÷ 8 ≈ **2.3GB** → 實際檔案 3.4GB
+- `qwen3.5:9b` 的 `ollama show` 顯示實際參數是 **9.7B**：9.7 × 4.5 ÷ 8 ≈ **5.5GB**
+  → 實際檔案 6.6GB。差額主要是 embedding 層和**視覺編碼器**
+  （qwen3.5 是多模態模型，即使你只用文字，那部分權重還是在檔案裡）。
+- 4B 參數 × 4.5 ÷ 8 ≈ **2.3GB** → 實際檔案 3.4GB（同理）。
 
 **但檔案大小不等於執行時吃的記憶體**，還要加上 KV cache。KV cache 會隨 context 線性長大，
 這是下面那一節的重點。本機 `qwen3.5:9b-q4_K_M`（檔案 6.6GB）實測：
@@ -223,20 +226,23 @@ opencode 透過 **OpenAI 相容端點**（`http://localhost:11434/v1`）跟 Olla
 這個協定裡**沒有**「context 要多大」這個欄位。所以：
 
 ```
-┌──────────────────────┐                    ┌──────────────────────┐
-│  opencode            │   POST /v1/chat/   │  Ollama              │
-│                      │   completions      │                      │
-│  limit.context       │ ────────────────> │  num_ctx             │
-│  ＝我「以為」模型     │   （請求裡帶不了    │  ＝模型「實際」      │
-│    能吃多少 token     │     context 大小） │    能吃多少 token    │
-└──────────────────────┘                    └──────────────────────┘
-        設定 A                                      設定 B
-   決定何時壓縮對話                            決定超過就截斷
+  opencode                                        Ollama
+  --------                                        ------
+  limit.context  ──── POST /v1/chat/completions ───>  num_ctx
+  設定 A                                             設定 B
+
+  「我以為模型能吃多少 token」                       「模型實際能吃多少 token」
+  → 決定何時壓縮／摘要對話（compaction）             → 超過就安靜地截掉一部分
+
+  OpenAI 相容協定裡沒有「context 要多大」這個欄位，
+  所以設定 A 永遠傳不到設定 B。兩邊要各設一次。
 ```
 
-- **設定 B（Ollama 的 `num_ctx`）** 決定模型真正看得到多少。超過就**直接把前面砍掉**。
-- **設定 A（opencode 的 `limit.context`）** 決定 opencode 什麼時候該壓縮／摘要對話。
-  opencode 沒辦法問 Ollama「你的 context 多大」，只能相信你在設定檔裡寫的數字。
+- **設定 B（Ollama 的 `num_ctx`）** 決定模型真正看得到多少。超過就**安靜地截掉一部分**。
+- **設定 A（opencode 的 `limit.context`）** 是 opencode 判斷「該不該壓縮／摘要對話」
+  （官方文件稱為 compaction）的依據。opencode 的自動 compaction 門檻就是從 catalog 裡的
+  context limit 算出來的，而 Ollama 這種自訂 provider 的 context limit 只能由你手寫。
+  opencode **沒辦法**問 Ollama「你的 context 多大」，只能相信你在設定檔裡寫的數字。
 
 **實測證明這兩者互不相通**：我在 `/v1/chat/completions` 請求裡同時塞了
 `"num_ctx": 32768` 和 `"options": {"num_ctx": 32768}`，然後看 `ollama ps`：
@@ -277,7 +283,7 @@ M2 MacBook Air 是 8 或 16GB——**幾乎所有學生的機器都落在第一�
 
 一般聊天 4k 綽綽有餘。但 agent 的 context 裡塞的是：
 
-| 內容 | 大約 token 數 |
+| 內容 | 大約 token 數（推估） |
 |---|---|
 | 系統提示（agent 的行為規則） | 1k–3k |
 | 工具定義（read / write / bash / glob / grep… 的 JSON schema） | 2k–5k |
@@ -285,33 +291,121 @@ M2 MacBook Air 是 8 或 16GB——**幾乎所有學生的機器都落在第一�
 | 讀進來的檔案內容 | 每個檔案 0.5k–5k |
 | 到目前為止的對話與工具輸出 | 持續累積 |
 
-**光是系統提示加工具定義就可能超過 4k。** 也就是說，在預設設定下，
-模型有可能在「還沒看到你第一句話」之前，context 就已經滿了。
+（這些數字是推估，沒有實測。）
 
-### 設定前 vs 設定後
+關鍵在於：**系統提示和工具定義是不會被丟掉的固定開銷。**
+Ollama 的 `chatPrompt` 在裁切訊息時，明文保證「一定保留最新的訊息與 system 訊息」
+（見原始碼註解）。也就是說，`num_ctx` 扣掉這一大塊固定開銷之後，
+剩下來給「你的問題、讀進來的檔案、工具輸出」的空間才是真正可用的額度。
 
-我實測了一次「送超過 4k 的內容給預設設定的模型」，這是 Ollama server 的 log：
+**光是系統提示加工具定義就可能吃掉 4k 的大半。** 在預設設定下，
+你的第一個檔案還沒讀進來，額度就差不多用完了。
+
+### 設定前 vs 設定後（本機實測）
+
+這是整章最值得自己重跑一次的實驗。我做了一份**完全相同**的請求，
+只換模型（一個 4k、一個 32k），走的就是 opencode 在用的 `/v1/chat/completions`：
+
+請求內容：
+
+- 一個 system message，裡面寫「系統提示驗證碼是 **BANANA7**」
+- 一個 `bash` 工具定義
+- 8 段筆記，每段開頭給一個代號（第 1 段是 **ALPHA1**、…、第 8 段是 **HOTEL8**），
+  每段約 1000 token，共約 10000 token
+- 最後問三個問題：(a) 系統提示驗證碼 (b) 第 1 段代號 (c) 第 8 段代號，
+  並要求執行 `ls -la`
+
+#### 設定前：`qwen3.5:9b-q4_K_M`（num_ctx = 4096 預設）
+
+```
+usage = {'prompt_tokens': 4049, 'completion_tokens': 961, 'total_tokens': 5010}
+```
+
+模型的回答（原文節錄）：
+
+```
+（說明）：作為語言模型，我無法在您的系統中執行命令……
+(a) 系統提示驗證碼：不知道（對話中未提及）
+(b) 第 1 段筆記代號：GOLF07
+(c) 第 8 段筆記代號：HOTEL8
+```
+
+`tool_calls` 是 `null`。三件事同時發生：
+
+1. **內容被吃掉了**：送進去約 10000 token，`prompt_tokens` 只有 **4049**。
+2. **舊的對話輪不見了**：第 1 段代號實際是 `ALPHA1`，它很有自信地回答 `GOLF07`
+   （那是第 7 段的代號）。最新的第 8 段 `HOTEL8` 它答對了——
+   因為 Ollama 保留的是**最後面**的訊息。**它不會說「我不知道」，它會編一個。**
+3. **連 system message 裡的驗證碼也答不出來**：它回「對話中未提及」。
+   這一點要講精確：Ollama 的 `chatPrompt` **明文保證一定保留 system 訊息**，
+   所以驗證碼其實還在 context 裡。它答不出來不是因為被刪掉，
+   而是因為 4k 的空間被塞爆之後，小模型在一堆雜訊裡**用不到**那條指令。
+   （同樣結構的另一次實測它答對了 `BANANA7`——這一條的表現不穩定，
+   這本身就是「context 太擠」的典型徵兆。）
+
+順帶一提，它也沒有呼叫 `bash` 工具，而是回「作為語言模型，我無法在您的系統中執行命令」。
+但這一項**不能歸因於 context**——見下面 32k 的對照。
+
+#### 設定後：`qwen3.5-32k`（num_ctx = 32768）
+
+同一份請求，只把 model 名稱換掉：
+
+```
+usage = {'prompt_tokens': 10190, 'completion_tokens': 3262, 'total_tokens': 13452}
+```
+
+```
+(a) 系統提示驗證碼：BANANA7
+(b) 第 1 段筆記的代號：ALPHA1
+(c) 第 8 段筆記的代號：HOTEL8
+```
+
+**三題全對**，`prompt_tokens` 是完整的 10190。**這不是「模型變聰明了」，
+是它終於看得到完整的指令。**
+
+（**重要的對照**：即使 context 開到 32k、內容完整送達，這一輪它**還是**沒有呼叫
+`bash` 工具，同樣用「我是語言模型，無法執行命令」打發。
+所以「不呼叫工具」是**模型本身的能力問題，不是 context 問題**。
+context 設對是必要條件，不是充分條件——剩下的問題在最後一節處理。）
+
+#### 最陰險的一點：完全不會有警告
+
+**在 `/v1/chat/completions` 這條路上，Ollama 的 log 一個字都不會印。**
+上面那次 4k 的截斷，`journalctl -u ollama | grep truncat` 完全沒有輸出。
+
+只有在走 `/api/generate`（直接送一整段 prompt，不是 messages）時才看得到 WARN：
 
 ```
 level=WARN source=runner.go:187 msg="truncating input prompt"
     limit=4096 prompt=10020 keep=4 new=4096
 ```
 
-10020 個 token 進去，**只有 4096 個留下來**。API 回傳的 `prompt_eval_count` 也確實是 `4096`。
-而且——**呼叫端完全不會收到任何錯誤或警告**。opencode 那邊看起來一切正常。
+也就是說：**opencode 走的那條路，是安靜失敗的。** 你唯一能依靠的訊號是
+`usage.prompt_tokens` 和 `ollama ps` 的 CONTEXT 欄——不要指望 log 會告訴你。
 
-被砍掉的是**最前面**的部分，也就是系統提示和工具定義所在的位置。這直接解釋了所有症狀：
+（同樣的 10020 token prompt 送給 `qwen3.5-32k` 走 `/api/generate`：
+`prompt_eval_count = 10020`，log 沒有 `truncating input prompt`。設定確實生效。）
 
-| 你看到的症狀 | 真正的原因 |
+#### 這解釋了所有症狀
+
+下面把「確定是 context 造成的」跟「可能只是模型太小」分開，這樣你才知道該調設定還是該換模型。
+
+**確定與 context 有關（本機實測可證）**
+
+| 症狀 | 原因 |
 |---|---|
-| 「一直忘記我前面說什麼」 | 對話前半被截斷了 |
-| 「亂呼叫不存在的工具，像 `execute`、`shell`」 | 工具定義被截掉，模型只能用猜的 |
-| 「同一件事重複做好幾次」 | 它看不到自己剛才已經做過的紀錄 |
-| 「不遵守 `AGENTS.md` 的規則」 | `AGENTS.md` 在 context 最前面，最先被砍 |
-| 「講到一半突然變得很笨」 | 累積內容剛好越過 4096 這條線 |
+| 「一直忘記我前面說什麼」 | 最舊的對話輪被丟掉，只保留最新的訊息（實測：第 1 段代號答錯、第 8 段答對） |
+| 「一本正經地講錯話」 | 資訊被丟掉後模型不會說「我不知道」，它會**編一個**（實測：`GOLF07` vs 正解 `ALPHA1`） |
+| 「同一件事重複做好幾次」 | 它看不到自己剛才已經做過的紀錄（同上機制） |
+| 「講到一半突然變得很笨」 | 累積內容剛好越過 num_ctx 這條線（實測：`prompt_tokens` 4049 vs 10190） |
 
-對照設定成 32k 之後：同樣的 prompt 完整進去，log 沒有 `truncating input prompt`，
-工具呼叫正常。**這不是「模型變聰明了」，是它終於看得到完整的指令。**
+**可能與 context 有關，但也可能只是模型太小（未能單獨驗證）**
+
+| 症狀 | 說明 |
+|---|---|
+| 「不遵守 `AGENTS.md` 的規則」 | 系統提示與 `AGENTS.md` 其實**不會**被丟掉（`chatPrompt` 保證保留 system 訊息）。但 context 一擠，小模型就用不到那些規則。調大 context 通常會改善，不保證解決 |
+| 「亂呼叫不存在的工具，像 `execute`、`shell`」 | 工具定義同樣不會被丟掉。這多半是小模型自己的毛病，先調 context，再用最後一節的 `AGENTS.md` 約束 |
+| 「該執行指令卻只印出指令」 | **實測在 4k 和 32k 都會發生**，所以主要是模型能力問題，不是 context。見最後一節 |
 
 ### 該設多大
 
@@ -325,12 +419,12 @@ level=WARN source=runner.go:187 msg="truncating input prompt"
 64k 是理想值，16k–32k 是在學生筆電上的現實下限。回頭看前面那張實測表：
 12GB 的卡開到 64k 就已經溢出到 CPU 了。所以：
 
-| 你的記憶體 | 建議 num_ctx |
-|---|---|
-| 8GB RAM 無獨顯 | 8192，勉強 16384 |
-| 16GB RAM 無獨顯 | 16384 |
-| 8–12GB VRAM | 32768 |
-| 24GB 以上 VRAM / 32GB 以上 Mac | 65536 |
+| 你的記憶體 | 建議 num_ctx | 依據 |
+|---|---|---|
+| 8GB RAM 無獨顯 | 8192，勉強 16384 | 推估（未實測） |
+| 16GB RAM 無獨顯 | 16384 | 推估（未實測） |
+| 8–12GB VRAM | 32768 | 12GB 本機實測 |
+| 24GB 以上 VRAM / 32GB 以上 Mac | 65536 | 推估（未實測） |
 
 **從 32768 開始試**，如果 `ollama ps` 顯示 PROCESSOR 不是 100% GPU（或機器開始瘋狂 swap），
 就往下調。
@@ -373,6 +467,9 @@ launchctl setenv OLLAMA_CONTEXT_LENGTH 32768
 
 然後從選單列**完全結束 Ollama 再重開**。
 
+> `launchctl setenv` 設的變數**重開機後不會保留**（未實測；若要永久生效，
+> 建議直接用下面提到的 app 設定滑桿）。
+
 **Windows**：
 
 「設定」→ 搜尋「環境變數」→「編輯系統環境變數」→「環境變數」→
@@ -396,8 +493,9 @@ OLLAMA_CONTEXT_LENGTH=32768 ollama serve
 
 #### 路線二：用 Modelfile 做一個固定 num_ctx 的模型（建議）
 
-不用動系統服務、不用 sudo、不影響其他模型，而且**透過 `/v1` 端點也一定生效**——
-這是本機唯一完整驗證過、從頭到尾都對的路線。
+不用動系統服務、不用 sudo、不影響其他模型，而且**透過 `/v1` 端點也一定生效**。
+（路線一和路線二在本機都實測生效過；路線二勝在不用碰系統設定，
+也不會影響你電腦上其他模型。）
 
 建立一個檔案 `Modelfile`（沒有副檔名）：
 
@@ -442,7 +540,7 @@ num_ctx                        32768     ← 有這行就對了
 
 | 情況 | 後果 |
 |---|---|
-| `limit.context` **大於** 真實 `num_ctx` | **危險**。opencode 以為還有空間、不壓縮對話，Ollama 安靜地截斷。模型莫名其妙變笨，**完全沒有錯誤訊息** |
+| `limit.context` **大於** 真實 `num_ctx` | **危險**。opencode 以為還有空間、還沒到 compaction 門檻，Ollama 卻已經安靜地丟掉前面的內容。模型莫名其妙變笨，**log 與 API 都沒有任何錯誤訊息** |
 | `limit.context` **小於** 真實 `num_ctx` | 只是浪費。opencode 太早壓縮對話，模型其實吃得下更多 |
 | 兩邊相同 | 正確 |
 
@@ -496,6 +594,12 @@ num_ctx                        32768     ← 有這行就對了
 - `limit.context` 和 `limit.output` 都是必填。`output` 是單次回覆上限，8192 夠用。
 - `tool_call: true` 明確告訴 opencode 這個模型會呼叫工具。
 
+> 驗證程度說明：上面這份設定檔在撰寫環境裡實測過 —— `opencode models ollama`
+> 確實列出 `ollama/qwen3.5-32k`（代表設定檔語法與 provider 註冊都正確），
+> `/v1` 端點的工具呼叫也實測通過。但**在撰寫環境裡沒有成功跑完一輪完整的 agent 任務**
+> （`opencode run` 在無終端機的批次環境下沒有送出任何請求就結束）。
+> 這一段的 opencode 端行為請當成「依官方文件與 schema 寫成、部分實測」（未實測完整 agent 回合）。
+
 ### 想保留雲端模型隨時切換
 
 把 `"model"` 留成 `"opencode/big-pickle"`，需要時在 opencode 裡用 `/models` 切換，
@@ -544,7 +648,7 @@ curl -s http://localhost:11434/v1/chat/completions \
   -d '{"model":"qwen3.5-32k","messages":[{"role":"user","content":"hi"}]}' > /dev/null
 ```
 
-趁模型還在記憶體裡（預設約 4 分鐘）馬上看：
+趁模型還在記憶體裡馬上看（Ollama 預設會保留 5 分鐘，`ollama ps` 的 UNTIL 欄會倒數）：
 
 ```bash
 ollama ps
@@ -612,24 +716,45 @@ opencode models ollama
 
 應該印出 `ollama/qwen3.5-32k`。沒印出來就是設定檔寫錯或放錯目錄。
 
-### 7. 看 Ollama 的 log 有沒有在截斷
+### 7. 確認內容沒有被安靜地截掉
 
-跑完一輪真實的 agent 任務後：
+**這一步的重點是：不要只看 log。** 前面實測過，走 `/v1/chat/completions`
+（也就是 opencode 走的路）時，Ollama 截斷內容**不會印任何警告**。
+
+可靠的做法是比對 `usage.prompt_tokens` 跟你送進去的量。送一份**故意超過 4096**
+的請求，看它有沒有被吃掉：
+
+```bash
+# 產生一份約 10000 token 的請求
+python3 -c "
+import json
+filler = '主成分分析會先把資料中心化，再對共變異數矩陣做特徵分解。' * 400
+print(json.dumps({'model':'qwen3.5-32k',
+ 'messages':[{'role':'user','content': filler + '\n請只回答一個字：好'}]},
+ ensure_ascii=False))" > big.json
+
+curl -s http://localhost:11434/v1/chat/completions \
+  -H 'Content-Type: application/json' --data-binary @big.json \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['usage'])"
+```
+
+`prompt_tokens` 應該是**八千到一萬**（確切數字取決於 tokenizer；本機實測這一段是
+`{'prompt_tokens': 8018, ...}`）。如果它剛好停在 `4049` 這種貼著 4096 的數字，
+就是被截斷了——回到第 3、4 步。
+
+log 檢查仍然有用，但只對 `/api/generate` 那條路有效（例如你用 `ollama run` 手動測試時）：
 
 ```bash
 # Linux / WSL2
 journalctl -u ollama --since "10 minutes ago" | grep -i truncat
-
 # 手動啟動的 server：直接看終端機輸出
 ```
 
-**沒有任何輸出才是對的。** 如果看到：
+如果看到這行，那是鐵證：
 
 ```
 level=WARN source=runner.go:187 msg="truncating input prompt" limit=4096 prompt=10020 keep=4 new=4096
 ```
-
-代表 `num_ctx` 根本沒設成功，回到第 3、4 步。這個 log 是最誠實的證據。
 
 ---
 
@@ -647,22 +772,26 @@ opencode 的內建工具有固定名字：`read`、`write`、`edit`、`bash`、`
 `python` 這種「看起來很合理」的名字。因為它訓練時看過太多別的 agent 框架，
 就直接套用印象中的名字。結果是工具呼叫失敗，agent 卡住或開始重試。
 
-**二、把該呼叫工具的動作變成「把指令印出來」。**
-你要它跑測試，它回你：
+**二、把該呼叫工具的動作變成「把指令印出來」，或乾脆說自己做不到。**
+本機實測，在明確給了 `bash` 工具定義、並要求「請執行 `ls -la`」的情況下，
+`qwen3.5:9b` 回的是（原文）：
 
-> 你可以執行以下指令來跑測試：
-> ```bash
-> uv run python lab1_cluster.py
-> ```
+```
+（說明）：作為語言模型，我無法在您的系統中執行命令，但這可能是一個測試或模擬情境。
+```
 
-它**沒有真的呼叫 `bash` 工具**，只是輸出了一段文字。這是小模型最常見的退化行為——
-退回成「聊天模型」而不是「agent」。
+`tool_calls` 是 `null`。它**沒有真的呼叫 `bash` 工具**，只輸出了一段文字。
+值得注意的是：這在 context 開到 32k、內容完整送達的情況下**仍然會發生**。
+這是小模型最常見的退化行為——退回成「聊天模型」而不是「agent」。
+換句話說，context 設對是必要條件，不是充分條件。
 
 **三、只做一步就停。**
 多步驟任務（讀檔 → 改 → 執行 → 看結果 → 修）常常在第一步之後就宣告完成。
 
 **四、幻覺自己的執行結果。**
 最危險的一種：它「假裝」執行過，然後**編造**一段輸出給你看。
+前面 context 那一節的實測就是同一個毛病的另一面：資訊不在 context 裡時，
+它不會說「我不知道」，而是很有自信地回答 `GOLF07`（正確答案是 `ALPHA1`）。
 這正是工作坊主線 `AGENTS.md` 裡那條規則要防的：
 
 > **自己驗證**：寫完數值方法後，必須附一段驗證程式碼，並實際執行、印出比對結果。
@@ -720,7 +849,9 @@ execute, shell, run, terminal, run_command, python, execute_command
 | `404` 或找不到模型 | `baseURL` 少了 `/v1`，或 `models` 的 key 跟 `ollama list` 的名字對不上 | 兩邊逐字比對 |
 | `does not support tools` | 模型不支援 tool calling | `ollama show <模型>` 看有沒有 `tools`；換模型 |
 | `ollama ps` 的 CONTEXT 是 4096 | `num_ctx` 沒設成功 | 用 Modelfile 路線重做，再跑一次驗證第 3、4 步 |
-| 模型一直忘記前面的事 | context 被截斷 | `journalctl -u ollama \| grep truncat` 確認；把 num_ctx 調到 16k–32k |
+| 模型一直忘記前面的事 | context 被截斷 | 比對 `usage.prompt_tokens` 跟送進去的量（走 `/v1` 時 log 不會有警告）；把 num_ctx 調到 16k–32k |
+| 內容明顯被截掉，但 log 一片乾淨 | 正常，`/v1/chat/completions` 的截斷不寫 log | 以 `usage.prompt_tokens` 和 `ollama ps` 的 CONTEXT 欄為準 |
+| 模型很有自信地講錯資訊 | 資訊被擠出 context，模型改用編造填補 | 同上；context 調大，並把任務切小 |
 | 模型叫出 `execute` / `shell` 這種工具 | 小模型的典型錯誤 | 在 `AGENTS.md` 加工具名稱約束；還是不行就換大一點的模型 |
 | 模型只印出指令、不執行 | 退化成聊天模式 | 同上；並把任務切小 |
 | 超級慢，風扇狂轉 | 溢出到 CPU 了 | `ollama ps` 看 PROCESSOR 是不是 100% GPU；調小 num_ctx 或換小模型 |
@@ -751,9 +882,39 @@ execute, shell, run, terminal, run_command, python, execute_command
 - Ollama library — gemma3n：<https://ollama.com/library/gemma3n>
 - opencode — Providers（Ollama 章節）：<https://opencode.ai/docs/providers/>
 - opencode — Config：<https://opencode.ai/docs/config/>
+- opencode — 內建工具清單：<https://opencode.ai/docs/tools/>
+- opencode — Compaction（自動壓縮對話的觸發條件）：<https://opencode.ai/v2/docs/compaction>
 - opencode — 設定檔 JSON schema：<https://opencode.ai/config.json>
+- Ollama 原始碼 `server/prompt.go`（`chatPrompt` 的裁切策略）：<https://github.com/ollama/ollama/blob/main/server/prompt.go>
+
+查證日期：2026-09-12。
 
 本機實測環境：WSL2 Ubuntu 24.04 / Ollama 0.21.2 / opencode 1.18.30 /
-RTX 5070 12GB / RAM 15GB / 模型 `qwen3.5:9b-q4_K_M`。
-文中所有 `ollama ps`、`ollama show`、server log 與 curl 的輸出，都是在這台機器上實際跑出來的。
-標註「（未實測）」的部分是我沒有對應硬體可以驗證的推估。查證日期：2026-09-12。
+RTX 5070 12GB / RAM 15GB / 模型 `qwen3.5:9b-q4_K_M`（9.7B、Q4_K_M、原生 context 262144）。
+
+**文中以下內容為本機實際執行產生，非示意**：
+
+- `ollama serve` 啟動 log 的 `vram-based default context ... total_vram="11.9 GiB" default_num_ctx=4096`
+- `ollama ps` 在 num_ctx = 4096 / 16384 / 32768 / 65536 四種設定下的 SIZE 與 PROCESSOR（含 65536 溢出到 CPU）
+- `/v1/chat/completions` 請求裡帶 `num_ctx` 與 `options.num_ctx` **被完全忽略**（CONTEXT 仍為 4096）
+- `OLLAMA_CONTEXT_LENGTH=16384` 的 server：不帶任何參數載入後 `context_length` 為 16384
+- Modelfile ＋ `ollama create` 路線：`ollama show --parameters` 出現 `num_ctx 32768`、`ollama ps` 的 CONTEXT 為 32768
+- 4k vs 32k 的 BANANA7 / ALPHA1 / HOTEL8 對照實驗（含 `usage` 數字與模型回答原文）
+- `/api/generate` 的 `truncating input prompt limit=4096 prompt=10020` WARN，以及
+  **同樣狀況走 `/v1/chat/completions` 時 log 完全無輸出**
+- `ollama show` 的 Capabilities 欄（`qwen3.5:9b-q4_K_M` 有 `tools`、`gemma3:1b` 只有 `completion`）
+- `gemma3:1b` 收到帶 `tools` 的請求時回傳 `does not support tools` 的錯誤原文
+- 「分層建議」表格裡的 8 個模型 tag，逐一以 `registry.ollama.ai` 的 manifest 查詢確認存在（HTTP 200）
+- 支援／不支援 tool calling 的兩張表格，19 個模型逐一抓取 `ollama.com/library/<name>` 頁面，
+  比對其 capability 標籤（`gemma3` 只有 vision；`gemma2`／`gemma3n`／`codegemma`／`phi3`／
+  `tinyllama`／`smollm`／`falcon3`／`starcoder2` 皆無標籤；`gemma4`／`qwen3.5`／`granite4.1`／
+  `llama3.2`／`qwen3`／`qwen2.5`／`qwen2.5-coder`／`phi4-mini`／`ministral-3`／`smollm2` 皆有 `tools`）
+- Ollama `server/prompt.go` 的 `chatPrompt` 註解：裁切時保證保留最新訊息與 system 訊息
+- `opencode models ollama` 確實列出設定檔裡的 `ollama/qwen3.5-32k`
+
+**未實測、已在文中標註的部分**：
+
+- 8GB / 16GB RAM 無獨顯機器、8GB VRAM 獨顯、Mac 的實際速度與可用 context（無對應硬體）
+- Windows 與 macOS 的環境變數設定路徑、桌面 app 的 context length 滑桿，以及滑桿與環境變數的優先順序
+- opencode 自動 compaction 的實際觸發時機（依官方文件敘述，未在本機觀察到）
+- 用 opencode 對本地模型跑完一輪完整的 agent 任務（`opencode run` 在無終端機的批次環境下未送出請求）
