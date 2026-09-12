@@ -1,0 +1,97 @@
+############################################################
+# Windows 11 原生安裝實測（非 WSL）
+# 日期: 2026-09-12T11:39:02+08:00
+############################################################
+
+=== 動手前：確認什麼都沒裝 ===
+5.1.26100.9444
+winget: v1.29.290
+opencode : ���w��
+uv : ���w��
+node : ���w��
+python : C:\Users\User\AppData\Local\Microsoft\WindowsApps\python.exe
+=== winget install SST.opencode ===
+The `msstore` source requires that you view the following agreements before using.
+Terms of Transaction: https://aka.ms/microsoft-store-terms-of-transaction
+The source requires the current machine's 2-letter geographic region to be sent to the backend service to function properly (ex. "US").
+
+Found opencode [SST.opencode] Version 1.18.30
+This application is licensed to you by its owner.
+Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
+Downloading https://github.com/anomalyco/opencode/releases/download/v1.18.30/opencode-windows-x64.zip
+Successfully verified installer hash
+Extracting archive...
+Successfully extracted archive
+Starting package install...
+Path environment variable modified; restart your shell to use the new value.
+Command line alias added: "opencode"
+Successfully installed
+
+=== winget install astral-sh.uv ===
+Found uv [astral-sh.uv] Version 0.12.13
+This application is licensed to you by its owner.
+Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
+This package requires the following dependencies:
+  - Packages
+      Microsoft.VCRedist.2015+.x64
+Downloading https://github.com/astral-sh/uv/releases/download/0.12.13/uv-x86_64-pc-windows-msvc.zip
+Successfully verified installer hash
+Extracting archive...
+Successfully extracted archive
+Starting package install...
+Path environment variable modified; restart your shell to use the new value.
+Command line alias added: "uvx"
+Command line alias added: "uv"
+Command line alias added: "uvw"
+Successfully installed
+=== 新開的 shell 裡能不能找到 ===
+opencode : C:\Users\User\AppData\Local\Microsoft\WinGet\Packages\SST.opencode_Microsoft.Winget.Source_8wekyb3d8bbwe\opencode.exe
+uv       : C:\Users\User\AppData\Local\Microsoft\WinGet\Packages\astral-sh.uv_Microsoft.Winget.Source_8wekyb3d8bbwe\uv.exe
+
+=== 版本 ===
+1.18.30
+uv 0.12.13 (0ebbd9274 2026-09-10 x86_64-pc-windows-msvc)
+專案位置: C:\Users\User\Documents\ai-math-lab
+=== 檔案建立完成 ===
+
+Name           Length
+----           ------
+figs                 
+notes                
+AGENTS.md      231   
+opencode.json  191   
+pyproject.toml 206   
+
+
+=== uv sync 開始（計時） ===
+6.5136371
+=== .venv 是否存在 ===
+存在
+=== 套件驗證 ===
+���� OK
+numpy 2.5.3
+sklearn 1.9.1
+=== uv 快取大小 ===
+235 MB
+=== Windows 上的 agent 實測（未登入、無 API key） ===
+--- auth 狀態 ---
+[0m
+[90mT[39m  Credentials [90m~\.local\share\opencode\auth.json
+[90m|[39m
+[90m—[39m  0 credentials
+
+--- 執行任務 ---
+[0m
+> build · big-pickle
+[0m
+[93m[1m! [0mpermission requested: edit (Users\User\Documents\ai-math-lab\hello.py); auto-rejecting
+[0m✗ [0mWrite hello.py failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+--- 產生的檔案 ---
+.venv
+figs
+notes
+AGENTS.md
+opencode.json
+pyproject.toml
+uv.lock

@@ -1,0 +1,332 @@
+<!--TITLE:git 安全網-->
+<!--DESC:不用 GitHub 帳號也能用。動手前 commit、改完看 diff、不滿意就還原。-->
+
+<div class="container narrow">
+
+<div class="pagehead">
+  <div class="kicker"><span>07</span><span>·</span><span class="badge after">課後延伸</span></div>
+  <h1>git：讓你敢放手讓 agent 改檔案</h1>
+</div>
+
+<div class="box tip"><p>適用版本：opencode 1.18.30</p></div>
+<p>這章不教 git 的全部，只教<strong>七個指令</strong>。目標很明確：讓你在按下 Enter 讓 agent 改你的檔案時，心裡不會怕。</p>
+<hr>
+<h2>1. 你在怕什麼</h2>
+<p>工作坊上多半會看到這個場景：agent 說「我來幫你改一下 <code>lab2_pca.py</code>」，然後停在權限詢問畫面，而你的手指懸在鍵盤上不敢按 <code>y</code>。</p>
+<p>怕的通常是這幾件事：</p>
+<ul>
+<li>它把我熬夜寫好的東西蓋掉了怎麼辦</li>
+<li>它改了五個檔案，我根本不知道它改了什麼</li>
+<li>它說「已修正」，但程式反而更壞了，我想回到原本的版本卻回不去</li>
+<li>它改對了一部分、改壞了一部分，我分不出來</li>
+</ul>
+<p>這些恐懼都是合理的。而且會導致一個很糟的結果：<strong>你為了安全，乾脆不讓 agent 動手，只讓它給你看程式碼，然後自己複製貼上。</strong> 那就等於把一個能幫你做事的工具，降級成一個比較會講話的搜尋引擎。</p>
+<p>git 解決的正是這件事。一句話：</p>
+<div class="box tip"><p><strong>git 讓「改壞了」這件事的代價，從「重寫一遍」變成「打一行指令」。</strong></p></div>
+<p>當還原成本趨近於零，恐懼就消失了，你才敢真的放手用。這才是這章的重點——git 在這門課裡不是「軟體工程規範」，是<strong>心理安全網</strong>。</p>
+<p>另外先講一個有關聯的設定。opencode 有個 <code>--auto</code> 參數，<code>--help</code> 裡它自己標註為「auto-approve permissions that are not explicitly denied (<strong>dangerous!</strong>)」。<strong>學習階段絕對不要用它。</strong> 逐次確認權限，加上這章的 git 工作流，是你目前最好的組合。</p>
+<hr>
+<h2>2. 不需要 GitHub 帳號</h2>
+<p>先破除一個誤會：<strong>git 和 GitHub 是兩回事。</strong></p>
+<ul>
+<li><strong>git</strong> 是裝在你電腦上的版本控制程式。完全離線，不需要帳號、不需要網路。</li>
+<li><strong>GitHub</strong> 是一個放 git 儲存庫的網站。需要帳號、需要網路。</li>
+</ul>
+<p>這章從頭到尾<strong>只用本機 git</strong>。你不需要註冊任何東西，你的程式碼不會上傳到任何地方。所有紀錄存在專案資料夾裡一個叫 <code>.git/</code> 的隱藏目錄。</p>
+<p>先確認你有 git：</p>
+<pre class="cmd"><code>git --version</code></pre>
+<p>有版本號就可以了。沒有的話，Ubuntu/WSL 用 <code>sudo apt install git</code>。</p>
+<p>第一次用要設定身分（只設定一次，之後所有專案通用）：</p>
+<pre class="cmd"><code>git config --global user.name "你的名字"
+git config --global user.email "你的信箱"</code></pre>
+<p>這兩個資訊只是寫進本機的 commit 紀錄裡，<strong>不會送到任何伺服器</strong>。</p>
+<hr>
+<h2>3. 最小可用的 git：七個指令</h2>
+<h3><code>git init</code> — 開始追蹤這個資料夾</h3>
+<pre class="cmd"><code>cd ~/ai-math-lab
+git init</code></pre>
+<p>只做一次。之後這個資料夾就被 git 追蹤了。</p>
+<h3><code>git status</code> — 現在有什麼變動</h3>
+<pre class="cmd"><code>git status</code></pre>
+<p>最常用的指令。看不懂現在是什麼狀況時就打它。</p>
+<h3><code>git add -A</code> — 把目前所有變動納入這次存檔</h3>
+<pre class="cmd"><code>git add -A</code></pre>
+<p><code>-A</code> 是 all 的意思，把所有新增、修改、刪除的檔案都納入。</p>
+<h3><code>git commit -m</code> — 存檔</h3>
+<pre class="cmd"><code>git commit -m "完成 PCA 手刻版本"</code></pre>
+<p><code>-m</code> 後面是這次存檔的說明，寫給未來的自己看。<code>git add -A</code> 和 <code>git commit</code> 幾乎總是一起用，可以連起來：</p>
+<pre class="cmd"><code>git add -A &amp;&amp; git commit -m "完成 PCA 手刻版本"</code></pre>
+<p><strong>把這行背起來。</strong> 這是整章使用頻率最高的指令。</p>
+<h3><code>git diff</code> — 看從上次存檔到現在改了什麼</h3>
+<pre class="cmd"><code>git diff</code></pre>
+<p><strong>這是這章最重要的指令。</strong> 它回答「agent 到底改了我什麼」。下一節專門講怎麼讀它的輸出。</p>
+<h3><code>git restore</code> — 丟掉未存檔的修改，回到上次 commit 的樣子</h3>
+<pre class="cmd"><code>git restore lab2_pca.py     # 只還原這個檔案
+git restore .               # 還原所有檔案</code></pre>
+<p><strong>這是你的後悔藥。</strong> 注意：它丟掉的是「還沒 commit 的修改」，這個動作<strong>無法復原</strong>，所以要先用 <code>git diff</code> 確認你真的不要那些修改。</p>
+<h3><code>git log --oneline</code> — 看存檔歷史</h3>
+<pre class="cmd"><code>git log --oneline</code></pre>
+<p>輸出長這樣：</p>
+<pre class="cmd"><code>a3f2c81 完成 PCA 手刻版本
+7b91e04 加上 k 值選擇的圖
+c4d5a22 初始環境</code></pre>
+<p>前面那串是 commit 的編號（hash）。按 <code>q</code> 離開。</p>
+<hr>
+<h2>4. 核心工作流：三步驟</h2>
+<p>這是整章的骨幹。<strong>每次叫 agent 動手之前、之後，各做一件事。</strong></p>
+<pre class="cmd"><code>  ┌─────────────────────────────────────────┐
+  │  1. 動手前先存檔                          │
+  │     git add -A &amp;&amp; git commit -m "..."    │
+  └─────────────────┬───────────────────────┘
+                    ↓
+  ┌─────────────────────────────────────────┐
+  │  2. 讓 agent 改（在 opencode 裡）          │
+  └─────────────────┬───────────────────────┘
+                    ↓
+  ┌─────────────────────────────────────────┐
+  │  3. 檢查                                 │
+  │     git diff                             │
+  └─────────────────┬───────────────────────┘
+                    ↓
+        ┌───────────┴───────────┐
+        ↓                       ↓
+   滿意 → 再 commit         不滿意 → git restore .
+   git add -A &amp;&amp;            （回到步驟 1 的狀態）
+   git commit -m "..."</code></pre>
+<p>實際操作起來是這樣：</p>
+<pre class="cmd"><code># 1. 動手前先存檔（這是關鍵，不要跳過）
+cd ~/ai-math-lab
+git add -A &amp;&amp; git commit -m "叫 agent 改 PCA 之前的狀態"
+
+# 2. 開 opencode 讓它改
+opencode
+# ...在裡面對話，讓它修改 lab2_pca.py...
+# 改完離開（Ctrl+C 或 /exit）
+
+# 3. 檢查它改了什麼
+git diff
+
+# 4a. 覺得不錯 → 存起來
+uv run python lab2_pca.py        # 先確認真的能跑
+git add -A &amp;&amp; git commit -m "PCA 加上 scree plot"
+
+# 4b. 覺得不行 → 全部丟掉
+git restore .</code></pre>
+<p><strong>注意 <code>git restore .</code> 的一個限制</strong>：它只還原「git 已經在追蹤的檔案」。如果 agent <strong>新增</strong>了檔案（例如自己開了一個 <code>notes/test.md</code>），<code>git restore .</code> <strong>不會把它刪掉</strong>。你會在 <code>git status</code> 看到它還躺在那裡（顯示為 untracked），然後以為 restore 失敗了。</p>
+<p>要清掉這些新增的檔案，用 <code>git clean</code>：</p>
+<pre class="cmd"><code>git clean -n      # 先預演，只列出「會被刪掉」的檔案，不真的刪
+git clean -f      # 確認清單沒問題後，真的刪掉</code></pre>
+<p><strong>一定要先 <code>-n</code> 再 <code>-f</code>。</strong> 詳見第 9 節的急救表。</p>
+<h3>為什麼「動手前先 commit」不能跳過</h3>
+<p>因為 <code>git diff</code> 和 <code>git restore</code> 都是<strong>相對於上一次 commit</strong> 運作的。</p>
+<p>如果你上次 commit 是三天前，中間你自己改了很多東西，那 <code>git diff</code> 會把「你自己改的」和「agent 改的」混在一起顯示，你分不出誰是誰。而 <code>git restore .</code> 會把你自己三天的心血也一起丟掉。</p>
+<p><strong>先 commit，等於畫一條乾淨的起跑線。</strong> 之後 <code>git diff</code> 顯示的每一行，都保證是 agent 幹的。</p>
+<p>commit 訊息隨便寫沒關係，<code>git commit -m "wip"</code> 也行。<strong>重點是有 commit，不是訊息寫得漂亮。</strong></p>
+<hr>
+<h2>5. 怎麼看懂 <code>git diff</code> 的輸出</h2>
+<p>這是一段真實的 <code>git diff</code> 輸出（實際跑出來的，不是示意）：</p>
+<pre class="cmd"><code>diff --git a/kmeans.py b/kmeans.py
+index 94c687d..3b8b876 100644
+--- a/kmeans.py
++++ b/kmeans.py
+@@ -1,10 +1,9 @@
+ import numpy as np
+ 
+ 
+-def kmeans(X, k, n_iter=100):
++def kmeans(X, k, n_iter=300):
+     """手刻 k-means。X: (n_samples, n_features)"""
+-    rng = np.random.default_rng(0)
+-    idx = rng.choice(len(X), k, replace=False)
++    idx = np.random.choice(len(X), k, replace=False)
+     centers = X[idx]
+     for _ in range(n_iter):
+         labels = np.argmin(((X[:, None] - centers) ** 2).sum(-1), axis=1)</code></pre>
+<p>一行一行拆解：</p>
+<div class="tw"><table><tr><th>符號</th><th>意思</th></tr><tr><td><code>diff --git a/kmeans.py b/kmeans.py</code></td><td>接下來講的是 <code>kmeans.py</code> 這個檔案</td></tr><tr><td><code>index 94c687d..3b8b876</code></td><td>內部編號，<strong>看不懂沒關係，直接跳過</strong></td></tr><tr><td><code>--- a/kmeans.py</code></td><td><code>a/</code> 代表<strong>舊版</strong>（你上次 commit 的）</td></tr><tr><td><code>+++ b/kmeans.py</code></td><td><code>b/</code> 代表<strong>新版</strong>（agent 改完的）</td></tr><tr><td><code>@@ -1,10 +1,9 @@</code></td><td>位置標記：舊版從第 1 行起算 10 行，新版從第 1 行起算 9 行</td></tr><tr><td>開頭是 <code>-</code> 的行</td><td><strong>被刪掉的</strong>（舊版有，新版沒有）</td></tr><tr><td>開頭是 <code>+</code> 的行</td><td><strong>新增的</strong>（新版才有）</td></tr><tr><td>開頭是空白的行</td><td>沒改，只是顯示出來讓你知道上下文</td></tr></table></div>
+<p>記憶法：<strong><code>-</code> 是拿掉，<code>+</code> 是加上。修改一行 = 先 <code>-</code> 舊的再 <code>+</code> 新的，所以會看到成對出現。</strong></p>
+<p><code>@@</code> 那行叫 hunk header。初學階段你只要知道「它標示這段變動在檔案的哪個位置」就夠了，數字不用細讀。一次 diff 可能有好幾個 <code>@@</code> 區塊，代表檔案的好幾處分別被改動。</p>
+<h3>讀出這個 diff 的問題</h3>
+<p>現在來實際判讀。這個 diff 有兩處變動：</p>
+<p><strong>變動一</strong>：<code>n_iter=100</code> → <code>n_iter=300</code>。迭代次數變多，合理，沒問題。</p>
+<p><strong>變動二</strong>：看仔細——</p>
+<pre class="cmd"><code>-    rng = np.random.default_rng(0)
+-    idx = rng.choice(len(X), k, replace=False)
++    idx = np.random.choice(len(X), k, replace=False)</code></pre>
+<p>原本用的是 <code>np.random.default_rng(0)</code>，<strong>帶了亂數種子 <code>0</code></strong>，所以每次執行的初始中心點都一樣，結果可重現。</p>
+<p>改完之後變成 <code>np.random.choice(...)</code>，<strong>種子不見了</strong>。程式看起來更簡潔、跑起來完全正常、結果也對——但<strong>每次跑出來的分群結果都不一樣了</strong>。</p>
+<p>這正是我們在 <code>AGENTS.md</code> 裡用 <code>random_state=0</code> 想守住的可重現性，被一個看似無害的「簡化」偷偷破壞了。</p>
+<p><strong>這就是 <code>git diff</code> 的價值。</strong> 如果你只是看 agent 說「我把程式碼簡化了一點，並增加迭代次數」，你會覺得很好、按下接受。只有逐行看 diff，才會發現種子被拿掉了。</p>
+<div class="box tip"><p><strong>養成習慣：diff 裡每一個 <code>-</code> 開頭的行都要問一句「這行為什麼該被刪掉？」</strong> 新增的程式碼通常看得出好壞，<strong>被偷偷刪掉的東西才是真正的陷阱</strong>。</p></div>
+<h3>幾個好用的變化</h3>
+<pre class="cmd"><code>git diff --stat           # 只看每個檔案改了幾行，先抓全貌
+git diff lab2_pca.py      # 只看某一個檔案
+git diff --word-diff      # 以「詞」為單位標示，改一兩個字時比較好讀</code></pre>
+<p>檔案改很多時，先 <code>git diff --stat</code> 看規模：</p>
+<pre class="cmd"><code> kmeans.py   | 5 ++---
+ lab2_pca.py | 32 ++++++++++++++++++++++++++++++++
+ 2 files changed, 34 insertions(+), 3 deletions(-)</code></pre>
+<p>如果你只叫它改一個檔案，結果這裡列出五個，那就是警訊，值得仔細看。</p>
+<hr>
+<h2>6. <code>.gitignore</code>：哪些東西不要進版控</h2>
+<p>有些檔案不該被 git 追蹤。在專案根目錄建立一個叫 <code>.gitignore</code> 的檔案：</p>
+<pre class="cmd"><code>cd ~/ai-math-lab
+cat &gt; .gitignore &lt;&lt;'EOF'
+# Python 虛擬環境（幾百 MB，可以用 uv sync 重建）
+.venv/
+
+# Python 快取
+__pycache__/
+*.pyc
+
+# 作業系統雜物
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+EOF
+
+git add -A &amp;&amp; git commit -m "加上 .gitignore"</code></pre>
+<h3>逐項說明</h3>
+<p><strong><code>.venv/</code> — 一定要排除。</strong> 這是 uv 建立的虛擬環境，幾百 MB、上萬個檔案，而且可以用 <code>uv sync</code> 從 <code>pyproject.toml</code> 和 <code>uv.lock</code> 完整重建。把它放進 git 只會讓儲存庫爆掉。</p>
+<div class="box tip"><p>小提醒：uv 其實會在 <code>.venv/</code> 裡自動放一個內容為 <code>*</code> 的 <code>.gitignore</code>，所以就算你沒寫，git 也不會追蹤它。自己在根目錄再寫一次是好習慣，因為你一眼就看得到這個決定。</p></div>
+<p>**<code>__pycache__/</code>、<code>*.pyc</code> — 一定要排除。** Python 自動產生的編譯快取，沒有保存價值。</p>
+<p><strong><code>uv.lock</code> — 要進版控。</strong> 它記錄了每個套件的精確版本，是可重現性的保證。不要把它加進 <code>.gitignore</code>。</p>
+<h3><code>figs/</code> 要不要進版控：這題沒有標準答案</h3>
+<p>這是真正需要你自己判斷的取捨。</p>
+<p><strong>支持「進版控」的理由：</strong></p>
+<ul>
+<li>圖是你作業或報告的一部分，交出去時要有</li>
+<li>可以看到圖隨著程式修改怎麼變化——<code>git log</code> 翻回去就能對照「那時候的圖長什麼樣」</li>
+<li>助教或組員不用重跑你的程式就能看到結果</li>
+<li>你的圖多半是幾十 KB 的 png，數量也有限，完全不會造成負擔</li>
+</ul>
+<p><strong>支持「不進版控」的理由：</strong></p>
+<ul>
+<li>圖是<strong>衍生產物</strong>，理論上跑一次程式就能重新生成</li>
+<li>每次重跑即使結果完全一樣，png 的二進位內容也可能有細微差異（時間戳記等），造成 <code>git status</code> 一直有雜訊</li>
+<li>圖檔的 diff 看不懂——git 只會說「binary files differ」</li>
+</ul>
+<p><strong>這門課的建議：<code>figs/</code> 進版控。</strong></p>
+<p>理由是課程情境：你的圖數量少、體積小，而且「看得到圖的演變過程」對學習的價值遠大於那點雜訊。更重要的是——<strong>你要交作業</strong>，圖在版控裡最保險。</p>
+<p>如果你之後做的專案會產生上百張高解析度的圖，那時再改成排除，並在 README 寫清楚怎麼重新生成。</p>
+<p>（如果你選擇不進版控，就在 <code>.gitignore</code> 加 <code>figs/*.png</code>，但保留 <code>figs/.gitkeep</code>，這樣目錄結構還在。）</p>
+<hr>
+<h2>7. 把數學筆記放進 git 的好處</h2>
+<p><code>notes/</code> 底下的 <code>.md</code> 筆記<strong>一定要進版控</strong>，而且好處比程式碼更明顯。</p>
+<h3>好處 1：看得到 agent 改了你筆記的哪一個字</h3>
+<p>純文字檔的 diff 精準到字元層級。假設你請 agent 潤飾筆記：</p>
+<pre class="cmd"><code>git add -A &amp;&amp; git commit -m "PCA 筆記初稿"
+opencode run "幫我潤飾 notes/pca.md 的說明，讓推導更清楚"
+git diff notes/pca.md</code></pre>
+<p>你會看到類似這樣：</p>
+<pre class="cmd"><code>-我們要找一個方向 $w$，讓投影後的變異數最大。
++我們要找一個單位向量 $w$（即 $\|w\|=1$），使投影 $Xw$ 的變異數最大。</code></pre>
+<p>一眼就知道它加了「單位向量」的限制條件。<strong>這是真的改好了</strong>，你學到了一個原本漏掉的條件。</p>
+<p>但也可能看到：</p>
+<pre class="cmd"><code>-特徵值 $\lambda_i$ 代表第 $i$ 個主成分解釋的變異量。
++特徵值 $\lambda_i$ 代表第 $i$ 個主成分的重要性。</code></pre>
+<p>「重要性」比「解釋的變異量」模糊，<strong>這是改差了</strong>，<code>git restore notes/pca.md</code> 退回去。</p>
+<h3>好處 2：你自己的理解歷程被保留下來</h3>
+<p><code>git log --oneline notes/pca.md</code> 可以看到這份筆記的所有版本。期末複習時翻回三週前的版本，你會看到當時的自己哪裡想錯了——<strong>那個「想錯又改對」的過程，比最終正確的版本更有學習價值</strong>。</p>
+<h3>好處 3：安心讓 agent 大改</h3>
+<p>知道隨時能還原，你才敢下「幫我重寫這一節，用更直觀的方式解釋特徵值分解」這種大動作的指令。不敢放手，就只能請它做無關痛癢的小修改。</p>
+<hr>
+<h2>8. 明確警告：不要叫 agent 幫你 <code>git push</code></h2>
+<p><strong>這是這章唯一一條完全沒有彈性的規則。</strong></p>
+<h3>為什麼</h3>
+<ol>
+<li><strong><code>push</code> 會把東西送到網路上，而且收不回來。</strong> 本機的東西改壞了，<code>git restore</code> 就好。推上去的東西別人可能已經看到、已經拉下來了。</li>
+<li><strong>你可能不小心推上不該公開的東西</strong> —— 沒寫進 <code>.gitignore</code> 的金鑰、個人資料、還沒交的作業答案。</li>
+<li><strong>這門課根本不需要。</strong> 本機 repo 就能得到這章所有的好處。</li>
+<li><strong>推錯地方的修復難度遠超出本課範圍</strong>，<code>git revert</code>、<code>git reset --hard</code>、force push 都是會讓初學者更慌的工具。</li>
+</ol>
+<h3>連帶的：<code>git commit</code> 也交給你自己做</h3>
+<p>你的 <code>AGENTS.md</code> 裡已經有這條：</p>
+<pre class="cmd"><code>- 不要 `git commit`、`git push`，除非我明講。</code></pre>
+<p>為什麼連 commit 都不給：<strong>commit 是「我檢查過了，這個版本我認可」的意思。</strong> 如果 agent 改完自己 commit 了，<code>git diff</code> 就沒東西可看了（變動已經被存進歷史），你就失去了檢查的機會。</p>
+<p><strong>分工要清楚：agent 負責改，你負責檢查和存檔。</strong></p>
+<h3>用 permission 真正擋住它</h3>
+<p>AGENTS.md 是請求，不是強制。要真的擋住，用 <code>opencode.json</code> 的 <code>permission</code>：</p>
+<pre class="cmd"><code>{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode/big-pickle",
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "git status": "allow",
+      "git diff *": "allow",
+      "git log *": "allow",
+      "git push": "deny",
+      "git push *": "deny",
+      "rm -rf *": "deny"
+    },
+    "edit": "ask",
+    "webfetch": "ask"
+  },
+  "instructions": ["AGENTS.md"]
+}</code></pre>
+<p>其中 **<code>"git push *": "deny"</code> 這條是我實際驗證過的**：存檔後執行 <code>opencode agent list</code>，可以在解析後的權限規則裡看到 <code>{"permission": "bash", "pattern": "git push *", "action": "deny"}</code>。同一份設定裡的 <code>git status</code> / <code>git diff *</code> 樣式也一併正確解析。<code>rm -rf *</code> 那條我沒有單獨測試，它只是同樣語法的套用。</p>
+<p>四個要點：</p>
+<ol>
+<li><strong><code>deny</code> 代表直接拒絕</strong>，連問都不問。<code>ask</code> 是每次問你，<code>allow</code> 是直接放行。</li>
+<li><strong>最後一條符合的規則勝出</strong>，所以萬用的 <code>"*": "ask"</code> 要寫在最前面，特例寫在後面。順序寫反了就沒效果。</li>
+<li>把 <code>git status</code>、<code>git diff</code>、<code>git log</code> 設成 <code>allow</code>，是因為它們是唯讀的、不會改任何東西，讓 agent 自由查詢反而方便（它可以自己檢查改了什麼）。</li>
+<li>**<code>"git push"</code> 和 <code>"git push *"</code> 兩條都要寫。** 前者擋不帶參數的 <code>git push</code>（最常見的形式），後者擋 <code>git push origin main</code> 這種帶參數的。我沒有實測單寫帶 <code>*</code> 的能不能同時擋住不帶參數的情況，所以兩條都寫。</li>
+</ol>
+<p>改完設定用這個指令確認生效：</p>
+<pre class="cmd"><code>opencode debug config</code></pre>
+<hr>
+<h2>9. 出事時的急救表</h2>
+<div class="tw"><table><tr><th>狀況</th><th>指令</th></tr><tr><td>agent 改壞了，還沒 commit</td><td><code>git restore .</code></td></tr><tr><td>只想還原其中一個檔案</td><td><code>git restore lab2_pca.py</code></td></tr><tr><td>想看 agent 到底改了什麼</td><td><code>git diff</code></td></tr><tr><td>改很多檔，想先看規模</td><td><code>git diff --stat</code></td></tr><tr><td>不確定現在是什麼狀態</td><td><code>git status</code></td></tr><tr><td>想看歷史版本</td><td><code>git log --oneline</code></td></tr><tr><td>想看某個舊版本的檔案內容</td><td><code>git show a3f2c81:lab2_pca.py</code></td></tr><tr><td>agent 新增了一堆你不要的檔案（還沒 add）</td><td><code>git clean -n</code> 先看，確認後 <code>git clean -f</code></td></tr></table></div>
+<p><strong>兩個保命原則：</strong></p>
+<ol>
+<li><strong><code>git restore</code> 之前一定先 <code>git diff</code>。</strong> 還原無法復原，先確認你真的不要那些修改。</li>
+<li><strong><code>git clean -f</code> 之前一定先 <code>git clean -n</code>。</strong> <code>-n</code> 是預演，只列出會被刪的檔案、不真的刪。</li>
+</ol>
+<hr>
+<h2>10. 本章重點</h2>
+<ol>
+<li>git 的價值是<strong>心理安全網</strong>：還原成本趨近於零，你才敢放手讓 agent 做事。</li>
+<li><strong>不需要 GitHub 帳號</strong>，純本機 repo 就能得到全部好處。</li>
+<li>七個指令：<code>init</code> / <code>status</code> / <code>add -A</code> / <code>commit -m</code> / <code>diff</code> / <code>restore</code> / <code>log --oneline</code>。</li>
+<li>核心工作流：<strong>動手前 commit → 讓 agent 改 → <code>git diff</code> 檢查 → 滿意再 commit，不滿意 <code>git restore</code></strong>。</li>
+<li>讀 diff：<code>-</code> 是刪掉、<code>+</code> 是新增、<code>@@</code> 是位置。<strong>特別注意被刪掉的行</strong>。</li>
+<li><code>.gitignore</code> 放 <code>.venv/</code>、<code>__pycache__/</code>；<code>uv.lock</code> 要進版控；<code>figs/</code> 這門課建議進版控。</li>
+<li>筆記進版控，看得到 agent 改了哪個字，也保留你自己的理解歷程。</li>
+<li><strong>絕對不要叫 agent <code>git push</code></strong>，並用 <code>permission</code> 的 <code>"git push *": "deny"</code> 真正擋住。</li>
+<li>學習階段不要用 <code>opencode --auto</code>。</li>
+</ol>
+<hr>
+<h2>練習</h2>
+<ol>
+<li>在你的專案跑 <code>git init</code>，建立 <code>.gitignore</code>，做出第一個 commit。</li>
+<li>跑 <code>git log --oneline</code> 確認 commit 存在。</li>
+<li>做一次完整工作流：commit → 叫 agent 改 <code>reference/</code> 裡任一支程式 → <code>git diff</code> 逐行讀 → 判斷好壞 → commit 或 restore。</li>
+<li>故意做一次 <code>git restore .</code>，親手體驗「改壞了也沒關係」的感覺。<strong>這一步不要跳過</strong>，恐懼是靠實際經驗消除的，不是靠讀文章。</li>
+<li>把第 8 節的 <code>permission</code> 設定寫進 <code>opencode.json</code>，用 <code>opencode debug config</code> 確認生效，然後叫 agent 執行 <code>git push</code>，看它是不是真的被擋下來。</li>
+</ol>
+<hr>
+<h2>資料來源</h2>
+<ul>
+<li>https://opencode.ai/docs/permissions/ — <code>permission</code> 的鍵、<code>allow</code>/<code>ask</code>/<code>deny</code>、樣式比對「最後一條符合的勝出」</li>
+<li>https://opencode.ai/docs/config/ — 設定檔位置與合併順序</li>
+<li>https://opencode.ai/docs/rules/ — AGENTS.md 與 git 相關規則的寫法</li>
+<li>https://learnopencode.com/2-daily/06-git-basics.html — git 基礎指令與「保留最後一次人工確認」的原則（中文教學站，簡體）</li>
+<li>https://learnopencode.com/5-advanced/05-permissions.html — bash 樣式規則範例、「最後匹配的規則生效」（中文教學站，簡體）</li>
+</ul>
+<p>本機實測（opencode 1.18.30，Linux/WSL2）：</p>
+<ul>
+<li>第 5 節的 <code>git diff</code> 輸出為實際執行 git 產生，非示意</li>
+<li><code>opencode agent list</code> 確認 <code>"git push *": "deny"</code> 規則正確解析</li>
+<li><code>opencode --help</code> 中 <code>--auto</code> 的原文警語 "(dangerous!)"</li>
+<li><code>starter/.venv/.gitignore</code> 內容確為 <code>*</code></li>
+</ul>
+
+<div class="pager">
+  <a href="agents-md.html"><div class="d">上一章</div><div class="t2">← 06 · AGENTS.md</div></a>
+  <a href="mcp-skills.html" class="next"><div class="d">下一章</div><div class="t2">08 · MCP →</div></a>
+</div>
+
+</div>

@@ -1,0 +1,190 @@
+<!--TITLE:Lab 1 · 分群-->
+<!--DESC:用 opencode 一次跑完 k=2 到 12 的 k-means，畫出 elbow 與 silhouette 曲線。然後發現 agent 選出的最佳 k 是 9，而真實類別數是 10。-->
+
+<div class="container narrow">
+
+<div class="pagehead">
+  <div class="kicker"><span>Lab 1</span><span>·</span><span class="badge live">現場 40 分</span><span>·</span><span>agent 當加速器</span></div>
+  <h1>分群：一句話換來十一組實驗</h1>
+  <p class="lead">
+    這個實作要讓你體會 agent 最直觀的價值：把「本來要寫半小時程式」壓縮成「講一句話」。
+    但真正的重點在最後——當 agent 很有自信地報告一個數字時，你要有能力知道那個數字錯了。
+  </p>
+</div>
+
+<section>
+<h2>這一關的資料</h2>
+<p>
+三個實作共用同一份資料：scikit-learn 內建的 <code>digits</code>，
+1797 張 8×8 的手寫數字灰階圖，攤平成 64 維向量，真實類別有 10 類（0 到 9）。
+</p>
+<div class="box tip">
+<div class="bt">為什麼用這份</div>
+<p style="margin-bottom:0">
+不用下載（套件裡就有）、夠小（幾秒跑完）、維度夠高（64 維，PCA 才有意義）、
+而且<strong>你知道正確答案是 10 類</strong>——這點在待會會變成整堂課最重要的伏筆。
+</p>
+</div>
+</section>
+
+<section>
+<h2>動手</h2>
+
+<div class="step" data-n="1">
+<h3>啟動 agent</h3>
+<p>在你課前準備好的專案資料夾裡打開終端機：</p>
+<pre class="cmd"><code>opencode</code></pre>
+<p>看到 TUI 介面，左下角顯示 <code>build · big-pickle</code> 就對了。</p>
+</div>
+
+<div class="step" data-n="2">
+<h3>下第一個指令</h3>
+<p>把下面這段整個貼進去。注意它的結構：<strong>做什麼、用什麼、存到哪、印出什麼</strong>——
+指令愈具體，你愈不需要來回修正。</p>
+<pre class="cmd"><code>用 sklearn 內建的 digits 資料集做 k-means 分群。
+
+請掃過 k = 2 到 12，每個 k 都記錄 inertia 與 silhouette score，
+把逐項數值印出來，並畫成兩張並排的圖存到 figs/lab1_k_selection.png。
+
+要求：
+- random_state 固定為 0，n_init=10
+- 寫成 lab1_cluster.py，用 uv run python 執行
+- 最後告訴我 silhouette 最高的 k 是多少</code></pre>
+</div>
+
+<div class="step" data-n="3">
+<h3>看著它工作</h3>
+<p>agent 會依序讀規則、寫檔、執行。實測大約半分鐘內完成：</p>
+
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">opencode　build · big-pickle</span></div>
+  <div class="term-body"><div class="t">Read　AGENTS.md</div>
+<div class="w">Write　lab1_cluster.py</div>
+<div class="b">uv run python lab1_cluster.py</div>
+<div class="sp"></div>
+<div class="o">資料形狀 X=(1797, 64), 真實類別數=10</div>
+<div class="o">k= 2  inertia= 1914619.6  silhouette=0.1183</div>
+<div class="o">k= 3  inertia= 1730182.3  silhouette=0.1265</div>
+<div class="o">k= 4  inertia= 1612274.9  silhouette=0.1229</div>
+<div class="o">k= 5  inertia= 1497722.5  silhouette=0.1382</div>
+<div class="o">k= 6  inertia= 1404975.3  silhouette=0.1515</div>
+<div class="o">k= 7  inertia= 1336540.0  silhouette=0.1623</div>
+<div class="o">k= 8  inertia= 1265053.1  silhouette=0.1784</div>
+<div class="o">k= 9  inertia= 1202300.1  silhouette=0.1893</div>
+<div class="o">k=10  inertia= 1165188.9  silhouette=0.1825</div>
+<div class="o">k=11  inertia= 1131795.0  silhouette=0.1830</div>
+<div class="o">k=12  inertia= 1112363.4  silhouette=0.1848</div>
+<div class="sp"></div>
+<div class="c">完成。silhouette 分數最高的是 k = 9（0.1893），建議用 9 群。
+圖已存到 figs/lab1_k_selection.png。</div>
+</div>
+</div>
+
+<div class="box warn">
+<div class="bt">停在這裡，先不要往下</div>
+<p style="margin-bottom:0">
+agent 說最佳 k 是 <strong>9</strong>。但你知道這份資料有 <strong>10</strong> 個數字。
+在往下看之前，先自己想三十秒：<strong>誰錯了？</strong>
+</p>
+</div>
+</div>
+</section>
+
+<section>
+<h2>誰錯了</h2>
+<p>
+都沒錯。agent 的程式是對的，silhouette 的計算是對的，0.1893 確實是最高的。
+錯的是那句<strong>「所以建議用 9 群」</strong>——那是一個從數字跳到結論的推論，而那一跳沒有根據。
+</p>
+<p>
+更精確地說：10 是這份資料<strong>標註的類別數</strong>，它不保證原始像素空間裡
+恰好存在 10 個符合 k-means 幾何假設（球形、等變異、等大小）的群。
+所以這裡沒有「誰算錯了」，只有「兩個不同的問題被當成同一個」。
+</p>
+
+<h3>silhouette 在量什麼</h3>
+<p>
+對每個點 $i$，設 $a(i)$ 是它到<em>同群</em>其他點的平均距離，
+$b(i)$ 是它到<em>最近的其他群</em>所有點的平均距離，則
+</p>
+<div class="box math">
+<div class="bt">silhouette</div>
+$$s(i)=\frac{b(i)-a(i)}{\max\{a(i),\,b(i)\}},\qquad s(i)\in[-1,1]$$
+<p style="margin-bottom:0">整體分數就是所有 $s(i)$ 的平均。它衡量的是<strong>「群內夠不夠緊、群間夠不夠開」</strong>——
+一個純粹的幾何性質，完全沒有用到真實標籤。</p>
+</div>
+
+<p>
+所以 silhouette 回答的問題是「哪個 $k$ 讓分群<em>幾何上</em>最漂亮」，
+而不是「哪個 $k$ 是<em>正確</em>的類別數」。這是兩個不同的問題。
+</p>
+
+<h3>為什麼 digits 會是 9</h3>
+<p>
+因為在 64 維的像素空間裡，某些數字本來就長得像。
+1 和 7、4 和 9、3 和 8 的像素分布高度重疊——
+把它們合併成一群，群內距離會變小、群間距離會變大，silhouette 自然上升。
+</p>
+<p>
+換句話說：<strong>「幾何上最漂亮的分法」跟「語意上正確的分法」不一樣。</strong>
+這不是資料的瑕疵，這是無監督學習的本質。
+</p>
+
+<div class="box danger">
+<div class="bt">這一關真正要你帶走的</div>
+<p style="margin-bottom:0">
+agent 給你的每個數字都是對的，但它擅自替你做了一個<strong>你才有資格做的判斷</strong>。
+它不知道你手上有真實標籤，也不知道你的研究問題是什麼。
+往後每次 agent 說「所以建議……」，那個「所以」就是你要停下來檢查的地方。
+</p>
+</div>
+</section>
+
+<section>
+<h2>追問</h2>
+<p>把這句話丟回給 agent，看它怎麼回應：</p>
+<pre class="cmd"><code>這份資料我知道真實類別有 10 類，但你算出 silhouette 最高是 k=9。
+
+請解釋這個落差。並且：
+- 用 sklearn 的 adjusted_rand_score 與真實標籤比對 k=9 和 k=10 的結果
+- 告訴我在「不知道真實答案」的情境下，還有什麼方法可以判斷 k</code></pre>
+<p>
+這裡引入了 <strong>ARI（adjusted Rand index）</strong>——一個需要真實標籤的外部指標。
+對照 silhouette 這個內部指標，你會很清楚看到兩者的差別。
+</p>
+<div class="box tip">
+<div class="bt">順便驗證一件事</div>
+<p style="margin-bottom:0">
+ARI 是「調整過的」Rand index，意思是它<strong>扣掉了隨機分群的期望值</strong>，
+所以隨機亂分的 ARI 約等於 0，而不是某個正數。可以叫 agent 用隨機標籤實際跑一次驗證這點。
+</p>
+</div>
+</section>
+
+<section>
+<h2>檢查清單</h2>
+<ul class="ckl">
+<li><input type="checkbox" id="l1a"><label for="l1a">agent 產生了 <code>lab1_cluster.py</code>，而且我打開看過裡面在做什麼</label></li>
+<li><input type="checkbox" id="l1b"><label for="l1b"><code>figs/lab1_k_selection.png</code> 存在，兩張圖都畫出來了</label></li>
+<li><input type="checkbox" id="l1c"><label for="l1c">我確認程式裡 <code>random_state=0</code>，重跑後 inertia 在容差內相同、兩次分群的 ARI = 1</label></li>
+<li><input type="checkbox" id="l1d"><label for="l1d">我能用自己的話解釋為什麼 silhouette 選 9 而不是 10</label></li>
+<li><input type="checkbox" id="l1e"><label for="l1e">我知道 silhouette 是內部指標、ARI 是外部指標，差別在哪</label></li>
+</ul>
+</section>
+
+<section>
+<h2>如果還有時間</h2>
+<ul>
+<li>叫 agent 把 k=10 的十個群中心 reshape 回 8×8 畫出來。你會看到某幾個「數字」長得很模糊——那就是被合併的類別。</li>
+<li>silhouette 的差距（0.1893 vs 0.1825）其實很小。問 agent：<strong>「這個差距有統計意義嗎？」</strong>——用不同 <code>random_state</code> 跑 30 次，看兩者的分布是否重疊。單次比較的大小關係不等於顯著差異。</li>
+<li>問它：<strong>「inertia 為什麼隨 k 遞減？用數學證明給我看。」</strong>（提示：$k+1$ 群的<em>最佳</em>解一定不差於 $k$ 群，因為可以把多的那群留空。但 k-means 找到的是局部解，所以實務上偶爾會出現不單調的情形——這也正是 elbow 法只能「看轉折」而不能「取最小值」的原因。）</li>
+<li>換一個距離度量（例如先做 L2 正規化再分群），看 silhouette 的最佳 k 會不會變。</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="first-run.html"><div class="d">上一章</div><div class="t2">← 01 · 第一次對話</div></a>
+  <a href="lab2-pca.html" class="next"><div class="d">下一章</div><div class="t2">03 · Lab 2 · 降維 →</div></a>
+</div>
+
+</div>

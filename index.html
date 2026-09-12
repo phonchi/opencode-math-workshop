@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>總覽｜OpenCode × AI-Math 工作坊</title>
+<meta name="description" content="三小時學會用 AI agent 做數學：opencode 實作工作坊。單一資料集貫穿分群、降維、分類三個實作，每一步都要求你用數學驗證 agent 的答案。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* =========================================================================
+   OpenCode × AI-Math 工作坊　設計系統
+   調色盤沿用 selfstudy 系列（暖紙色 / 靛藍 / 赤陶 / 松綠）
+   排版走編輯設計：大字級對比、慷慨留白、細線分隔、克制用色
+   ========================================================================= */
+:root{
+  --paper:#f6f2e9;
+  --paper-2:#fffdf8;
+  --ink:#1b1b2b;
+  --ink-2:#4a4a5e;
+  --ink-3:#7d7a72;
+  --rule:#ded6c6;
+  --rule-2:#ece5d6;
+
+  --live:#b8503c;   /* 現場 */
+  --link:#2a3c78;   /* 連結・標題 */
+  --after:#1a6247;  /* 課後・通過 */
+  --warn:#96660c;   /* 注意 */
+
+  --term-bg:#191922;
+  --term-bar:#23232f;
+  --term-fg:#d8d5cc;
+  --term-dim:#807d8e;
+  --term-user:#e3c273;
+  --term-tool:#77aecb;
+  --term-bash:#8ec392;
+  --term-chat:#a99fd0;
+  --term-err:#dd8877;
+
+  --r-sm:6px; --r-md:10px; --r-lg:16px;
+  --sh-1:0 1px 2px rgba(27,27,43,.04);
+  --sh-2:0 4px 16px rgba(27,27,43,.07);
+  --sh-3:0 14px 40px rgba(27,27,43,.13);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{
+  font-family:'Noto Sans TC',system-ui,sans-serif;
+  background-color:var(--paper);
+  /* 紙張紋理：兩層極淡的徑向漸層，不使用圖檔 */
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(184,80,60,.028), transparent 42%),
+    radial-gradient(circle at 82% 78%, rgba(42,60,120,.030), transparent 46%);
+  background-attachment:fixed;
+  color:var(--ink);
+  font-size:17px;
+  line-height:1.92;
+  letter-spacing:.01em;
+  text-wrap:pretty;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;height:auto;}
+::selection{background:rgba(227,194,115,.42);}
+
+/* ---------------- 導覽列 ---------------- */
+.topnav{
+  position:sticky;top:0;z-index:60;
+  background:rgba(246,242,233,.88);
+  backdrop-filter:saturate(1.5) blur(12px);
+  border-bottom:1px solid var(--rule-2);
+}
+.topnav .inner{
+  max-width:1140px;margin:0 auto;padding:.6rem 2rem;
+  display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;
+}
+.topnav .brand{
+  font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:700;
+  letter-spacing:.08em;color:var(--ink);text-decoration:none;white-space:nowrap;
+}
+.topnav .brand i{font-style:normal;color:var(--live);margin:0 .15em;}
+.topnav nav{display:flex;gap:.05rem;flex-wrap:wrap;margin-left:auto;}
+.topnav nav a{
+  font-size:.78rem;color:var(--ink-3);text-decoration:none;
+  padding:.2rem .6rem;border-radius:var(--r-sm);white-space:nowrap;
+  transition:color .16s var(--ease),background .16s var(--ease);
+}
+.topnav nav a:hover{color:var(--ink);background:rgba(255,253,248,.9);}
+.topnav nav a[aria-current]{color:var(--live);font-weight:700;}
+
+/* ---------------- 版面骨架 ---------------- */
+.container{max-width:1140px;margin:0 auto;padding:4.5rem 2rem;}
+.container.narrow{max-width:780px;}
+section{margin-bottom:4.5rem;}
+section:last-child{margin-bottom:0;}
+
+/* ---------------- 字級階層 ---------------- */
+h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.1rem,5.2vw,3.4rem);
+  line-height:1.28;letter-spacing:-.015em;margin-bottom:1rem;
+}
+h2{
+  font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:clamp(1.45rem,2.6vw,1.85rem);
+  line-height:1.45;letter-spacing:-.01em;
+  margin:4rem 0 1.2rem;padding-top:1.2rem;
+  border-top:1px solid var(--rule);
+  position:relative;
+}
+h2::before{
+  content:"";position:absolute;top:-1px;left:0;width:56px;height:2px;background:var(--live);
+}
+h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.16rem;
+  line-height:1.6;margin:2.4rem 0 .7rem;color:var(--link);
+}
+h4{font-size:.98rem;font-weight:700;margin:1.6rem 0 .5rem;color:var(--ink-2);}
+p{margin-bottom:1.15rem;}
+.lead{font-size:1.09rem;line-height:1.95;color:var(--ink-2);}
+ul,ol{margin:0 0 1.2rem 1.5rem;}
+li{margin-bottom:.45rem;}
+li::marker{color:var(--ink-3);}
+a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:.2em;}
+a:hover{color:var(--live);}
+hr{border:0;border-top:1px solid var(--rule);margin:3rem 0;}
+strong{font-weight:700;color:var(--ink);}
+em{font-style:normal;background:linear-gradient(transparent 62%,rgba(227,194,115,.5) 0);}
+code{
+  font-family:'JetBrains Mono',monospace;font-size:.85em;
+  background:rgba(222,214,198,.42);padding:.12em .4em;border-radius:4px;
+  letter-spacing:0;
+  /* 一長串連續的行內 code 會撐破手機版，允許在任何位置斷行 */
+  overflow-wrap:anywhere;word-break:break-word;
+}
+p,li,td,th,h1,h2,h3,h4,dd,dt{overflow-wrap:break-word;}
+
+/* ---------------- Hero ---------------- */
+.hero{
+  background:
+    radial-gradient(ellipse 120% 80% at 78% 8%, rgba(227,194,115,.10), transparent 58%),
+    linear-gradient(152deg,#262636 0%,#16161f 62%,#101018 100%);
+  color:#f4f0e7;padding:6rem 2rem 5rem;position:relative;overflow:hidden;
+}
+.hero .inner{max-width:1140px;margin:0 auto;position:relative;z-index:2;}
+.hero .kicker{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--term-user);
+  margin-bottom:1.3rem;display:flex;align-items:center;gap:.8rem;
+}
+.hero .kicker::after{content:"";flex:1;max-width:180px;height:1px;background:rgba(227,194,115,.3);}
+.hero h1{color:#fff;max-width:18em;margin-bottom:1.2rem;}
+.hero h1 i{font-style:normal;color:var(--term-user);}
+.hero .sub{
+  font-size:1.06rem;line-height:1.9;color:rgba(255,255,255,.74);
+  max-width:38em;margin-bottom:2.6rem;
+}
+.hero .meta{
+  display:flex;gap:3.2rem;flex-wrap:wrap;
+  padding-top:1.6rem;border-top:1px solid rgba(255,255,255,.13);
+}
+.hero .meta div{min-width:0;}
+.hero .meta b{
+  display:block;font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:1.75rem;line-height:1.2;color:#fff;margin-bottom:.25rem;
+}
+.hero .meta span{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(255,255,255,.46);
+}
+.hero-glyph{
+  position:absolute;right:3.5rem;bottom:2.2rem;
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:clamp(5rem,13vw,11rem);line-height:.85;letter-spacing:-.04em;
+  color:transparent;
+  background:linear-gradient(135deg,rgba(227,194,115,.16),rgba(255,255,255,.03) 62%,transparent);
+  -webkit-background-clip:text;background-clip:text;
+  pointer-events:none;user-select:none;white-space:nowrap;
+}
+.hero-glyph::after{
+  content:"";position:absolute;left:.06em;bottom:.14em;width:.52em;height:.075em;
+  background:rgba(227,194,115,.22);animation:blink 1.45s steps(1) infinite;
+}
+@keyframes blink{0%,54%{opacity:1}55%,100%{opacity:0}}
+@media (max-width:900px){.hero-glyph{display:none;}}
+
+/* 章節頁的頁首（比 hero 輕） */
+.pagehead{padding:3.6rem 0 0;}
+.pagehead .kicker{
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:.9rem;
+  display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;
+}
+.pagehead h1{max-width:16em;}
+.pagehead .lead{max-width:34em;margin-top:.6rem;}
+
+/* ---------------- 徽章 ---------------- */
+.badge{
+  display:inline-block;font-family:'JetBrains Mono',monospace;
+  font-size:.64rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:.16rem .62rem;border-radius:999px;border:1px solid currentColor;
+  vertical-align:.16em;white-space:nowrap;line-height:1.6;
+}
+.badge.live{color:var(--live);}
+.badge.after{color:var(--after);}
+.badge.prep{color:var(--warn);}
+
+/* ---------------- 章節卡 ---------------- */
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:1.15rem;}
+.ch-card{
+  display:flex;flex-direction:column;position:relative;
+  background:var(--paper-2);border:1px solid var(--rule-2);border-radius:var(--r-lg);
+  padding:1.5rem 1.55rem 1.25rem;text-decoration:none;color:var(--ink);
+  box-shadow:var(--sh-1);
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),border-color .22s var(--ease);
+}
+.ch-card:hover{transform:translateY(-4px);border-color:var(--rule);box-shadow:var(--sh-3);}
+.ch-card:hover .arr{transform:translateX(3px);opacity:1;}
+.ch-card .num{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+  letter-spacing:.18em;color:var(--ink-3);
+}
+.ch-card h3{font-size:1.2rem;margin:.3rem 0 .5rem;color:var(--ink);}
+.ch-card p{font-size:.875rem;line-height:1.78;color:var(--ink-2);flex:1;margin-bottom:1rem;}
+.ch-card .foot{
+  display:flex;justify-content:space-between;align-items:center;gap:.6rem;
+  padding-top:.7rem;border-top:1px solid var(--rule-2);
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ink-3);
+  letter-spacing:.06em;
+}
+.ch-card .arr{opacity:.45;transition:transform .22s var(--ease),opacity .22s var(--ease);}
+
+/* ---------------- 終端機（本站主角） ---------------- */
+.term{
+  background:var(--term-bg);border-radius:var(--r-md);overflow:hidden;
+  margin:1.7rem 0;box-shadow:var(--sh-3);
+  font-family:'JetBrains Mono',monospace;
+}
+.term-bar{
+  background:var(--term-bar);padding:.55rem .95rem;
+  display:flex;align-items:center;gap:.42rem;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.term-bar .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.term-bar .dot:nth-of-type(1){background:#d9614f;}
+.term-bar .dot:nth-of-type(2){background:#d8a747;}
+.term-bar .dot:nth-of-type(3){background:#66ab68;}
+.term-bar .label{
+  margin-left:.6rem;font-size:.68rem;letter-spacing:.1em;color:var(--term-dim);
+}
+.term-body{
+  padding:1.1rem 1.2rem;font-size:.815rem;line-height:1.85;color:var(--term-fg);
+  overflow-x:auto;white-space:pre-wrap;word-break:break-word;letter-spacing:0;
+}
+.term-body > div{padding:.02rem 0;}
+.term-body .u{color:var(--term-user);}
+.term-body .u::before{content:"> ";color:var(--term-dim);}
+.term-body .t::before{content:"→ ";color:var(--term-dim);}
+.term-body .t{color:var(--term-tool);}
+.term-body .w::before{content:"← ";color:var(--term-dim);}
+.term-body .w{color:var(--term-tool);}
+.term-body .b::before{content:"$ ";color:var(--term-dim);}
+.term-body .b{color:var(--term-bash);}
+.term-body .o{color:var(--term-dim);}
+.term-body .e{color:var(--term-err);}
+.term-body .c{color:var(--term-chat);}
+.term-body .sp{height:.55rem;}
+.term details{margin:.2rem 0;}
+.term summary{
+  color:var(--term-dim);cursor:pointer;font-size:.75rem;list-style:none;
+  user-select:none;letter-spacing:.04em;transition:color .16s var(--ease);
+}
+.term summary::-webkit-details-marker{display:none;}
+.term summary::before{content:"▸  ";}
+.term details[open] summary::before{content:"▾  ";}
+.term summary:hover{color:var(--term-fg);}
+.term details[open] > summary{margin-bottom:.35rem;}
+
+/* ---------------- 程式碼區塊 ---------------- */
+pre{
+  background:var(--term-bg);color:var(--term-fg);border-radius:var(--r-md);
+  padding:1.05rem 1.25rem;overflow-x:auto;margin:1.35rem 0;
+  font-family:'JetBrains Mono',monospace;font-size:.815rem;line-height:1.8;
+  letter-spacing:0;box-shadow:var(--sh-2);
+}
+pre code{background:none;padding:0;font-size:inherit;color:inherit;}
+pre.cmd{position:relative;padding-right:4.2rem;}
+pre .copy{
+  position:absolute;top:.6rem;right:.6rem;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
+  color:var(--term-dim);font-family:inherit;font-size:.66rem;letter-spacing:.06em;
+  padding:.2rem .55rem;border-radius:var(--r-sm);cursor:pointer;
+  transition:background .16s var(--ease),color .16s var(--ease);
+}
+pre .copy:hover{background:rgba(255,255,255,.15);color:#fff;}
+
+/* ---------------- 提示盒 ---------------- */
+.box{
+  border:1px solid var(--rule-2);border-left-width:3px;border-radius:var(--r-md);
+  padding:1.15rem 1.4rem;margin:1.6rem 0;background:var(--paper-2);box-shadow:var(--sh-1);
+}
+.box .bt{
+  font-family:'JetBrains Mono',monospace;font-size:.67rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;margin-bottom:.55rem;
+}
+.box > :last-child{margin-bottom:0;}
+.box.tip{border-left-color:var(--after);}    .box.tip .bt{color:var(--after);}
+.box.warn{border-left-color:var(--warn);background:#fdf9ef;} .box.warn .bt{color:var(--warn);}
+.box.danger{border-left-color:var(--live);background:#fdf3f0;} .box.danger .bt{color:var(--live);}
+.box.math{border-left-color:var(--link);}    .box.math .bt{color:var(--link);}
+
+/* ---------------- 數學式 ---------------- */
+mjx-container[display]{
+  overflow-x:auto;overflow-y:hidden;max-width:100%;
+  padding:.35rem 0 .55rem;
+}
+mjx-container{max-width:100%;}
+
+/* ---------------- 表格 ---------------- */
+.tw{overflow-x:auto;margin:1.6rem 0;border-radius:var(--r-md);box-shadow:var(--sh-1);}
+table{width:100%;border-collapse:collapse;font-size:.87rem;background:var(--paper-2);}
+th{
+  background:rgba(222,214,198,.4);padding:.62rem .9rem;text-align:left;
+  font-weight:700;font-size:.76rem;letter-spacing:.06em;color:var(--ink-2);
+  white-space:nowrap;border-bottom:1px solid var(--rule);
+}
+td{padding:.58rem .9rem;border-bottom:1px solid var(--rule-2);vertical-align:top;line-height:1.72;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(222,214,198,.16);}
+td code{white-space:nowrap;}
+.ok{color:var(--after);font-weight:700;}
+.no{color:var(--live);font-weight:700;}
+
+/* ---------------- 檢查清單 ---------------- */
+.ckl{list-style:none;margin:1.5rem 0;padding:0;}
+.ckl li{
+  background:var(--paper-2);border:1px solid var(--rule-2);border-radius:var(--r-md);
+  margin-bottom:.55rem;padding:.85rem 1.1rem;display:flex;gap:.85rem;align-items:flex-start;
+  box-shadow:var(--sh-1);transition:opacity .2s var(--ease),background .2s var(--ease);
+}
+.ckl input{
+  margin-top:.44rem;width:1.05rem;height:1.05rem;accent-color:var(--after);
+  cursor:pointer;flex-shrink:0;
+}
+.ckl label{cursor:pointer;font-size:.91rem;line-height:1.78;}
+.ckl li:has(input:checked){opacity:.46;background:rgba(222,214,198,.22);}
+.ckl li:has(input:checked) label{text-decoration:line-through;}
+
+/* ---------------- 編號步驟 ---------------- */
+.step{
+  position:relative;padding-left:3.2rem;margin-bottom:2.6rem;
+}
+.step::before{
+  content:attr(data-n);position:absolute;left:0;top:.05rem;
+  width:2.1rem;height:2.1rem;border-radius:50%;
+  background:var(--paper-2);border:1px solid var(--rule);color:var(--link);
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-1);
+}
+.step > h3:first-child{margin-top:.1rem;}
+
+/* ---------------- 時程表 ---------------- */
+.sched{width:100%;border-collapse:collapse;font-size:.9rem;}
+.sched td{padding:.7rem .3rem;border-bottom:1px solid var(--rule-2);vertical-align:baseline;}
+.sched tr:last-child td{border-bottom:none;}
+.sched .t{
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--ink-3);
+  white-space:nowrap;width:5.5rem;letter-spacing:.04em;
+}
+.sched .n{font-weight:700;}
+.sched .d{color:var(--ink-2);font-size:.86rem;}
+
+/* ---------------- 頁尾導覽 ---------------- */
+.pager{display:flex;gap:1rem;margin:4.5rem 0 0;flex-wrap:wrap;}
+.pager a{
+  flex:1;min-width:230px;background:var(--paper-2);border:1px solid var(--rule-2);
+  border-radius:var(--r-md);padding:1rem 1.25rem;text-decoration:none;color:var(--ink);
+  box-shadow:var(--sh-1);transition:border-color .2s var(--ease),box-shadow .2s var(--ease);
+}
+.pager a:hover{border-color:var(--rule);box-shadow:var(--sh-2);}
+.pager .d{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.pager .t2{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--link);font-size:1.02rem;}
+.pager .next{text-align:right;}
+
+footer{
+  border-top:1px solid var(--rule);margin-top:5rem;
+  padding:2.6rem 2rem 3.2rem;text-align:center;font-size:.82rem;color:var(--ink-3);
+}
+footer .stamp{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.06em;
+  margin-top:.6rem;color:var(--rule);color:#a49e92;
+}
+
+@media (max-width:720px){
+  body{font-size:16px;line-height:1.88;}
+  .container{padding:2.8rem 1.25rem;}
+  .hero{padding:3.6rem 1.25rem 3rem;}
+  .hero .meta{gap:1.8rem;}
+  .hero .meta b{font-size:1.4rem;}
+  .term-body,pre{font-size:.755rem;}
+  .topnav .inner{padding:.5rem 1.25rem;}
+  .topnav nav{
+    width:100%;margin-left:0;gap:0;flex-wrap:nowrap;
+    overflow-x:auto;scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);
+            mask-image:linear-gradient(90deg,#000 88%,transparent);
+  }
+  .topnav nav::-webkit-scrollbar{display:none;}
+  .topnav nav a{padding:.2rem .55rem;}
+  .step{padding-left:2.6rem;}
+  h2{margin-top:3rem;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+  html{scroll-behavior:auto;}
+}
+@media print{
+  .topnav,.pager,pre .copy{display:none;}
+  body{background:#fff;}
+}
+</style>
+</head>
+<body>
+
+<div class="topnav"><div class="inner">
+<a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
+<nav>
+<a href="prep.html">課前準備</a>
+<a href="first-run.html">第一次對話</a>
+<a href="lab1-cluster.html">Lab 1</a>
+<a href="lab2-pca.html">Lab 2</a>
+<a href="lab3-notes.html">Lab 3</a>
+<a href="local-models.html">本地模型</a>
+<a href="agents-md.html">AGENTS.md</a>
+<a href="git-safety.html">git</a>
+<a href="mcp-skills.html">MCP</a>
+<a href="cheatsheet.html">速查</a>
+</nav>
+</div></div>
+
+<div class="hero">
+<div class="hero-glyph">&gt;_</div>
+<div class="inner">
+  <div class="kicker">國立中山大學　人工智慧與數學整合學程</div>
+  <h1>三小時，學會<i>指揮</i>一個會寫程式的 AI</h1>
+  <p class="sub">
+    不是叫它幫你寫作業。是讓它跑實驗、畫圖、整理筆記，
+    然後<strong style="color:#fff">用你學過的數學，親手驗證它有沒有騙你</strong>。
+  </p>
+  <div class="meta">
+    <div><b>3 小時</b><span>現場工作坊</span></div>
+    <div><b>0 元</b><span>免註冊・免信用卡</span></div>
+    <div><b>3 個</b><span>數學實作</span></div>
+    <div><b>1 份</b><span>資料集貫穿全場</span></div>
+  </div>
+</div>
+</div>
+
+<div class="container">
+
+<section>
+<h2>這場工作坊在做什麼</h2>
+<p class="lead">
+你已經在課堂上學過迴歸、分群、降維、分類背後的數學。這場工作坊要處理的是另一件事：
+<strong>當一個 AI agent 三十秒就把這些方法實作出來，你的價值在哪裡？</strong>
+</p>
+<p>
+答案是判斷力。agent 寫得快，但它會用錯指標、會挑錯比較方式、會給你一個看起來很有道理但其實錯的結論。
+而你——修過線性代數與統計的人——有能力抓出來。這三小時就在練這件事。
+</p>
+
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">opencode　—　實際錄下的畫面</span></div>
+  <div class="term-body"><div class="u">手刻一個 PCA，不可以呼叫 sklearn。寫完自己驗證，並把驗證結果印出來。</div>
+<div class="sp"></div>
+<div class="t">Read　AGENTS.md</div>
+<div class="w">Write　pca_manual.py</div>
+<div class="b">uv run python pca_manual.py</div>
+<div class="sp"></div>
+<div class="o">驗證 1：解釋變異比例　最大差異 = 8.327e-17　→ PASS</div>
+<div class="o">驗證 2：主成分方向 |cos|　最大偏離 1 = 8.882e-16　→ PASS</div>
+<div class="o">驗證 3：重建誤差　差異 = 0.000e+00　→ PASS</div>
+<div class="sp"></div>
+<div class="c">三項驗證都通過了。補充一點：第 4、7、8、9、10 個主成分的方向跟 sklearn 相反，
+這是正常的——特徵向量的正負號本來就任意，所以我用 |cos| 而不是直接相減。</div>
+</div>
+</div>
+
+<div class="box math">
+<div class="bt">給你的第一個問題</div>
+<p>上面那段話，agent 說得頭頭是道。但它其實<strong>漏了一個條件</strong>——
+在什麼情況下，用 <code>|cos|</code> 比對主成分方向這個做法會失效？</p>
+<p style="margin-bottom:0">Lab 2 會處理這題。這就是這場工作坊的樣子。</p>
+</div>
+</section>
+
+<section>
+<h2>現場三小時怎麼走</h2>
+<table class="sched">
+<tr><td class="t">00:00</td><td class="n">綠燈檢查 <span class="badge prep">課前</span></td>
+    <td class="d">確認每個人的環境都活著。課前準備沒做完的，這裡補救。</td></tr>
+<tr><td class="t">00:10</td><td class="n">第一次對話 <span class="badge live">現場</span></td>
+    <td class="d">TUI 操作、權限機制、session 的邊界。搞懂你在跟什麼東西說話。</td></tr>
+<tr><td class="t">00:40</td><td class="n">Lab 1 · 分群 <span class="badge live">現場</span></td>
+    <td class="d">agent 當加速器。一句話換來十一組 k-means 與兩張圖——然後你發現它選錯了 k。</td></tr>
+<tr><td class="t">01:20</td><td class="n">休息</td><td class="d"></td></tr>
+<tr><td class="t">01:30</td><td class="n">Lab 2 · 降維 <span class="badge live">現場</span></td>
+    <td class="d">agent 當被告。手刻 PCA vs sklearn，你負責設計能抓出錯誤的驗證方法。</td></tr>
+<tr><td class="t">02:10</td><td class="n">Lab 3 · 分類與筆記 <span class="badge live">現場</span></td>
+    <td class="d">agent 當學習夥伴。梯度檢查、線性可分的陷阱，再讓它把推導整理成 LaTeX 筆記。</td></tr>
+<tr><td class="t">02:50</td><td class="n">收尾</td>
+    <td class="d">課後四章怎麼自己往下走。</td></tr>
+</table>
+</section>
+
+<section>
+<h2>課程地圖</h2>
+<p>標 <span class="badge live">現場</span> 的是三小時內會一起做的；標 <span class="badge after">課後</span> 的是給你自己往下走的。
+全部內容都留在這個網站上，工作坊結束後隨時可以回來。</p>
+
+<div class="ch-grid" style="margin-top:1.6rem">
+
+<a class="ch-card" href="prep.html">
+  <div class="num">00</div>
+  <h3>課前準備</h3>
+  <p>裝好 opencode 與 uv，跑一次自測。<strong>務必在工作坊前做完</strong>——建 Python 環境實測要下載 287 MB、花六分半鐘，全班同時做會塞爆教室網路。</p>
+  <div class="foot"><span class="badge prep">課前</span><span class="arr">→</span></div>
+</a>
+
+<a class="ch-card" href="first-run.html">
+  <div class="num">01</div>
+  <h3>第一次對話</h3>
+  <p>啟動、下指令、看懂畫面上那些箭頭是什麼意思。權限機制為什麼重要，以及 session 滿了該怎麼辦。</p>
+  <div class="foot"><span class="badge live">現場 30 分</span><span class="arr">→</span></div>
+</a>
+
+<a class="ch-card" href="lab1-cluster.html">
+  <div class="num">02</div>
+  <h3>Lab 1 · 分群：agent 當加速器</h3>
+  <p>k-means 掃過 k=2 到 12，畫 elbow 與 silhouette。agent 會很有自信地告訴你最佳 k 是 9——但真實答案是 10。為什麼？</p>
+  <div class="foot"><span class="badge live">現場 40 分</span><span class="arr">→</span></div>
+</a>
+
+<a class="ch-card" href="lab2-pca.html">
+  <div class="num">03</div>
+  <h3>Lab 2 · 降維：agent 當被告</h3>
+  <p>手刻 PCA 與 sklearn 比對。直接相減差 0.94 看起來大錯特錯，用對方法卻是完全正確。驗證方法本身就是這堂課的主題。</p>
+  <div class="foot"><span class="badge live">現場 40 分</span><span class="arr">→</span></div>
+</a>
+
+<a class="ch-card" href="lab3-notes.html">
+  <div class="num">04</div>
+  <h3>Lab 3 · 分類與筆記：agent 當夥伴</h3>
+  <p>有限差分梯度檢查，抓出寫錯的梯度公式。接著撞上線性可分的陷阱，親眼看到「沒有最佳解」長什麼樣子。最後讓 agent 把推導寫成筆記。</p>
+  <div class="foot"><span class="badge live">現場 40 分</span><span class="arr">→</span></div>
+</a>
+
+<a class="ch-card" href="local-models.html">
+  <div class="num">05</div>
+  <h3>在自己電腦上跑本地模型</h3>
+  <p>Ollama 接 opencode。重點是 context 長度要在<strong>兩個地方各設一次</strong>——只設一邊，模型就會表現得像個笨蛋，而你會以為是模型不好。</p>
+  <div class="foot"><span class="badge after">課後</span><span class="arr">→</span></div>
+</a>
+
+<a class="ch-card" href="agents-md.html">
+  <div class="num">06</div>
+  <h3>用 AGENTS.md 馴服 agent</h3>
+  <p>把「一律用 uv run」「隨機種子固定」「不准偷呼叫 sklearn 充數」寫成專案規則，讓 agent 每次都照做，不必你每次重講。</p>
+  <div class="foot"><span class="badge after">課後</span><span class="arr">→</span></div>
+</a>
+
+<a class="ch-card" href="git-safety.html">
+  <div class="num">07</div>
+  <h3>git：讓你敢放手</h3>
+  <p>不用 GitHub 帳號也能用。動手前先 commit、改完看 diff、不滿意就還原——有這張安全網，你才敢真的讓 agent 改你的檔案。</p>
+  <div class="foot"><span class="badge after">課後</span><span class="arr">→</span></div>
+</a>
+
+<a class="ch-card" href="mcp-skills.html">
+  <div class="num">08</div>
+  <h3>再往前一步：MCP 與 subagent</h3>
+  <p>加分項，不是必修。等前面都練熟了再來看怎麼接外部工具、怎麼自訂專門做數學驗證的 agent。</p>
+  <div class="foot"><span class="badge after">課後</span><span class="arr">→</span></div>
+</a>
+
+<a class="ch-card" href="cheatsheet.html">
+  <div class="num">09</div>
+  <h3>速查表</h3>
+  <p>指令、快捷鍵、常見錯誤與對應解法。現場卡住先翻這頁。</p>
+  <div class="foot"><span class="badge after">隨時</span><span class="arr">→</span></div>
+</a>
+
+</div>
+</section>
+
+<section>
+<h2>開始之前</h2>
+<div class="box warn">
+<div class="bt">兩件必須先知道的事</div>
+<p><strong>一、免費模型會看你送過去的東西。</strong>
+本工作坊用的 <code>opencode/big-pickle</code> 是限時免費的試用模型，
+官方明講資料可能被用於改進模型。所以：<strong>不要把還沒發表的研究資料、
+個人隱私資料、或任何機密內容丟進去</strong>。課堂用的都是 scikit-learn 內建的公開資料集。</p>
+<p style="margin-bottom:0"><strong>二、agent 會動你的檔案。</strong>
+它真的會寫檔、刪檔、執行指令。這不是聊天機器人。
+先看過<a href="git-safety.html">第 07 章</a>，或至少在動手前把重要的東西備份一份。</p>
+</div>
+</section>
+
+<div class="pager">
+  <a href="prep.html" class="next" style="margin-left:auto">
+    <div class="d">下一步</div>
+    <div class="t2">00 · 課前準備 →</div>
+  </a>
+</div>
+
+</div>
+
+<footer>
+<div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
+<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+</footer>
+
+<script>
+// 導覽列高亮目前頁面
+(function(){
+  var f=(location.pathname.split('/').pop()||'index.html');
+  document.querySelectorAll('.topnav nav a').forEach(function(a){
+    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+  });
+})();
+
+// 指令複製鈕
+document.querySelectorAll('pre.cmd').forEach(function(pre){
+  var b=document.createElement('button');
+  b.className='copy'; b.type='button'; b.textContent='複製';
+  b.addEventListener('click',function(){
+    var t=pre.querySelector('code');
+    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
+      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
+    },function(){ b.textContent='複製失敗'; });
+  });
+  pre.appendChild(b);
+});
+
+// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
+(function(){
+  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
+  var saved={};
+  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
+    var id=cb.id||('ck'+i); cb.id=id;
+    if(saved[id]) cb.checked=true;
+    cb.addEventListener('change',function(){
+      saved[id]=cb.checked;
+      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+    });
+  });
+})();
+</script>
+
+<script>
+// MathJax 3：啟用 $...$ 行內數學（預設不開）
+window.MathJax={
+  tex:{
+    inlineMath:[['$','$'],['\\(','\\)']],
+    displayMath:[['$$','$$'],['\\[','\\]']],
+    processEscapes:true
+  },
+  options:{
+    skipHtmlTags:['script','noscript','style','textarea','pre','code'],
+    ignoreHtmlClass:'term|tw'
+  },
+  chtml:{ scale:1.02 }
+};
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!--TITLE:速查表-->
+<!--DESC:opencode 與 uv 的指令、TUI 快捷鍵、常見錯誤與對應解法。現場卡住先翻這一頁。-->
+
+<div class="container narrow">
+
+<div class="pagehead">
+  <div class="kicker"><span>09</span><span>·</span><span class="badge after">隨時查</span></div>
+  <h1>速查表</h1>
+  <p class="lead">現場卡住先翻這頁。所有指令都在 opencode 1.18.30 上實測過。</p>
+</div>
+
+<section>
+<h2>最常用的五件事</h2>
+<div class="tw"><table>
+<tr><th>你想做什麼</th><th>怎麼做</th></tr>
+<tr><td>開始工作</td><td><code>cd &lt;專案資料夾&gt;</code> 然後 <code>opencode</code></td></tr>
+<tr><td>問一個問題就好，不進 TUI</td><td><code>opencode run "問題"</code></td></tr>
+<tr><td>讓它動手（非互動）</td><td><code>opencode run --auto "任務"</code></td></tr>
+<tr><td>看錯誤的真正原因</td><td>加上 <code>--print-logs --log-level ERROR</code></td></tr>
+<tr><td>確認設定有沒有生效</td><td><code>opencode debug config</code></td></tr>
+</table></div>
+</section>
+
+<section>
+<h2>opencode CLI</h2>
+<div class="tw"><table>
+<tr><th>指令</th><th>作用</th></tr>
+<tr><td><code>opencode</code></td><td>在目前資料夾啟動 TUI 互動模式</td></tr>
+<tr><td><code>opencode run "訊息"</code></td><td>非互動執行一次。<strong>權限設 ask 的動作會被自動拒絕</strong></td></tr>
+<tr><td><code>opencode run --auto "訊息"</code></td><td>同上，但事先答應所有未被明確拒絕的權限</td></tr>
+<tr><td><code>opencode run -c "訊息"</code></td><td>接續上一個 session</td></tr>
+<tr><td><code>opencode models</code></td><td>列出目前可用的模型</td></tr>
+<tr><td><code>opencode auth list</code></td><td>看有哪些已登入的 provider</td></tr>
+<tr><td><code>opencode debug config</code></td><td>顯示合併後的最終設定（排查設定問題的第一站）</td></tr>
+<tr><td><code>opencode debug paths</code></td><td>顯示設定、資料、快取的實際路徑</td></tr>
+<tr><td><code>opencode debug agent &lt;名字&gt;</code></td><td>顯示某個 agent 的設定細節</td></tr>
+<tr><td><code>opencode agent list</code></td><td>列出可用的 agent</td></tr>
+<tr><td><code>opencode mcp list</code></td><td>列出 MCP server 與連線狀態</td></tr>
+<tr><td><code>opencode stats</code></td><td>token 用量與費用統計</td></tr>
+<tr><td><code>opencode upgrade</code></td><td>升級到最新版</td></tr>
+</table></div>
+<div class="box tip">
+<div class="bt">忘記指令的時候</div>
+<p style="margin-bottom:0">任何一層都可以加 <code>--help</code>：<code>opencode --help</code>、<code>opencode run --help</code>、<code>opencode debug --help</code>。</p>
+</div>
+</section>
+
+<section>
+<h2>uv</h2>
+<div class="tw"><table>
+<tr><th>指令</th><th>作用</th></tr>
+<tr><td><code>uv sync</code></td><td>依 <code>pyproject.toml</code> 建立／更新環境</td></tr>
+<tr><td><code>uv run python &lt;檔案&gt;</code></td><td>在專案環境裡執行 Python（<strong>本工作坊一律用這個</strong>）</td></tr>
+<tr><td><code>uv run python -c "..."</code></td><td>執行一行 Python</td></tr>
+<tr><td><code>uv add &lt;套件&gt;</code></td><td>加入套件並更新 <code>pyproject.toml</code></td></tr>
+<tr><td><code>uv remove &lt;套件&gt;</code></td><td>移除套件</td></tr>
+<tr><td><code>uv --version</code></td><td>看版本</td></tr>
+</table></div>
+<div class="box warn">
+<div class="bt">不要用的指令</div>
+<p style="margin-bottom:0">
+<code>pip install</code>、<code>python xxx.py</code>、<code>conda activate</code>——
+在這個專案裡都會出問題，因為套件裝在 uv 管理的 <code>.venv</code> 裡。
+</p>
+</div>
+</section>
+
+<section>
+<h2>git 最小組合</h2>
+<div class="tw"><table>
+<tr><th>指令</th><th>作用</th></tr>
+<tr><td><code>git init</code></td><td>開始追蹤這個資料夾（只做一次）</td></tr>
+<tr><td><code>git add -A</code></td><td>把所有變動納入這次存檔</td></tr>
+<tr><td><code>git commit -m "說明"</code></td><td>存檔</td></tr>
+<tr><td><code>git diff</code></td><td>看從上次存檔到現在改了什麼</td></tr>
+<tr><td><code>git status</code></td><td>現在有哪些檔案被動過</td></tr>
+<tr><td><code>git restore .</code></td><td><strong>丟掉所有未存檔的修改</strong>，回到上次 commit</td></tr>
+<tr><td><code>git log --oneline</code></td><td>看存檔歷史</td></tr>
+</table></div>
+<p>核心工作流只有三步：<strong>動手前 <code>git commit</code> → 讓 agent 改 → <code>git diff</code> 檢查</strong>。
+不滿意就 <code>git restore .</code>。詳見<a href="git-safety.html">第 07 章</a>。</p>
+</section>
+
+<section>
+<h2>常見錯誤與解法</h2>
+<div class="tw"><table>
+<tr><th>訊息／症狀</th><th>怎麼辦</th></tr>
+<tr><td><code>command not found: opencode</code><br><code>無法辨識 'opencode'</code></td>
+    <td>PATH 沒重新載入。<strong>關掉終端機重開</strong>。Windows 用 PowerShell 不要用 cmd。</td></tr>
+<tr><td><code>permission requested: edit ...; auto-rejecting</code></td>
+    <td><code>opencode run</code> 是非互動模式，沒人能回答權限詢問。加 <code>--auto</code>，或改用互動模式（直接打 <code>opencode</code>）。</td></tr>
+<tr><td><code>Error: Internal server error</code></td>
+    <td>看不到原因。加 <code>--print-logs --log-level ERROR</code> 重跑。</td></tr>
+<tr><td><code>Unrecognized request argument supplied: prompt_cache_key</code></td>
+    <td>上游的已知偶發問題。<strong>重試一次</strong>通常就好。</td></tr>
+<tr><td><code>UnknownError / Unexpected server error</code></td>
+    <td>多半是換到了需要 API key 的模型。確認 <code>opencode.json</code> 的 model 是 <code>opencode/big-pickle</code>。</td></tr>
+<tr><td>agent 用 <code>python</code> 而不是 <code>uv run python</code></td>
+    <td><code>AGENTS.md</code> 沒被讀到。確認它跟 <code>opencode.json</code> 在同一個資料夾，且你在該資料夾裡啟動。用 <code>opencode debug config</code> 確認。</td></tr>
+<tr><td>agent 說「應該正確」但沒真的跑</td>
+    <td>在 <code>AGENTS.md</code> 裡明確要求「必須實際執行並印出結果」。詳見<a href="agents-md.html">第 06 章</a>。</td></tr>
+<tr><td>agent 開始「修」一個沒壞的程式</td>
+    <td>按 <strong>Esc</strong> 打斷它，然後問它一個能戳破錯誤前提的問題。不要放任它亂改。</td></tr>
+<tr><td>回答愈來愈短、開始忘記前面講過的事</td>
+    <td>context 快滿了。用 <code>/compact</code> 壓縮，或開新 session 重講重點。</td></tr>
+<tr><td><code>ModuleNotFoundError</code></td>
+    <td>套件沒裝或沒用 <code>uv run</code>。先跑 <code>uv sync</code>，再確認指令前面有 <code>uv run</code>。</td></tr>
+<tr><td>圖沒出現</td>
+    <td>終端機環境沒有視窗，<code>plt.show()</code> 不會有效果。要用 <code>plt.savefig("figs/xxx.png")</code>。</td></tr>
+</table></div>
+</section>
+
+<section>
+<h2>下指令的四個習慣</h2>
+<div class="tw"><table>
+<tr><th>習慣</th><th>差別</th></tr>
+<tr><td><strong>說清楚存到哪</strong></td>
+    <td>「畫個圖」→ 你不知道它存去哪了。<br>「畫成兩張並排的圖存到 <code>figs/lab1.png</code>」→ 你找得到。</td></tr>
+<tr><td><strong>要求印出中間結果</strong></td>
+    <td>「驗證一下」→ 它會說「已驗證，結果正確」。<br>「印出每一項的實際數值與 PASS/FAIL」→ 你看得到證據。</td></tr>
+<tr><td><strong>先推導再寫程式</strong></td>
+    <td>直接要程式 → 你沒有獨立的對照組。<br>先要推導 → 那份推導就是你檢查程式的依據。</td></tr>
+<tr><td><strong>禁止它抄捷徑</strong></td>
+    <td>「手刻 PCA」→ 它可能直接呼叫 sklearn。<br>「手刻 PCA，不可以呼叫 sklearn，它只能當對照組」→ 才是你要的。</td></tr>
+</table></div>
+</section>
+
+<section>
+<h2>三個實作的關鍵數字</h2>
+<p>用來對答案。你的數值應該跟這些一致（都固定了隨機種子）。</p>
+<div class="tw"><table>
+<tr><th>Lab</th><th>項目</th><th>參考值</th></tr>
+<tr><td rowspan="2">1</td><td>silhouette 最高的 k</td><td>9（分數 0.1893）</td></tr>
+<tr><td>k=10 的 silhouette</td><td>0.1825</td></tr>
+<tr><td rowspan="4">2</td><td>前 3 個特徵值</td><td>179.0069　163.7177　141.7884</td></tr>
+<tr><td>重建 MSE（K=10）</td><td>4.9142964257</td></tr>
+<tr><td>直接相減 components_ 最大差</td><td>0.9411（<strong>不代表錯</strong>）</td></tr>
+<tr><td>分母寫成 n 時，關卡 5 的差</td><td>0.0996</td></tr>
+<tr><td rowspan="3">3</td><td>梯度檢查最佳步長</td><td>h ≈ 1e-4（誤差 7.2e-12）</td></tr>
+<tr><td>幾何間隔</td><td>1.174682e-02（&gt; 0，故線性可分）</td></tr>
+<tr><td>手刻 vs sklearn 的 ‖w‖</td><td>19.14 vs 97.90（準確率都 1.0）</td></tr>
+</table></div>
+</section>
+
+<div class="pager">
+  <a href="mcp-skills.html"><div class="d">上一章</div><div class="t2">← 08 · MCP 與 subagent</div></a>
+  <a href="index.html" class="next"><div class="d">回到</div><div class="t2">總覽 →</div></a>
+</div>
+
+</div>

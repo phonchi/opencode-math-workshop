@@ -1,0 +1,278 @@
+<!--TITLE:Lab 3 · 分類與筆記-->
+<!--DESC:有限差分梯度檢查抓出寫錯的公式，撞上線性可分導致 MLE 不存在的陷阱，最後讓 agent 把推導整理成可版控的 LaTeX 筆記。-->
+
+<div class="container narrow">
+
+<div class="pagehead">
+  <div class="kicker"><span>Lab 3</span><span>·</span><span class="badge live">現場 40 分</span><span>·</span><span>agent 當學習夥伴</span></div>
+  <h1>分類與筆記：讓 agent 幫你學，而不是幫你交差</h1>
+  <p class="lead">
+    前兩關你在檢查 agent。這一關反過來——讓它當你的推導夥伴：
+    寫程式、驗證公式、然後把整個推導過程整理成一份你之後真的會回去看的筆記。
+  </p>
+</div>
+
+<section>
+<h2>任務</h2>
+<p>
+從 digits 裡挑出數字 <strong>3</strong> 和 <strong>8</strong>（357 筆），手刻一個 logistic 迴歸做二元分類。
+</p>
+<div class="box math">
+<div class="bt">你要驗證的公式</div>
+<p>令 $z=X_bw$、$\sigma(z)=\dfrac{1}{1+e^{-z}}$，平均對數損失與其梯度為</p>
+$$L(w)=\frac1n\sum_i\Bigl[\log\bigl(1+e^{z_i}\bigr)-y_iz_i\Bigr],
+\qquad \nabla_wL=\frac1nX_b^\top\bigl[\sigma(X_bw)-y\bigr]$$
+<p style="margin-bottom:0">agent 會很快寫出來。問題是：<strong>你怎麼知道它沒寫錯？</strong></p>
+</div>
+</section>
+
+<section>
+<h2>動手</h2>
+
+<div class="step" data-n="1">
+<h3>先要求推導，再要求程式</h3>
+<pre class="cmd"><code>我要手刻一個二元 logistic 迴歸，資料是 digits 裡的 3 和 8。
+
+第一步請先不要寫程式。用文字跟數學式跟我推導兩件事：
+1. 從負對數概似出發，推到 L(w) = (1/n) Σ [log(1+e^z) - y z]
+2. 從 L(w) 推到 ∇L = (1/n) X^T (σ(Xw) - y)
+
+推導完再寫程式。</code></pre>
+<p>
+先推導後寫程式，不只是為了教學。<strong>你需要那份推導來當獨立對照組</strong>——
+待會的數值檢查只能證明「程式內部一致」，不能證明「公式本身正確」。
+</p>
+</div>
+
+<div class="step" data-n="2">
+<h3>有限差分梯度檢查</h3>
+<p>這是數值方法裡最乾淨的自我驗證：用損失函數本身去逼近梯度，跟解析梯度比。</p>
+<div class="box math">
+<div class="bt">中央差分</div>
+$$\frac{\partial L}{\partial w_i}\;\approx\;\frac{L(w+h\mathbf{e}_i)-L(w-h\mathbf{e}_i)}{2h}$$
+</div>
+<pre class="cmd"><code>請加一段有限差分梯度檢查：
+
+- 用中央差分，檢查**全部** 65 個維度（不要只抽樣幾個）
+- 步長 h 掃過 1e-2 到 1e-9，每個 h 印出最大絕對誤差與最大相對誤差
+- 做成表格</code></pre>
+
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">opencode　build · big-pickle</span></div>
+  <div class="term-body"><div class="b">uv run python lab3_logistic.py</div>
+<div class="sp"></div>
+<div class="o">    步長 h      最大絕對誤差      最大相對誤差   判定</div>
+<div class="o">     1e-02       7.351e-08       6.888e-06   FAIL</div>
+<div class="o">     1e-03       7.351e-10       6.889e-08   PASS</div>
+<div class="o">     1e-04       7.171e-12       9.332e-08   PASS</div>
+<div class="o">     1e-05       1.030e-11       1.858e-07   PASS</div>
+<div class="o">     1e-06       6.535e-11       5.733e-06   PASS</div>
+<div class="o">     1e-07       7.568e-10       7.971e-05   PASS</div>
+<div class="o">     1e-09       8.026e-08       7.274e-04   FAIL</div>
+</div>
+</div>
+
+<h3>為什麼兩頭都會 FAIL</h3>
+<p>中央差分的總誤差有兩個來源，方向相反：</p>
+<div class="box math">
+<div class="bt">誤差分解</div>
+$$E(h)\;\approx\;\underbrace{Ah^2}_{\text{截斷誤差}}\;+\;\underbrace{\frac{Bu}{h}}_{\text{捨入誤差}}$$
+<p style="margin-bottom:0">
+$u$ 是浮點精度（float64 約 $2.2\times10^{-16}$）。
+$h$ 太大時泰勒展開的高階項來不及被忽略；
+$h$ 太小時 $L(w+h)$ 與 $L(w-h)$ 幾乎相等，相減會損失有效位數。
+令導數為零可得最佳量級 $h\sim u^{1/3}\approx 6\times10^{-6}$——
+實測最佳落在 $10^{-4}$ 附近，同一個量級。
+</p>
+</div>
+
+<div class="box warn">
+<div class="bt">FAIL 不等於公式錯</div>
+<p style="margin-bottom:0">
+上表兩頭的 FAIL，程式完全沒問題。
+所以看到梯度檢查 FAIL 時，正確的說法是<strong>「有不一致，要查原因」</strong>——
+可能是公式錯、步長不當、捨入誤差，或該維梯度本身接近 0。
+反過來說，PASS 也只提供<strong>局部數值證據</strong>：如果 <code>loss()</code> 和 <code>grad()</code>
+一起照著同一個錯誤的目標函數寫，這關照樣全過。這就是為什麼第 1 步要先獨立推導。
+</p>
+</div>
+</div>
+
+<div class="step" data-n="3">
+<h3>訓練，然後撞上一個陷阱</h3>
+<pre class="cmd"><code>現在用梯度下降訓練（lr=0.5，20000 次迭代），
+並在第 100、1000、5000、10000、20000 次時印出 ||w|| 與損失。
+
+訓練完跟 sklearn 的 LogisticRegression 比對。
+注意 sklearn 1.8 起 penalty 參數已棄用，無正則化要用 C=np.inf。</code></pre>
+
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">訓練過程</span></div>
+  <div class="term-body"><div class="o">      迭代        ||w||               損失</div>
+<div class="o">     100       4.1422       0.09344736</div>
+<div class="o">    1000       8.8816       0.02217583</div>
+<div class="o">    5000      13.8902       0.00625092</div>
+<div class="o">   10000      16.4297       0.00343643</div>
+<div class="o">   20000      19.1436       0.00184668</div>
+<div class="sp"></div>
+<div class="o">手刻 GD 準確率 = 1.0000　sklearn 準確率 = 1.0000</div>
+<div class="o">手刻 ||w|| = 19.1436　　sklearn ||w|| = 97.8955</div>
+</div>
+</div>
+
+<div class="box danger">
+<div class="bt">看出問題了嗎</div>
+<p style="margin-bottom:0">
+損失一直往 0 掉，但 <strong>$\|w\|$ 一直長，沒有要停的跡象</strong>。
+而 sklearn 算出來的 $\|w\|$ 是 97.9，是手刻版的五倍。
+兩邊準確率都是 1.0000。<strong>誰對？</strong>
+</p>
+</div>
+</div>
+
+<div class="step" data-n="4">
+<h3>證明它真的線性可分</h3>
+<p>
+「$\|w\|$ 一直變大」只是個徵兆，不是證明。要真的確認，解一個線性可行性問題：
+令 $t_i=2y_i-1\in\{-1,+1\}$，找 $v$ 使得
+</p>
+<div class="box math">
+<div class="bt">可行性問題</div>
+$$t_i\,(\mathbf{x}_i^\top v)\;\ge\;1\qquad\text{對所有 }i$$
+<p style="margin-bottom:0">如果這組不等式有解，就代表存在一個<strong>嚴格</strong>分隔超平面。</p>
+</div>
+<pre class="cmd"><code>請用 scipy.optimize.linprog 解這個線性可行性問題：
+找 v 使得對所有 i 都有 t_i * (x_i · v) >= 1，其中 t_i = 2*y_i - 1。
+
+如果有解，印出幾何間隔 margin / ||v||。
+然後對找到的 v，計算 c = 1, 5, 20, 100, 500 時的 L(c*v)。</code></pre>
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">可分性證明</span></div>
+  <div class="term-body"><div class="o">可行解存在  ->  PASS</div>
+<div class="o">幾何間隔 = margin / ||v|| = 1.174682e-02  ->  PASS</div>
+<div class="sp"></div>
+<div class="o">      c =    1   L(cv) = 0.1022643878</div>
+<div class="o">      c =    5   L(cv) = 0.0011832838</div>
+<div class="o">      c =   20   L(cv) = 0.0000000003</div>
+<div class="o">      c =  100   L(cv) = 0.0000000000</div>
+<div class="o">      c =  500   L(cv) = 0.0000000000</div>
+</div>
+</div>
+<p>
+這就是完整的論證：存在嚴格分隔向量 $v$，沿著它放大 $c$，損失
+$L(cv)=\frac1n\sum_i\log\bigl(1+e^{-c\,t_i\mathbf{x}_i^\top v}\bigr)\to 0$，
+而任何有限的 $w$ 都給出 $L(w)>0$。
+</p>
+<div class="box math">
+<div class="bt">結論</div>
+<p style="margin-bottom:0">
+對線性可分的資料，<strong>無正則化 logistic 迴歸的最大概似估計不存在有限解</strong>。
+所以「手刻係數 vs sklearn 係數」根本沒有標準答案可以比——兩邊都只是在往無窮遠的路上停在不同位置。
+</p>
+</div>
+<div class="box warn">
+<div class="bt">一個常被講錯的地方</div>
+<p style="margin-bottom:0">
+「把 $w$ 放大損失一定更小」這句話<strong>只在 $w$ 已經分對全部樣本時才成立</strong>。
+如果還有分錯的點，放大只會讓那些點的損失爆掉。
+另外，這個結論只適用於<strong>這 357 筆樣本</strong>，不代表所有手寫的 3 和 8 都線性可分。
+</p>
+</div>
+</div>
+
+<div class="step" data-n="5">
+<h3>那準確率都 1.0，是不是代表兩邊一樣？</h3>
+<pre class="cmd"><code>請比較手刻與 sklearn 的：
+1. 預測標籤是否完全一致
+2. 預測機率的最大差
+3. 兩個權重向量的夾角餘弦</code></pre>
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">決策邊界比對</span></div>
+  <div class="term-body"><div class="o">預測標籤完全一致？　PASS</div>
+<div class="o">預測機率最大差　　= 0.0341　　&lt;- 標籤一樣，機率差很多</div>
+<div class="o">權重向量 cos　　　= 0.994942　&lt;- 方向相近但不相同</div>
+</div>
+</div>
+<p>
+所以「兩邊準確率都是 1.0」<strong>不代表決策邊界相同</strong>。
+不同的超平面可以把同一批訓練資料分對，但對新資料的機率預測會不一樣。
+準確率相同只能算是「表現檢查」，不能當作實作正確的證明。
+</p>
+</div>
+
+<div class="step" data-n="6">
+<h3>正則化把問題變回有解</h3>
+<pre class="cmd"><code>加上 L2 正則化（sklearn 用 l1_ratio=0, C=1.0）再跑一次，
+比較 ||w|| 跟準確率。</code></pre>
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">加上 L2</span></div>
+  <div class="term-body"><div class="o">無正則化　||w|| = 97.8955　準確率 = 1.0000</div>
+<div class="o">L2 (C=1.0) ||w|| =  6.0144　準確率 = 1.0000</div>
+</div>
+</div>
+<p>
+$\|w\|$ 從 97.9 掉到 6.0，準確率完全沒變。
+目標函數多了 $\frac{1}{2C}\|w\|^2$ 這一項之後變成嚴格凸且強制的（coercive），
+<strong>唯一最小值存在</strong>。這就是正則化除了「防過擬合」之外，更基本的一個理由。
+</p>
+</div>
+</section>
+
+<section>
+<h2>最後：把它變成一份筆記</h2>
+<p>
+到這裡你已經推導了兩個公式、做了三種驗證、發現了一個反直覺的結論。
+這些東西如果只留在終端機的捲動紀錄裡，下週就沒了。
+</p>
+<pre class="cmd"><code>請把今天這一輪的推導與發現整理成 notes/logistic.md，內容包含：
+
+1. 從負對數概似到 L(w) 的完整推導（用 $...$ 與 $$...$$ 寫數學式）
+2. 梯度的推導
+3. 有限差分梯度檢查：原理、誤差分解 E(h) ≈ A h² + B u/h、為什麼兩頭都會 FAIL
+4. 線性可分導致 MLE 不存在的完整論證（含那個「只在已分對時成立」的但書）
+5. 為什麼準確率相同不代表決策邊界相同（附上我們實測的機率差 0.0341）
+6. 正則化怎麼讓問題重新有解
+
+寫給三個月後的我看，那時我已經忘記細節了。</code></pre>
+
+<div class="box tip">
+<div class="bt">為什麼要寫成檔案，而不是在對話裡問</div>
+<p style="margin-bottom:0">
+因為檔案可以進 git。下次你叫 agent 補充或修改這份筆記，
+<code>git diff</code> 會告訴你它<strong>到底改了哪幾行</strong>——
+你不必重讀整份文件去找差異，也不會不知不覺讓它把你原本寫對的東西改掉。
+筆記因此變成會累積的資產，而不是散落在各個對話視窗裡的碎片。
+詳見<a href="git-safety.html">第 07 章</a>。
+</p>
+</div>
+
+<pre class="cmd"><code>git add notes/logistic.md && git commit -m "Lab 3: logistic 推導與驗證筆記"</code></pre>
+</section>
+
+<section>
+<h2>檢查清單</h2>
+<ul class="ckl">
+<li><input type="checkbox" id="l3a"><label for="l3a">我有讓 agent <strong>先推導再寫程式</strong>，而且我看過那份推導</label></li>
+<li><input type="checkbox" id="l3b"><label for="l3b">梯度檢查掃過多個步長，我看到兩頭都會 FAIL 的 U 型曲線</label></li>
+<li><input type="checkbox" id="l3c"><label for="l3c">我能解釋截斷誤差與捨入誤差為什麼是相反方向</label></li>
+<li><input type="checkbox" id="l3d"><label for="l3d">我用 linprog 實際證明了資料線性可分，而不是只看 $\|w\|$ 變大</label></li>
+<li><input type="checkbox" id="l3e"><label for="l3e">我知道「準確率都 1.0」不代表決策邊界相同</label></li>
+<li><input type="checkbox" id="l3f"><label for="l3f"><code>notes/logistic.md</code> 存在，而且已經 commit 進 git</label></li>
+</ul>
+</section>
+
+<section>
+<h2>如果還有時間</h2>
+<ul>
+<li>把梯度檢查的表格畫成 log-log 圖（$h$ 對最大誤差），你會看到一條漂亮的 V 型——左半段斜率 $-1$（捨入），右半段斜率 $+2$（截斷）。叫 agent 順便驗證這兩個斜率。</li>
+<li>換成 3 vs 5（比較難分的一對），重跑可分性檢查。如果 linprog 找不到可行解，那無正則化的 MLE 就存在有限解了——這時手刻與 sklearn 的係數才真的該收斂到同一組。</li>
+<li>掃過 $C$ 從 $10^{-3}$ 到 $10^{3}$，畫 $\|w\|$ 與訓練／測試準確率的曲線，看正則化路徑長什麼樣子。</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="lab2-pca.html"><div class="d">上一章</div><div class="t2">← 03 · Lab 2 · 降維</div></a>
+  <a href="local-models.html" class="next"><div class="d">下一章</div><div class="t2">05 · 本地模型 →</div></a>
+</div>
+
+</div>

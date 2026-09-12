@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab 3 · 分類與筆記｜OpenCode × AI-Math 工作坊</title>
+<meta name="description" content="有限差分梯度檢查抓出寫錯的公式，撞上線性可分導致 MLE 不存在的陷阱，最後讓 agent 把推導整理成可版控的 LaTeX 筆記。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* =========================================================================
+   OpenCode × AI-Math 工作坊　設計系統
+   調色盤沿用 selfstudy 系列（暖紙色 / 靛藍 / 赤陶 / 松綠）
+   排版走編輯設計：大字級對比、慷慨留白、細線分隔、克制用色
+   ========================================================================= */
+:root{
+  --paper:#f6f2e9;
+  --paper-2:#fffdf8;
+  --ink:#1b1b2b;
+  --ink-2:#4a4a5e;
+  --ink-3:#7d7a72;
+  --rule:#ded6c6;
+  --rule-2:#ece5d6;
+
+  --live:#b8503c;   /* 現場 */
+  --link:#2a3c78;   /* 連結・標題 */
+  --after:#1a6247;  /* 課後・通過 */
+  --warn:#96660c;   /* 注意 */
+
+  --term-bg:#191922;
+  --term-bar:#23232f;
+  --term-fg:#d8d5cc;
+  --term-dim:#807d8e;
+  --term-user:#e3c273;
+  --term-tool:#77aecb;
+  --term-bash:#8ec392;
+  --term-chat:#a99fd0;
+  --term-err:#dd8877;
+
+  --r-sm:6px; --r-md:10px; --r-lg:16px;
+  --sh-1:0 1px 2px rgba(27,27,43,.04);
+  --sh-2:0 4px 16px rgba(27,27,43,.07);
+  --sh-3:0 14px 40px rgba(27,27,43,.13);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{
+  font-family:'Noto Sans TC',system-ui,sans-serif;
+  background-color:var(--paper);
+  /* 紙張紋理：兩層極淡的徑向漸層，不使用圖檔 */
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(184,80,60,.028), transparent 42%),
+    radial-gradient(circle at 82% 78%, rgba(42,60,120,.030), transparent 46%);
+  background-attachment:fixed;
+  color:var(--ink);
+  font-size:17px;
+  line-height:1.92;
+  letter-spacing:.01em;
+  text-wrap:pretty;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;height:auto;}
+::selection{background:rgba(227,194,115,.42);}
+
+/* ---------------- 導覽列 ---------------- */
+.topnav{
+  position:sticky;top:0;z-index:60;
+  background:rgba(246,242,233,.88);
+  backdrop-filter:saturate(1.5) blur(12px);
+  border-bottom:1px solid var(--rule-2);
+}
+.topnav .inner{
+  max-width:1140px;margin:0 auto;padding:.6rem 2rem;
+  display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;
+}
+.topnav .brand{
+  font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:700;
+  letter-spacing:.08em;color:var(--ink);text-decoration:none;white-space:nowrap;
+}
+.topnav .brand i{font-style:normal;color:var(--live);margin:0 .15em;}
+.topnav nav{display:flex;gap:.05rem;flex-wrap:wrap;margin-left:auto;}
+.topnav nav a{
+  font-size:.78rem;color:var(--ink-3);text-decoration:none;
+  padding:.2rem .6rem;border-radius:var(--r-sm);white-space:nowrap;
+  transition:color .16s var(--ease),background .16s var(--ease);
+}
+.topnav nav a:hover{color:var(--ink);background:rgba(255,253,248,.9);}
+.topnav nav a[aria-current]{color:var(--live);font-weight:700;}
+
+/* ---------------- 版面骨架 ---------------- */
+.container{max-width:1140px;margin:0 auto;padding:4.5rem 2rem;}
+.container.narrow{max-width:780px;}
+section{margin-bottom:4.5rem;}
+section:last-child{margin-bottom:0;}
+
+/* ---------------- 字級階層 ---------------- */
+h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.1rem,5.2vw,3.4rem);
+  line-height:1.28;letter-spacing:-.015em;margin-bottom:1rem;
+}
+h2{
+  font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:clamp(1.45rem,2.6vw,1.85rem);
+  line-height:1.45;letter-spacing:-.01em;
+  margin:4rem 0 1.2rem;padding-top:1.2rem;
+  border-top:1px solid var(--rule);
+  position:relative;
+}
+h2::before{
+  content:"";position:absolute;top:-1px;left:0;width:56px;height:2px;background:var(--live);
+}
+h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.16rem;
+  line-height:1.6;margin:2.4rem 0 .7rem;color:var(--link);
+}
+h4{font-size:.98rem;font-weight:700;margin:1.6rem 0 .5rem;color:var(--ink-2);}
+p{margin-bottom:1.15rem;}
+.lead{font-size:1.09rem;line-height:1.95;color:var(--ink-2);}
+ul,ol{margin:0 0 1.2rem 1.5rem;}
+li{margin-bottom:.45rem;}
+li::marker{color:var(--ink-3);}
+a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:.2em;}
+a:hover{color:var(--live);}
+hr{border:0;border-top:1px solid var(--rule);margin:3rem 0;}
+strong{font-weight:700;color:var(--ink);}
+em{font-style:normal;background:linear-gradient(transparent 62%,rgba(227,194,115,.5) 0);}
+code{
+  font-family:'JetBrains Mono',monospace;font-size:.85em;
+  background:rgba(222,214,198,.42);padding:.12em .4em;border-radius:4px;
+  letter-spacing:0;
+  /* 一長串連續的行內 code 會撐破手機版，允許在任何位置斷行 */
+  overflow-wrap:anywhere;word-break:break-word;
+}
+p,li,td,th,h1,h2,h3,h4,dd,dt{overflow-wrap:break-word;}
+
+/* ---------------- Hero ---------------- */
+.hero{
+  background:
+    radial-gradient(ellipse 120% 80% at 78% 8%, rgba(227,194,115,.10), transparent 58%),
+    linear-gradient(152deg,#262636 0%,#16161f 62%,#101018 100%);
+  color:#f4f0e7;padding:6rem 2rem 5rem;position:relative;overflow:hidden;
+}
+.hero .inner{max-width:1140px;margin:0 auto;position:relative;z-index:2;}
+.hero .kicker{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--term-user);
+  margin-bottom:1.3rem;display:flex;align-items:center;gap:.8rem;
+}
+.hero .kicker::after{content:"";flex:1;max-width:180px;height:1px;background:rgba(227,194,115,.3);}
+.hero h1{color:#fff;max-width:18em;margin-bottom:1.2rem;}
+.hero h1 i{font-style:normal;color:var(--term-user);}
+.hero .sub{
+  font-size:1.06rem;line-height:1.9;color:rgba(255,255,255,.74);
+  max-width:38em;margin-bottom:2.6rem;
+}
+.hero .meta{
+  display:flex;gap:3.2rem;flex-wrap:wrap;
+  padding-top:1.6rem;border-top:1px solid rgba(255,255,255,.13);
+}
+.hero .meta div{min-width:0;}
+.hero .meta b{
+  display:block;font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:1.75rem;line-height:1.2;color:#fff;margin-bottom:.25rem;
+}
+.hero .meta span{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(255,255,255,.46);
+}
+.hero-glyph{
+  position:absolute;right:3.5rem;bottom:2.2rem;
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:clamp(5rem,13vw,11rem);line-height:.85;letter-spacing:-.04em;
+  color:transparent;
+  background:linear-gradient(135deg,rgba(227,194,115,.16),rgba(255,255,255,.03) 62%,transparent);
+  -webkit-background-clip:text;background-clip:text;
+  pointer-events:none;user-select:none;white-space:nowrap;
+}
+.hero-glyph::after{
+  content:"";position:absolute;left:.06em;bottom:.14em;width:.52em;height:.075em;
+  background:rgba(227,194,115,.22);animation:blink 1.45s steps(1) infinite;
+}
+@keyframes blink{0%,54%{opacity:1}55%,100%{opacity:0}}
+@media (max-width:900px){.hero-glyph{display:none;}}
+
+/* 章節頁的頁首（比 hero 輕） */
+.pagehead{padding:3.6rem 0 0;}
+.pagehead .kicker{
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:.9rem;
+  display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;
+}
+.pagehead h1{max-width:16em;}
+.pagehead .lead{max-width:34em;margin-top:.6rem;}
+
+/* ---------------- 徽章 ---------------- */
+.badge{
+  display:inline-block;font-family:'JetBrains Mono',monospace;
+  font-size:.64rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:.16rem .62rem;border-radius:999px;border:1px solid currentColor;
+  vertical-align:.16em;white-space:nowrap;line-height:1.6;
+}
+.badge.live{color:var(--live);}
+.badge.after{color:var(--after);}
+.badge.prep{color:var(--warn);}
+
+/* ---------------- 章節卡 ---------------- */
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:1.15rem;}
+.ch-card{
+  display:flex;flex-direction:column;position:relative;
+  background:var(--paper-2);border:1px solid var(--rule-2);border-radius:var(--r-lg);
+  padding:1.5rem 1.55rem 1.25rem;text-decoration:none;color:var(--ink);
+  box-shadow:var(--sh-1);
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),border-color .22s var(--ease);
+}
+.ch-card:hover{transform:translateY(-4px);border-color:var(--rule);box-shadow:var(--sh-3);}
+.ch-card:hover .arr{transform:translateX(3px);opacity:1;}
+.ch-card .num{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+  letter-spacing:.18em;color:var(--ink-3);
+}
+.ch-card h3{font-size:1.2rem;margin:.3rem 0 .5rem;color:var(--ink);}
+.ch-card p{font-size:.875rem;line-height:1.78;color:var(--ink-2);flex:1;margin-bottom:1rem;}
+.ch-card .foot{
+  display:flex;justify-content:space-between;align-items:center;gap:.6rem;
+  padding-top:.7rem;border-top:1px solid var(--rule-2);
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ink-3);
+  letter-spacing:.06em;
+}
+.ch-card .arr{opacity:.45;transition:transform .22s var(--ease),opacity .22s var(--ease);}
+
+/* ---------------- 終端機（本站主角） ---------------- */
+.term{
+  background:var(--term-bg);border-radius:var(--r-md);overflow:hidden;
+  margin:1.7rem 0;box-shadow:var(--sh-3);
+  font-family:'JetBrains Mono',monospace;
+}
+.term-bar{
+  background:var(--term-bar);padding:.55rem .95rem;
+  display:flex;align-items:center;gap:.42rem;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.term-bar .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.term-bar .dot:nth-of-type(1){background:#d9614f;}
+.term-bar .dot:nth-of-type(2){background:#d8a747;}
+.term-bar .dot:nth-of-type(3){background:#66ab68;}
+.term-bar .label{
+  margin-left:.6rem;font-size:.68rem;letter-spacing:.1em;color:var(--term-dim);
+}
+.term-body{
+  padding:1.1rem 1.2rem;font-size:.815rem;line-height:1.85;color:var(--term-fg);
+  overflow-x:auto;white-space:pre-wrap;word-break:break-word;letter-spacing:0;
+}
+.term-body > div{padding:.02rem 0;}
+.term-body .u{color:var(--term-user);}
+.term-body .u::before{content:"> ";color:var(--term-dim);}
+.term-body .t::before{content:"→ ";color:var(--term-dim);}
+.term-body .t{color:var(--term-tool);}
+.term-body .w::before{content:"← ";color:var(--term-dim);}
+.term-body .w{color:var(--term-tool);}
+.term-body .b::before{content:"$ ";color:var(--term-dim);}
+.term-body .b{color:var(--term-bash);}
+.term-body .o{color:var(--term-dim);}
+.term-body .e{color:var(--term-err);}
+.term-body .c{color:var(--term-chat);}
+.term-body .sp{height:.55rem;}
+.term details{margin:.2rem 0;}
+.term summary{
+  color:var(--term-dim);cursor:pointer;font-size:.75rem;list-style:none;
+  user-select:none;letter-spacing:.04em;transition:color .16s var(--ease);
+}
+.term summary::-webkit-details-marker{display:none;}
+.term summary::before{content:"▸  ";}
+.term details[open] summary::before{content:"▾  ";}
+.term summary:hover{color:var(--term-fg);}
+.term details[open] > summary{margin-bottom:.35rem;}
+
+/* ---------------- 程式碼區塊 ---------------- */
+pre{
+  background:var(--term-bg);color:var(--term-fg);border-radius:var(--r-md);
+  padding:1.05rem 1.25rem;overflow-x:auto;margin:1.35rem 0;
+  font-family:'JetBrains Mono',monospace;font-size:.815rem;line-height:1.8;
+  letter-spacing:0;box-shadow:var(--sh-2);
+}
+pre code{background:none;padding:0;font-size:inherit;color:inherit;}
+pre.cmd{position:relative;padding-right:4.2rem;}
+pre .copy{
+  position:absolute;top:.6rem;right:.6rem;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
+  color:var(--term-dim);font-family:inherit;font-size:.66rem;letter-spacing:.06em;
+  padding:.2rem .55rem;border-radius:var(--r-sm);cursor:pointer;
+  transition:background .16s var(--ease),color .16s var(--ease);
+}
+pre .copy:hover{background:rgba(255,255,255,.15);color:#fff;}
+
+/* ---------------- 提示盒 ---------------- */
+.box{
+  border:1px solid var(--rule-2);border-left-width:3px;border-radius:var(--r-md);
+  padding:1.15rem 1.4rem;margin:1.6rem 0;background:var(--paper-2);box-shadow:var(--sh-1);
+}
+.box .bt{
+  font-family:'JetBrains Mono',monospace;font-size:.67rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;margin-bottom:.55rem;
+}
+.box > :last-child{margin-bottom:0;}
+.box.tip{border-left-color:var(--after);}    .box.tip .bt{color:var(--after);}
+.box.warn{border-left-color:var(--warn);background:#fdf9ef;} .box.warn .bt{color:var(--warn);}
+.box.danger{border-left-color:var(--live);background:#fdf3f0;} .box.danger .bt{color:var(--live);}
+.box.math{border-left-color:var(--link);}    .box.math .bt{color:var(--link);}
+
+/* ---------------- 數學式 ---------------- */
+mjx-container[display]{
+  overflow-x:auto;overflow-y:hidden;max-width:100%;
+  padding:.35rem 0 .55rem;
+}
+mjx-container{max-width:100%;}
+
+/* ---------------- 表格 ---------------- */
+.tw{overflow-x:auto;margin:1.6rem 0;border-radius:var(--r-md);box-shadow:var(--sh-1);}
+table{width:100%;border-collapse:collapse;font-size:.87rem;background:var(--paper-2);}
+th{
+  background:rgba(222,214,198,.4);padding:.62rem .9rem;text-align:left;
+  font-weight:700;font-size:.76rem;letter-spacing:.06em;color:var(--ink-2);
+  white-space:nowrap;border-bottom:1px solid var(--rule);
+}
+td{padding:.58rem .9rem;border-bottom:1px solid var(--rule-2);vertical-align:top;line-height:1.72;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(222,214,198,.16);}
+td code{white-space:nowrap;}
+.ok{color:var(--after);font-weight:700;}
+.no{color:var(--live);font-weight:700;}
+
+/* ---------------- 檢查清單 ---------------- */
+.ckl{list-style:none;margin:1.5rem 0;padding:0;}
+.ckl li{
+  background:var(--paper-2);border:1px solid var(--rule-2);border-radius:var(--r-md);
+  margin-bottom:.55rem;padding:.85rem 1.1rem;display:flex;gap:.85rem;align-items:flex-start;
+  box-shadow:var(--sh-1);transition:opacity .2s var(--ease),background .2s var(--ease);
+}
+.ckl input{
+  margin-top:.44rem;width:1.05rem;height:1.05rem;accent-color:var(--after);
+  cursor:pointer;flex-shrink:0;
+}
+.ckl label{cursor:pointer;font-size:.91rem;line-height:1.78;}
+.ckl li:has(input:checked){opacity:.46;background:rgba(222,214,198,.22);}
+.ckl li:has(input:checked) label{text-decoration:line-through;}
+
+/* ---------------- 編號步驟 ---------------- */
+.step{
+  position:relative;padding-left:3.2rem;margin-bottom:2.6rem;
+}
+.step::before{
+  content:attr(data-n);position:absolute;left:0;top:.05rem;
+  width:2.1rem;height:2.1rem;border-radius:50%;
+  background:var(--paper-2);border:1px solid var(--rule);color:var(--link);
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-1);
+}
+.step > h3:first-child{margin-top:.1rem;}
+
+/* ---------------- 時程表 ---------------- */
+.sched{width:100%;border-collapse:collapse;font-size:.9rem;}
+.sched td{padding:.7rem .3rem;border-bottom:1px solid var(--rule-2);vertical-align:baseline;}
+.sched tr:last-child td{border-bottom:none;}
+.sched .t{
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--ink-3);
+  white-space:nowrap;width:5.5rem;letter-spacing:.04em;
+}
+.sched .n{font-weight:700;}
+.sched .d{color:var(--ink-2);font-size:.86rem;}
+
+/* ---------------- 頁尾導覽 ---------------- */
+.pager{display:flex;gap:1rem;margin:4.5rem 0 0;flex-wrap:wrap;}
+.pager a{
+  flex:1;min-width:230px;background:var(--paper-2);border:1px solid var(--rule-2);
+  border-radius:var(--r-md);padding:1rem 1.25rem;text-decoration:none;color:var(--ink);
+  box-shadow:var(--sh-1);transition:border-color .2s var(--ease),box-shadow .2s var(--ease);
+}
+.pager a:hover{border-color:var(--rule);box-shadow:var(--sh-2);}
+.pager .d{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.pager .t2{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--link);font-size:1.02rem;}
+.pager .next{text-align:right;}
+
+footer{
+  border-top:1px solid var(--rule);margin-top:5rem;
+  padding:2.6rem 2rem 3.2rem;text-align:center;font-size:.82rem;color:var(--ink-3);
+}
+footer .stamp{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.06em;
+  margin-top:.6rem;color:var(--rule);color:#a49e92;
+}
+
+@media (max-width:720px){
+  body{font-size:16px;line-height:1.88;}
+  .container{padding:2.8rem 1.25rem;}
+  .hero{padding:3.6rem 1.25rem 3rem;}
+  .hero .meta{gap:1.8rem;}
+  .hero .meta b{font-size:1.4rem;}
+  .term-body,pre{font-size:.755rem;}
+  .topnav .inner{padding:.5rem 1.25rem;}
+  .topnav nav{
+    width:100%;margin-left:0;gap:0;flex-wrap:nowrap;
+    overflow-x:auto;scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);
+            mask-image:linear-gradient(90deg,#000 88%,transparent);
+  }
+  .topnav nav::-webkit-scrollbar{display:none;}
+  .topnav nav a{padding:.2rem .55rem;}
+  .step{padding-left:2.6rem;}
+  h2{margin-top:3rem;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+  html{scroll-behavior:auto;}
+}
+@media print{
+  .topnav,.pager,pre .copy{display:none;}
+  body{background:#fff;}
+}
+</style>
+</head>
+<body>
+
+<div class="topnav"><div class="inner">
+<a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
+<nav>
+<a href="prep.html">課前準備</a>
+<a href="first-run.html">第一次對話</a>
+<a href="lab1-cluster.html">Lab 1</a>
+<a href="lab2-pca.html">Lab 2</a>
+<a href="lab3-notes.html">Lab 3</a>
+<a href="local-models.html">本地模型</a>
+<a href="agents-md.html">AGENTS.md</a>
+<a href="git-safety.html">git</a>
+<a href="mcp-skills.html">MCP</a>
+<a href="cheatsheet.html">速查</a>
+</nav>
+</div></div>
+
+<div class="container narrow">
+
+<div class="pagehead">
+  <div class="kicker"><span>Lab 3</span><span>·</span><span class="badge live">現場 40 分</span><span>·</span><span>agent 當學習夥伴</span></div>
+  <h1>分類與筆記：讓 agent 幫你學，而不是幫你交差</h1>
+  <p class="lead">
+    前兩關你在檢查 agent。這一關反過來——讓它當你的推導夥伴：
+    寫程式、驗證公式、然後把整個推導過程整理成一份你之後真的會回去看的筆記。
+  </p>
+</div>
+
+<section>
+<h2>任務</h2>
+<p>
+從 digits 裡挑出數字 <strong>3</strong> 和 <strong>8</strong>（357 筆），手刻一個 logistic 迴歸做二元分類。
+</p>
+<div class="box math">
+<div class="bt">你要驗證的公式</div>
+<p>令 $z=X_bw$、$\sigma(z)=\dfrac{1}{1+e^{-z}}$，平均對數損失與其梯度為</p>
+$$L(w)=\frac1n\sum_i\Bigl[\log\bigl(1+e^{z_i}\bigr)-y_iz_i\Bigr],
+\qquad \nabla_wL=\frac1nX_b^\top\bigl[\sigma(X_bw)-y\bigr]$$
+<p style="margin-bottom:0">agent 會很快寫出來。問題是：<strong>你怎麼知道它沒寫錯？</strong></p>
+</div>
+</section>
+
+<section>
+<h2>動手</h2>
+
+<div class="step" data-n="1">
+<h3>先要求推導，再要求程式</h3>
+<pre class="cmd"><code>我要手刻一個二元 logistic 迴歸，資料是 digits 裡的 3 和 8。
+
+第一步請先不要寫程式。用文字跟數學式跟我推導兩件事：
+1. 從負對數概似出發，推到 L(w) = (1/n) Σ [log(1+e^z) - y z]
+2. 從 L(w) 推到 ∇L = (1/n) X^T (σ(Xw) - y)
+
+推導完再寫程式。</code></pre>
+<p>
+先推導後寫程式，不只是為了教學。<strong>你需要那份推導來當獨立對照組</strong>——
+待會的數值檢查只能證明「程式內部一致」，不能證明「公式本身正確」。
+</p>
+</div>
+
+<div class="step" data-n="2">
+<h3>有限差分梯度檢查</h3>
+<p>這是數值方法裡最乾淨的自我驗證：用損失函數本身去逼近梯度，跟解析梯度比。</p>
+<div class="box math">
+<div class="bt">中央差分</div>
+$$\frac{\partial L}{\partial w_i}\;\approx\;\frac{L(w+h\mathbf{e}_i)-L(w-h\mathbf{e}_i)}{2h}$$
+</div>
+<pre class="cmd"><code>請加一段有限差分梯度檢查：
+
+- 用中央差分，檢查**全部** 65 個維度（不要只抽樣幾個）
+- 步長 h 掃過 1e-2 到 1e-9，每個 h 印出最大絕對誤差與最大相對誤差
+- 做成表格</code></pre>
+
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">opencode　build · big-pickle</span></div>
+  <div class="term-body"><div class="b">uv run python lab3_logistic.py</div>
+<div class="sp"></div>
+<div class="o">    步長 h      最大絕對誤差      最大相對誤差   判定</div>
+<div class="o">     1e-02       7.351e-08       6.888e-06   FAIL</div>
+<div class="o">     1e-03       7.351e-10       6.889e-08   PASS</div>
+<div class="o">     1e-04       7.171e-12       9.332e-08   PASS</div>
+<div class="o">     1e-05       1.030e-11       1.858e-07   PASS</div>
+<div class="o">     1e-06       6.535e-11       5.733e-06   PASS</div>
+<div class="o">     1e-07       7.568e-10       7.971e-05   PASS</div>
+<div class="o">     1e-09       8.026e-08       7.274e-04   FAIL</div>
+</div>
+</div>
+
+<h3>為什麼兩頭都會 FAIL</h3>
+<p>中央差分的總誤差有兩個來源，方向相反：</p>
+<div class="box math">
+<div class="bt">誤差分解</div>
+$$E(h)\;\approx\;\underbrace{Ah^2}_{\text{截斷誤差}}\;+\;\underbrace{\frac{Bu}{h}}_{\text{捨入誤差}}$$
+<p style="margin-bottom:0">
+$u$ 是浮點精度（float64 約 $2.2\times10^{-16}$）。
+$h$ 太大時泰勒展開的高階項來不及被忽略；
+$h$ 太小時 $L(w+h)$ 與 $L(w-h)$ 幾乎相等，相減會損失有效位數。
+令導數為零可得最佳量級 $h\sim u^{1/3}\approx 6\times10^{-6}$——
+實測最佳落在 $10^{-4}$ 附近，同一個量級。
+</p>
+</div>
+
+<div class="box warn">
+<div class="bt">FAIL 不等於公式錯</div>
+<p style="margin-bottom:0">
+上表兩頭的 FAIL，程式完全沒問題。
+所以看到梯度檢查 FAIL 時，正確的說法是<strong>「有不一致，要查原因」</strong>——
+可能是公式錯、步長不當、捨入誤差，或該維梯度本身接近 0。
+反過來說，PASS 也只提供<strong>局部數值證據</strong>：如果 <code>loss()</code> 和 <code>grad()</code>
+一起照著同一個錯誤的目標函數寫，這關照樣全過。這就是為什麼第 1 步要先獨立推導。
+</p>
+</div>
+</div>
+
+<div class="step" data-n="3">
+<h3>訓練，然後撞上一個陷阱</h3>
+<pre class="cmd"><code>現在用梯度下降訓練（lr=0.5，20000 次迭代），
+並在第 100、1000、5000、10000、20000 次時印出 ||w|| 與損失。
+
+訓練完跟 sklearn 的 LogisticRegression 比對。
+注意 sklearn 1.8 起 penalty 參數已棄用，無正則化要用 C=np.inf。</code></pre>
+
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">訓練過程</span></div>
+  <div class="term-body"><div class="o">      迭代        ||w||               損失</div>
+<div class="o">     100       4.1422       0.09344736</div>
+<div class="o">    1000       8.8816       0.02217583</div>
+<div class="o">    5000      13.8902       0.00625092</div>
+<div class="o">   10000      16.4297       0.00343643</div>
+<div class="o">   20000      19.1436       0.00184668</div>
+<div class="sp"></div>
+<div class="o">手刻 GD 準確率 = 1.0000　sklearn 準確率 = 1.0000</div>
+<div class="o">手刻 ||w|| = 19.1436　　sklearn ||w|| = 97.8955</div>
+</div>
+</div>
+
+<div class="box danger">
+<div class="bt">看出問題了嗎</div>
+<p style="margin-bottom:0">
+損失一直往 0 掉，但 <strong>$\|w\|$ 一直長，沒有要停的跡象</strong>。
+而 sklearn 算出來的 $\|w\|$ 是 97.9，是手刻版的五倍。
+兩邊準確率都是 1.0000。<strong>誰對？</strong>
+</p>
+</div>
+</div>
+
+<div class="step" data-n="4">
+<h3>證明它真的線性可分</h3>
+<p>
+「$\|w\|$ 一直變大」只是個徵兆，不是證明。要真的確認，解一個線性可行性問題：
+令 $t_i=2y_i-1\in\{-1,+1\}$，找 $v$ 使得
+</p>
+<div class="box math">
+<div class="bt">可行性問題</div>
+$$t_i\,(\mathbf{x}_i^\top v)\;\ge\;1\qquad\text{對所有 }i$$
+<p style="margin-bottom:0">如果這組不等式有解，就代表存在一個<strong>嚴格</strong>分隔超平面。</p>
+</div>
+<pre class="cmd"><code>請用 scipy.optimize.linprog 解這個線性可行性問題：
+找 v 使得對所有 i 都有 t_i * (x_i · v) >= 1，其中 t_i = 2*y_i - 1。
+
+如果有解，印出幾何間隔 margin / ||v||。
+然後對找到的 v，計算 c = 1, 5, 20, 100, 500 時的 L(c*v)。</code></pre>
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">可分性證明</span></div>
+  <div class="term-body"><div class="o">可行解存在  ->  PASS</div>
+<div class="o">幾何間隔 = margin / ||v|| = 1.174682e-02  ->  PASS</div>
+<div class="sp"></div>
+<div class="o">      c =    1   L(cv) = 0.1022643878</div>
+<div class="o">      c =    5   L(cv) = 0.0011832838</div>
+<div class="o">      c =   20   L(cv) = 0.0000000003</div>
+<div class="o">      c =  100   L(cv) = 0.0000000000</div>
+<div class="o">      c =  500   L(cv) = 0.0000000000</div>
+</div>
+</div>
+<p>
+這就是完整的論證：存在嚴格分隔向量 $v$，沿著它放大 $c$，損失
+$L(cv)=\frac1n\sum_i\log\bigl(1+e^{-c\,t_i\mathbf{x}_i^\top v}\bigr)\to 0$，
+而任何有限的 $w$ 都給出 $L(w)>0$。
+</p>
+<div class="box math">
+<div class="bt">結論</div>
+<p style="margin-bottom:0">
+對線性可分的資料，<strong>無正則化 logistic 迴歸的最大概似估計不存在有限解</strong>。
+所以「手刻係數 vs sklearn 係數」根本沒有標準答案可以比——兩邊都只是在往無窮遠的路上停在不同位置。
+</p>
+</div>
+<div class="box warn">
+<div class="bt">一個常被講錯的地方</div>
+<p style="margin-bottom:0">
+「把 $w$ 放大損失一定更小」這句話<strong>只在 $w$ 已經分對全部樣本時才成立</strong>。
+如果還有分錯的點，放大只會讓那些點的損失爆掉。
+另外，這個結論只適用於<strong>這 357 筆樣本</strong>，不代表所有手寫的 3 和 8 都線性可分。
+</p>
+</div>
+</div>
+
+<div class="step" data-n="5">
+<h3>那準確率都 1.0，是不是代表兩邊一樣？</h3>
+<pre class="cmd"><code>請比較手刻與 sklearn 的：
+1. 預測標籤是否完全一致
+2. 預測機率的最大差
+3. 兩個權重向量的夾角餘弦</code></pre>
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">決策邊界比對</span></div>
+  <div class="term-body"><div class="o">預測標籤完全一致？　PASS</div>
+<div class="o">預測機率最大差　　= 0.0341　　&lt;- 標籤一樣，機率差很多</div>
+<div class="o">權重向量 cos　　　= 0.994942　&lt;- 方向相近但不相同</div>
+</div>
+</div>
+<p>
+所以「兩邊準確率都是 1.0」<strong>不代表決策邊界相同</strong>。
+不同的超平面可以把同一批訓練資料分對，但對新資料的機率預測會不一樣。
+準確率相同只能算是「表現檢查」，不能當作實作正確的證明。
+</p>
+</div>
+
+<div class="step" data-n="6">
+<h3>正則化把問題變回有解</h3>
+<pre class="cmd"><code>加上 L2 正則化（sklearn 用 l1_ratio=0, C=1.0）再跑一次，
+比較 ||w|| 跟準確率。</code></pre>
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">加上 L2</span></div>
+  <div class="term-body"><div class="o">無正則化　||w|| = 97.8955　準確率 = 1.0000</div>
+<div class="o">L2 (C=1.0) ||w|| =  6.0144　準確率 = 1.0000</div>
+</div>
+</div>
+<p>
+$\|w\|$ 從 97.9 掉到 6.0，準確率完全沒變。
+目標函數多了 $\frac{1}{2C}\|w\|^2$ 這一項之後變成嚴格凸且強制的（coercive），
+<strong>唯一最小值存在</strong>。這就是正則化除了「防過擬合」之外，更基本的一個理由。
+</p>
+</div>
+</section>
+
+<section>
+<h2>最後：把它變成一份筆記</h2>
+<p>
+到這裡你已經推導了兩個公式、做了三種驗證、發現了一個反直覺的結論。
+這些東西如果只留在終端機的捲動紀錄裡，下週就沒了。
+</p>
+<pre class="cmd"><code>請把今天這一輪的推導與發現整理成 notes/logistic.md，內容包含：
+
+1. 從負對數概似到 L(w) 的完整推導（用 $...$ 與 $$...$$ 寫數學式）
+2. 梯度的推導
+3. 有限差分梯度檢查：原理、誤差分解 E(h) ≈ A h² + B u/h、為什麼兩頭都會 FAIL
+4. 線性可分導致 MLE 不存在的完整論證（含那個「只在已分對時成立」的但書）
+5. 為什麼準確率相同不代表決策邊界相同（附上我們實測的機率差 0.0341）
+6. 正則化怎麼讓問題重新有解
+
+寫給三個月後的我看，那時我已經忘記細節了。</code></pre>
+
+<div class="box tip">
+<div class="bt">為什麼要寫成檔案，而不是在對話裡問</div>
+<p style="margin-bottom:0">
+因為檔案可以進 git。下次你叫 agent 補充或修改這份筆記，
+<code>git diff</code> 會告訴你它<strong>到底改了哪幾行</strong>——
+你不必重讀整份文件去找差異，也不會不知不覺讓它把你原本寫對的東西改掉。
+筆記因此變成會累積的資產，而不是散落在各個對話視窗裡的碎片。
+詳見<a href="git-safety.html">第 07 章</a>。
+</p>
+</div>
+
+<pre class="cmd"><code>git add notes/logistic.md && git commit -m "Lab 3: logistic 推導與驗證筆記"</code></pre>
+</section>
+
+<section>
+<h2>檢查清單</h2>
+<ul class="ckl">
+<li><input type="checkbox" id="l3a"><label for="l3a">我有讓 agent <strong>先推導再寫程式</strong>，而且我看過那份推導</label></li>
+<li><input type="checkbox" id="l3b"><label for="l3b">梯度檢查掃過多個步長，我看到兩頭都會 FAIL 的 U 型曲線</label></li>
+<li><input type="checkbox" id="l3c"><label for="l3c">我能解釋截斷誤差與捨入誤差為什麼是相反方向</label></li>
+<li><input type="checkbox" id="l3d"><label for="l3d">我用 linprog 實際證明了資料線性可分，而不是只看 $\|w\|$ 變大</label></li>
+<li><input type="checkbox" id="l3e"><label for="l3e">我知道「準確率都 1.0」不代表決策邊界相同</label></li>
+<li><input type="checkbox" id="l3f"><label for="l3f"><code>notes/logistic.md</code> 存在，而且已經 commit 進 git</label></li>
+</ul>
+</section>
+
+<section>
+<h2>如果還有時間</h2>
+<ul>
+<li>把梯度檢查的表格畫成 log-log 圖（$h$ 對最大誤差），你會看到一條漂亮的 V 型——左半段斜率 $-1$（捨入），右半段斜率 $+2$（截斷）。叫 agent 順便驗證這兩個斜率。</li>
+<li>換成 3 vs 5（比較難分的一對），重跑可分性檢查。如果 linprog 找不到可行解，那無正則化的 MLE 就存在有限解了——這時手刻與 sklearn 的係數才真的該收斂到同一組。</li>
+<li>掃過 $C$ 從 $10^{-3}$ 到 $10^{3}$，畫 $\|w\|$ 與訓練／測試準確率的曲線，看正則化路徑長什麼樣子。</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="lab2-pca.html"><div class="d">上一章</div><div class="t2">← 03 · Lab 2 · 降維</div></a>
+  <a href="local-models.html" class="next"><div class="d">下一章</div><div class="t2">05 · 本地模型 →</div></a>
+</div>
+
+</div>
+
+<footer>
+<div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
+<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+</footer>
+
+<script>
+// 導覽列高亮目前頁面
+(function(){
+  var f=(location.pathname.split('/').pop()||'index.html');
+  document.querySelectorAll('.topnav nav a').forEach(function(a){
+    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+  });
+})();
+
+// 指令複製鈕
+document.querySelectorAll('pre.cmd').forEach(function(pre){
+  var b=document.createElement('button');
+  b.className='copy'; b.type='button'; b.textContent='複製';
+  b.addEventListener('click',function(){
+    var t=pre.querySelector('code');
+    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
+      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
+    },function(){ b.textContent='複製失敗'; });
+  });
+  pre.appendChild(b);
+});
+
+// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
+(function(){
+  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
+  var saved={};
+  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
+    var id=cb.id||('ck'+i); cb.id=id;
+    if(saved[id]) cb.checked=true;
+    cb.addEventListener('change',function(){
+      saved[id]=cb.checked;
+      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+    });
+  });
+})();
+</script>
+
+<script>
+// MathJax 3：啟用 $...$ 行內數學（預設不開）
+window.MathJax={
+  tex:{
+    inlineMath:[['$','$'],['\\(','\\)']],
+    displayMath:[['$$','$$'],['\\[','\\]']],
+    processEscapes:true
+  },
+  options:{
+    skipHtmlTags:['script','noscript','style','textarea','pre','code'],
+    ignoreHtmlClass:'term|tw'
+  },
+  chtml:{ scale:1.02 }
+};
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

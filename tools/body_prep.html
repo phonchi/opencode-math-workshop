@@ -1,0 +1,315 @@
+<!--TITLE:課前準備-->
+<!--DESC:工作坊前請務必完成：安裝 opencode 與 uv、建立 Python 環境、跑一次自測。實測建環境要下載 287 MB、花六分半鐘，現場做會來不及。-->
+
+<div class="container narrow">
+
+<div class="pagehead">
+  <div class="kicker"><span>00</span><span>·</span><span class="badge prep">請在工作坊前完成</span></div>
+  <h1>課前準備</h1>
+  <p class="lead">
+    全部照做大約 <strong>10 到 20 分鐘</strong>，主要時間花在等下載。
+    請務必在家裡或宿舍做完——要下載的東西約 <strong>287 MB</strong>，
+    全班三十人同時在教室做，網路會塞住。
+  </p>
+</div>
+
+<div class="box danger">
+<div class="bt">為什麼不能現場做</div>
+<p>
+建立 Python 環境要下載約 <strong>287 MB</strong>（Python 直譯器加上所有套件）。
+本教材實測過三次，耗時從 <strong>2 秒到 6 分 38 秒</strong>都出現過——
+差異完全取決於當下的網路狀況。
+</p>
+<p style="margin-bottom:0">
+換句話說：<strong>你沒辦法預測自己會遇到哪一種</strong>。
+而三十個人同時在同一個 WiFi 上抓 287 MB，幾乎保證會遇到慢的那一種。
+</p>
+</div>
+
+<section>
+<h2>你需要安裝兩個東西</h2>
+<div class="tw"><table>
+<tr><th>工具</th><th>作用</th><th>大小</th></tr>
+<tr><td><strong>opencode</strong></td><td>AI agent 本體，在終端機裡跑</td><td>約 100 MB</td></tr>
+<tr><td><strong>uv</strong></td><td>Python 環境管理，比 conda 快很多，而且不需要先裝 Python</td><td>約 40 MB</td></tr>
+</table></div>
+<div class="box tip">
+<div class="bt">好消息</div>
+<p style="margin-bottom:0">
+<strong>不需要註冊任何帳號、不需要 API key、不需要信用卡。</strong>
+工作坊用的模型 <code>opencode/big-pickle</code> 是內建免費的，裝完就能直接用。
+</p>
+</div>
+</section>
+
+<section>
+<h2>安裝</h2>
+
+<h3>Windows</h3>
+<p>開啟 <strong>PowerShell</strong>（開始選單搜尋「PowerShell」），貼上這兩行：</p>
+<pre class="cmd"><code>winget install SST.opencode --accept-source-agreements --accept-package-agreements
+winget install astral-sh.uv --accept-source-agreements --accept-package-agreements</code></pre>
+<div class="box warn">
+<div class="bt">兩個一定會遇到的坑</div>
+<p><strong>一、不加 <code>--accept-source-agreements</code> 會卡住。</strong>
+winget 第一次執行會跳出一個要你按 Y 的條款同意，但那個提示常常收不到鍵盤輸入，
+整個指令就停在那裡不動。上面的指令已經幫你跳過了。</p>
+<p style="margin-bottom:0"><strong>二、裝完要重開 PowerShell。</strong>
+新裝的程式不會出現在已經開著的視窗裡（PATH 沒有重新載入）。
+把視窗關掉重開，再往下走。</p>
+</div>
+
+<h3>macOS</h3>
+<pre class="cmd"><code>curl -fsSL https://opencode.ai/install | bash
+curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
+<p class="lead" style="font-size:.92rem;color:var(--ink-3)">
+（macOS 步驟依官方文件撰寫，本教材未在 Mac 上實測。若遇到問題請在工作坊開始前告訴助教。）
+</p>
+
+<h3>Linux / WSL</h3>
+<pre class="cmd"><code>curl -fsSL https://opencode.ai/install | bash
+curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
+<p>裝完後關掉終端機重開，或執行 <code>source ~/.bashrc</code>。</p>
+</section>
+
+<section>
+<h2>確認裝好了</h2>
+<pre class="cmd"><code>opencode --version
+uv --version</code></pre>
+<p>應該各自印出一個版本號。本教材實測的版本：</p>
+<div class="tw"><table>
+<tr><th></th><th>WSL (Ubuntu 24.04)</th><th>Windows 11</th></tr>
+<tr><td>opencode</td><td><code>1.18.30</code></td><td><code>1.18.30</code></td></tr>
+<tr><td>uv</td><td><code>0.12.x</code></td><td><code>0.12.13</code></td></tr>
+</table></div>
+<div class="box warn">
+<div class="bt">如果出現「找不到指令」</div>
+<p style="margin-bottom:0">
+九成是 PATH 沒重新載入。<strong>把終端機完全關掉、重新開一個</strong>再試。
+還是不行的話，Windows 請確認是用 PowerShell 而不是舊版的 cmd。
+</p>
+</div>
+</section>
+
+<section>
+<h2>建立工作坊專案</h2>
+
+<div class="step" data-n="1">
+<h3>建資料夾與檔案</h3>
+<p>找一個你記得住的位置（例如 <code>Documents</code>），建立資料夾：</p>
+<pre class="cmd"><code>mkdir ai-math-lab
+cd ai-math-lab
+mkdir notes figs</code></pre>
+</div>
+
+<div class="step" data-n="2">
+<h3>建立 <code>pyproject.toml</code></h3>
+<p>用任何文字編輯器（記事本也行）建立一個叫 <code>pyproject.toml</code> 的檔案，內容：</p>
+<pre class="cmd"><code>[project]
+name = "ai-math-lab"
+version = "0.1.0"
+requires-python = "&gt;=3.10"
+dependencies = [
+    "numpy&gt;=1.26",
+    "scipy&gt;=1.11",
+    "matplotlib&gt;=3.8",
+    "scikit-learn&gt;=1.4",
+    "networkx&gt;=3.2",
+]</code></pre>
+</div>
+
+<div class="step" data-n="3">
+<h3>建立 <code>opencode.json</code></h3>
+<p>同一個資料夾，建立 <code>opencode.json</code>：</p>
+<pre class="cmd"><code>{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode/big-pickle",
+  "permission": {
+    "bash": "ask",
+    "edit": "ask",
+    "webfetch": "ask"
+  },
+  "instructions": ["AGENTS.md"]
+}</code></pre>
+<div class="box tip">
+<div class="bt">為什麼放在專案裡而不是全域設定</div>
+<p style="margin-bottom:0">
+opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 → 專案設定，後者蓋掉前者的同名項目。
+把工作坊的設定放在專案資料夾裡，就不會影響你電腦上其他的 opencode 用途，
+換一個資料夾就換一套設定。
+</p>
+</div>
+</div>
+
+<div class="step" data-n="4">
+<h3>建立 <code>AGENTS.md</code></h3>
+<p>這是給 agent 看的專案規則。同一個資料夾，建立 <code>AGENTS.md</code>：</p>
+<pre class="cmd"><code># AI-Math 工作坊　專案規則
+
+## 語言
+一律使用台灣繁體中文回答。程式碼、變數名稱、套件名稱保留英文。
+
+## 執行環境
+本專案用 uv 管理環境。執行 Python 一律用：`uv run python &lt;檔案&gt;`
+不要用 `python`、`python3`、`pip install`。要加套件用 `uv add &lt;套件&gt;`。
+
+## 數學程式的規矩
+1. 可重現：用到隨機性的地方一律設 `random_state=0` 或 `np.random.seed(0)`。
+2. 先說數學，再寫程式：動手前先用兩三句話說明你要用的公式或步驟。
+3. 自己驗證：寫完數值方法必須附驗證程式碼，實際執行並印出比對結果。
+   不可以只說「應該正確」。
+4. 不要偷懶：如果我要求「手刻」某個方法，就不可以直接呼叫 sklearn 的
+   對應實作來充數。sklearn 只能當對照組。
+
+## 圖檔
+所有圖存到 `figs/`，用 `savefig()`，不要用 `plt.show()`（無視窗環境無效）。
+
+## 筆記
+數學筆記寫在 `notes/` 底下的 .md 檔，數學式用 $...$ 與 $$...$$。
+
+## 不要做的事
+- 不要 git commit 或 git push，除非我明講。
+- 不要刪除 `figs/` 或 `notes/` 裡既有的檔案。</code></pre>
+</div>
+
+<div class="step" data-n="5">
+<h3>建立 Python 環境（這步會等比較久）</h3>
+<pre class="cmd"><code>uv sync</code></pre>
+<p>
+第一次執行會下載 Python 直譯器與所有套件，共約 <strong>287 MB</strong>。
+實測耗時在 <strong>2 秒到 6 分半</strong>之間，取決於網路。
+之後在同一台機器上再跑就只要幾秒，因為東西都進快取了。
+</p>
+<p>如果超過一分鐘還在跑，去泡杯茶。看到類似這樣就對了：</p>
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">uv sync</span></div>
+  <div class="term-body"><div class="o"> + numpy==2.5.3</div>
+<div class="o"> + scipy==1.18.1</div>
+<div class="o"> + scikit-learn==1.9.1</div>
+<div class="o"> + matplotlib==3.11.2</div>
+<div class="o"> + networkx==3.6.1</div>
+<div class="o">（還有十幾個相依套件）</div>
+</div>
+</div>
+</div>
+</section>
+
+<section>
+<h2>綠燈自測</h2>
+<p>下面三個測試全部通過，你就準備好了。</p>
+
+<h3>測試一：Python 環境</h3>
+<pre class="cmd"><code>uv run python -c "import numpy, scipy, sklearn, matplotlib, networkx; print('環境 OK')"</code></pre>
+<p>應該印出 <code>環境 OK</code>。</p>
+
+<h3>測試二：agent 會回話</h3>
+<pre class="cmd"><code>opencode run "用一句話說明什麼是主成分分析"</code></pre>
+<p>應該在幾秒內得到一段繁體中文的回答。</p>
+
+<h3>測試三：agent 真的會動手（最重要的一關）</h3>
+<pre class="cmd"><code>opencode run --auto "建立一個 hello.py，內容是印出 1 到 10 的平方，然後執行它"</code></pre>
+
+<div class="box warn">
+<div class="bt">那個 --auto 是什麼，為什麼只有這裡要加</div>
+<p>
+你剛才在 <code>opencode.json</code> 裡把 <code>edit</code> 和 <code>bash</code> 設成 <code>ask</code>，
+意思是「agent 要改檔案或跑指令之前，先問過我」。
+</p>
+<p>
+問題是 <code>opencode run</code> 是<strong>非互動模式</strong>——沒有人可以回答那個問題。
+opencode 的處理方式是<strong>直接拒絕</strong>：
+</p>
+<pre><code>! permission requested: edit (hello.py); auto-rejecting
+✗ Write hello.py failed
+Error: The user rejected permission to use this specific tool call.</code></pre>
+<p style="margin-bottom:0">
+<code>--auto</code> 就是「這一次我事先全部答應」。
+它在自測時很方便，但<strong>平常不要養成習慣</strong>——
+工作坊全程我們都用互動模式（直接打 <code>opencode</code>），
+那時候每個動作都會停下來問你，你才有機會看清楚它要做什麼。
+</p>
+</div>
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">預期畫面</span></div>
+  <div class="term-body"><div class="t">Read　AGENTS.md</div>
+<div class="w">Write　hello.py</div>
+<div class="b">uv run python hello.py</div>
+<div class="o">1 4 9 16 25 36 49 64 81 100</div>
+<div class="sp"></div>
+<div class="c">已建立 hello.py 並執行完成。</div>
+</div>
+</div>
+<p>
+看到 <code>Read</code>、<code>Write</code>、<code>$</code> 這三種箭頭，代表 agent 的三種能力
+（讀檔、寫檔、執行指令）都正常。而且它讀了 <code>AGENTS.md</code>、用了 <code>uv run</code>——
+表示你的專案規則有生效。
+</p>
+
+<ul class="ckl">
+<li><input type="checkbox" id="p1"><label for="p1"><code>opencode --version</code> 印出 1.18.x</label></li>
+<li><input type="checkbox" id="p2"><label for="p2"><code>uv --version</code> 印出版本號</label></li>
+<li><input type="checkbox" id="p3"><label for="p3">專案資料夾裡有 <code>pyproject.toml</code>、<code>opencode.json</code>、<code>AGENTS.md</code></label></li>
+<li><input type="checkbox" id="p4"><label for="p4"><code>uv sync</code> 跑完，沒有紅色錯誤</label></li>
+<li><input type="checkbox" id="p5"><label for="p5">測試一印出「環境 OK」</label></li>
+<li><input type="checkbox" id="p6"><label for="p6">測試二得到繁體中文回答</label></li>
+<li><input type="checkbox" id="p7"><label for="p7">測試三真的產生了 <code>hello.py</code> 並印出平方數</label></li>
+</ul>
+</section>
+
+<section>
+<h2>卡住了？</h2>
+<div class="tw"><table>
+<tr><th>症狀</th><th>原因</th><th>怎麼辦</th></tr>
+<tr><td><code>opencode: command not found</code><br><code>無法辨識 'opencode'</code></td>
+    <td>PATH 沒重新載入</td>
+    <td>把終端機<strong>完全關掉重開</strong>。Windows 請用 PowerShell，不要用 cmd。</td></tr>
+<tr><td>winget 停在 <code>Do you agree...[Y] Yes [N] No</code> 不動</td>
+    <td>互動式條款同意收不到鍵盤輸入</td>
+    <td>Ctrl+C 中斷，改用本頁那組帶 <code>--accept-source-agreements</code> 的指令。</td></tr>
+<tr><td><code>Error: Internal server error</code></td>
+    <td>看不到真正原因</td>
+    <td>加旗標重跑：<code>opencode run "..." --print-logs --log-level ERROR</code></td></tr>
+<tr><td><code>Unrecognized request argument supplied: prompt_cache_key</code></td>
+    <td>opencode 的已知上游問題，偶發</td>
+    <td><strong>重試一次</strong>通常就好。實測會自己恢復。</td></tr>
+<tr><td>換成其他模型後回 <code>UnknownError</code></td>
+    <td>那些模型需要 API key</td>
+    <td>本工作坊<strong>只用 <code>opencode/big-pickle</code></strong>。不要改 <code>opencode.json</code> 裡的 model。</td></tr>
+<tr><td><code>uv sync</code> 下載很慢或中斷</td>
+    <td>網路</td>
+    <td>重跑一次，uv 會接續已下載的部分，不會從頭來。</td></tr>
+<tr><td><code>permission requested: edit ...; auto-rejecting</code></td>
+    <td><code>opencode run</code> 是非互動模式，沒人能回答 <code>ask</code> 的權限詢問</td>
+    <td>自測時加 <code>--auto</code>。平常請用互動模式（直接打 <code>opencode</code>）。</td></tr>
+<tr><td>agent 用了 <code>python</code> 而不是 <code>uv run python</code></td>
+    <td><code>AGENTS.md</code> 沒被讀到</td>
+    <td>確認 <code>AGENTS.md</code> 跟 <code>opencode.json</code> 在<strong>同一個資料夾</strong>，且你是在那個資料夾裡啟動 opencode。</td></tr>
+</table></div>
+
+<div class="box tip">
+<div class="bt">還是不行的話</div>
+<p style="margin-bottom:0">
+把<strong>你打的指令</strong>和<strong>完整的錯誤訊息</strong>截圖，工作坊開始前傳給助教。
+請不要只說「裝不起來」——那樣沒辦法幫你。
+</p>
+</div>
+</section>
+
+<section>
+<h2>最後提醒</h2>
+<div class="box warn">
+<div class="bt">免費模型會看你送過去的內容</div>
+<p style="margin-bottom:0">
+<code>opencode/big-pickle</code> 是限時免費的試用模型，官方明講資料可能被用於改進模型。
+<strong>不要把未發表的研究資料、個人隱私資料或任何機密內容丟進去。</strong>
+課堂用的都是 scikit-learn 內建的公開資料集，沒有這個問題。
+</p>
+</div>
+</section>
+
+<div class="pager">
+  <a href="index.html"><div class="d">回到</div><div class="t2">← 總覽</div></a>
+  <a href="first-run.html" class="next"><div class="d">下一章</div><div class="t2">01 · 第一次對話 →</div></a>
+</div>
+
+</div>

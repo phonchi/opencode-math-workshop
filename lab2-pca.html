@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab 2 · 降維｜OpenCode × AI-Math 工作坊</title>
+<meta name="description" content="手刻 PCA 與 sklearn 比對。四道驗證關卡全部通過，卻抓不出一個真實的錯誤——這一關要練的是設計驗證的能力，不是寫 PCA 的能力。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* =========================================================================
+   OpenCode × AI-Math 工作坊　設計系統
+   調色盤沿用 selfstudy 系列（暖紙色 / 靛藍 / 赤陶 / 松綠）
+   排版走編輯設計：大字級對比、慷慨留白、細線分隔、克制用色
+   ========================================================================= */
+:root{
+  --paper:#f6f2e9;
+  --paper-2:#fffdf8;
+  --ink:#1b1b2b;
+  --ink-2:#4a4a5e;
+  --ink-3:#7d7a72;
+  --rule:#ded6c6;
+  --rule-2:#ece5d6;
+
+  --live:#b8503c;   /* 現場 */
+  --link:#2a3c78;   /* 連結・標題 */
+  --after:#1a6247;  /* 課後・通過 */
+  --warn:#96660c;   /* 注意 */
+
+  --term-bg:#191922;
+  --term-bar:#23232f;
+  --term-fg:#d8d5cc;
+  --term-dim:#807d8e;
+  --term-user:#e3c273;
+  --term-tool:#77aecb;
+  --term-bash:#8ec392;
+  --term-chat:#a99fd0;
+  --term-err:#dd8877;
+
+  --r-sm:6px; --r-md:10px; --r-lg:16px;
+  --sh-1:0 1px 2px rgba(27,27,43,.04);
+  --sh-2:0 4px 16px rgba(27,27,43,.07);
+  --sh-3:0 14px 40px rgba(27,27,43,.13);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{
+  font-family:'Noto Sans TC',system-ui,sans-serif;
+  background-color:var(--paper);
+  /* 紙張紋理：兩層極淡的徑向漸層，不使用圖檔 */
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(184,80,60,.028), transparent 42%),
+    radial-gradient(circle at 82% 78%, rgba(42,60,120,.030), transparent 46%);
+  background-attachment:fixed;
+  color:var(--ink);
+  font-size:17px;
+  line-height:1.92;
+  letter-spacing:.01em;
+  text-wrap:pretty;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;height:auto;}
+::selection{background:rgba(227,194,115,.42);}
+
+/* ---------------- 導覽列 ---------------- */
+.topnav{
+  position:sticky;top:0;z-index:60;
+  background:rgba(246,242,233,.88);
+  backdrop-filter:saturate(1.5) blur(12px);
+  border-bottom:1px solid var(--rule-2);
+}
+.topnav .inner{
+  max-width:1140px;margin:0 auto;padding:.6rem 2rem;
+  display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;
+}
+.topnav .brand{
+  font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:700;
+  letter-spacing:.08em;color:var(--ink);text-decoration:none;white-space:nowrap;
+}
+.topnav .brand i{font-style:normal;color:var(--live);margin:0 .15em;}
+.topnav nav{display:flex;gap:.05rem;flex-wrap:wrap;margin-left:auto;}
+.topnav nav a{
+  font-size:.78rem;color:var(--ink-3);text-decoration:none;
+  padding:.2rem .6rem;border-radius:var(--r-sm);white-space:nowrap;
+  transition:color .16s var(--ease),background .16s var(--ease);
+}
+.topnav nav a:hover{color:var(--ink);background:rgba(255,253,248,.9);}
+.topnav nav a[aria-current]{color:var(--live);font-weight:700;}
+
+/* ---------------- 版面骨架 ---------------- */
+.container{max-width:1140px;margin:0 auto;padding:4.5rem 2rem;}
+.container.narrow{max-width:780px;}
+section{margin-bottom:4.5rem;}
+section:last-child{margin-bottom:0;}
+
+/* ---------------- 字級階層 ---------------- */
+h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.1rem,5.2vw,3.4rem);
+  line-height:1.28;letter-spacing:-.015em;margin-bottom:1rem;
+}
+h2{
+  font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:clamp(1.45rem,2.6vw,1.85rem);
+  line-height:1.45;letter-spacing:-.01em;
+  margin:4rem 0 1.2rem;padding-top:1.2rem;
+  border-top:1px solid var(--rule);
+  position:relative;
+}
+h2::before{
+  content:"";position:absolute;top:-1px;left:0;width:56px;height:2px;background:var(--live);
+}
+h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.16rem;
+  line-height:1.6;margin:2.4rem 0 .7rem;color:var(--link);
+}
+h4{font-size:.98rem;font-weight:700;margin:1.6rem 0 .5rem;color:var(--ink-2);}
+p{margin-bottom:1.15rem;}
+.lead{font-size:1.09rem;line-height:1.95;color:var(--ink-2);}
+ul,ol{margin:0 0 1.2rem 1.5rem;}
+li{margin-bottom:.45rem;}
+li::marker{color:var(--ink-3);}
+a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:.2em;}
+a:hover{color:var(--live);}
+hr{border:0;border-top:1px solid var(--rule);margin:3rem 0;}
+strong{font-weight:700;color:var(--ink);}
+em{font-style:normal;background:linear-gradient(transparent 62%,rgba(227,194,115,.5) 0);}
+code{
+  font-family:'JetBrains Mono',monospace;font-size:.85em;
+  background:rgba(222,214,198,.42);padding:.12em .4em;border-radius:4px;
+  letter-spacing:0;
+  /* 一長串連續的行內 code 會撐破手機版，允許在任何位置斷行 */
+  overflow-wrap:anywhere;word-break:break-word;
+}
+p,li,td,th,h1,h2,h3,h4,dd,dt{overflow-wrap:break-word;}
+
+/* ---------------- Hero ---------------- */
+.hero{
+  background:
+    radial-gradient(ellipse 120% 80% at 78% 8%, rgba(227,194,115,.10), transparent 58%),
+    linear-gradient(152deg,#262636 0%,#16161f 62%,#101018 100%);
+  color:#f4f0e7;padding:6rem 2rem 5rem;position:relative;overflow:hidden;
+}
+.hero .inner{max-width:1140px;margin:0 auto;position:relative;z-index:2;}
+.hero .kicker{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--term-user);
+  margin-bottom:1.3rem;display:flex;align-items:center;gap:.8rem;
+}
+.hero .kicker::after{content:"";flex:1;max-width:180px;height:1px;background:rgba(227,194,115,.3);}
+.hero h1{color:#fff;max-width:18em;margin-bottom:1.2rem;}
+.hero h1 i{font-style:normal;color:var(--term-user);}
+.hero .sub{
+  font-size:1.06rem;line-height:1.9;color:rgba(255,255,255,.74);
+  max-width:38em;margin-bottom:2.6rem;
+}
+.hero .meta{
+  display:flex;gap:3.2rem;flex-wrap:wrap;
+  padding-top:1.6rem;border-top:1px solid rgba(255,255,255,.13);
+}
+.hero .meta div{min-width:0;}
+.hero .meta b{
+  display:block;font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:1.75rem;line-height:1.2;color:#fff;margin-bottom:.25rem;
+}
+.hero .meta span{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(255,255,255,.46);
+}
+.hero-glyph{
+  position:absolute;right:3.5rem;bottom:2.2rem;
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:clamp(5rem,13vw,11rem);line-height:.85;letter-spacing:-.04em;
+  color:transparent;
+  background:linear-gradient(135deg,rgba(227,194,115,.16),rgba(255,255,255,.03) 62%,transparent);
+  -webkit-background-clip:text;background-clip:text;
+  pointer-events:none;user-select:none;white-space:nowrap;
+}
+.hero-glyph::after{
+  content:"";position:absolute;left:.06em;bottom:.14em;width:.52em;height:.075em;
+  background:rgba(227,194,115,.22);animation:blink 1.45s steps(1) infinite;
+}
+@keyframes blink{0%,54%{opacity:1}55%,100%{opacity:0}}
+@media (max-width:900px){.hero-glyph{display:none;}}
+
+/* 章節頁的頁首（比 hero 輕） */
+.pagehead{padding:3.6rem 0 0;}
+.pagehead .kicker{
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:.9rem;
+  display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;
+}
+.pagehead h1{max-width:16em;}
+.pagehead .lead{max-width:34em;margin-top:.6rem;}
+
+/* ---------------- 徽章 ---------------- */
+.badge{
+  display:inline-block;font-family:'JetBrains Mono',monospace;
+  font-size:.64rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:.16rem .62rem;border-radius:999px;border:1px solid currentColor;
+  vertical-align:.16em;white-space:nowrap;line-height:1.6;
+}
+.badge.live{color:var(--live);}
+.badge.after{color:var(--after);}
+.badge.prep{color:var(--warn);}
+
+/* ---------------- 章節卡 ---------------- */
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:1.15rem;}
+.ch-card{
+  display:flex;flex-direction:column;position:relative;
+  background:var(--paper-2);border:1px solid var(--rule-2);border-radius:var(--r-lg);
+  padding:1.5rem 1.55rem 1.25rem;text-decoration:none;color:var(--ink);
+  box-shadow:var(--sh-1);
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),border-color .22s var(--ease);
+}
+.ch-card:hover{transform:translateY(-4px);border-color:var(--rule);box-shadow:var(--sh-3);}
+.ch-card:hover .arr{transform:translateX(3px);opacity:1;}
+.ch-card .num{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+  letter-spacing:.18em;color:var(--ink-3);
+}
+.ch-card h3{font-size:1.2rem;margin:.3rem 0 .5rem;color:var(--ink);}
+.ch-card p{font-size:.875rem;line-height:1.78;color:var(--ink-2);flex:1;margin-bottom:1rem;}
+.ch-card .foot{
+  display:flex;justify-content:space-between;align-items:center;gap:.6rem;
+  padding-top:.7rem;border-top:1px solid var(--rule-2);
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ink-3);
+  letter-spacing:.06em;
+}
+.ch-card .arr{opacity:.45;transition:transform .22s var(--ease),opacity .22s var(--ease);}
+
+/* ---------------- 終端機（本站主角） ---------------- */
+.term{
+  background:var(--term-bg);border-radius:var(--r-md);overflow:hidden;
+  margin:1.7rem 0;box-shadow:var(--sh-3);
+  font-family:'JetBrains Mono',monospace;
+}
+.term-bar{
+  background:var(--term-bar);padding:.55rem .95rem;
+  display:flex;align-items:center;gap:.42rem;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.term-bar .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.term-bar .dot:nth-of-type(1){background:#d9614f;}
+.term-bar .dot:nth-of-type(2){background:#d8a747;}
+.term-bar .dot:nth-of-type(3){background:#66ab68;}
+.term-bar .label{
+  margin-left:.6rem;font-size:.68rem;letter-spacing:.1em;color:var(--term-dim);
+}
+.term-body{
+  padding:1.1rem 1.2rem;font-size:.815rem;line-height:1.85;color:var(--term-fg);
+  overflow-x:auto;white-space:pre-wrap;word-break:break-word;letter-spacing:0;
+}
+.term-body > div{padding:.02rem 0;}
+.term-body .u{color:var(--term-user);}
+.term-body .u::before{content:"> ";color:var(--term-dim);}
+.term-body .t::before{content:"→ ";color:var(--term-dim);}
+.term-body .t{color:var(--term-tool);}
+.term-body .w::before{content:"← ";color:var(--term-dim);}
+.term-body .w{color:var(--term-tool);}
+.term-body .b::before{content:"$ ";color:var(--term-dim);}
+.term-body .b{color:var(--term-bash);}
+.term-body .o{color:var(--term-dim);}
+.term-body .e{color:var(--term-err);}
+.term-body .c{color:var(--term-chat);}
+.term-body .sp{height:.55rem;}
+.term details{margin:.2rem 0;}
+.term summary{
+  color:var(--term-dim);cursor:pointer;font-size:.75rem;list-style:none;
+  user-select:none;letter-spacing:.04em;transition:color .16s var(--ease);
+}
+.term summary::-webkit-details-marker{display:none;}
+.term summary::before{content:"▸  ";}
+.term details[open] summary::before{content:"▾  ";}
+.term summary:hover{color:var(--term-fg);}
+.term details[open] > summary{margin-bottom:.35rem;}
+
+/* ---------------- 程式碼區塊 ---------------- */
+pre{
+  background:var(--term-bg);color:var(--term-fg);border-radius:var(--r-md);
+  padding:1.05rem 1.25rem;overflow-x:auto;margin:1.35rem 0;
+  font-family:'JetBrains Mono',monospace;font-size:.815rem;line-height:1.8;
+  letter-spacing:0;box-shadow:var(--sh-2);
+}
+pre code{background:none;padding:0;font-size:inherit;color:inherit;}
+pre.cmd{position:relative;padding-right:4.2rem;}
+pre .copy{
+  position:absolute;top:.6rem;right:.6rem;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
+  color:var(--term-dim);font-family:inherit;font-size:.66rem;letter-spacing:.06em;
+  padding:.2rem .55rem;border-radius:var(--r-sm);cursor:pointer;
+  transition:background .16s var(--ease),color .16s var(--ease);
+}
+pre .copy:hover{background:rgba(255,255,255,.15);color:#fff;}
+
+/* ---------------- 提示盒 ---------------- */
+.box{
+  border:1px solid var(--rule-2);border-left-width:3px;border-radius:var(--r-md);
+  padding:1.15rem 1.4rem;margin:1.6rem 0;background:var(--paper-2);box-shadow:var(--sh-1);
+}
+.box .bt{
+  font-family:'JetBrains Mono',monospace;font-size:.67rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;margin-bottom:.55rem;
+}
+.box > :last-child{margin-bottom:0;}
+.box.tip{border-left-color:var(--after);}    .box.tip .bt{color:var(--after);}
+.box.warn{border-left-color:var(--warn);background:#fdf9ef;} .box.warn .bt{color:var(--warn);}
+.box.danger{border-left-color:var(--live);background:#fdf3f0;} .box.danger .bt{color:var(--live);}
+.box.math{border-left-color:var(--link);}    .box.math .bt{color:var(--link);}
+
+/* ---------------- 數學式 ---------------- */
+mjx-container[display]{
+  overflow-x:auto;overflow-y:hidden;max-width:100%;
+  padding:.35rem 0 .55rem;
+}
+mjx-container{max-width:100%;}
+
+/* ---------------- 表格 ---------------- */
+.tw{overflow-x:auto;margin:1.6rem 0;border-radius:var(--r-md);box-shadow:var(--sh-1);}
+table{width:100%;border-collapse:collapse;font-size:.87rem;background:var(--paper-2);}
+th{
+  background:rgba(222,214,198,.4);padding:.62rem .9rem;text-align:left;
+  font-weight:700;font-size:.76rem;letter-spacing:.06em;color:var(--ink-2);
+  white-space:nowrap;border-bottom:1px solid var(--rule);
+}
+td{padding:.58rem .9rem;border-bottom:1px solid var(--rule-2);vertical-align:top;line-height:1.72;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(222,214,198,.16);}
+td code{white-space:nowrap;}
+.ok{color:var(--after);font-weight:700;}
+.no{color:var(--live);font-weight:700;}
+
+/* ---------------- 檢查清單 ---------------- */
+.ckl{list-style:none;margin:1.5rem 0;padding:0;}
+.ckl li{
+  background:var(--paper-2);border:1px solid var(--rule-2);border-radius:var(--r-md);
+  margin-bottom:.55rem;padding:.85rem 1.1rem;display:flex;gap:.85rem;align-items:flex-start;
+  box-shadow:var(--sh-1);transition:opacity .2s var(--ease),background .2s var(--ease);
+}
+.ckl input{
+  margin-top:.44rem;width:1.05rem;height:1.05rem;accent-color:var(--after);
+  cursor:pointer;flex-shrink:0;
+}
+.ckl label{cursor:pointer;font-size:.91rem;line-height:1.78;}
+.ckl li:has(input:checked){opacity:.46;background:rgba(222,214,198,.22);}
+.ckl li:has(input:checked) label{text-decoration:line-through;}
+
+/* ---------------- 編號步驟 ---------------- */
+.step{
+  position:relative;padding-left:3.2rem;margin-bottom:2.6rem;
+}
+.step::before{
+  content:attr(data-n);position:absolute;left:0;top:.05rem;
+  width:2.1rem;height:2.1rem;border-radius:50%;
+  background:var(--paper-2);border:1px solid var(--rule);color:var(--link);
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-1);
+}
+.step > h3:first-child{margin-top:.1rem;}
+
+/* ---------------- 時程表 ---------------- */
+.sched{width:100%;border-collapse:collapse;font-size:.9rem;}
+.sched td{padding:.7rem .3rem;border-bottom:1px solid var(--rule-2);vertical-align:baseline;}
+.sched tr:last-child td{border-bottom:none;}
+.sched .t{
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--ink-3);
+  white-space:nowrap;width:5.5rem;letter-spacing:.04em;
+}
+.sched .n{font-weight:700;}
+.sched .d{color:var(--ink-2);font-size:.86rem;}
+
+/* ---------------- 頁尾導覽 ---------------- */
+.pager{display:flex;gap:1rem;margin:4.5rem 0 0;flex-wrap:wrap;}
+.pager a{
+  flex:1;min-width:230px;background:var(--paper-2);border:1px solid var(--rule-2);
+  border-radius:var(--r-md);padding:1rem 1.25rem;text-decoration:none;color:var(--ink);
+  box-shadow:var(--sh-1);transition:border-color .2s var(--ease),box-shadow .2s var(--ease);
+}
+.pager a:hover{border-color:var(--rule);box-shadow:var(--sh-2);}
+.pager .d{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.pager .t2{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--link);font-size:1.02rem;}
+.pager .next{text-align:right;}
+
+footer{
+  border-top:1px solid var(--rule);margin-top:5rem;
+  padding:2.6rem 2rem 3.2rem;text-align:center;font-size:.82rem;color:var(--ink-3);
+}
+footer .stamp{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.06em;
+  margin-top:.6rem;color:var(--rule);color:#a49e92;
+}
+
+@media (max-width:720px){
+  body{font-size:16px;line-height:1.88;}
+  .container{padding:2.8rem 1.25rem;}
+  .hero{padding:3.6rem 1.25rem 3rem;}
+  .hero .meta{gap:1.8rem;}
+  .hero .meta b{font-size:1.4rem;}
+  .term-body,pre{font-size:.755rem;}
+  .topnav .inner{padding:.5rem 1.25rem;}
+  .topnav nav{
+    width:100%;margin-left:0;gap:0;flex-wrap:nowrap;
+    overflow-x:auto;scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);
+            mask-image:linear-gradient(90deg,#000 88%,transparent);
+  }
+  .topnav nav::-webkit-scrollbar{display:none;}
+  .topnav nav a{padding:.2rem .55rem;}
+  .step{padding-left:2.6rem;}
+  h2{margin-top:3rem;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+  html{scroll-behavior:auto;}
+}
+@media print{
+  .topnav,.pager,pre .copy{display:none;}
+  body{background:#fff;}
+}
+</style>
+</head>
+<body>
+
+<div class="topnav"><div class="inner">
+<a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
+<nav>
+<a href="prep.html">課前準備</a>
+<a href="first-run.html">第一次對話</a>
+<a href="lab1-cluster.html">Lab 1</a>
+<a href="lab2-pca.html">Lab 2</a>
+<a href="lab3-notes.html">Lab 3</a>
+<a href="local-models.html">本地模型</a>
+<a href="agents-md.html">AGENTS.md</a>
+<a href="git-safety.html">git</a>
+<a href="mcp-skills.html">MCP</a>
+<a href="cheatsheet.html">速查</a>
+</nav>
+</div></div>
+
+<div class="container narrow">
+
+<div class="pagehead">
+  <div class="kicker"><span>Lab 2</span><span>·</span><span class="badge live">現場 40 分</span><span>·</span><span>agent 當被告</span></div>
+  <h1>降維：設計一組真的抓得到錯的驗證</h1>
+  <p class="lead">
+    這一關你要叫 agent 手刻 PCA，然後證明它對不對。聽起來很簡單——
+    但你會發現，一組看起來很完整、跑起來全部 PASS 的驗證，
+    可能對某一類錯誤<strong>完全免疫</strong>。
+  </p>
+</div>
+
+<section>
+<h2>先講清楚要驗什麼</h2>
+<p>PCA 的定義：對中心化後的資料 $X_c$，計算共變異數矩陣</p>
+<div class="box math">
+<div class="bt">定義</div>
+$$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
+<p style="margin-bottom:0">取 $\Lambda$ 中最大的 $K$ 個特徵值對應的特徵向量，就是前 $K$ 個主成分。</p>
+</div>
+<p>
+所以一個「正確的 PCA 實作」至少要：中心化對、分母對、特徵分解對、由大到小排序對、取前 $K$ 個對。
+你的任務是設計檢查，讓<strong>其中任何一項寫錯都會被抓到</strong>。
+</p>
+</section>
+
+<section>
+<h2>動手</h2>
+
+<div class="step" data-n="1">
+<h3>要求 agent 手刻</h3>
+<pre class="cmd"><code>手刻一個 PCA，取前 10 個主成分，資料用 sklearn 內建的 digits。
+
+要求：
+- 只能用 numpy：中心化、算共變異數矩陣、np.linalg.eigh、排序、取前 10 個
+- 不可以呼叫 sklearn.decomposition.PCA 來算（它只能當對照組）
+- 寫成 lab2_pca.py，用 uv run python 執行
+
+寫完之後，請你自己設計驗證，證明你的實作跟 sklearn 的 PCA 一致，
+並且把每一項驗證的實際數值印出來。</code></pre>
+<p>
+注意最後一句：<strong>驗證方法是叫 agent 自己想的</strong>。
+這是刻意的——我們要先看看它會想出什麼。
+</p>
+</div>
+
+<div class="step" data-n="2">
+<h3>第一個坑：它可能會直接相減</h3>
+<p>多數情況下 agent 會想到比對 <code>components_</code>。執行後你會看到：</p>
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">opencode　build · big-pickle</span></div>
+  <div class="term-body"><div class="b">uv run python lab2_pca.py</div>
+<div class="o">手刻 components 與 sklearn 最大差 = 0.9411</div>
+<div class="e">驗證失敗：主成分不一致</div>
+<div class="sp"></div>
+<div class="c">看起來我的實作有問題，讓我檢查一下特徵分解的部分……</div>
+</div>
+</div>
+<div class="box danger">
+<div class="bt">這裡不要讓它亂改</div>
+<p style="margin-bottom:0">
+agent 會開始「修」一個其實沒壞的程式。<strong>打斷它</strong>（按 Esc 或 Ctrl+C），
+然後問它一個問題：<br>
+<em>「$v$ 是 $C$ 的特徵向量，那 $-v$ 是不是？如果是，你的比較方法有什麼問題？」</em>
+</p>
+</div>
+<p>
+關鍵在於 $Cv=\lambda v \Rightarrow C(-v)=\lambda(-v)$。
+特徵向量的<strong>正負號是任意的</strong>，兩個實作各自挑了不同的號，逐項相減當然差很大。
+</p>
+</div>
+
+<div class="step" data-n="3">
+<h3>換成正確的比法</h3>
+<p>兩邊的主成分都已正規化，所以比它們的夾角餘弦絕對值：</p>
+<div class="box math">
+<div class="bt">方向比對</div>
+$$\bigl|\cos\theta_i\bigr|=\bigl|\,\mathbf{w}^{\text{manual}}_i\cdot\mathbf{w}^{\text{sklearn}}_i\,\bigr|\;\overset{?}{\approx}\;1$$
+</div>
+<pre class="cmd"><code>剛才那個比較方法是錯的，因為特徵向量的正負號任意。
+
+請改成下面四項驗證，每一項都印出實際數值與 PASS/FAIL：
+1. 解釋變異比例：evals[:10]/evals.sum() vs explained_variance_ratio_
+2. 主成分方向：|cos| 應該都接近 1，並列出哪幾個方向相反
+3. 重建誤差：(Xc @ W.T) @ W + mu 的 MSE vs sklearn inverse_transform 的 MSE
+4. 正交性：W @ W.T 應該接近單位矩陣</code></pre>
+
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">opencode　build · big-pickle</span></div>
+  <div class="term-body"><div class="b">uv run python lab2_pca.py</div>
+<div class="sp"></div>
+<div class="o">關卡 1：解釋變異比例　最大差異 = 8.327e-17　-> PASS</div>
+<div class="o">關卡 2：主成分方向　最大偏離 1 = 8.882e-16　-> PASS</div>
+<div class="o">　　　　方向相反的主成分：PC[4, 7, 8, 9, 10]（正常現象）</div>
+<div class="o">關卡 3：重建誤差　差異 = 0.000e+00　-> PASS</div>
+<div class="o">關卡 4：正交性　最大差 = 8.882e-16　-> PASS</div>
+<div class="sp"></div>
+<div class="c">四項驗證全部通過，手刻的 PCA 與 sklearn 一致。</div>
+</div>
+</div>
+<p>四關全過。看起來可以收工了。</p>
+</div>
+
+</section>
+
+<section>
+<h2>但是這組驗證有一個洞</h2>
+<p class="lead">
+現在做一件事：<strong>故意把程式寫錯</strong>，把共變異數的分母從 $n-1$ 改成 $n$，然後重跑那四關。
+</p>
+<pre class="cmd"><code>請做一個實驗：把共變異數矩陣的分母從 (n-1) 改成 n，
+其他都不動，重新跑那四項驗證，把結果印出來。</code></pre>
+
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">分母寫成 n 的版本</span></div>
+  <div class="term-body"><div class="o">關卡 1（比例）　　PASS</div>
+<div class="o">關卡 2（方向）　　PASS</div>
+<div class="o">關卡 3（重建）　　PASS</div>
+<div class="o">關卡 4（正交）　　PASS</div>
+</div>
+</div>
+
+<div class="box danger">
+<div class="bt">程式是錯的，四關卻全部通過</div>
+<p style="margin-bottom:0">
+這不是巧合，是<strong>數學上的必然</strong>。
+</p>
+</div>
+
+<p>設 $C'=cC$，其中 $c=\frac{n-1}{n}$ 是一個正常數。那麼：</p>
+<div class="box math">
+<div class="bt">為什麼四關都測不到</div>
+$$Cv=\lambda v\;\Longrightarrow\;C'v=(c\lambda)v$$
+<ul style="margin-bottom:0">
+<li><strong>特徵向量完全不變</strong> → 關卡 2（方向）、關卡 4（正交）必然通過</li>
+<li>特徵值同乘 $c$，但比例 $\dfrac{c\lambda_i}{\sum_j c\lambda_j}=\dfrac{\lambda_i}{\sum_j\lambda_j}$ → 關卡 1 中 $c$ 被<strong>約掉</strong></li>
+<li>重建 $X_cW^\top W+\mu$ 只用到特徵向量，跟特徵值大小無關 → 關卡 3 通過</li>
+</ul>
+</div>
+
+<p>
+四道關卡沒有任何一道會去看<strong>特徵值本身的數值</strong>，
+而分母錯誤剛好只影響特徵值的尺度。所以這組驗證對這個錯誤完全免疫。
+</p>
+
+<h3>補上第五關</h3>
+<pre class="cmd"><code>再加一個關卡 5：直接比對特徵值本身，
+evals[:10] 應該等於 sklearn 的 pca.explained_variance_。
+兩個版本（n-1 和 n）都跑一次。</code></pre>
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">加上關卡 5 之後</span></div>
+  <div class="term-body"><div class="o">正確 n-1　關卡1=PASS 關卡2=PASS 關卡3=PASS 關卡4=PASS ‖ 關卡5=PASS</div>
+<div class="e">錯誤 n  　關卡1=PASS 關卡2=PASS 關卡3=PASS 關卡4=PASS ‖ 關卡5=FAIL  差=0.0996</div>
+</div>
+</div>
+
+<div class="box tip">
+<div class="bt">這一關真正要你帶走的</div>
+<p>
+<strong>「驗證全部通過」只代表「這組驗證抓不到錯」，不代表程式正確。</strong>
+</p>
+<p style="margin-bottom:0">
+設計驗證的時候，該問的不是「我檢查了幾項」，
+而是「<strong>什麼樣的錯誤會從我的檢查縫隙中溜過去</strong>」。
+這個思考方式在寫論文、審稿、做實驗的時候一樣好用。
+</p>
+</div>
+</section>
+
+<section>
+<h2>兩個必須講清楚的但書</h2>
+
+<h3>但書一：$|\cos|$ 不是永遠有效</h3>
+<p>
+$|\cos|$ 比對成立的前提是<strong>特徵值單純（沒有重根）且間隔夠大</strong>。
+如果 $\lambda_i=\lambda_{i+1}$，那個二維特徵空間裡<em>任何</em>一組正交基底都是合法的特徵向量——
+兩個都正確的實作，逐向量 $|\cos|$ 甚至可以是 0。
+</p>
+<pre class="cmd"><code>請印出前 11 個特徵值，並計算相鄰特徵值的最小間隔，
+告訴我這份資料有沒有接近重根的問題。</code></pre>
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">特徵值間隔檢查</span></div>
+  <div class="term-body"><div class="o">前 10 個特徵值：</div>
+<div class="o">  179.0069  163.7177  141.7884  101.1004  69.5132</div>
+<div class="o">   59.1085   51.8845   44.0151   40.3110  37.0118</div>
+<div class="o">λ₁₁ = 28.5190</div>
+<div class="o">相鄰最小間隔 = 3.2992　　第 10／11 之間 = 8.4928</div>
+<div class="c">間隔遠大於 float64 的數值誤差，沒有接近重根的問題，|cos| 在這份資料上適用。</div>
+</div>
+</div>
+<p>
+digits 剛好安全。但如果你之後換一份資料，<strong>務必先檢查這件事</strong>。
+真的碰到重根時，要改成比較整個子空間——例如比投影矩陣 $W^\top W$，或算 principal angles。
+</p>
+
+<h3>但書二：關卡 4 只是必要條件</h3>
+<p>
+$WW^\top\approx I$ 確實不需要對照組，但它只證明「這 $K$ 個向量彼此正交且長度為 1」。
+<strong>隨便一組正交基底都會通過</strong>——包括「不小心取到最小的那 10 個特徵向量」這種錯誤。
+要完整驗證還得檢查特徵方程殘差 $CW^\top-W^\top\Lambda$、特徵值大小與取用順序。
+</p>
+</section>
+
+<section>
+<h2>檢查清單</h2>
+<ul class="ckl">
+<li><input type="checkbox" id="l2a"><label for="l2a">我的手刻 PCA 只用 numpy，沒有偷呼叫 <code>sklearn.decomposition.PCA</code></label></li>
+<li><input type="checkbox" id="l2b"><label for="l2b">我能解釋為什麼直接比 <code>components_</code> 會得到 0.94 的差</label></li>
+<li><input type="checkbox" id="l2c"><label for="l2c">五道關卡都有印出實際數值，不是只有 PASS/FAIL</label></li>
+<li><input type="checkbox" id="l2d"><label for="l2d">我親眼看到「分母寫成 n」時前四關全過、第五關才抓到</label></li>
+<li><input type="checkbox" id="l2e"><label for="l2e">我能說出 $|\cos|$ 比對失效的條件</label></li>
+<li><input type="checkbox" id="l2f"><label for="l2f">我知道 $WW^\top=I$ 只是必要條件，不是充分條件</label></li>
+</ul>
+</section>
+
+<section>
+<h2>如果還有時間</h2>
+<ul>
+<li>問 agent：<code>pca._fit_svd_solver</code> 是什麼？你會發現預設 <code>auto</code> 在這份資料上選的是 <code>covariance_eigh</code>——跟手刻同一種演算法。所以這根本不算「兩種演算法交叉驗證」。要真的交叉驗證必須明寫 <code>svd_solver='full'</code>。</li>
+<li>設計一個「取錯順序」的錯誤（取最小的 10 個特徵值），看看五道關卡各自會不會抓到。</li>
+<li>把前 10 個主成分 reshape 回 8×8 畫出來，看看 PCA 學到了什麼樣的筆畫結構。</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="lab1-cluster.html"><div class="d">上一章</div><div class="t2">← 02 · Lab 1 · 分群</div></a>
+  <a href="lab3-notes.html" class="next"><div class="d">下一章</div><div class="t2">04 · Lab 3 · 分類與筆記 →</div></a>
+</div>
+
+</div>
+
+<footer>
+<div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
+<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+</footer>
+
+<script>
+// 導覽列高亮目前頁面
+(function(){
+  var f=(location.pathname.split('/').pop()||'index.html');
+  document.querySelectorAll('.topnav nav a').forEach(function(a){
+    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+  });
+})();
+
+// 指令複製鈕
+document.querySelectorAll('pre.cmd').forEach(function(pre){
+  var b=document.createElement('button');
+  b.className='copy'; b.type='button'; b.textContent='複製';
+  b.addEventListener('click',function(){
+    var t=pre.querySelector('code');
+    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
+      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
+    },function(){ b.textContent='複製失敗'; });
+  });
+  pre.appendChild(b);
+});
+
+// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
+(function(){
+  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
+  var saved={};
+  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
+    var id=cb.id||('ck'+i); cb.id=id;
+    if(saved[id]) cb.checked=true;
+    cb.addEventListener('change',function(){
+      saved[id]=cb.checked;
+      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+    });
+  });
+})();
+</script>
+
+<script>
+// MathJax 3：啟用 $...$ 行內數學（預設不開）
+window.MathJax={
+  tex:{
+    inlineMath:[['$','$'],['\\(','\\)']],
+    displayMath:[['$$','$$'],['\\[','\\]']],
+    processEscapes:true
+  },
+  options:{
+    skipHtmlTags:['script','noscript','style','textarea','pre','code'],
+    ignoreHtmlClass:'term|tw'
+  },
+  chtml:{ scale:1.02 }
+};
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

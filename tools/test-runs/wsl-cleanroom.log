@@ -1,0 +1,128 @@
+############################################################
+# WSL clean-room 安裝測試
+# 日期: 2026-09-12T11:05:42+08:00
+# 環境: Ubuntu 24.04.4 LTS / kernel 6.6.87.2-microsoft-standard-WSL2
+############################################################
+
+=== [0] 動手前的狀態 ===
+opencode: 1.14.25
+config dir:
+AGENTS.md
+mcp
+node_modules
+opencode.json
+opencode.json.backup-before-lmstudio
+opencode.json.bak.20260426-143001
+package-lock.json
+package.json
+settings.json
+skills
+statusline-command.sh
+
+=== [1] 刪除全域設定（模擬全新電腦） ===
+rm -rf ~/.config/opencode  -> 完成
+ls: cannot access '/home/phonchi/.config/opencode': No such file or directory
+確認：~/.config/opencode 已不存在
+確認 session DB 未動：
+-rw-r--r-- 1 phonchi phonchi 2519040 Sep 12 09:28 /home/phonchi/.local/share/opencode/opencode.db
+
+=== [2] 官方安裝指令（學生實際會跑的那一行） ===
+$ curl -fsSL https://opencode.ai/install | bash
+[0m[0;2mInstalled version: [0m1.14.25.[0m
+[0m
+[0;2mInstalling [0mopencode [0;2mversion: [0m1.18.30[0m
+#=#=#                                                                          ##O#-#                                                                         ##O=#  #                                                                       #=#=-#  #                                                                                                                                                 0.4%##                                                                         3.6%########                                                                  11.7%################                                                          22.6%########################                                                  34.6%################################                                          45.4%#######################################                                   54.9%###############################################                           65.9%######################################################                    75.5%#############################################################             85.5%####################################################################      94.5%######################################################################## 100.0%
+
+[0;2m                    [0m             ▄     
+[0;2m█▀▀█ █▀▀█ █▀▀█ █▀▀▄ [0m█▀▀▀ █▀▀█ █▀▀█ █▀▀█
+[0;2m█░░█ █░░█ █▀▀▀ █░░█ [0m█░░░ █░░█ █░░█ █▀▀▀
+[0;2m▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀  ▀ [0m▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
+
+
+[0;2mOpenCode includes free models, to start:[0m
+
+cd <project>  [0;2m# Open directory[0m
+opencode      [0;2m# Run command[0m
+
+[0;2mFor more information visit [0mhttps://opencode.ai/docs
+
+
+
+--- 安裝後版本 ---
+1.18.30
+
+=== [3] 全新狀態下有哪些模型（未登入） ===
+$ opencode auth list
+[0m
+┌  Credentials [90m~/.local/share/opencode/auth.json
+│
+└  0 credentials
+
+
+$ opencode models
+opencode/big-pickle
+opencode/gpt-5-nano
+opencode/hy3-preview-free
+opencode/minimax-m2.5-free
+opencode/nemotron-3-super-free
+
+=== [4] 未登入狀態的 smoke test（關鍵驗證） ===
+工作目錄: /tmp/claude-1000/-home-phonchi/6cc874c1-26ae-4986-8f19-e2db8b7190a0/scratchpad/zen-smoke
+
+$ opencode run --model opencode/big-pickle "只回答四個字：測試成功"
+[0m
+> build · big-pickle
+[0m
+[91m[1mError: [0mInternal server error
+exit=0
+
+=== [5] 免費模型逐一實測（全新狀態、auth.json 不存在） ===
+big-pickle                   OK
+gpt-5-nano                   FAIL: UnknownError / Unexpected server error
+hy3-preview-free             FAIL: UnknownError / Unexpected server error
+minimax-m2.5-free            FAIL: UnknownError / Unexpected server error
+nemotron-3-super-free        FAIL: UnknownError / Unexpected server error
+
+結論：opencode 1.18.30 只有 opencode/big-pickle 可在未登入狀態使用。
+      其餘模型即使列在 `opencode models` 也需要 API key。
+      教材一律指定 opencode/big-pickle。
+
+注意：big-pickle 第一次呼叫曾出現
+      "Unrecognized request argument supplied: prompt_cache_key"
+      （上游 issue anomalyco/opencode#45113），重試即成功 → 屬暫時性，
+      教材疑難排解需列出此錯誤與「重試一次」的處置。
+
+=== [6] 工具呼叫實測（big-pickle） ===
+任務：讀 readme.txt → 寫 hello.py → 執行
+結果：Read / Write / Bash 三種工具全部正常，輸出正確，耗時 7.4 秒
+回應語言：自動繁體中文
+重要觀察：`opencode run` 非互動模式下不詢問權限，直接寫檔與執行。
+          與 TUI 互動模式預設行為不同 → 教材權限章必須說明。
+
+=== [7] 除錯技巧（進教材疑難排解章） ===
+預設只顯示 "Error: Internal server error"，看不到原因。
+加旗標才看得到真正的錯誤：
+  opencode run --model opencode/big-pickle "..." --print-logs --log-level ERROR
+
+=== [8] 權限機制實測（重要，教材原本寫錯） ===
+在含 opencode.json（"permission": {"edit":"ask","bash":"ask"}）的專案裡：
+
+  A) opencode run "建立 hello.py..."
+     -> ! permission requested: edit (...); auto-rejecting
+        ✗ Write hello.py failed
+        Error: The user rejected permission to use this specific tool call.
+     非互動模式沒有人可以回答 ask，opencode 直接拒絕。
+
+  B) opencode run --auto "建立 hello.py..."
+     -> 成功。檔案建立、執行、輸出正確。
+
+Windows 11 原生端行為完全相同（見 windows.log）。
+
+教材修正：課前準備的測試三改用 --auto，並加上完整說明與疑難排解條目。
+
+=== [9] uv sync 冷快取耗時：三次量測差異很大 ===
+  WSL 第一次   6 分 38 秒（287 MB）
+  Windows      6.5 秒（快取 235 MB）
+  WSL 第二次   2.2 秒（287 MB）
+結論：耗時完全取決於當下網路，無法預測。
+教材改成誠實陳述範圍（2 秒 ~ 6 分半），不再宣稱單一數字。

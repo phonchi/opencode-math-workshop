@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab 1 · 分群｜OpenCode × AI-Math 工作坊</title>
+<meta name="description" content="用 opencode 一次跑完 k=2 到 12 的 k-means，畫出 elbow 與 silhouette 曲線。然後發現 agent 選出的最佳 k 是 9，而真實類別數是 10。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* =========================================================================
+   OpenCode × AI-Math 工作坊　設計系統
+   調色盤沿用 selfstudy 系列（暖紙色 / 靛藍 / 赤陶 / 松綠）
+   排版走編輯設計：大字級對比、慷慨留白、細線分隔、克制用色
+   ========================================================================= */
+:root{
+  --paper:#f6f2e9;
+  --paper-2:#fffdf8;
+  --ink:#1b1b2b;
+  --ink-2:#4a4a5e;
+  --ink-3:#7d7a72;
+  --rule:#ded6c6;
+  --rule-2:#ece5d6;
+
+  --live:#b8503c;   /* 現場 */
+  --link:#2a3c78;   /* 連結・標題 */
+  --after:#1a6247;  /* 課後・通過 */
+  --warn:#96660c;   /* 注意 */
+
+  --term-bg:#191922;
+  --term-bar:#23232f;
+  --term-fg:#d8d5cc;
+  --term-dim:#807d8e;
+  --term-user:#e3c273;
+  --term-tool:#77aecb;
+  --term-bash:#8ec392;
+  --term-chat:#a99fd0;
+  --term-err:#dd8877;
+
+  --r-sm:6px; --r-md:10px; --r-lg:16px;
+  --sh-1:0 1px 2px rgba(27,27,43,.04);
+  --sh-2:0 4px 16px rgba(27,27,43,.07);
+  --sh-3:0 14px 40px rgba(27,27,43,.13);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{
+  font-family:'Noto Sans TC',system-ui,sans-serif;
+  background-color:var(--paper);
+  /* 紙張紋理：兩層極淡的徑向漸層，不使用圖檔 */
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(184,80,60,.028), transparent 42%),
+    radial-gradient(circle at 82% 78%, rgba(42,60,120,.030), transparent 46%);
+  background-attachment:fixed;
+  color:var(--ink);
+  font-size:17px;
+  line-height:1.92;
+  letter-spacing:.01em;
+  text-wrap:pretty;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;height:auto;}
+::selection{background:rgba(227,194,115,.42);}
+
+/* ---------------- 導覽列 ---------------- */
+.topnav{
+  position:sticky;top:0;z-index:60;
+  background:rgba(246,242,233,.88);
+  backdrop-filter:saturate(1.5) blur(12px);
+  border-bottom:1px solid var(--rule-2);
+}
+.topnav .inner{
+  max-width:1140px;margin:0 auto;padding:.6rem 2rem;
+  display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;
+}
+.topnav .brand{
+  font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:700;
+  letter-spacing:.08em;color:var(--ink);text-decoration:none;white-space:nowrap;
+}
+.topnav .brand i{font-style:normal;color:var(--live);margin:0 .15em;}
+.topnav nav{display:flex;gap:.05rem;flex-wrap:wrap;margin-left:auto;}
+.topnav nav a{
+  font-size:.78rem;color:var(--ink-3);text-decoration:none;
+  padding:.2rem .6rem;border-radius:var(--r-sm);white-space:nowrap;
+  transition:color .16s var(--ease),background .16s var(--ease);
+}
+.topnav nav a:hover{color:var(--ink);background:rgba(255,253,248,.9);}
+.topnav nav a[aria-current]{color:var(--live);font-weight:700;}
+
+/* ---------------- 版面骨架 ---------------- */
+.container{max-width:1140px;margin:0 auto;padding:4.5rem 2rem;}
+.container.narrow{max-width:780px;}
+section{margin-bottom:4.5rem;}
+section:last-child{margin-bottom:0;}
+
+/* ---------------- 字級階層 ---------------- */
+h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.1rem,5.2vw,3.4rem);
+  line-height:1.28;letter-spacing:-.015em;margin-bottom:1rem;
+}
+h2{
+  font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:clamp(1.45rem,2.6vw,1.85rem);
+  line-height:1.45;letter-spacing:-.01em;
+  margin:4rem 0 1.2rem;padding-top:1.2rem;
+  border-top:1px solid var(--rule);
+  position:relative;
+}
+h2::before{
+  content:"";position:absolute;top:-1px;left:0;width:56px;height:2px;background:var(--live);
+}
+h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.16rem;
+  line-height:1.6;margin:2.4rem 0 .7rem;color:var(--link);
+}
+h4{font-size:.98rem;font-weight:700;margin:1.6rem 0 .5rem;color:var(--ink-2);}
+p{margin-bottom:1.15rem;}
+.lead{font-size:1.09rem;line-height:1.95;color:var(--ink-2);}
+ul,ol{margin:0 0 1.2rem 1.5rem;}
+li{margin-bottom:.45rem;}
+li::marker{color:var(--ink-3);}
+a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:.2em;}
+a:hover{color:var(--live);}
+hr{border:0;border-top:1px solid var(--rule);margin:3rem 0;}
+strong{font-weight:700;color:var(--ink);}
+em{font-style:normal;background:linear-gradient(transparent 62%,rgba(227,194,115,.5) 0);}
+code{
+  font-family:'JetBrains Mono',monospace;font-size:.85em;
+  background:rgba(222,214,198,.42);padding:.12em .4em;border-radius:4px;
+  letter-spacing:0;
+  /* 一長串連續的行內 code 會撐破手機版，允許在任何位置斷行 */
+  overflow-wrap:anywhere;word-break:break-word;
+}
+p,li,td,th,h1,h2,h3,h4,dd,dt{overflow-wrap:break-word;}
+
+/* ---------------- Hero ---------------- */
+.hero{
+  background:
+    radial-gradient(ellipse 120% 80% at 78% 8%, rgba(227,194,115,.10), transparent 58%),
+    linear-gradient(152deg,#262636 0%,#16161f 62%,#101018 100%);
+  color:#f4f0e7;padding:6rem 2rem 5rem;position:relative;overflow:hidden;
+}
+.hero .inner{max-width:1140px;margin:0 auto;position:relative;z-index:2;}
+.hero .kicker{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--term-user);
+  margin-bottom:1.3rem;display:flex;align-items:center;gap:.8rem;
+}
+.hero .kicker::after{content:"";flex:1;max-width:180px;height:1px;background:rgba(227,194,115,.3);}
+.hero h1{color:#fff;max-width:18em;margin-bottom:1.2rem;}
+.hero h1 i{font-style:normal;color:var(--term-user);}
+.hero .sub{
+  font-size:1.06rem;line-height:1.9;color:rgba(255,255,255,.74);
+  max-width:38em;margin-bottom:2.6rem;
+}
+.hero .meta{
+  display:flex;gap:3.2rem;flex-wrap:wrap;
+  padding-top:1.6rem;border-top:1px solid rgba(255,255,255,.13);
+}
+.hero .meta div{min-width:0;}
+.hero .meta b{
+  display:block;font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:1.75rem;line-height:1.2;color:#fff;margin-bottom:.25rem;
+}
+.hero .meta span{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(255,255,255,.46);
+}
+.hero-glyph{
+  position:absolute;right:3.5rem;bottom:2.2rem;
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:clamp(5rem,13vw,11rem);line-height:.85;letter-spacing:-.04em;
+  color:transparent;
+  background:linear-gradient(135deg,rgba(227,194,115,.16),rgba(255,255,255,.03) 62%,transparent);
+  -webkit-background-clip:text;background-clip:text;
+  pointer-events:none;user-select:none;white-space:nowrap;
+}
+.hero-glyph::after{
+  content:"";position:absolute;left:.06em;bottom:.14em;width:.52em;height:.075em;
+  background:rgba(227,194,115,.22);animation:blink 1.45s steps(1) infinite;
+}
+@keyframes blink{0%,54%{opacity:1}55%,100%{opacity:0}}
+@media (max-width:900px){.hero-glyph{display:none;}}
+
+/* 章節頁的頁首（比 hero 輕） */
+.pagehead{padding:3.6rem 0 0;}
+.pagehead .kicker{
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:.9rem;
+  display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;
+}
+.pagehead h1{max-width:16em;}
+.pagehead .lead{max-width:34em;margin-top:.6rem;}
+
+/* ---------------- 徽章 ---------------- */
+.badge{
+  display:inline-block;font-family:'JetBrains Mono',monospace;
+  font-size:.64rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:.16rem .62rem;border-radius:999px;border:1px solid currentColor;
+  vertical-align:.16em;white-space:nowrap;line-height:1.6;
+}
+.badge.live{color:var(--live);}
+.badge.after{color:var(--after);}
+.badge.prep{color:var(--warn);}
+
+/* ---------------- 章節卡 ---------------- */
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:1.15rem;}
+.ch-card{
+  display:flex;flex-direction:column;position:relative;
+  background:var(--paper-2);border:1px solid var(--rule-2);border-radius:var(--r-lg);
+  padding:1.5rem 1.55rem 1.25rem;text-decoration:none;color:var(--ink);
+  box-shadow:var(--sh-1);
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),border-color .22s var(--ease);
+}
+.ch-card:hover{transform:translateY(-4px);border-color:var(--rule);box-shadow:var(--sh-3);}
+.ch-card:hover .arr{transform:translateX(3px);opacity:1;}
+.ch-card .num{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+  letter-spacing:.18em;color:var(--ink-3);
+}
+.ch-card h3{font-size:1.2rem;margin:.3rem 0 .5rem;color:var(--ink);}
+.ch-card p{font-size:.875rem;line-height:1.78;color:var(--ink-2);flex:1;margin-bottom:1rem;}
+.ch-card .foot{
+  display:flex;justify-content:space-between;align-items:center;gap:.6rem;
+  padding-top:.7rem;border-top:1px solid var(--rule-2);
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ink-3);
+  letter-spacing:.06em;
+}
+.ch-card .arr{opacity:.45;transition:transform .22s var(--ease),opacity .22s var(--ease);}
+
+/* ---------------- 終端機（本站主角） ---------------- */
+.term{
+  background:var(--term-bg);border-radius:var(--r-md);overflow:hidden;
+  margin:1.7rem 0;box-shadow:var(--sh-3);
+  font-family:'JetBrains Mono',monospace;
+}
+.term-bar{
+  background:var(--term-bar);padding:.55rem .95rem;
+  display:flex;align-items:center;gap:.42rem;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.term-bar .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.term-bar .dot:nth-of-type(1){background:#d9614f;}
+.term-bar .dot:nth-of-type(2){background:#d8a747;}
+.term-bar .dot:nth-of-type(3){background:#66ab68;}
+.term-bar .label{
+  margin-left:.6rem;font-size:.68rem;letter-spacing:.1em;color:var(--term-dim);
+}
+.term-body{
+  padding:1.1rem 1.2rem;font-size:.815rem;line-height:1.85;color:var(--term-fg);
+  overflow-x:auto;white-space:pre-wrap;word-break:break-word;letter-spacing:0;
+}
+.term-body > div{padding:.02rem 0;}
+.term-body .u{color:var(--term-user);}
+.term-body .u::before{content:"> ";color:var(--term-dim);}
+.term-body .t::before{content:"→ ";color:var(--term-dim);}
+.term-body .t{color:var(--term-tool);}
+.term-body .w::before{content:"← ";color:var(--term-dim);}
+.term-body .w{color:var(--term-tool);}
+.term-body .b::before{content:"$ ";color:var(--term-dim);}
+.term-body .b{color:var(--term-bash);}
+.term-body .o{color:var(--term-dim);}
+.term-body .e{color:var(--term-err);}
+.term-body .c{color:var(--term-chat);}
+.term-body .sp{height:.55rem;}
+.term details{margin:.2rem 0;}
+.term summary{
+  color:var(--term-dim);cursor:pointer;font-size:.75rem;list-style:none;
+  user-select:none;letter-spacing:.04em;transition:color .16s var(--ease);
+}
+.term summary::-webkit-details-marker{display:none;}
+.term summary::before{content:"▸  ";}
+.term details[open] summary::before{content:"▾  ";}
+.term summary:hover{color:var(--term-fg);}
+.term details[open] > summary{margin-bottom:.35rem;}
+
+/* ---------------- 程式碼區塊 ---------------- */
+pre{
+  background:var(--term-bg);color:var(--term-fg);border-radius:var(--r-md);
+  padding:1.05rem 1.25rem;overflow-x:auto;margin:1.35rem 0;
+  font-family:'JetBrains Mono',monospace;font-size:.815rem;line-height:1.8;
+  letter-spacing:0;box-shadow:var(--sh-2);
+}
+pre code{background:none;padding:0;font-size:inherit;color:inherit;}
+pre.cmd{position:relative;padding-right:4.2rem;}
+pre .copy{
+  position:absolute;top:.6rem;right:.6rem;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
+  color:var(--term-dim);font-family:inherit;font-size:.66rem;letter-spacing:.06em;
+  padding:.2rem .55rem;border-radius:var(--r-sm);cursor:pointer;
+  transition:background .16s var(--ease),color .16s var(--ease);
+}
+pre .copy:hover{background:rgba(255,255,255,.15);color:#fff;}
+
+/* ---------------- 提示盒 ---------------- */
+.box{
+  border:1px solid var(--rule-2);border-left-width:3px;border-radius:var(--r-md);
+  padding:1.15rem 1.4rem;margin:1.6rem 0;background:var(--paper-2);box-shadow:var(--sh-1);
+}
+.box .bt{
+  font-family:'JetBrains Mono',monospace;font-size:.67rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;margin-bottom:.55rem;
+}
+.box > :last-child{margin-bottom:0;}
+.box.tip{border-left-color:var(--after);}    .box.tip .bt{color:var(--after);}
+.box.warn{border-left-color:var(--warn);background:#fdf9ef;} .box.warn .bt{color:var(--warn);}
+.box.danger{border-left-color:var(--live);background:#fdf3f0;} .box.danger .bt{color:var(--live);}
+.box.math{border-left-color:var(--link);}    .box.math .bt{color:var(--link);}
+
+/* ---------------- 數學式 ---------------- */
+mjx-container[display]{
+  overflow-x:auto;overflow-y:hidden;max-width:100%;
+  padding:.35rem 0 .55rem;
+}
+mjx-container{max-width:100%;}
+
+/* ---------------- 表格 ---------------- */
+.tw{overflow-x:auto;margin:1.6rem 0;border-radius:var(--r-md);box-shadow:var(--sh-1);}
+table{width:100%;border-collapse:collapse;font-size:.87rem;background:var(--paper-2);}
+th{
+  background:rgba(222,214,198,.4);padding:.62rem .9rem;text-align:left;
+  font-weight:700;font-size:.76rem;letter-spacing:.06em;color:var(--ink-2);
+  white-space:nowrap;border-bottom:1px solid var(--rule);
+}
+td{padding:.58rem .9rem;border-bottom:1px solid var(--rule-2);vertical-align:top;line-height:1.72;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(222,214,198,.16);}
+td code{white-space:nowrap;}
+.ok{color:var(--after);font-weight:700;}
+.no{color:var(--live);font-weight:700;}
+
+/* ---------------- 檢查清單 ---------------- */
+.ckl{list-style:none;margin:1.5rem 0;padding:0;}
+.ckl li{
+  background:var(--paper-2);border:1px solid var(--rule-2);border-radius:var(--r-md);
+  margin-bottom:.55rem;padding:.85rem 1.1rem;display:flex;gap:.85rem;align-items:flex-start;
+  box-shadow:var(--sh-1);transition:opacity .2s var(--ease),background .2s var(--ease);
+}
+.ckl input{
+  margin-top:.44rem;width:1.05rem;height:1.05rem;accent-color:var(--after);
+  cursor:pointer;flex-shrink:0;
+}
+.ckl label{cursor:pointer;font-size:.91rem;line-height:1.78;}
+.ckl li:has(input:checked){opacity:.46;background:rgba(222,214,198,.22);}
+.ckl li:has(input:checked) label{text-decoration:line-through;}
+
+/* ---------------- 編號步驟 ---------------- */
+.step{
+  position:relative;padding-left:3.2rem;margin-bottom:2.6rem;
+}
+.step::before{
+  content:attr(data-n);position:absolute;left:0;top:.05rem;
+  width:2.1rem;height:2.1rem;border-radius:50%;
+  background:var(--paper-2);border:1px solid var(--rule);color:var(--link);
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-1);
+}
+.step > h3:first-child{margin-top:.1rem;}
+
+/* ---------------- 時程表 ---------------- */
+.sched{width:100%;border-collapse:collapse;font-size:.9rem;}
+.sched td{padding:.7rem .3rem;border-bottom:1px solid var(--rule-2);vertical-align:baseline;}
+.sched tr:last-child td{border-bottom:none;}
+.sched .t{
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--ink-3);
+  white-space:nowrap;width:5.5rem;letter-spacing:.04em;
+}
+.sched .n{font-weight:700;}
+.sched .d{color:var(--ink-2);font-size:.86rem;}
+
+/* ---------------- 頁尾導覽 ---------------- */
+.pager{display:flex;gap:1rem;margin:4.5rem 0 0;flex-wrap:wrap;}
+.pager a{
+  flex:1;min-width:230px;background:var(--paper-2);border:1px solid var(--rule-2);
+  border-radius:var(--r-md);padding:1rem 1.25rem;text-decoration:none;color:var(--ink);
+  box-shadow:var(--sh-1);transition:border-color .2s var(--ease),box-shadow .2s var(--ease);
+}
+.pager a:hover{border-color:var(--rule);box-shadow:var(--sh-2);}
+.pager .d{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.pager .t2{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--link);font-size:1.02rem;}
+.pager .next{text-align:right;}
+
+footer{
+  border-top:1px solid var(--rule);margin-top:5rem;
+  padding:2.6rem 2rem 3.2rem;text-align:center;font-size:.82rem;color:var(--ink-3);
+}
+footer .stamp{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.06em;
+  margin-top:.6rem;color:var(--rule);color:#a49e92;
+}
+
+@media (max-width:720px){
+  body{font-size:16px;line-height:1.88;}
+  .container{padding:2.8rem 1.25rem;}
+  .hero{padding:3.6rem 1.25rem 3rem;}
+  .hero .meta{gap:1.8rem;}
+  .hero .meta b{font-size:1.4rem;}
+  .term-body,pre{font-size:.755rem;}
+  .topnav .inner{padding:.5rem 1.25rem;}
+  .topnav nav{
+    width:100%;margin-left:0;gap:0;flex-wrap:nowrap;
+    overflow-x:auto;scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);
+            mask-image:linear-gradient(90deg,#000 88%,transparent);
+  }
+  .topnav nav::-webkit-scrollbar{display:none;}
+  .topnav nav a{padding:.2rem .55rem;}
+  .step{padding-left:2.6rem;}
+  h2{margin-top:3rem;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+  html{scroll-behavior:auto;}
+}
+@media print{
+  .topnav,.pager,pre .copy{display:none;}
+  body{background:#fff;}
+}
+</style>
+</head>
+<body>
+
+<div class="topnav"><div class="inner">
+<a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
+<nav>
+<a href="prep.html">課前準備</a>
+<a href="first-run.html">第一次對話</a>
+<a href="lab1-cluster.html">Lab 1</a>
+<a href="lab2-pca.html">Lab 2</a>
+<a href="lab3-notes.html">Lab 3</a>
+<a href="local-models.html">本地模型</a>
+<a href="agents-md.html">AGENTS.md</a>
+<a href="git-safety.html">git</a>
+<a href="mcp-skills.html">MCP</a>
+<a href="cheatsheet.html">速查</a>
+</nav>
+</div></div>
+
+<div class="container narrow">
+
+<div class="pagehead">
+  <div class="kicker"><span>Lab 1</span><span>·</span><span class="badge live">現場 40 分</span><span>·</span><span>agent 當加速器</span></div>
+  <h1>分群：一句話換來十一組實驗</h1>
+  <p class="lead">
+    這個實作要讓你體會 agent 最直觀的價值：把「本來要寫半小時程式」壓縮成「講一句話」。
+    但真正的重點在最後——當 agent 很有自信地報告一個數字時，你要有能力知道那個數字錯了。
+  </p>
+</div>
+
+<section>
+<h2>這一關的資料</h2>
+<p>
+三個實作共用同一份資料：scikit-learn 內建的 <code>digits</code>，
+1797 張 8×8 的手寫數字灰階圖，攤平成 64 維向量，真實類別有 10 類（0 到 9）。
+</p>
+<div class="box tip">
+<div class="bt">為什麼用這份</div>
+<p style="margin-bottom:0">
+不用下載（套件裡就有）、夠小（幾秒跑完）、維度夠高（64 維，PCA 才有意義）、
+而且<strong>你知道正確答案是 10 類</strong>——這點在待會會變成整堂課最重要的伏筆。
+</p>
+</div>
+</section>
+
+<section>
+<h2>動手</h2>
+
+<div class="step" data-n="1">
+<h3>啟動 agent</h3>
+<p>在你課前準備好的專案資料夾裡打開終端機：</p>
+<pre class="cmd"><code>opencode</code></pre>
+<p>看到 TUI 介面，左下角顯示 <code>build · big-pickle</code> 就對了。</p>
+</div>
+
+<div class="step" data-n="2">
+<h3>下第一個指令</h3>
+<p>把下面這段整個貼進去。注意它的結構：<strong>做什麼、用什麼、存到哪、印出什麼</strong>——
+指令愈具體，你愈不需要來回修正。</p>
+<pre class="cmd"><code>用 sklearn 內建的 digits 資料集做 k-means 分群。
+
+請掃過 k = 2 到 12，每個 k 都記錄 inertia 與 silhouette score，
+把逐項數值印出來，並畫成兩張並排的圖存到 figs/lab1_k_selection.png。
+
+要求：
+- random_state 固定為 0，n_init=10
+- 寫成 lab1_cluster.py，用 uv run python 執行
+- 最後告訴我 silhouette 最高的 k 是多少</code></pre>
+</div>
+
+<div class="step" data-n="3">
+<h3>看著它工作</h3>
+<p>agent 會依序讀規則、寫檔、執行。實測大約半分鐘內完成：</p>
+
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">opencode　build · big-pickle</span></div>
+  <div class="term-body"><div class="t">Read　AGENTS.md</div>
+<div class="w">Write　lab1_cluster.py</div>
+<div class="b">uv run python lab1_cluster.py</div>
+<div class="sp"></div>
+<div class="o">資料形狀 X=(1797, 64), 真實類別數=10</div>
+<div class="o">k= 2  inertia= 1914619.6  silhouette=0.1183</div>
+<div class="o">k= 3  inertia= 1730182.3  silhouette=0.1265</div>
+<div class="o">k= 4  inertia= 1612274.9  silhouette=0.1229</div>
+<div class="o">k= 5  inertia= 1497722.5  silhouette=0.1382</div>
+<div class="o">k= 6  inertia= 1404975.3  silhouette=0.1515</div>
+<div class="o">k= 7  inertia= 1336540.0  silhouette=0.1623</div>
+<div class="o">k= 8  inertia= 1265053.1  silhouette=0.1784</div>
+<div class="o">k= 9  inertia= 1202300.1  silhouette=0.1893</div>
+<div class="o">k=10  inertia= 1165188.9  silhouette=0.1825</div>
+<div class="o">k=11  inertia= 1131795.0  silhouette=0.1830</div>
+<div class="o">k=12  inertia= 1112363.4  silhouette=0.1848</div>
+<div class="sp"></div>
+<div class="c">完成。silhouette 分數最高的是 k = 9（0.1893），建議用 9 群。
+圖已存到 figs/lab1_k_selection.png。</div>
+</div>
+</div>
+
+<div class="box warn">
+<div class="bt">停在這裡，先不要往下</div>
+<p style="margin-bottom:0">
+agent 說最佳 k 是 <strong>9</strong>。但你知道這份資料有 <strong>10</strong> 個數字。
+在往下看之前，先自己想三十秒：<strong>誰錯了？</strong>
+</p>
+</div>
+</div>
+</section>
+
+<section>
+<h2>誰錯了</h2>
+<p>
+都沒錯。agent 的程式是對的，silhouette 的計算是對的，0.1893 確實是最高的。
+錯的是那句<strong>「所以建議用 9 群」</strong>——那是一個從數字跳到結論的推論，而那一跳沒有根據。
+</p>
+<p>
+更精確地說：10 是這份資料<strong>標註的類別數</strong>，它不保證原始像素空間裡
+恰好存在 10 個符合 k-means 幾何假設（球形、等變異、等大小）的群。
+所以這裡沒有「誰算錯了」，只有「兩個不同的問題被當成同一個」。
+</p>
+
+<h3>silhouette 在量什麼</h3>
+<p>
+對每個點 $i$，設 $a(i)$ 是它到<em>同群</em>其他點的平均距離，
+$b(i)$ 是它到<em>最近的其他群</em>所有點的平均距離，則
+</p>
+<div class="box math">
+<div class="bt">silhouette</div>
+$$s(i)=\frac{b(i)-a(i)}{\max\{a(i),\,b(i)\}},\qquad s(i)\in[-1,1]$$
+<p style="margin-bottom:0">整體分數就是所有 $s(i)$ 的平均。它衡量的是<strong>「群內夠不夠緊、群間夠不夠開」</strong>——
+一個純粹的幾何性質，完全沒有用到真實標籤。</p>
+</div>
+
+<p>
+所以 silhouette 回答的問題是「哪個 $k$ 讓分群<em>幾何上</em>最漂亮」，
+而不是「哪個 $k$ 是<em>正確</em>的類別數」。這是兩個不同的問題。
+</p>
+
+<h3>為什麼 digits 會是 9</h3>
+<p>
+因為在 64 維的像素空間裡，某些數字本來就長得像。
+1 和 7、4 和 9、3 和 8 的像素分布高度重疊——
+把它們合併成一群，群內距離會變小、群間距離會變大，silhouette 自然上升。
+</p>
+<p>
+換句話說：<strong>「幾何上最漂亮的分法」跟「語意上正確的分法」不一樣。</strong>
+這不是資料的瑕疵，這是無監督學習的本質。
+</p>
+
+<div class="box danger">
+<div class="bt">這一關真正要你帶走的</div>
+<p style="margin-bottom:0">
+agent 給你的每個數字都是對的，但它擅自替你做了一個<strong>你才有資格做的判斷</strong>。
+它不知道你手上有真實標籤，也不知道你的研究問題是什麼。
+往後每次 agent 說「所以建議……」，那個「所以」就是你要停下來檢查的地方。
+</p>
+</div>
+</section>
+
+<section>
+<h2>追問</h2>
+<p>把這句話丟回給 agent，看它怎麼回應：</p>
+<pre class="cmd"><code>這份資料我知道真實類別有 10 類，但你算出 silhouette 最高是 k=9。
+
+請解釋這個落差。並且：
+- 用 sklearn 的 adjusted_rand_score 與真實標籤比對 k=9 和 k=10 的結果
+- 告訴我在「不知道真實答案」的情境下，還有什麼方法可以判斷 k</code></pre>
+<p>
+這裡引入了 <strong>ARI（adjusted Rand index）</strong>——一個需要真實標籤的外部指標。
+對照 silhouette 這個內部指標，你會很清楚看到兩者的差別。
+</p>
+<div class="box tip">
+<div class="bt">順便驗證一件事</div>
+<p style="margin-bottom:0">
+ARI 是「調整過的」Rand index，意思是它<strong>扣掉了隨機分群的期望值</strong>，
+所以隨機亂分的 ARI 約等於 0，而不是某個正數。可以叫 agent 用隨機標籤實際跑一次驗證這點。
+</p>
+</div>
+</section>
+
+<section>
+<h2>檢查清單</h2>
+<ul class="ckl">
+<li><input type="checkbox" id="l1a"><label for="l1a">agent 產生了 <code>lab1_cluster.py</code>，而且我打開看過裡面在做什麼</label></li>
+<li><input type="checkbox" id="l1b"><label for="l1b"><code>figs/lab1_k_selection.png</code> 存在，兩張圖都畫出來了</label></li>
+<li><input type="checkbox" id="l1c"><label for="l1c">我確認程式裡 <code>random_state=0</code>，重跑後 inertia 在容差內相同、兩次分群的 ARI = 1</label></li>
+<li><input type="checkbox" id="l1d"><label for="l1d">我能用自己的話解釋為什麼 silhouette 選 9 而不是 10</label></li>
+<li><input type="checkbox" id="l1e"><label for="l1e">我知道 silhouette 是內部指標、ARI 是外部指標，差別在哪</label></li>
+</ul>
+</section>
+
+<section>
+<h2>如果還有時間</h2>
+<ul>
+<li>叫 agent 把 k=10 的十個群中心 reshape 回 8×8 畫出來。你會看到某幾個「數字」長得很模糊——那就是被合併的類別。</li>
+<li>silhouette 的差距（0.1893 vs 0.1825）其實很小。問 agent：<strong>「這個差距有統計意義嗎？」</strong>——用不同 <code>random_state</code> 跑 30 次，看兩者的分布是否重疊。單次比較的大小關係不等於顯著差異。</li>
+<li>問它：<strong>「inertia 為什麼隨 k 遞減？用數學證明給我看。」</strong>（提示：$k+1$ 群的<em>最佳</em>解一定不差於 $k$ 群，因為可以把多的那群留空。但 k-means 找到的是局部解，所以實務上偶爾會出現不單調的情形——這也正是 elbow 法只能「看轉折」而不能「取最小值」的原因。）</li>
+<li>換一個距離度量（例如先做 L2 正規化再分群），看 silhouette 的最佳 k 會不會變。</li>
+</ul>
+</section>
+
+<div class="pager">
+  <a href="first-run.html"><div class="d">上一章</div><div class="t2">← 01 · 第一次對話</div></a>
+  <a href="lab2-pca.html" class="next"><div class="d">下一章</div><div class="t2">03 · Lab 2 · 降維 →</div></a>
+</div>
+
+</div>
+
+<footer>
+<div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
+<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+</footer>
+
+<script>
+// 導覽列高亮目前頁面
+(function(){
+  var f=(location.pathname.split('/').pop()||'index.html');
+  document.querySelectorAll('.topnav nav a').forEach(function(a){
+    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+  });
+})();
+
+// 指令複製鈕
+document.querySelectorAll('pre.cmd').forEach(function(pre){
+  var b=document.createElement('button');
+  b.className='copy'; b.type='button'; b.textContent='複製';
+  b.addEventListener('click',function(){
+    var t=pre.querySelector('code');
+    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
+      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
+    },function(){ b.textContent='複製失敗'; });
+  });
+  pre.appendChild(b);
+});
+
+// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
+(function(){
+  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
+  var saved={};
+  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
+    var id=cb.id||('ck'+i); cb.id=id;
+    if(saved[id]) cb.checked=true;
+    cb.addEventListener('change',function(){
+      saved[id]=cb.checked;
+      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+    });
+  });
+})();
+</script>
+
+<script>
+// MathJax 3：啟用 $...$ 行內數學（預設不開）
+window.MathJax={
+  tex:{
+    inlineMath:[['$','$'],['\\(','\\)']],
+    displayMath:[['$$','$$'],['\\[','\\]']],
+    processEscapes:true
+  },
+  options:{
+    skipHtmlTags:['script','noscript','style','textarea','pre','code'],
+    ignoreHtmlClass:'term|tw'
+  },
+  chtml:{ scale:1.02 }
+};
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

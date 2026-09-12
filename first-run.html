@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第一次對話｜OpenCode × AI-Math 工作坊</title>
+<meta name="description" content="TUI 操作、權限機制、session 的邊界。搞懂你在跟什麼東西說話。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* =========================================================================
+   OpenCode × AI-Math 工作坊　設計系統
+   調色盤沿用 selfstudy 系列（暖紙色 / 靛藍 / 赤陶 / 松綠）
+   排版走編輯設計：大字級對比、慷慨留白、細線分隔、克制用色
+   ========================================================================= */
+:root{
+  --paper:#f6f2e9;
+  --paper-2:#fffdf8;
+  --ink:#1b1b2b;
+  --ink-2:#4a4a5e;
+  --ink-3:#7d7a72;
+  --rule:#ded6c6;
+  --rule-2:#ece5d6;
+
+  --live:#b8503c;   /* 現場 */
+  --link:#2a3c78;   /* 連結・標題 */
+  --after:#1a6247;  /* 課後・通過 */
+  --warn:#96660c;   /* 注意 */
+
+  --term-bg:#191922;
+  --term-bar:#23232f;
+  --term-fg:#d8d5cc;
+  --term-dim:#807d8e;
+  --term-user:#e3c273;
+  --term-tool:#77aecb;
+  --term-bash:#8ec392;
+  --term-chat:#a99fd0;
+  --term-err:#dd8877;
+
+  --r-sm:6px; --r-md:10px; --r-lg:16px;
+  --sh-1:0 1px 2px rgba(27,27,43,.04);
+  --sh-2:0 4px 16px rgba(27,27,43,.07);
+  --sh-3:0 14px 40px rgba(27,27,43,.13);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{
+  font-family:'Noto Sans TC',system-ui,sans-serif;
+  background-color:var(--paper);
+  /* 紙張紋理：兩層極淡的徑向漸層，不使用圖檔 */
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(184,80,60,.028), transparent 42%),
+    radial-gradient(circle at 82% 78%, rgba(42,60,120,.030), transparent 46%);
+  background-attachment:fixed;
+  color:var(--ink);
+  font-size:17px;
+  line-height:1.92;
+  letter-spacing:.01em;
+  text-wrap:pretty;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;height:auto;}
+::selection{background:rgba(227,194,115,.42);}
+
+/* ---------------- 導覽列 ---------------- */
+.topnav{
+  position:sticky;top:0;z-index:60;
+  background:rgba(246,242,233,.88);
+  backdrop-filter:saturate(1.5) blur(12px);
+  border-bottom:1px solid var(--rule-2);
+}
+.topnav .inner{
+  max-width:1140px;margin:0 auto;padding:.6rem 2rem;
+  display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;
+}
+.topnav .brand{
+  font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:700;
+  letter-spacing:.08em;color:var(--ink);text-decoration:none;white-space:nowrap;
+}
+.topnav .brand i{font-style:normal;color:var(--live);margin:0 .15em;}
+.topnav nav{display:flex;gap:.05rem;flex-wrap:wrap;margin-left:auto;}
+.topnav nav a{
+  font-size:.78rem;color:var(--ink-3);text-decoration:none;
+  padding:.2rem .6rem;border-radius:var(--r-sm);white-space:nowrap;
+  transition:color .16s var(--ease),background .16s var(--ease);
+}
+.topnav nav a:hover{color:var(--ink);background:rgba(255,253,248,.9);}
+.topnav nav a[aria-current]{color:var(--live);font-weight:700;}
+
+/* ---------------- 版面骨架 ---------------- */
+.container{max-width:1140px;margin:0 auto;padding:4.5rem 2rem;}
+.container.narrow{max-width:780px;}
+section{margin-bottom:4.5rem;}
+section:last-child{margin-bottom:0;}
+
+/* ---------------- 字級階層 ---------------- */
+h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.1rem,5.2vw,3.4rem);
+  line-height:1.28;letter-spacing:-.015em;margin-bottom:1rem;
+}
+h2{
+  font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:clamp(1.45rem,2.6vw,1.85rem);
+  line-height:1.45;letter-spacing:-.01em;
+  margin:4rem 0 1.2rem;padding-top:1.2rem;
+  border-top:1px solid var(--rule);
+  position:relative;
+}
+h2::before{
+  content:"";position:absolute;top:-1px;left:0;width:56px;height:2px;background:var(--live);
+}
+h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.16rem;
+  line-height:1.6;margin:2.4rem 0 .7rem;color:var(--link);
+}
+h4{font-size:.98rem;font-weight:700;margin:1.6rem 0 .5rem;color:var(--ink-2);}
+p{margin-bottom:1.15rem;}
+.lead{font-size:1.09rem;line-height:1.95;color:var(--ink-2);}
+ul,ol{margin:0 0 1.2rem 1.5rem;}
+li{margin-bottom:.45rem;}
+li::marker{color:var(--ink-3);}
+a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:.2em;}
+a:hover{color:var(--live);}
+hr{border:0;border-top:1px solid var(--rule);margin:3rem 0;}
+strong{font-weight:700;color:var(--ink);}
+em{font-style:normal;background:linear-gradient(transparent 62%,rgba(227,194,115,.5) 0);}
+code{
+  font-family:'JetBrains Mono',monospace;font-size:.85em;
+  background:rgba(222,214,198,.42);padding:.12em .4em;border-radius:4px;
+  letter-spacing:0;
+  /* 一長串連續的行內 code 會撐破手機版，允許在任何位置斷行 */
+  overflow-wrap:anywhere;word-break:break-word;
+}
+p,li,td,th,h1,h2,h3,h4,dd,dt{overflow-wrap:break-word;}
+
+/* ---------------- Hero ---------------- */
+.hero{
+  background:
+    radial-gradient(ellipse 120% 80% at 78% 8%, rgba(227,194,115,.10), transparent 58%),
+    linear-gradient(152deg,#262636 0%,#16161f 62%,#101018 100%);
+  color:#f4f0e7;padding:6rem 2rem 5rem;position:relative;overflow:hidden;
+}
+.hero .inner{max-width:1140px;margin:0 auto;position:relative;z-index:2;}
+.hero .kicker{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--term-user);
+  margin-bottom:1.3rem;display:flex;align-items:center;gap:.8rem;
+}
+.hero .kicker::after{content:"";flex:1;max-width:180px;height:1px;background:rgba(227,194,115,.3);}
+.hero h1{color:#fff;max-width:18em;margin-bottom:1.2rem;}
+.hero h1 i{font-style:normal;color:var(--term-user);}
+.hero .sub{
+  font-size:1.06rem;line-height:1.9;color:rgba(255,255,255,.74);
+  max-width:38em;margin-bottom:2.6rem;
+}
+.hero .meta{
+  display:flex;gap:3.2rem;flex-wrap:wrap;
+  padding-top:1.6rem;border-top:1px solid rgba(255,255,255,.13);
+}
+.hero .meta div{min-width:0;}
+.hero .meta b{
+  display:block;font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:1.75rem;line-height:1.2;color:#fff;margin-bottom:.25rem;
+}
+.hero .meta span{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(255,255,255,.46);
+}
+.hero-glyph{
+  position:absolute;right:3.5rem;bottom:2.2rem;
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:clamp(5rem,13vw,11rem);line-height:.85;letter-spacing:-.04em;
+  color:transparent;
+  background:linear-gradient(135deg,rgba(227,194,115,.16),rgba(255,255,255,.03) 62%,transparent);
+  -webkit-background-clip:text;background-clip:text;
+  pointer-events:none;user-select:none;white-space:nowrap;
+}
+.hero-glyph::after{
+  content:"";position:absolute;left:.06em;bottom:.14em;width:.52em;height:.075em;
+  background:rgba(227,194,115,.22);animation:blink 1.45s steps(1) infinite;
+}
+@keyframes blink{0%,54%{opacity:1}55%,100%{opacity:0}}
+@media (max-width:900px){.hero-glyph{display:none;}}
+
+/* 章節頁的頁首（比 hero 輕） */
+.pagehead{padding:3.6rem 0 0;}
+.pagehead .kicker{
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:.9rem;
+  display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;
+}
+.pagehead h1{max-width:16em;}
+.pagehead .lead{max-width:34em;margin-top:.6rem;}
+
+/* ---------------- 徽章 ---------------- */
+.badge{
+  display:inline-block;font-family:'JetBrains Mono',monospace;
+  font-size:.64rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:.16rem .62rem;border-radius:999px;border:1px solid currentColor;
+  vertical-align:.16em;white-space:nowrap;line-height:1.6;
+}
+.badge.live{color:var(--live);}
+.badge.after{color:var(--after);}
+.badge.prep{color:var(--warn);}
+
+/* ---------------- 章節卡 ---------------- */
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:1.15rem;}
+.ch-card{
+  display:flex;flex-direction:column;position:relative;
+  background:var(--paper-2);border:1px solid var(--rule-2);border-radius:var(--r-lg);
+  padding:1.5rem 1.55rem 1.25rem;text-decoration:none;color:var(--ink);
+  box-shadow:var(--sh-1);
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),border-color .22s var(--ease);
+}
+.ch-card:hover{transform:translateY(-4px);border-color:var(--rule);box-shadow:var(--sh-3);}
+.ch-card:hover .arr{transform:translateX(3px);opacity:1;}
+.ch-card .num{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+  letter-spacing:.18em;color:var(--ink-3);
+}
+.ch-card h3{font-size:1.2rem;margin:.3rem 0 .5rem;color:var(--ink);}
+.ch-card p{font-size:.875rem;line-height:1.78;color:var(--ink-2);flex:1;margin-bottom:1rem;}
+.ch-card .foot{
+  display:flex;justify-content:space-between;align-items:center;gap:.6rem;
+  padding-top:.7rem;border-top:1px solid var(--rule-2);
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ink-3);
+  letter-spacing:.06em;
+}
+.ch-card .arr{opacity:.45;transition:transform .22s var(--ease),opacity .22s var(--ease);}
+
+/* ---------------- 終端機（本站主角） ---------------- */
+.term{
+  background:var(--term-bg);border-radius:var(--r-md);overflow:hidden;
+  margin:1.7rem 0;box-shadow:var(--sh-3);
+  font-family:'JetBrains Mono',monospace;
+}
+.term-bar{
+  background:var(--term-bar);padding:.55rem .95rem;
+  display:flex;align-items:center;gap:.42rem;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.term-bar .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.term-bar .dot:nth-of-type(1){background:#d9614f;}
+.term-bar .dot:nth-of-type(2){background:#d8a747;}
+.term-bar .dot:nth-of-type(3){background:#66ab68;}
+.term-bar .label{
+  margin-left:.6rem;font-size:.68rem;letter-spacing:.1em;color:var(--term-dim);
+}
+.term-body{
+  padding:1.1rem 1.2rem;font-size:.815rem;line-height:1.85;color:var(--term-fg);
+  overflow-x:auto;white-space:pre-wrap;word-break:break-word;letter-spacing:0;
+}
+.term-body > div{padding:.02rem 0;}
+.term-body .u{color:var(--term-user);}
+.term-body .u::before{content:"> ";color:var(--term-dim);}
+.term-body .t::before{content:"→ ";color:var(--term-dim);}
+.term-body .t{color:var(--term-tool);}
+.term-body .w::before{content:"← ";color:var(--term-dim);}
+.term-body .w{color:var(--term-tool);}
+.term-body .b::before{content:"$ ";color:var(--term-dim);}
+.term-body .b{color:var(--term-bash);}
+.term-body .o{color:var(--term-dim);}
+.term-body .e{color:var(--term-err);}
+.term-body .c{color:var(--term-chat);}
+.term-body .sp{height:.55rem;}
+.term details{margin:.2rem 0;}
+.term summary{
+  color:var(--term-dim);cursor:pointer;font-size:.75rem;list-style:none;
+  user-select:none;letter-spacing:.04em;transition:color .16s var(--ease);
+}
+.term summary::-webkit-details-marker{display:none;}
+.term summary::before{content:"▸  ";}
+.term details[open] summary::before{content:"▾  ";}
+.term summary:hover{color:var(--term-fg);}
+.term details[open] > summary{margin-bottom:.35rem;}
+
+/* ---------------- 程式碼區塊 ---------------- */
+pre{
+  background:var(--term-bg);color:var(--term-fg);border-radius:var(--r-md);
+  padding:1.05rem 1.25rem;overflow-x:auto;margin:1.35rem 0;
+  font-family:'JetBrains Mono',monospace;font-size:.815rem;line-height:1.8;
+  letter-spacing:0;box-shadow:var(--sh-2);
+}
+pre code{background:none;padding:0;font-size:inherit;color:inherit;}
+pre.cmd{position:relative;padding-right:4.2rem;}
+pre .copy{
+  position:absolute;top:.6rem;right:.6rem;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
+  color:var(--term-dim);font-family:inherit;font-size:.66rem;letter-spacing:.06em;
+  padding:.2rem .55rem;border-radius:var(--r-sm);cursor:pointer;
+  transition:background .16s var(--ease),color .16s var(--ease);
+}
+pre .copy:hover{background:rgba(255,255,255,.15);color:#fff;}
+
+/* ---------------- 提示盒 ---------------- */
+.box{
+  border:1px solid var(--rule-2);border-left-width:3px;border-radius:var(--r-md);
+  padding:1.15rem 1.4rem;margin:1.6rem 0;background:var(--paper-2);box-shadow:var(--sh-1);
+}
+.box .bt{
+  font-family:'JetBrains Mono',monospace;font-size:.67rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;margin-bottom:.55rem;
+}
+.box > :last-child{margin-bottom:0;}
+.box.tip{border-left-color:var(--after);}    .box.tip .bt{color:var(--after);}
+.box.warn{border-left-color:var(--warn);background:#fdf9ef;} .box.warn .bt{color:var(--warn);}
+.box.danger{border-left-color:var(--live);background:#fdf3f0;} .box.danger .bt{color:var(--live);}
+.box.math{border-left-color:var(--link);}    .box.math .bt{color:var(--link);}
+
+/* ---------------- 數學式 ---------------- */
+mjx-container[display]{
+  overflow-x:auto;overflow-y:hidden;max-width:100%;
+  padding:.35rem 0 .55rem;
+}
+mjx-container{max-width:100%;}
+
+/* ---------------- 表格 ---------------- */
+.tw{overflow-x:auto;margin:1.6rem 0;border-radius:var(--r-md);box-shadow:var(--sh-1);}
+table{width:100%;border-collapse:collapse;font-size:.87rem;background:var(--paper-2);}
+th{
+  background:rgba(222,214,198,.4);padding:.62rem .9rem;text-align:left;
+  font-weight:700;font-size:.76rem;letter-spacing:.06em;color:var(--ink-2);
+  white-space:nowrap;border-bottom:1px solid var(--rule);
+}
+td{padding:.58rem .9rem;border-bottom:1px solid var(--rule-2);vertical-align:top;line-height:1.72;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(222,214,198,.16);}
+td code{white-space:nowrap;}
+.ok{color:var(--after);font-weight:700;}
+.no{color:var(--live);font-weight:700;}
+
+/* ---------------- 檢查清單 ---------------- */
+.ckl{list-style:none;margin:1.5rem 0;padding:0;}
+.ckl li{
+  background:var(--paper-2);border:1px solid var(--rule-2);border-radius:var(--r-md);
+  margin-bottom:.55rem;padding:.85rem 1.1rem;display:flex;gap:.85rem;align-items:flex-start;
+  box-shadow:var(--sh-1);transition:opacity .2s var(--ease),background .2s var(--ease);
+}
+.ckl input{
+  margin-top:.44rem;width:1.05rem;height:1.05rem;accent-color:var(--after);
+  cursor:pointer;flex-shrink:0;
+}
+.ckl label{cursor:pointer;font-size:.91rem;line-height:1.78;}
+.ckl li:has(input:checked){opacity:.46;background:rgba(222,214,198,.22);}
+.ckl li:has(input:checked) label{text-decoration:line-through;}
+
+/* ---------------- 編號步驟 ---------------- */
+.step{
+  position:relative;padding-left:3.2rem;margin-bottom:2.6rem;
+}
+.step::before{
+  content:attr(data-n);position:absolute;left:0;top:.05rem;
+  width:2.1rem;height:2.1rem;border-radius:50%;
+  background:var(--paper-2);border:1px solid var(--rule);color:var(--link);
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-1);
+}
+.step > h3:first-child{margin-top:.1rem;}
+
+/* ---------------- 時程表 ---------------- */
+.sched{width:100%;border-collapse:collapse;font-size:.9rem;}
+.sched td{padding:.7rem .3rem;border-bottom:1px solid var(--rule-2);vertical-align:baseline;}
+.sched tr:last-child td{border-bottom:none;}
+.sched .t{
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--ink-3);
+  white-space:nowrap;width:5.5rem;letter-spacing:.04em;
+}
+.sched .n{font-weight:700;}
+.sched .d{color:var(--ink-2);font-size:.86rem;}
+
+/* ---------------- 頁尾導覽 ---------------- */
+.pager{display:flex;gap:1rem;margin:4.5rem 0 0;flex-wrap:wrap;}
+.pager a{
+  flex:1;min-width:230px;background:var(--paper-2);border:1px solid var(--rule-2);
+  border-radius:var(--r-md);padding:1rem 1.25rem;text-decoration:none;color:var(--ink);
+  box-shadow:var(--sh-1);transition:border-color .2s var(--ease),box-shadow .2s var(--ease);
+}
+.pager a:hover{border-color:var(--rule);box-shadow:var(--sh-2);}
+.pager .d{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.pager .t2{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--link);font-size:1.02rem;}
+.pager .next{text-align:right;}
+
+footer{
+  border-top:1px solid var(--rule);margin-top:5rem;
+  padding:2.6rem 2rem 3.2rem;text-align:center;font-size:.82rem;color:var(--ink-3);
+}
+footer .stamp{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.06em;
+  margin-top:.6rem;color:var(--rule);color:#a49e92;
+}
+
+@media (max-width:720px){
+  body{font-size:16px;line-height:1.88;}
+  .container{padding:2.8rem 1.25rem;}
+  .hero{padding:3.6rem 1.25rem 3rem;}
+  .hero .meta{gap:1.8rem;}
+  .hero .meta b{font-size:1.4rem;}
+  .term-body,pre{font-size:.755rem;}
+  .topnav .inner{padding:.5rem 1.25rem;}
+  .topnav nav{
+    width:100%;margin-left:0;gap:0;flex-wrap:nowrap;
+    overflow-x:auto;scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);
+            mask-image:linear-gradient(90deg,#000 88%,transparent);
+  }
+  .topnav nav::-webkit-scrollbar{display:none;}
+  .topnav nav a{padding:.2rem .55rem;}
+  .step{padding-left:2.6rem;}
+  h2{margin-top:3rem;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+  html{scroll-behavior:auto;}
+}
+@media print{
+  .topnav,.pager,pre .copy{display:none;}
+  body{background:#fff;}
+}
+</style>
+</head>
+<body>
+
+<div class="topnav"><div class="inner">
+<a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
+<nav>
+<a href="prep.html">課前準備</a>
+<a href="first-run.html">第一次對話</a>
+<a href="lab1-cluster.html">Lab 1</a>
+<a href="lab2-pca.html">Lab 2</a>
+<a href="lab3-notes.html">Lab 3</a>
+<a href="local-models.html">本地模型</a>
+<a href="agents-md.html">AGENTS.md</a>
+<a href="git-safety.html">git</a>
+<a href="mcp-skills.html">MCP</a>
+<a href="cheatsheet.html">速查</a>
+</nav>
+</div></div>
+
+<div class="container narrow">
+
+<div class="pagehead">
+  <div class="kicker"><span>01</span><span>·</span><span class="badge live">現場 30 分</span></div>
+  <h1>第一次對話</h1>
+</div>
+
+<h2>這一章你會學到</h2>
+<ul>
+<li>用一行指令啟動 opencode，看懂畫面上每一塊在說什麼</li>
+<li>送出你的第一個指令，並且看懂 agent 是「先想、再動手、再回報」</li>
+<li>在 agent 要改檔或跑指令時，看得懂權限對話框並做出選擇</li>
+<li>知道 session 是什麼、什麼時候該開新的、context 快滿了怎麼辦</li>
+</ul>
+<hr>
+<h2>1. 啟動</h2>
+<h3>1.1 安裝（如果你還沒裝）</h3>
+<p>Linux / macOS / WSL：</p>
+<pre class="cmd"><code>curl -fsSL https://opencode.ai/install | bash</code></pre>
+<p>Windows（PowerShell）：</p>
+<pre class="cmd"><code>winget install SST.opencode --accept-source-agreements --accept-package-agreements</code></pre>
+<p>確認裝好了：</p>
+<pre class="cmd"><code>opencode --version</code></pre>
+<p>本章所有內容都在 <code>1.18.30</code> 上實測。如果你的版本號不一樣，畫面可能會有差別。</p>
+<h3>1.2 建好 Python 環境</h3>
+<p>進到工作坊的專案資料夾（講師發的那個，例如 <code>ai-math-lab</code>），先把 Python 環境裝起來（第一次會跑幾分鐘）：</p>
+<pre class="cmd"><code>uv sync</code></pre>
+<p>檢查環境：</p>
+<pre class="cmd"><code>uv run python -c "import numpy, sklearn, matplotlib, networkx; print('環境 OK')"</code></pre>
+<p>這個專案一律用 <code>uv run python 檔名.py</code> 執行程式，不要用 <code>python</code>、<code>python3</code>，也不要用 <code>pip install</code>。要加套件用 <code>uv add 套件名</code>。這條規則已經寫在專案的 <code>AGENTS.md</code> 裡，agent 自己會遵守。</p>
+<h3>1.3 兩種啟動方式</h3>
+<p><strong>互動模式（本章都用這個）</strong>：</p>
+<pre class="cmd"><code>opencode</code></pre>
+<p>直接進入 TUI（終端機介面），可以一句一句對話，agent 要動手之前會停下來問你。</p>
+<p><strong>非互動模式（先知道有這個就好，這一章不要用）</strong>：</p>
+<pre class="cmd"><code>opencode run "讀 pyproject.toml，用一句話說明這個專案裝了哪些套件"</code></pre>
+<p><code>opencode run</code> 丟一句話進去、印出結果就結束。實測它<strong>不會問權限</strong>，會直接寫檔、直接執行指令。所以在你還不熟的階段，一律用 <code>opencode</code>（互動模式）。</p>
+<h3>1.4 模型不用設定</h3>
+<p>這個專案的 <code>opencode.json</code> 已經把模型指定成 <code>opencode/big-pickle</code>：</p>
+<pre class="cmd"><code>{
+  "model": "opencode/big-pickle"
+}</code></pre>
+<p><code>big-pickle</code> 不用登入、不用 API key、不用信用卡。啟動後畫面上會有一行提示 <code>Run /connect to add an AI provider and start coding</code> ——<strong>忽略它</strong>。那是給要接自己帳號的人看的，你不需要。</p>
+<hr>
+<h2>2. 認識畫面</h2>
+<p>啟動後還沒開始對話時，畫面大概長這樣（實測擷取，位置會隨終端機寬度調整）：</p>
+<pre class="cmd"><code>                              █▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█
+                              █  █ █  █ █▀▀▀ █  █ █    █  █ █  █ █▀▀▀
+                              ▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
+
+      ┃
+      ┃  Ask anything… "What is the tech stack of this project?"
+      ┃
+      ┃  Build · Big Pickle OpenCode Zen
+      ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+                                       tab agents  ctrl+p commands
+
+              ● Tip Run /connect to add an AI provider and start coding
+
+  /home/you/ai-math-lab                                          1.18.30</code></pre>
+<p>由上往下看：</p>
+<div class="tw"><table><tr><th>畫面上的東西</th><th>意思</th></tr><tr><td><code>Ask anything…</code></td><td>輸入框。游標在這裡，直接打字就行</td></tr><tr><td><code>Build · Big Pickle OpenCode Zen</code></td><td>現在用的 <strong>agent</strong>（Build）· <strong>模型</strong>（Big Pickle）· <strong>供應商</strong>（OpenCode Zen）</td></tr><tr><td><code>tab agents</code></td><td>按 <code>Tab</code> 可以換 agent</td></tr><tr><td><code>ctrl+p commands</code></td><td>按 <code>ctrl+p</code> 開指令面板</td></tr><tr><td>最底左邊</td><td>你現在在哪個資料夾。<strong>開始之前先確認這行是對的</strong></td></tr><tr><td>最底右邊</td><td>opencode 版本</td></tr></table></div>
+<p>開始對話之後，右邊會多出一欄側邊欄：</p>
+<pre class="cmd"><code>                                     列出資料夾內所有檔案     &lt;- session 名稱（自動命名）
+
+                                     Context
+                                     16,007 tokens
+                                     8% used
+                                     $0.00 spent
+
+                                     LSP
+                                     LSPs are disabled</code></pre>
+<p><code>8% used</code> 是<strong>這一章最重要的一個數字</strong>：它是目前對話佔掉模型記憶上限的百分比。底部狀態列也會同步顯示成 <code>16.0K (8%)</code>。第 5 節會用到它。</p>
+<p><code>$0.00 spent</code> 因為 <code>big-pickle</code> 是免費的，所以永遠是 0。</p>
+<p>側邊欄在終端機太窄的時候會自動收起來，可以用 <code>ctrl+x b</code> 開關（未實測）。</p>
+<h3>輸入框的三個特殊開頭字元</h3>
+<div class="tw"><table><tr><th>打什麼</th><th>會發生什麼</th><th>例子</th></tr><tr><td><code>/</code></td><td>跳出斜線指令清單</td><td><code>/models</code></td></tr><tr><td><code>@</code></td><td>補檔名，也可以叫 subagent</td><td>打 <code>@AGENT</code> 會補成 <code>@AGENTS.md</code>；<code>@explore</code>、<code>@general</code> 是 subagent</td></tr><tr><td><code>!</code></td><td>進入 Shell 模式，直接在這裡跑 shell 指令，底部會顯示 <code>esc exit shell mode</code>，按 <code>Esc</code> 退出</td><td><code>!ls -la</code></td></tr></table></div>
+<hr>
+<h2>3. 你的第一個指令</h2>
+<h3>3.1 先問一個不用動手的問題</h3>
+<p>在輸入框打下面這句，按 <code>Enter</code>：</p>
+<pre class="cmd"><code>請讀 AGENTS.md，用三句話說明這個專案的規矩</code></pre>
+<p>你會看到三件事：</p>
+<ol>
+<li><strong>agent 先「想」</strong>。畫面上會出現一段淺色的思考過程（Thought），說它打算怎麼做。</li>
+<li><strong>它用了工具</strong>。你會看到 <code>read</code> 之類的工具呼叫列出來。</li>
+<li><strong>它用繁體中文回答</strong>。這不是巧合——<code>AGENTS.md</code> 裡寫了「一律使用台灣繁體中文回答」，agent 啟動時就把這個檔讀進去了。實測確認有效。</li>
+</ol>
+<p>這一句只是讀檔，不會跳出權限對話框。</p>
+<h3>3.2 再下一個要動手的指令</h3>
+<pre class="cmd"><code>請用 uv run python 印出 numpy 的版本</code></pre>
+<p>這次不一樣：agent 要跑 shell 指令，所以會停下來問你。往下看第 4 節。</p>
+<h3>3.3 一個完整的三步任務</h3>
+<p>講師實測 <code>big-pickle</code> 跑一個「讀檔 → 寫檔 → 執行」的三步任務大約 <strong>7.4 秒</strong>。你可以試這個：</p>
+<pre class="cmd"><code>讀 pyproject.toml，在 notes/ 寫一個 環境說明.md 列出這個專案用到的套件，然後用 uv run python -c "import numpy; print(numpy.__version__)" 確認環境能跑</code></pre>
+<p>跑的過程中如果你想停下來：按 <code>Esc</code>。<strong>注意按一次不夠</strong>——底部會從 <code>esc interrupt</code> 變成 <code>esc again to interrupt</code>，要再按一次才真的中斷（實測；如果它正在執行工具，可能要多按幾次）。</p>
+<h3>3.4 打多行字</h3>
+<p>輸入框裡按 <code>Enter</code> 就送出了。要換行不送出，按 <strong><code>ctrl+j</code></strong>（實測可用）。<code>shift+Enter</code>、<code>alt+Enter</code>、<code>ctrl+Enter</code> 也綁著同樣的功能，但有些終端機吃不到這幾組，<code>ctrl+j</code> 最保險。</p>
+<p>要打很長的一段（例如整段數學推導），用 <code>/editor</code> 或 <code>ctrl+x e</code> 開你平常用的編輯器來寫。</p>
+<h3>3.5 想重打上一句</h3>
+<p>輸入框空的時候按 <code>↑</code>，會把你上一句話叫回來（實測）。</p>
+<hr>
+<h2>4. 權限：agent 要動手之前會先問你</h2>
+<h3>4.1 你會看到什麼</h3>
+<p>你的 <code>opencode.json</code> 裡有這段：</p>
+<pre class="cmd"><code>{
+  "permission": {
+    "bash": "ask",
+    "edit": "ask",
+    "webfetch": "ask"
+  }
+}</code></pre>
+<p>意思是：agent 要<strong>跑指令</strong>（bash）、<strong>改檔案</strong>（edit）、<strong>上網抓資料</strong>（webfetch）之前，都要先問你。</p>
+<p>實測畫面（1.18.30）：</p>
+<pre class="cmd"><code>  ┃  △ Permission required
+  ┃    # Shell command
+  ┃
+  ┃  $ ls -la
+  ┃
+  ┃   Allow once   Allow always   Reject      ctrl+f fullscreen  ⇆ select  enter confirm</code></pre>
+<h3>4.2 怎麼回答</h3>
+<div class="tw"><table><tr><th>選項</th><th>意思</th><th>工作坊建議</th></tr><tr><td><code>Allow once</code></td><td>只允許這一次</td><td><strong>每次都選這個</strong>。你才會看到 agent 到底做了哪些事</td></tr><tr><td><code>Allow always</code></td><td>這個 session 之後同類的請求都不再問</td><td>熟了之後再用</td></tr><tr><td><code>Reject</code></td><td>拒絕。agent 會換別的做法或停下來</td><td>看到不該跑的指令就選這個</td></tr></table></div>
+<p>操作方式：用方向鍵或 <code>Tab</code>（畫面提示的 <code>⇆ select</code>）移動，按 <code>Enter</code> 確認。預設游標在 <code>Allow once</code>，所以看完指令沒問題就直接按 <code>Enter</code>。</p>
+<p>指令太長被截掉的時候，按 <code>ctrl+f</code> 全螢幕看完整內容。</p>
+<h3>4.3 三個值的意思</h3>
+<p><code>opencode.json</code> 裡每個權限可以設成三個值之一：</p>
+<div class="tw"><table><tr><th>值</th><th>行為</th></tr><tr><td><code>"allow"</code></td><td>不問，直接做</td></tr><tr><td><code>"ask"</code></td><td>跳對話框問你</td></tr><tr><td><code>"deny"</code></td><td>直接擋掉，agent 不能做</td></tr></table></div>
+<p>也可以針對指令樣式分開設定，例如允許 <code>git status</code> 但禁止 <code>rm</code>：</p>
+<pre class="cmd"><code>{
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "git status*": "allow",
+      "rm *": "deny"
+    }
+  }
+}</code></pre>
+<p>比對樣式時<strong>最後一條符合的規則生效</strong>。（來源：opencode.ai/docs/permissions）</p>
+<h3>4.4 兩個要記住的例外</h3>
+<ul>
+<li><strong><code>opencode run</code> 完全不會問</strong>。它是非互動模式，直接寫檔、直接執行。所以練習階段用 <code>opencode</code>。</li>
+<li><strong><code>--auto</code> 這個參數不要加</strong>。<code>opencode --auto</code> 會自動同意所有沒被明確 <code>deny</code> 的請求，官方文件自己標註 <code>dangerous!</code>。</li>
+</ul>
+<h3>4.5 順便說 agent 模式</h3>
+<p>按 <code>Tab</code> 可以在兩個 agent 之間切換，畫面左下角的 <code>Build · Big Pickle</code> 會跟著變成 <code>Plan · Big Pickle</code>（實測）。</p>
+<div class="tw"><table><tr><th>agent</th><th>用來做什麼</th></tr><tr><td><code>Build</code></td><td>預設。可以讀、可以改、可以跑指令。工作坊全程用這個</td></tr><tr><td><code>Plan</code></td><td>官方說明是 <code>Plan mode. Disallows all edit tools.</code>，內建權限把 <code>edit</code> 設成 <code>deny</code>（只允許寫 <code>.opencode/plans/*.md</code>），適合先讓它分析、不要動你的檔案</td></tr></table></div>
+<p><code>Plan</code> 的內建 <code>deny</code> 和本專案 <code>opencode.json</code> 裡的 <code>edit: "ask"</code> 疊在一起之後的實際結果，本章沒有實測。工作坊請用 <code>Build</code>。</p>
+<hr>
+<h2>5. session：對話的記憶邊界</h2>
+<h3>5.1 session 是什麼</h3>
+<p>一個 session 就是一串獨立的對話，有自己的記憶。opencode 把它存在本機（<code>~/.local/share/opencode/opencode.db</code>，來源：learnopencode.com），所以你關掉終端機之後還找得回來。</p>
+<p>agent 的「記憶」只有這個 session 裡的訊息，加上它自己去讀的檔案。換了 session，前面講的話它就不知道了。</p>
+<h3>5.2 什麼時候該開新 session</h3>
+<p><strong>換題目就開新的。</strong> 做完 Lab 1 的分群要開始做 Lab 2 的 PCA，就開新 session。理由有兩個：</p>
+<ul>
+<li>舊對話會一直佔 context，愈用愈慢、愈容易被壓縮掉細節</li>
+<li>不相干的舊內容會干擾判斷（例如它以為你還在用 Lab 1 的資料）</li>
+</ul>
+<p>開新 session：</p>
+<pre class="cmd"><code>/new</code></pre>
+<p>或按 <code>ctrl+x n</code>。</p>
+<h3>5.3 context 滿了怎麼辦</h3>
+<p>看側邊欄的 <code>% used</code>（或底部的 <code>16.0K (8%)</code>）。判斷方式：</p>
+<ul>
+<li><strong>換題目了</strong> → <code>/new</code>（<code>ctrl+x n</code>）</li>
+<li><strong>同一個題目還沒做完，但 <code>% used</code> 已經很高</strong> → 壓縮（compact）</li>
+</ul>
+<p>壓縮會讓 agent 把前面的對話摘要成一小段，然後把舊訊息清掉，留下摘要繼續做。細節會流失，所以重要的結論要先寫進 <code>notes/</code> 裡的 <code>.md</code> 檔，不要只留在對話裡。</p>
+<p>在 1.18.30，壓縮<strong>沒有斜線指令</strong>，要用其中一種：</p>
+<ul>
+<li>按 <code>ctrl+x c</code></li>
+<li>或按 <code>ctrl+p</code> 開指令面板，搜尋 <code>compact</code>，選 <code>Compact session</code></li>
+</ul>
+<p>注意：指令面板裡的 session 相關指令<strong>要先有對話才會出現</strong>。在剛啟動的首頁按 <code>ctrl+p</code> 搜 <code>compact</code> 會顯示 <code>No results found</code>（實測）。</p>
+<p>learnopencode.com 提到對話太長時 opencode 也會自動觸發壓縮（未實測）。</p>
+<h3>5.4 回到舊 session</h3>
+<pre class="cmd"><code>/sessions</code></pre>
+<p>或按 <code>ctrl+x l</code>。別名 <code>/resume</code>、<code>/continue</code> 也是同一個指令。session 名稱是 opencode 依你第一句話自動取的，會顯示在右上角。</p>
+<p>如果你已經離開 opencode 了，在終端機下：</p>
+<pre class="cmd"><code>opencode        # 進來後用 /sessions 挑
+opencode -c     # 直接接續上一個 session</code></pre>
+<hr>
+<h2>6. 常用斜線指令速查</h2>
+<p>以下 17 個是 1.18.30 在輸入框打 <code>/</code> 之後<strong>實際列出來</strong>的全部內建指令（實測逐項確認）。描述欄是 opencode 自己顯示的英文說明。</p>
+<div class="tw"><table><tr><th>指令</th><th>opencode 顯示的說明</th><th>你會用到嗎</th></tr><tr><td><code>/agents</code></td><td>Switch agent</td><td>換 Build / Plan。按 <code>Tab</code> 更快</td></tr><tr><td><code>/connect</code></td><td>Connect provider</td><td><strong>不用</strong>。big-pickle 免登入，按到就按 <code>Esc</code></td></tr><tr><td><code>/debug</code></td><td>View debug info</td><td>不用</td></tr><tr><td><code>/diff</code></td><td>Open diff viewer</td><td>會。看 agent 到底改了哪幾行</td></tr><tr><td><code>/editor</code></td><td>Open editor</td><td>會。要打很長的訊息時</td></tr><tr><td><code>/exit</code></td><td>Exit the app</td><td>會。<strong>離開 opencode 請用這個</strong></td></tr><tr><td><code>/help</code></td><td>Help</td><td>忘記按鍵的時候</td></tr><tr><td><code>/init</code></td><td>guided AGENTS.md setup</td><td><strong>不用</strong>。你的專案已經有 <code>AGENTS.md</code> 了</td></tr><tr><td><code>/mcps</code></td><td>Toggle MCPs</td><td>不用</td></tr><tr><td><code>/models</code></td><td>Switch model</td><td>會。開起來會看到 <code>● Big Pickle　Free</code>，<code>●</code> 是目前選的。按 <code>Esc</code> 關掉</td></tr><tr><td><code>/move</code></td><td>Move to another project dir</td><td>不用</td></tr><tr><td><code>/new</code></td><td>New session（別名 <code>/clear</code>）</td><td>會。換題目就用</td></tr><tr><td><code>/review</code></td><td>review changes [commit\</td><td>branch\</td><td>pr]</td><td>進階。讓 agent 檢查你的改動</td></tr><tr><td><code>/sessions</code></td><td>Switch session（別名 <code>/resume</code>、<code>/continue</code>）</td><td>會。回到舊對話</td></tr><tr><td><code>/skills</code></td><td>Skills</td><td>不用</td></tr><tr><td><code>/status</code></td><td>View status</td><td>不用</td></tr><tr><td><code>/themes</code></td><td>Switch theme</td><td>想換配色再說</td></tr></table></div>
+<p><strong>重要差異</strong>：opencode.ai/docs 和 learnopencode.com 都列了 <code>/compact</code>、<code>/undo</code>、<code>/redo</code>、<code>/share</code>、<code>/export</code> 這幾個斜線指令，但實測 1.18.30 的 <code>/</code> 清單裡<strong>沒有這些</strong>。它們變成指令面板（<code>ctrl+p</code>）裡的項目，有各自的快捷鍵：</p>
+<div class="tw"><table><tr><th>想做的事</th><th>1.18.30 的做法</th></tr><tr><td>壓縮 context</td><td><code>ctrl+x c</code>，或 <code>ctrl+p</code> → <code>Compact session</code></td></tr><tr><td>復原上一則訊息</td><td><code>ctrl+x u</code>，或 <code>ctrl+p</code> → <code>Undo previous message</code></td></tr><tr><td>匯出對話記錄</td><td><code>ctrl+x x</code>，或 <code>ctrl+p</code> → <code>Export session transcript</code></td></tr><tr><td>分享對話</td><td><code>ctrl+p</code> → <code>Share session</code>（沒有預設快捷鍵）</td></tr></table></div>
+<hr>
+<h2>7. 快捷鍵速查</h2>
+<p><code>ctrl+x</code> 是 <strong>leader key</strong>（前置鍵）。用法是：按 <code>ctrl+x</code>，<strong>整個放開</strong>，再按下一個字母。不要一起按。</p>
+<h3>你一定會用到的</h3>
+<div class="tw"><table><tr><th>按鍵</th><th>作用</th><th>來源</th></tr><tr><td><code>Enter</code></td><td>送出訊息</td><td>實測</td></tr><tr><td><code>ctrl+j</code></td><td>輸入框內換行，不送出</td><td>實測</td></tr><tr><td><code>Esc</code></td><td>中斷 agent。<strong>按一次會變成 <code>esc again to interrupt</code>，要再按一次</strong></td><td>實測</td></tr><tr><td><code>ctrl+c</code></td><td>輸入框<strong>有字</strong> → 清空；輸入框<strong>是空的</strong> → 直接關掉 opencode，沒有確認</td><td>實測</td></tr><tr><td><code>↑</code></td><td>輸入框空的時候，叫回你上一句話</td><td>實測</td></tr><tr><td><code>Tab</code></td><td>切換 agent：Build ↔ Plan</td><td>實測</td></tr><tr><td><code>ctrl+p</code></td><td>開指令面板（Commands）</td><td>實測</td></tr><tr><td><code>ctrl+x</code></td><td>leader key</td><td>實測</td></tr></table></div>
+<p>離開 opencode 請打 <code>/exit</code>。不要習慣性連按兩下 <code>ctrl+c</code>——輸入框一空掉，第二下就把程式關了。</p>
+<h3>leader 組合鍵</h3>
+<p>下面這些是在指令面板（<code>ctrl+p</code>）裡<strong>實際看到 opencode 自己標示</strong>的快捷鍵：</p>
+<div class="tw"><table><tr><th>按鍵</th><th>作用</th><th>來源</th></tr><tr><td><code>ctrl+x n</code></td><td>開新 session</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x l</code></td><td>切換 session</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x c</code></td><td>壓縮目前 session</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x u</code></td><td>復原上一則訊息</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x x</code></td><td>匯出對話記錄</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x m</code></td><td>切換模型</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x e</code></td><td>用外部編輯器寫訊息</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x g</code></td><td>跳到某一則訊息</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x s</code></td><td>看狀態</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x t</code></td><td>換主題</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+r</code></td><td>重新命名 session</td><td>實測（面板顯示）</td></tr></table></div>
+<h3>其他（1.18.30 預設值，本章未實測）</h3>
+<p>這幾組是從 1.18.30 的預設 keybind 表讀出來的，但現場沒有逐一按過；有些組合會被終端機或視窗管理員吃掉。</p>
+<div class="tw"><table><tr><th>按鍵</th><th>作用</th><th>來源</th></tr><tr><td><code>shift+Enter</code> / <code>alt+Enter</code> / <code>ctrl+Enter</code></td><td>輸入框換行（同 <code>ctrl+j</code>）</td><td>二進位預設值（未實測）</td></tr><tr><td><code>shift+Tab</code></td><td>反向切換 agent</td><td>二進位預設值（未實測）</td></tr><tr><td><code>PageUp</code> / <code>PageDown</code></td><td>對話上下捲一頁</td><td>二進位預設值（未實測）</td></tr><tr><td><code>ctrl+x b</code></td><td>開關側邊欄</td><td>二進位預設值（未實測）</td></tr><tr><td><code>ctrl+x y</code></td><td>複製訊息</td><td>二進位預設值（未實測）</td></tr><tr><td><code>ctrl+x r</code></td><td>重做（redo）訊息</td><td>二進位預設值（未實測）</td></tr><tr><td><code>ctrl+a</code> / <code>ctrl+e</code> / <code>ctrl+k</code></td><td>輸入框內：移到行首 / 行尾 / 刪到行尾</td><td>二進位預設值（未實測）</td></tr><tr><td><code>F2</code></td><td>換到上一個用過的模型</td><td>二進位預設值（未實測）</td></tr><tr><td><code>ctrl+f</code></td><td>在權限對話框裡切全螢幕</td><td>實測（畫面提示）</td></tr></table></div>
+<hr>
+<h2>卡住了？</h2>
+<div class="tw"><table><tr><th>你看到的</th><th>為什麼</th><th>怎麼解</th></tr><tr><td><code>Error: Internal server error</code></td><td>這是預設的錯誤訊息，什麼資訊都沒有</td><td>加上 log 參數重跑：<code>opencode run "訊息" --print-logs --log-level ERROR</code>，才看得到真正的原因</td></tr><tr><td><code>Unrecognized request argument supplied: prompt_cache_key</code></td><td>上游的 bug，偶發</td><td><strong>重試一次就好</strong>。不用改任何設定</td></tr><tr><td>畫面底部一直顯示 <code>esc again to interrupt</code></td><td>你只按了一次 <code>Esc</code>，還沒真的中斷</td><td>再按一次 <code>Esc</code>。如果它正在跑工具，多按幾次</td></tr><tr><td>opencode 突然關掉了</td><td>輸入框是空的時候按了 <code>ctrl+c</code>，那就是「離開」</td><td>重新 <code>opencode</code>，再用 <code>/sessions</code>（<code>ctrl+x l</code>）找回剛剛的對話，或直接 <code>opencode -c</code></td></tr><tr><td><code>● Tip Run /connect to add an AI provider</code></td><td>這是給要接自己帳號的人看的提示</td><td>忽略。<code>big-pickle</code> 不用連任何 provider</td></tr><tr><td>agent 用簡體中文或英文回答</td><td>它沒讀到 <code>AGENTS.md</code></td><td>確認你是在專案資料夾裡啟動的（看畫面最底左邊那行路徑），不是在家目錄</td></tr><tr><td>agent 直接改了檔案、沒問我</td><td>你用的是 <code>opencode run</code></td><td>改用 <code>opencode</code>（互動模式）。也確認沒有加 <code>--auto</code></td></tr><tr><td>跑 <code>python xxx.py</code> 說找不到套件</td><td>沒走 uv 的環境</td><td>一律用 <code>uv run python xxx.py</code></td></tr><tr><td>側邊欄的 Context / tokens 看不到</td><td>終端機視窗太窄，側邊欄自動收起來了</td><td>把視窗拉寬，或按 <code>ctrl+x b</code>（未實測）</td></tr><tr><td><code>% used</code> 已經很高，agent 開始忘記前面講過的事</td><td>context 快滿了</td><td>換題目就 <code>/new</code>；同一題就按 <code>ctrl+x c</code> 壓縮，壓縮前先把結論寫進 <code>notes/</code></td></tr><tr><td><code>/compact</code>、<code>/undo</code>、<code>/share</code> 打了沒反應</td><td>1.18.30 沒有這幾個斜線指令</td><td>用 <code>ctrl+x c</code>、<code>ctrl+x u</code>，或 <code>ctrl+p</code> 開指令面板搜尋</td></tr></table></div>
+<hr>
+<h2>資料來源</h2>
+<p>本章的操作細節分成四種來源，表格裡都標註了。</p>
+<p><strong>一、1.18.30 實測</strong></p>
+<p>在本機 <code>opencode 1.18.30</code> 上實際操作驗證的項目：<code>/</code> 斜線指令完整清單（17 項，逐項確認）、<code>ctrl+p</code> 指令面板內容與其標示的快捷鍵、權限對話框的完整文字與選項、<code>Esc</code> 需要按兩次才中斷、<code>ctrl+c</code> 在空輸入框會直接離開、<code>ctrl+j</code> 換行、<code>↑</code> 叫回上一句、<code>Tab</code> 切換 Build/Plan、<code>@</code> 補檔名與 subagent、<code>!</code> Shell 模式、<code>/models</code> 顯示 <code>● Big Pickle Free</code>、側邊欄 Context 與 <code>% used</code>、agent 以繁體中文回答。</p>
+<p><strong>二、1.18.30 預設 keybind 表</strong></p>
+<p>從 <code>1.18.30</code> 執行檔內的預設 keybind 定義讀出（leader key 為 <code>ctrl+x</code>）。標註「二進位預設值（未實測）」的項目屬於此類。</p>
+<p><code>plan</code> agent 的權限與說明來自本機指令：</p>
+<pre class="cmd"><code>opencode debug agent plan
+opencode agent list
+opencode debug config</code></pre>
+<p><strong>三、官方文件（opencode.ai）</strong></p>
+<ul>
+<li>&lt;https://opencode.ai/docs/tui/&gt; — TUI 斜線指令與快捷鍵清單（其中 <code>/compact</code>、<code>/undo</code>、<code>/redo</code>、<code>/share</code>、<code>/export</code>、<code>/details</code>、<code>/thinking</code> 在 1.18.30 實測不存在）</li>
+<li>&lt;https://opencode.ai/docs/keybinds/&gt; — 預設 keybind 與 leader key</li>
+<li>&lt;https://opencode.ai/docs/permissions/&gt; — <code>allow</code> / <code>ask</code> / <code>deny</code>、樣式比對規則、<code>--auto</code>、對話框三個選項</li>
+<li>&lt;https://opencode.ai/docs/agents/&gt; — build / plan / general / explore / scout 的定位</li>
+</ul>
+<p><strong>四、中文教學站（learnopencode.com）</strong></p>
+<ul>
+<li>&lt;https://learnopencode.com/1-start/&gt; — 第一階段目錄</li>
+<li>&lt;https://learnopencode.com/sitemap.xml&gt; — 全站頁面清單</li>
+<li>&lt;https://learnopencode.com/2-daily/01-interface.html&gt; — 畫面分區、<code>@</code> / <code>!</code> / <code>/</code> 三個開頭字元</li>
+<li>&lt;https://learnopencode.com/2-daily/02-sessions.html&gt; — session 定義、存放位置、自動壓縮、匯入匯出</li>
+<li>&lt;https://learnopencode.com/2-daily/03-shortcuts.html&gt; — 快捷鍵表、leader key「按了要放開」的用法</li>
+<li>&lt;https://learnopencode.com/3-workflow/01-plan-build.html&gt; — Plan / Build 能力對照與建議流程</li>
+<li>&lt;https://learnopencode.com/3-workflow/03-init.html&gt; — <code>/init</code> 掃描專案產生 <code>AGENTS.md</code> 的行為</li>
+</ul>
+<p><strong>已知的文件與實測衝突</strong></p>
+<p>learnopencode.com 與 opencode.ai/docs 都把 <code>/compact</code>、<code>/undo</code>、<code>/redo</code>、<code>/share</code>、<code>/export</code> 列為斜線指令，但 1.18.30 的 <code>/</code> 清單中不存在這些指令。本章一律<strong>以實測為準</strong>。</p>
+<p>learnopencode.com 的 Plan / Build 對照表寫 Plan 可以執行 bash（✓），opencode.ai/docs 寫 Plan 把 bash 設成 <code>ask</code>；實測 <code>opencode debug agent plan</code> 顯示 <code>bash</code> 在本專案設定下為 <code>ask</code>。</p>
+<p><strong>查不到、因此本章沒有寫的內容</strong></p>
+<ul>
+<li><code>opencode.school/lessons/models/</code> 回 HTTP 403，未讀取</li>
+<li>learnopencode.com 的 <code>2-daily/04-sessions.html</code> 與 <code>2-daily/05-shortcuts.html</code> 回 404（正確路徑是 <code>02-sessions.html</code> 與 <code>03-shortcuts.html</code>）</li>
+<li>官方文件提到的 <code>/details</code>、<code>/thinking</code>、<code>/unshare</code>、<code>/summarize</code> 在 1.18.30 的 <code>/</code> 清單中查不到，也找不到對應的指令面板項目，因此未列入</li>
+<li><code>/variants</code>、<code>/workspaces</code>、<code>/org</code>、<code>/warp</code> 存在於 1.18.30 執行檔內，但實測在本專案的 <code>/</code> 清單中不出現（需要特定模型變體或實驗性功能開關），因此未列入</li>
+<li>官方文件提到 <code>tui.jsonc</code> 可自訂 keybind，但未在 1.18.30 驗證檔案位置與格式，因此本章不教如何改鍵</li>
+</ul>
+
+<div class="pager">
+  <a href="prep.html"><div class="d">上一章</div><div class="t2">← 00 · 課前準備</div></a>
+  <a href="lab1-cluster.html" class="next"><div class="d">下一章</div><div class="t2">02 · Lab 1 →</div></a>
+</div>
+
+</div>
+
+<footer>
+<div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
+<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+</footer>
+
+<script>
+// 導覽列高亮目前頁面
+(function(){
+  var f=(location.pathname.split('/').pop()||'index.html');
+  document.querySelectorAll('.topnav nav a').forEach(function(a){
+    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+  });
+})();
+
+// 指令複製鈕
+document.querySelectorAll('pre.cmd').forEach(function(pre){
+  var b=document.createElement('button');
+  b.className='copy'; b.type='button'; b.textContent='複製';
+  b.addEventListener('click',function(){
+    var t=pre.querySelector('code');
+    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
+      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
+    },function(){ b.textContent='複製失敗'; });
+  });
+  pre.appendChild(b);
+});
+
+// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
+(function(){
+  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
+  var saved={};
+  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
+    var id=cb.id||('ck'+i); cb.id=id;
+    if(saved[id]) cb.checked=true;
+    cb.addEventListener('change',function(){
+      saved[id]=cb.checked;
+      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+    });
+  });
+})();
+</script>
+
+<script>
+// MathJax 3：啟用 $...$ 行內數學（預設不開）
+window.MathJax={
+  tex:{
+    inlineMath:[['$','$'],['\\(','\\)']],
+    displayMath:[['$$','$$'],['\\[','\\]']],
+    processEscapes:true
+  },
+  options:{
+    skipHtmlTags:['script','noscript','style','textarea','pre','code'],
+    ignoreHtmlClass:'term|tw'
+  },
+  chtml:{ scale:1.02 }
+};
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>
