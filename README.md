@@ -2,7 +2,9 @@
 
 國立中山大學「人工智慧與數學」整合學程　三小時 AI agent 工作坊的教學網站。
 
-線上閱讀：把這個 repo 開成 GitHub Pages（main / root），或直接用瀏覽器開 `index.html`。
+**線上閱讀：<https://phonchi.github.io/opencode-math-workshop/>**
+
+也可以直接用瀏覽器開本機的 `index.html`，功能完全相同。
 
 ## 內容
 
