@@ -3,26 +3,93 @@
 
 支援的 Markdown 子集（刻意只做需要的）：
   # 標題 → pagehead     ## → h2     ### → h3     #### → h4
-  ```lang ... ```       → <pre class="cmd">（bash/json/toml/text）
+  ```lang ... ```       → <pre class="cmd">　有語言標記 = 指令，給複製鈕
+  ``` ... ```           → <pre class="out">　無語言標記 = 輸出，不給複製鈕
   > 引言區塊             → <div class="box tip">
   表格                   → <div class="tw"><table>
   - / 1. 清單            → ul / ol
-  **粗體** `程式碼` [連結](url)
+  **粗體** `程式碼` [連結](url) <自動連結> 裸 URL（都會變成可點的 <a>）
   特殊標記：
     :::warn 標題 / ::: → <div class="box warn">
     :::danger 標題 / :::
     :::math 標題 / :::
+    :::bg 標題 / :::   → <details class="bg">　可收合的背景補充
 """
-import re, sys, html, pathlib
+import re, sys, html, pathlib, unicodedata
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
+# 桌機下 .container.narrow 的可用寬度：780px 減兩側 2rem 內距 = 716px，
+# 再減 pre 自己的左右內距 1.25rem x 2 = 40px，實際能放字的是 676px。
+# JetBrains Mono 的西文字寬是 0.6em，但 **CJK 與全形字元佔兩倍寬**，
+# 用 len() 會低估，必須改算顯示寬度，否則含中文註解的輸出會被右邊裁掉。
+TEXT_PX = 676
+BASE_REM = 0.815      # 一般 pre 的字級
+MIN_REM = 0.58        # 再小就難讀了，剩下的交給水平捲動
+
+
+def disp_width(line):
+    """等寬字體下的顯示寬度（以西文字元為單位）。CJK 與全形算兩格。"""
+    return sum(2 if unicodedata.east_asian_width(c) in 'WF' else 1
+               for c in line)
+
+
+def fit_style(lines):
+    """寬輸出縮字級，讓它在桌機一眼看完，不要被右邊裁掉。"""
+    w = max((disp_width(x) for x in lines), default=0)
+    if w <= 0:
+        return ''
+    need = TEXT_PX / (w * 16 * 0.6)
+    if need >= BASE_REM:
+        return ''
+    size = max(MIN_REM, round(need, 3))
+    return ' style="font-size:%srem"' % size
+
+
+def _link(url, text=None):
+    """外部連結一律開新分頁，並加一個小箭頭讓讀者知道會離開本站。"""
+    text = text or url
+    return (f'<a class="ext" href="{url}" target="_blank" rel="noopener">'
+            f'{text}</a>')
+
+
 def inline(s):
+    """行內語法。順序很重要：
+
+    1. 先把 `code span` 抽成佔位符，避免裡面的 URL 被誤轉成連結
+       （例如 `http://localhost:11434/v1` 是設定值，不是要點的連結）
+    2. 再處理粗體、連結
+    3. 最後把 code span 放回去
+    """
     s = html.escape(s, quote=False)
-    s = re.sub(r'`([^`]+)`', lambda m: f'<code>{m.group(1)}</code>', s)
+
+    # --- 抽出 code span ---
+    spans = []
+
+    def stash(m):
+        spans.append(m.group(1))
+        return f'\x00{len(spans) - 1}\x00'
+
+    s = re.sub(r'`([^`]+)`', stash, s)
+
+    # --- 粗體 ---
     s = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', s)
-    s = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', s)
+
+    # --- [文字](網址) ---
+    s = re.sub(r'\[([^\]]+)\]\((https?://[^)]+)\)',
+               lambda m: _link(m.group(2), m.group(1)), s)
+
+    # --- <網址> 自動連結（html.escape 後變成 &lt;…&gt;）---
+    s = re.sub(r'&lt;(https?://[^\s&]+?)&gt;', lambda m: _link(m.group(1)), s)
+
+    # --- 裸 URL（前面不能是引號、括號或已經在標籤屬性裡）---
+    s = re.sub(r'(?<![\"\'(>=])\b(https?://[^\s<>"\'()\u3000，。、）]+)',
+               lambda m: _link(m.group(1)), s)
+
+    # --- 放回 code span ---
+    s = re.sub(r'\x00(\d+)\x00',
+               lambda m: f'<code>{spans[int(m.group(1))]}</code>', s)
     return s
 
 
@@ -50,7 +117,14 @@ def convert(md, title, desc, pager_prev=None, pager_next=None, badge=None):
                 buf.append(lines[i]); i += 1
             i += 1
             body = html.escape('\n'.join(buf), quote=False)
-            out.append(f'<pre class="cmd"><code>{body}</code></pre>')
+            if lang:
+                # 有語言標記 = 學生要照抄的指令或檔案內容 -> 給複製鈕
+                out.append(f'<pre class="cmd" data-lang="{lang}">'
+                           f'<code>{body}</code></pre>')
+            else:
+                # 無語言標記 = 程式的輸出 -> 不給複製鈕（沒人要複製輸出）
+                out.append(f'<pre class="out"{fit_style(buf)}>'
+                           f'<code>{body}</code></pre>')
             continue
 
         # 自訂區塊 :::type 標題
@@ -64,8 +138,14 @@ def convert(md, title, desc, pager_prev=None, pager_next=None, badge=None):
                 buf.append(lines[i]); i += 1
             i += 1
             inner = convert_fragment('\n'.join(buf))
-            bt = f'<div class="bt">{inline(head)}</div>' if head else ''
-            out.append(f'<div class="box {kind}">{bt}{inner}</div>')
+            if kind == 'bg':
+                # 背景補充：可收合，已經懂的人直接跳過
+                out.append('<details class="bg"><summary>'
+                           f'{inline(head) or "背景補充"}</summary>'
+                           f'<div class="bg-body">{inner}</div></details>')
+            else:
+                bt = f'<div class="bt">{inline(head)}</div>' if head else ''
+                out.append(f'<div class="box {kind}">{bt}{inner}</div>')
             continue
 
         # 標題

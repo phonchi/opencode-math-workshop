@@ -15,13 +15,17 @@
 
 ### 1.1 安裝（如果你還沒裝）
 
-Linux / macOS / WSL：
+**Linux / WSL**：`curl` 不一定裝在你的系統裡（Ubuntu 的基本安裝不含它），
+所以先用一定有的 `apt` 把它補上，再裝 opencode：
 
 ```bash
+sudo apt update && sudo apt install -y curl ca-certificates
 curl -fsSL https://opencode.ai/install | bash
 ```
 
-Windows（PowerShell）：
+**macOS**：內建 `curl`，直接跑第二行就好。
+
+**Windows（PowerShell）**：`winget` 是 Windows 11 內建的，不用先裝東西。
 
 ```powershell
 winget install SST.opencode --accept-source-agreements --accept-package-agreements
@@ -79,7 +83,7 @@ opencode run "讀 pyproject.toml，用一句話說明這個專案裝了哪些套
 }
 ```
 
-`big-pickle` 不用登入、不用 API key、不用信用卡。啟動後畫面上會有一行提示 `Run /connect to add an AI provider and start coding` ——**忽略它**。那是給要接自己帳號的人看的，你不需要。
+`big-pickle` 不用登入、不用 API key、不用信用卡。啟動後畫面上會有一行提示 `Run /connect to add an AI provider and start coding`，**忽略它**。那是給要接自己帳號的人看的，你不需要。
 
 ---
 
@@ -151,7 +155,7 @@ opencode run "讀 pyproject.toml，用一句話說明這個專案裝了哪些套
 
 在輸入框打下面這句，按 `Enter`：
 
-```
+```text
 請讀 AGENTS.md，用三句話說明這個專案的規矩
 ```
 
@@ -159,7 +163,7 @@ opencode run "讀 pyproject.toml，用一句話說明這個專案裝了哪些套
 
 1. **agent 先「想」**。畫面上會出現一段淺色的思考過程（Thought），說它打算怎麼做。
 2. **它用了工具**。你會看到 `read` 之類的工具呼叫列出來。
-3. **它用繁體中文回答**。這不是巧合——`AGENTS.md` 裡寫了「一律使用台灣繁體中文回答」，agent 啟動時就把這個檔讀進去了。實測確認有效。
+3. **它用繁體中文回答**。這不是巧合：`AGENTS.md` 裡寫了「一律使用台灣繁體中文回答」，agent 啟動時就把這個檔讀進去了。實測確認有效。
 
 這一句只是讀檔，不會跳出權限對話框。
 
@@ -175,11 +179,13 @@ opencode run "讀 pyproject.toml，用一句話說明這個專案裝了哪些套
 
 講師實測 `big-pickle` 跑一個「讀檔 → 寫檔 → 執行」的三步任務大約 **7.4 秒**。你可以試這個：
 
-```
-讀 pyproject.toml，在 notes/ 寫一個 環境說明.md 列出這個專案用到的套件，然後用 uv run python -c "import numpy; print(numpy.__version__)" 確認環境能跑
+```text
+讀 pyproject.toml，在 notes/ 寫一個 環境說明.md，列出這個專案用到的套件。
+然後執行 uv run python -c "import numpy; print(numpy.__version__)"
+確認環境真的跑得起來。
 ```
 
-跑的過程中如果你想停下來：按 `Esc`。**注意按一次不夠**——底部會從 `esc interrupt` 變成 `esc again to interrupt`，要再按一次才真的中斷（實測；如果它正在執行工具，可能要多按幾次）。
+跑的過程中如果你想停下來：按 `Esc`。**注意按一次不夠**。底部會從 `esc interrupt` 變成 `esc again to interrupt`，要再按一次才真的中斷（實測；如果它正在執行工具，可能要多按幾次）。
 
 ### 3.4 打多行字
 
@@ -388,7 +394,7 @@ opencode -c     # 直接接續上一個 session
 | `ctrl+p` | 開指令面板（Commands） | 實測 |
 | `ctrl+x` | leader key | 實測 |
 
-離開 opencode 請打 `/exit`。不要習慣性連按兩下 `ctrl+c`——輸入框一空掉，第二下就把程式關了。
+離開 opencode 請打 `/exit`。不要習慣性連按兩下 `ctrl+c`，輸入框一空掉，第二下就把程式關了。
 
 ### leader 組合鍵
 

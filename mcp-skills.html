@@ -286,7 +286,16 @@ pre{
   letter-spacing:0;box-shadow:var(--sh-2);
 }
 pre code{background:none;padding:0;font-size:inherit;color:inherit;}
-pre.cmd{position:relative;padding-right:4.2rem;}
+pre.cmd{
+  position:relative;padding-right:4.2rem;
+  /* 指令一律不裁切：太長就換行，並用懸掛縮排讓人看得出是同一行的延續。
+     複製鈕複製的仍是原始單行文字。 */
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  padding-left:2.4rem;
+  text-indent:-1.15rem;
+}
+pre.cmd code{display:block;}
 pre .copy{
   position:absolute;top:.6rem;right:.6rem;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
@@ -295,6 +304,73 @@ pre .copy{
   transition:background .16s var(--ease),color .16s var(--ease);
 }
 pre .copy:hover{background:rgba(255,255,255,.15);color:#fff;}
+
+/* ---------------- 輸出區塊（跟「指令」區分開）---------------- */
+/* 指令 = 學生要照抄的，給複製鈕；輸出 = 程式吐出來的，不給複製鈕。
+   兩者視覺上要看得出差別，否則學生會不知道哪些該打、哪些是結果。 */
+pre.out{
+  position:relative;
+  border-left:3px solid rgba(143,201,143,.45);
+  /* 左右邊緣的陰影只在「真的可以捲動」時出現，提示還有內容 */
+  background-image:
+    linear-gradient(to right, var(--term-bg) 30%, rgba(25,25,34,0)),
+    linear-gradient(to left,  var(--term-bg) 30%, rgba(25,25,34,0)),
+    radial-gradient(farthest-side at 0 50%,   rgba(255,255,255,.15), rgba(255,255,255,0)),
+    radial-gradient(farthest-side at 100% 50%,rgba(255,255,255,.15), rgba(255,255,255,0));
+  background-position:left center,right center,left center,right center;
+  background-repeat:no-repeat;
+  background-size:44px 100%,44px 100%,16px 100%,16px 100%;
+  background-attachment:local,local,scroll,scroll;
+  background-color:var(--term-bg);
+  padding-right:1.25rem;   /* 沒有複製鈕，右邊不需要留位 */
+}
+pre.out::after{
+  content:"輸出";
+  position:absolute;top:.45rem;right:.7rem;
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.14em;
+  color:var(--term-dim);opacity:.55;pointer-events:none;user-select:none;
+}
+pre.out code{display:block;padding-top:.15rem;}
+
+/* ---------------- 外部連結 ---------------- */
+a.ext::after{
+  content:"↗";
+  font-size:.72em;margin-left:.18em;vertical-align:.1em;
+  color:var(--ink-3);text-decoration:none;
+}
+a.ext:hover::after{color:var(--live);}
+
+/* ---------------- 背景補充（可收合）---------------- */
+/* 只修過微積分與線性代數的學生看得到解釋；已經懂的人直接跳過，
+   不會拖慢三小時的節奏。 */
+details.bg{
+  margin:1.6rem 0;border:1px dashed var(--rule);border-radius:var(--r-md);
+  background:rgba(255,253,248,.6);overflow:hidden;
+}
+details.bg > summary{
+  cursor:pointer;list-style:none;user-select:none;
+  padding:.7rem 1.1rem;font-size:.88rem;font-weight:500;color:var(--link);
+  display:flex;align-items:center;gap:.55rem;
+  transition:background .16s var(--ease);
+}
+details.bg > summary::-webkit-details-marker{display:none;}
+details.bg > summary::before{
+  content:"背景補充";
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;
+  letter-spacing:.12em;color:var(--warn);border:1px solid currentColor;
+  border-radius:999px;padding:.1rem .5rem;flex-shrink:0;
+}
+details.bg > summary::after{
+  content:"展開";margin-left:auto;font-size:.72rem;color:var(--ink-3);
+  font-family:'JetBrains Mono',monospace;letter-spacing:.06em;flex-shrink:0;
+}
+details.bg[open] > summary::after{content:"收合";}
+details.bg > summary:hover{background:rgba(222,214,198,.28);}
+details.bg[open] > summary{border-bottom:1px dashed var(--rule);}
+.bg-body{padding:1rem 1.3rem 1.15rem;font-size:.94rem;}
+.bg-body > :last-child{margin-bottom:0;}
+.bg-body h4{margin-top:1.1rem;}
+.bg-body h4:first-child{margin-top:0;}
 
 /* ---------------- 提示盒 ---------------- */
 .box{
@@ -324,12 +400,15 @@ table{width:100%;border-collapse:collapse;font-size:.87rem;background:var(--pape
 th{
   background:rgba(222,214,198,.4);padding:.62rem .9rem;text-align:left;
   font-weight:700;font-size:.76rem;letter-spacing:.06em;color:var(--ink-2);
-  white-space:nowrap;border-bottom:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
 }
 td{padding:.58rem .9rem;border-bottom:1px solid var(--rule-2);vertical-align:top;line-height:1.72;}
 tr:last-child td{border-bottom:none;}
 tbody tr:hover{background:rgba(222,214,198,.16);}
-td code{white-space:nowrap;}
+td code,th code{
+  /* 短的保持一行好讀，過長的允許換行，否則整個表格會被撐爆 */
+  white-space:normal;overflow-wrap:anywhere;
+}
 .ok{color:var(--after);font-weight:700;}
 .no{color:var(--live);font-weight:700;}
 
@@ -460,7 +539,7 @@ footer .stamp{
 <li>AGENTS.md 寫了但沒驗證過有沒有生效</li>
 <li>用 opencode 寫數學程式還不太順</li>
 </ul>
-<p>理由很實際：<strong>這章的東西都是在「你已經能順利用 agent 做事」之後，才會感覺到價值的優化。</strong> 在地基還不穩的時候加裝潢，只會讓你要 debug 的東西變多——當結果不如預期，你會分不清是模型的問題、你的提示的問題，還是你多加的那個 MCP 的問題。</p>
+<p>理由很實際：<strong>這章的東西都是在「你已經能順利用 agent 做事」之後，才會感覺到價值的優化。</strong> 在地基還不穩的時候加裝潢，只會讓你要 debug 的東西變多。結果不如預期時，你會分不清是模型的問題、提示的問題，還是你多加的那個 MCP 的問題。</p>
 <p>而且老實說：<strong>這門課的作業，只用前兩章的內容就能完整做完。</strong> 這章是給已經吃飽、還想多學一點的人。</p>
 <p>準備好的話，我們開始。</p>
 <hr>
@@ -484,7 +563,7 @@ footer .stamp{
 <p><strong>問題</strong>：<code>opencode/big-pickle</code> 和所有模型一樣，知識有時間截止點。你問它 scikit-learn 某個參數怎麼用，它可能給你一個兩年前的 API，跑起來噴 <code>TypeError</code>。你也可以叫它用 <code>webfetch</code> 去抓文件，但那是抓整頁 HTML，又慢又雜。</p>
 <p><strong>解法</strong>：接上 Context7，它專門提供<strong>套件的即時文件查詢</strong>，agent 可以直接查 numpy、scipy、scikit-learn、matplotlib 的當前 API。</p>
 <p>在專案根目錄的 <code>opencode.json</code> 加上 <code>mcp</code> 區塊：</p>
-<pre class="cmd"><code>{
+<pre class="cmd" data-lang="json"><code>{
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode/big-pickle",
   "permission": { "bash": "ask", "edit": "ask", "webfetch": "ask" },
@@ -498,10 +577,10 @@ footer .stamp{
   }
 }</code></pre>
 <p>存檔後驗證：</p>
-<pre class="cmd"><code>cd ~/ai-math-lab
+<pre class="cmd" data-lang="bash"><code>cd ~/ai-math-lab
 opencode mcp list</code></pre>
 <p>實測輸出：</p>
-<pre class="cmd"><code>┌  MCP Servers
+<pre class="out"><code>┌  MCP Servers
 │
 ●  ✓ context7 connected
 │      https://mcp.context7.com/mcp
@@ -509,10 +588,10 @@ opencode mcp list</code></pre>
 └  1 server(s)</code></pre>
 <p>看到 <code>connected</code> 就成功了。<strong>這個 server 不需要註冊、不需要 API key、不需要付費</strong>，和 <code>opencode/big-pickle</code> 一樣可以直接用。</p>
 <p>接上之後可以這樣問：</p>
-<pre class="cmd"><code>scikit-learn 最新版的 PCA，取得解釋變異比例的屬性叫什麼？查文件確認再回答。</code></pre>
+<pre class="cmd" data-lang="text"><code>scikit-learn 最新版的 PCA，取得解釋變異比例的屬性叫什麼？查文件確認再回答。</code></pre>
 <h3>兩種 MCP：remote 與 local</h3>
 <p><strong>remote</strong>：連到別人架好的網路服務。你不用安裝任何東西。</p>
-<pre class="cmd"><code>{
+<pre class="cmd" data-lang="json"><code>{
   "mcp": {
     "my-remote-mcp": {
       "type": "remote",
@@ -526,13 +605,13 @@ opencode mcp list</code></pre>
 }</code></pre>
 <ul>
 <li><code>url</code>（必填）：server 網址</li>
-<li><code>headers</code>（選填）：需要金鑰時用。<strong>注意 <code>{env:MY_API_KEY}</code> 這種寫法</strong>——它會去讀環境變數，<strong>不要把金鑰直接寫進 <code>opencode.json</code></strong>，因為那個檔案會進 git。</li>
+<li><code>headers</code>（選填）：需要金鑰時用。<strong>注意 <code>{env:MY_API_KEY}</code> 這種寫法</strong>：它會去讀環境變數，<strong>不要把金鑰直接寫進 <code>opencode.json</code></strong>，因為那個檔案會進 git。</li>
 <li><code>enabled</code>（選填）：設 <code>false</code> 可暫時關掉而不用刪設定</li>
 <li><code>timeout</code>（選填）：取得工具清單的逾時毫秒數</li>
 <li><code>oauth</code>（選填）：需要 OAuth 授權時用，設 <code>false</code> 可停用自動偵測</li>
 </ul>
 <p><strong>local</strong>：在你電腦上跑一個程式當 server。</p>
-<pre class="cmd"><code>{
+<pre class="cmd" data-lang="json"><code>{
   "mcp": {
     "my-local-mcp": {
       "type": "local",
@@ -553,7 +632,7 @@ opencode mcp list</code></pre>
 <p><strong>這門課建議只用 remote</strong>，因為 local 需要 Node.js 環境、要下載套件，多一層可能出錯的地方。</p>
 <h3><code>opencode mcp</code> 這個 CLI</h3>
 <p>實測 1.18.30 有這些子指令：</p>
-<pre class="cmd"><code>opencode mcp add [name]      # 新增 MCP server
+<pre class="cmd" data-lang="bash"><code>opencode mcp add [name]      # 新增 MCP server
 opencode mcp list            # 列出所有 server 與連線狀態（別名 ls）
 opencode mcp auth [name]     # 對支援 OAuth 的 server 進行認證
 opencode mcp logout [name]   # 移除已儲存的 OAuth 憑證
@@ -568,7 +647,7 @@ opencode mcp debug &lt;name&gt;    # 偵錯 OAuth 連線問題</code></pre>
 <h2>3. 自訂 agent：換一個專家來</h2>
 <h3>這是什麼</h3>
 <p>opencode 內建了幾個 agent。實測 1.18.30 用 <code>opencode agent list</code> 可以看到：</p>
-<pre class="cmd"><code>build (primary)
+<pre class="out"><code>build (primary)
 plan (primary)
 explore (subagent)
 general (subagent)</code></pre>
@@ -579,17 +658,17 @@ general (subagent)</code></pre>
 </ul>
 <p><strong>自訂 agent 就是自己定義一個</strong>，給它專屬的系統提示、溫度和權限。</p>
 <h3>檔案放哪裡</h3>
-<pre class="cmd"><code>專案層：&lt;專案根目錄&gt;/.opencode/agents/&lt;名字&gt;.md
+<pre class="out"><code>專案層：&lt;專案根目錄&gt;/.opencode/agents/&lt;名字&gt;.md
 全域：  ~/.config/opencode/agents/&lt;名字&gt;.md</code></pre>
 <p><strong>檔名就是 agent 的名字。</strong> <code>math-reviewer.md</code> 會產生一個叫 <code>math-reviewer</code> 的 agent。專案層優先於全域。</p>
 <div class="box tip"><p>實測補充：1.18.30 底下 <code>.opencode/agent/</code>（單數）和 <code>.opencode/agents/</code>（複數）<strong>兩種目錄名都能被載入</strong>。文件寫的是複數，<strong>建議統一用 <code>agents/</code></strong>，不要混用，免得以後找不到自己的檔案放哪。</p></div>
 <h3>什麼情況值得做</h3>
 <p>老實說，<strong>大部分情況不值得</strong>。你在 AGENTS.md 裡多寫一條規則，通常就解決了。</p>
-<p>值得做的是這種情形：<strong>你需要一個權限跟主 agent 不同的角色。</strong> 這是 AGENTS.md 做不到的——AGENTS.md 是全專案共用的提示，而 agent 可以有自己的權限設定。</p>
+<p>值得做的是這種情形：<strong>你需要一個權限跟主 agent 不同的角色。</strong> 這是 AGENTS.md 做不到的。AGENTS.md 是全專案共用的提示，而 agent 可以有自己的權限設定。</p>
 <p>最典型的例子就是「<strong>只做數學驗證的 reviewer</strong>」：你想要一個看得到你的程式、但<strong>在機制上不可能改你的程式</strong>的審查員。</p>
 <h3>完整範例：數學驗證 reviewer</h3>
 <p>建立 <code>.opencode/agents/math-reviewer.md</code>：</p>
-<pre class="cmd"><code>---
+<pre class="cmd" data-lang="markdown"><code>---
 description: 檢查數學程式的正確性與可重現性，只讀不改
 mode: subagent
 temperature: 0.1
@@ -615,11 +694,11 @@ permission:
 回報格式：用台灣繁體中文，條列，每一項先寫結論再寫理由。
 不要修改任何檔案。不要執行任何指令。</code></pre>
 <p><strong>驗證它有沒有被正確載入</strong>（實測可用）：</p>
-<pre class="cmd"><code>cd ~/ai-math-lab
+<pre class="cmd" data-lang="bash"><code>cd ~/ai-math-lab
 opencode agent list                    # 看 math-reviewer 有沒有出現
 opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre>
 <p><code>opencode debug agent math-reviewer</code> 的實測輸出裡可以確認這些欄位都正確生效：</p>
-<pre class="cmd"><code>{
+<pre class="cmd" data-lang="json"><code>{
   "name": "math-reviewer",
   "mode": "subagent",
   "description": "檢查數學程式的正確性與可重現性，只讀不改",
@@ -627,19 +706,19 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
   "prompt": "你是數學驗證審查員。..."
 }</code></pre>
 <p>而且權限規則裡確實出現了：</p>
-<pre class="cmd"><code>{ "permission": "edit", "action": "deny", "pattern": "*" }
+<pre class="cmd" data-lang="json"><code>{ "permission": "edit", "action": "deny", "pattern": "*" }
 { "permission": "bash", "action": "deny", "pattern": "*" }</code></pre>
 <p><strong>這就是自訂 agent 相對於 AGENTS.md 的關鍵優勢</strong>：<code>edit: deny</code> 是機制上的封鎖，不是口頭請求。這個 reviewer 在技術上就是不可能改到你的程式。</p>
 <h3>怎麼用它</h3>
 <p>在 opencode 對話裡用 <code>@</code> 呼叫：</p>
-<pre class="cmd"><code>@math-reviewer 檢查 lab2_pca.py 的手刻 PCA 有沒有問題</code></pre>
+<pre class="out"><code>@math-reviewer 檢查 lab2_pca.py 的手刻 PCA 有沒有問題</code></pre>
 <p>主 agent 也可能根據 <code>description</code> 自動判斷要不要叫它，所以 <code>description</code> 要寫清楚這個 agent 適合做什麼。</p>
 <h3>frontmatter 可用的欄位</h3>
 <div class="tw"><table><tr><th>欄位</th><th>說明</th></tr><tr><td><code>description</code></td><td>這個 agent 做什麼。<strong>主 agent 靠它判斷要不要呼叫</strong>，要寫清楚</td></tr><tr><td><code>mode</code></td><td><code>subagent</code>（被呼叫）或 <code>primary</code>（Tab 切換）</td></tr><tr><td><code>model</code></td><td>指定模型。<strong>這門課請省略</strong>，省略就沿用 <code>opencode/big-pickle</code></td></tr><tr><td><code>temperature</code></td><td>0 到 1。驗證、審查類的工作用低值（0.1），創意類用高值</td></tr><tr><td><code>prompt</code></td><td>用 <code>{file:./prompts/xxx.txt}</code> 從外部檔案讀系統提示</td></tr><tr><td><code>permission</code></td><td>權限覆寫，會蓋過全域設定</td></tr><tr><td><code>disable</code></td><td>設 <code>true</code> 暫時停用</td></tr></table></div>
 <div class="box tip"><p><strong>關於 <code>model</code> 欄位的提醒</strong>：官方文件和中文教學站的範例幾乎都寫 <code>model: anthropic/claude-sonnet-4-...</code>。<strong>照抄會壞掉</strong>，因為這門課只用 <code>opencode/big-pickle</code>（唯一免登入免付費的）。<strong>直接把 <code>model</code> 那行刪掉</strong>，agent 就會沿用你在 <code>opencode.json</code> 設的模型。上面的範例就是這樣寫的。</p></div>
 <h3>也可以寫在 opencode.json 裡</h3>
 <p>不想開新檔案的話，也可以定義在 <code>opencode.json</code> 的 <code>agent</code> 區塊：</p>
-<pre class="cmd"><code>{
+<pre class="cmd" data-lang="json"><code>{
   "agent": {
     "math-reviewer": {
       "description": "檢查數學程式的正確性與可重現性，只讀不改",
@@ -651,38 +730,38 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 <p><strong>但建議用 <code>.md</code> 檔</strong>，因為系統提示會很長，寫在 JSON 裡要處理跳脫字元，很痛苦。</p>
 <h3><code>opencode agent create</code></h3>
 <p>實測 1.18.30 確實有這個指令：</p>
-<pre class="cmd"><code>opencode agent create</code></pre>
+<pre class="cmd" data-lang="bash"><code>opencode agent create</code></pre>
 <p>它會用互動問答引導你設定位置、描述、系統提示和權限。</p>
-<p>（注意：中文教學站 5.2a 那章<strong>沒有提到</strong>這個指令，只教手寫 <code>.md</code> 檔；但<strong>實測 1.18.30 確實有 <code>opencode agent create</code></strong>，以實測為準。不過因為它是互動式問答，<strong>還是建議直接手寫 <code>.md</code> 檔</strong>，你會更清楚每個欄位在幹嘛，也比較好改。）</p>
+<p>（注意：中文教學站 5.2a 那章沒提到這個指令，只教手寫 <code>.md</code> 檔。但<strong>實測 1.18.30 確實有 <code>opencode agent create</code></strong>，以實測為準。不過它是互動式問答，還是建議直接手寫 <code>.md</code> 檔，你會更清楚每個欄位在幹嘛，也比較好改。）</p>
 <hr>
 <h2>4. subagent / task：什麼時候該拆子任務</h2>
 <h3>這是什麼</h3>
 <p>主 agent 可以把一件工作丟給 subagent，subagent 在<strong>自己獨立的對話脈絡</strong>裡完成，只把結果回報給主 agent。</p>
 <p>關鍵在於<strong>脈絡隔離</strong>：subagent 翻了二十個檔案，那二十個檔案的內容<strong>不會</strong>塞進你的主對話。回到主對話的只有結論。</p>
 <h3>為什麼這件事重要</h3>
-<p>模型的 context（一次能看的內容量）是有限的。當對話塞滿了雜訊——你為了找一個函式而讓它印出的一堆檔案內容——真正重要的東西（你的 AGENTS.md 規則、你的需求、你正在寫的程式）就會被擠掉或稀釋。</p>
+<p>模型的 context（一次能看的內容量）是有限的。當對話塞滿雜訊（你為了找一個函式而讓它印出的一堆檔案內容），真正重要的東西就會被擠掉或稀釋：你的 AGENTS.md 規則、你的需求、你正在寫的程式。</p>
 <p>你會觀察到的症狀：<strong>對話進行到後面，agent 開始忘記規則、開始用 <code>python</code> 而不是 <code>uv run python</code>、開始用英文回你。</strong> 這通常不是模型變笨，是 context 被雜訊淹沒了。</p>
 <h3>什麼時候該拆</h3>
 <p><strong>該拆的情況：</strong></p>
 <ol>
-<li><strong>大範圍搜尋</strong>：「三份 reference 程式裡，哪些地方用到隨機性？」——需要翻很多檔案，但你只要一個清單。</li>
-<li><strong>獨立的檢查工作</strong>：「檢查我的 PCA 實作對不對」——用上面那個 <code>math-reviewer</code>，不要讓審查的往返污染你寫程式的主線。</li>
+<li><strong>大範圍搜尋</strong>：「三份 reference 程式裡，哪些地方用到隨機性？」需要翻很多檔案，但你只要一個清單。</li>
+<li><strong>獨立的檢查工作</strong>：「檢查我的 PCA 實作對不對」，用上面那個 <code>math-reviewer</code>，不要讓審查的往返污染你寫程式的主線。</li>
 <li><strong>主線做到一半的岔題</strong>：正在寫程式，突然想查個東西。拆出去，主線保持乾淨。</li>
 <li><strong>需要不同權限的工作</strong>：主線需要能改檔案，審查工作<strong>不該</strong>能改檔案。</li>
 </ol>
 <p><strong>不該拆的情況：</strong></p>
 <ol>
-<li><strong>單一檔案的小修改</strong>——直接做，拆出去的溝通成本比省下的多。</li>
-<li><strong>需要完整前後文才能判斷的工作</strong>——subagent 看不到你主對話裡講過的東西，你得把背景重講一遍，常常反而更慢。</li>
-<li><strong>你自己還不清楚要什麼的時候</strong>——先在主對話裡把需求想清楚。</li>
+<li><strong>單一檔案的小修改</strong>：直接做，拆出去的溝通成本比省下的多。</li>
+<li><strong>需要完整前後文才能判斷的工作</strong>：subagent 看不到你主對話裡講過的東西，你得把背景重講一遍，常常反而更慢。</li>
+<li><strong>你自己還不清楚要什麼的時候</strong>：先在主對話裡把需求想清楚。</li>
 </ol>
 <p><strong>判斷原則：這件事需要翻很多東西，但結論只有幾句話？→ 拆。</strong></p>
 <h3>怎麼用</h3>
 <p>最簡單的方式就是直接 <code>@</code> 呼叫：</p>
-<pre class="cmd"><code>@explore 找出 reference/ 底下三支程式裡所有用到隨機性的地方</code></pre>
+<pre class="cmd" data-lang="text"><code>@explore 找出 reference/ 底下三支程式裡所有用到隨機性的地方</code></pre>
 <p><code>explore</code> 是內建的唯讀探索 subagent，很適合這種「翻檔案找東西」的工作，而且它唯讀，不可能改壞你的東西。</p>
 <p>或者直接描述工作，讓主 agent 自己決定要不要拆：</p>
-<pre class="cmd"><code>先用子任務調查 reference/ 裡三支程式的隨機性用法，整理成清單，
+<pre class="cmd" data-lang="text"><code>先用子任務調查 reference/ 裡三支程式的隨機性用法，整理成清單，
 然後我們再討論要怎麼統一設定種子。</code></pre>
 <h3>相關設定</h3>
 <ul>
@@ -691,9 +770,9 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 </ul>
 <hr>
 <h2>5. 還有一個：skills</h2>
-<p>順帶一提，opencode 也支援 skills——把一組可重複使用的工作流程打包成檔案。</p>
+<p>順帶一提，opencode 也支援 skills，可以把一組重複用到的工作流程打包成檔案。</p>
 <p>檔案位置（依序搜尋）：</p>
-<pre class="cmd"><code>.opencode/skills/&lt;名字&gt;/SKILL.md
+<pre class="out"><code>.opencode/skills/&lt;名字&gt;/SKILL.md
 ~/.config/opencode/skills/&lt;名字&gt;/SKILL.md
 .claude/skills/&lt;名字&gt;/SKILL.md
 ~/.claude/skills/&lt;名字&gt;/SKILL.md
@@ -701,12 +780,12 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 ~/.agents/skills/&lt;名字&gt;/SKILL.md</code></pre>
 <p><code>SKILL.md</code> 的 frontmatter 必填 <code>name</code>（小寫英數與連字號，1–64 字元）和 <code>description</code>（1–1024 字元）。</p>
 <p>查看目前有哪些 skills：</p>
-<pre class="cmd"><code>opencode debug skill</code></pre>
+<pre class="cmd" data-lang="bash"><code>opencode debug skill</code></pre>
 <p><strong>這門課不會用到 skills。</strong> 列在這裡只是讓你知道有這個東西，之後看到別人的專案裡有 <code>SKILL.md</code> 不會一頭霧水。先把 AGENTS.md 寫好，那個的投資報酬率高得多。</p>
 <hr>
 <h2>6. 一張表做決定</h2>
 <p>遇到問題時，先問自己這個問題：</p>
-<pre class="cmd"><code>   agent 做不到這件事？
+<pre class="out"><code>   agent 做不到這件事？
         ↓ 是
       → MCP（給它新工具）
 
@@ -755,14 +834,14 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 <hr>
 <h2>資料來源</h2>
 <ul>
-<li>https://opencode.ai/docs/mcp-servers/ — <code>mcp</code> 設定區塊、local 與 remote 的鍵、<code>opencode mcp</code> 子指令</li>
-<li>https://opencode.ai/docs/agents/ — primary 與 subagent、agent 檔案位置、frontmatter 欄位、<code>agent</code> JSON 區塊</li>
-<li>https://opencode.ai/docs/permissions/ — <code>permission</code> 的鍵與值、agent 層級覆寫</li>
-<li>https://opencode.ai/docs/config/ — <code>subagent_depth</code>、<code>agent</code>、<code>mcp</code> 等頂層設定鍵</li>
-<li>https://opencode.ai/docs/skills/ — SKILL.md 位置與 frontmatter 必填欄位</li>
-<li>https://learnopencode.com/5-advanced/07a-mcp-basics.html — MCP 設定範例與排錯表（中文教學站，簡體）</li>
-<li>https://learnopencode.com/5-advanced/02a-agent-quickstart.html — 自訂 agent 快速上手（中文教學站，簡體）</li>
-<li>https://learnopencode.com/4-scenarios/coder-agents.html — reviewer 類 agent 的 frontmatter 範例（中文教學站，簡體；其範例用 <code>~/.config/opencode/agent/</code> 單數路徑）</li>
+<li><a class="ext" href="https://opencode.ai/docs/mcp-servers/" target="_blank" rel="noopener">https://opencode.ai/docs/mcp-servers/</a> — <code>mcp</code> 設定區塊、local 與 remote 的鍵、<code>opencode mcp</code> 子指令</li>
+<li><a class="ext" href="https://opencode.ai/docs/agents/" target="_blank" rel="noopener">https://opencode.ai/docs/agents/</a> — primary 與 subagent、agent 檔案位置、frontmatter 欄位、<code>agent</code> JSON 區塊</li>
+<li><a class="ext" href="https://opencode.ai/docs/permissions/" target="_blank" rel="noopener">https://opencode.ai/docs/permissions/</a> — <code>permission</code> 的鍵與值、agent 層級覆寫</li>
+<li><a class="ext" href="https://opencode.ai/docs/config/" target="_blank" rel="noopener">https://opencode.ai/docs/config/</a> — <code>subagent_depth</code>、<code>agent</code>、<code>mcp</code> 等頂層設定鍵</li>
+<li><a class="ext" href="https://opencode.ai/docs/skills/" target="_blank" rel="noopener">https://opencode.ai/docs/skills/</a> — SKILL.md 位置與 frontmatter 必填欄位</li>
+<li><a class="ext" href="https://learnopencode.com/5-advanced/07a-mcp-basics.html" target="_blank" rel="noopener">https://learnopencode.com/5-advanced/07a-mcp-basics.html</a> — MCP 設定範例與排錯表（中文教學站，簡體）</li>
+<li><a class="ext" href="https://learnopencode.com/5-advanced/02a-agent-quickstart.html" target="_blank" rel="noopener">https://learnopencode.com/5-advanced/02a-agent-quickstart.html</a> — 自訂 agent 快速上手（中文教學站，簡體）</li>
+<li><a class="ext" href="https://learnopencode.com/4-scenarios/coder-agents.html" target="_blank" rel="noopener">https://learnopencode.com/4-scenarios/coder-agents.html</a> — reviewer 類 agent 的 frontmatter 範例（中文教學站，簡體；其範例用 <code>~/.config/opencode/agent/</code> 單數路徑）</li>
 </ul>
 <p>本機實測（opencode 1.18.30，Linux/WSL2）：</p>
 <ul>

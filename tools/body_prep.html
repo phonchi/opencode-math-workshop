@@ -8,7 +8,7 @@
   <h1>課前準備</h1>
   <p class="lead">
     全部照做大約 <strong>10 到 20 分鐘</strong>，主要時間花在等下載。
-    請務必在家裡或宿舍做完——要下載的東西約 <strong>287 MB</strong>，
+    請務必在家裡或宿舍做完。要下載的東西約 <strong>287 MB</strong>，
     全班三十人同時在教室做，網路會塞住。
   </p>
 </div>
@@ -17,14 +17,69 @@
 <div class="bt">為什麼不能現場做</div>
 <p>
 建立 Python 環境要下載約 <strong>287 MB</strong>（Python 直譯器加上所有套件）。
-本教材實測過三次，耗時從 <strong>2 秒到 6 分 38 秒</strong>都出現過——
-差異完全取決於當下的網路狀況。
+本教材實測過三次，耗時從 <strong>2 秒到 6 分 38 秒</strong>都出現過，差異完全看當下的網路狀況。
 </p>
 <p style="margin-bottom:0">
 換句話說：<strong>你沒辦法預測自己會遇到哪一種</strong>。
 而三十個人同時在同一個 WiFi 上抓 287 MB，幾乎保證會遇到慢的那一種。
 </p>
 </div>
+
+<section>
+<h2>先確認一件事：你會用終端機嗎</h2>
+<p>
+這場工作坊全程在<strong>終端機</strong>裡進行。如果你平常只在 VS Code 按執行鍵、
+或只用過 Google Colab，下面這個展開來看一分鐘就夠了。
+</p>
+
+<details class="bg"><summary>終端機 60 秒入門：打開它、走到資料夾、確認位置</summary>
+<div class="bg-body">
+<p>
+終端機就是一個「用打字下指令」的視窗。它永遠<strong>站在某一個資料夾裡面</strong>，
+你打的指令都是對那個資料夾下的。這是最重要、也最常被忽略的一件事。
+</p>
+<h4>怎麼打開</h4>
+<div class="tw"><table>
+<tr><th>系統</th><th>怎麼開</th></tr>
+<tr><td>Windows</td><td>開始選單搜尋 <strong>PowerShell</strong></td></tr>
+<tr><td>macOS</td><td>Launchpad 搜尋<strong>終端機</strong>（Terminal）</td></tr>
+<tr><td>Linux / WSL</td><td>你已經在用了</td></tr>
+</table></div>
+<h4>三個你會用到的指令</h4>
+<div class="tw"><table>
+<tr><th>指令</th><th>作用</th></tr>
+<tr><td><code>pwd</code>　（Windows 也能用）</td><td><strong>我現在在哪個資料夾？</strong>不確定的時候先打這個</td></tr>
+<tr><td><code>ls</code>　（Windows 也能用）</td><td>列出這個資料夾裡有什麼</td></tr>
+<tr><td><code>cd 資料夾名稱</code></td><td>走進某個資料夾。<code>cd ..</code> 是回上一層</td></tr>
+</table></div>
+<h4>最省事的做法：不要用打的</h4>
+<p>
+路徑打字很容易出錯。直接用檔案總管／Finder 走到你要的資料夾，
+然後把資料夾<strong>拖進終端機視窗</strong>，路徑就會自動填好。
+先打 <code>cd </code>（注意後面有空格）再拖，然後按 Enter。
+</p>
+<div class="box warn">
+<div class="bt">整場工作坊最常見的錯誤</div>
+<p style="margin-bottom:0">
+在<strong>錯的資料夾</strong>裡啟動 opencode。這樣它讀不到你的
+<code>AGENTS.md</code> 與 <code>opencode.json</code>，於是會用簡體中文回答、
+用 <code>python</code> 而不是 <code>uv run python</code>、行為完全不對。
+每次啟動前先 <code>pwd</code> 跟 <code>ls</code> 確認一下，兩秒的事。
+</p>
+</div>
+<h4>幾個小技巧</h4>
+<ul>
+<li><strong>Tab 鍵會自動補完</strong>檔名與資料夾名。打前幾個字母按 Tab，省事又不會打錯</li>
+<li><strong>↑ 方向鍵</strong>叫回上一個指令，不用重打</li>
+<li>指令卡住停不下來：<strong>Ctrl+C</strong></li>
+<li>畫面太亂：打 <code>clear</code>（Windows 用 <code>cls</code>）</li>
+</ul>
+<p style="margin-bottom:0">
+這樣就夠了。這場工作坊不會用到更進階的終端機操作。
+</p>
+</div>
+</details>
+</section>
 
 <section>
 <h2>你需要安裝兩個東西</h2>
@@ -46,9 +101,21 @@
 <h2>安裝</h2>
 
 <h3>Windows</h3>
-<p>開啟 <strong>PowerShell</strong>（開始選單搜尋「PowerShell」），貼上這兩行：</p>
+<p>
+Windows 11 內建了一個叫 <code>winget</code> 的套件管理員（跟系統一起出貨的
+<strong>App Installer</strong>），所以你什麼都不用先裝。
+開啟 <strong>PowerShell</strong>（開始選單搜尋「PowerShell」），貼上這兩行：
+</p>
 <pre class="cmd"><code>winget install SST.opencode --accept-source-agreements --accept-package-agreements
 winget install astral-sh.uv --accept-source-agreements --accept-package-agreements</code></pre>
+<div class="box tip">
+<div class="bt">如果說「無法辨識 winget」</div>
+<p style="margin-bottom:0">
+表示你的 Windows 比較舊（Windows 10 要 1809 以上才有，2004 之後才變成標配）。
+開啟 <strong>Microsoft Store</strong>，搜尋 <strong>App Installer</strong> 安裝，
+然後關掉 PowerShell 重開。
+</p>
+</div>
 <div class="box warn">
 <div class="bt">兩個一定會遇到的坑</div>
 <p><strong>一、不加 <code>--accept-source-agreements</code> 會卡住。</strong>
@@ -60,6 +127,7 @@ winget 第一次執行會跳出一個要你按 Y 的條款同意，但那個提�
 </div>
 
 <h3>macOS</h3>
+<p>macOS 內建 <code>curl</code>，直接開「終端機」貼這兩行：</p>
 <pre class="cmd"><code>curl -fsSL https://opencode.ai/install | bash
 curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 <p class="lead" style="font-size:.92rem;color:var(--ink-3)">
@@ -67,6 +135,15 @@ curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 </p>
 
 <h3>Linux / WSL</h3>
+<p>
+這裡要多一個步驟。下載工具 <code>curl</code> <strong>不一定裝在你的系統裡</strong>，
+Ubuntu 的基本安裝並不包含它。真正一定有的是套件管理員 <code>apt</code>，
+所以先用它把 <code>curl</code> 補上：
+</p>
+<pre class="cmd"><code>sudo apt update &amp;&amp; sudo apt install -y curl ca-certificates</code></pre>
+<p>（<code>ca-certificates</code> 是驗證 HTTPS 憑證用的，少了它 <code>curl</code> 會連不上。
+如果這兩個本來就有，這行也只會告訴你「已經是最新版」，不會弄壞任何東西。）</p>
+<p>接著才裝 opencode 與 uv：</p>
 <pre class="cmd"><code>curl -fsSL https://opencode.ai/install | bash
 curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 <p>裝完後關掉終端機重開，或執行 <code>source ~/.bashrc</code>。</p>
@@ -216,7 +293,7 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 意思是「agent 要改檔案或跑指令之前，先問過我」。
 </p>
 <p>
-問題是 <code>opencode run</code> 是<strong>非互動模式</strong>——沒有人可以回答那個問題。
+問題是 <code>opencode run</code> 是<strong>非互動模式</strong>，沒有人可以回答那個問題。
 opencode 的處理方式是<strong>直接拒絕</strong>：
 </p>
 <pre><code>! permission requested: edit (hello.py); auto-rejecting
@@ -224,7 +301,7 @@ opencode 的處理方式是<strong>直接拒絕</strong>：
 Error: The user rejected permission to use this specific tool call.</code></pre>
 <p style="margin-bottom:0">
 <code>--auto</code> 就是「這一次我事先全部答應」。
-它在自測時很方便，但<strong>平常不要養成習慣</strong>——
+它在自測時很方便，但<strong>平常不要養成習慣</strong>。
 工作坊全程我們都用互動模式（直接打 <code>opencode</code>），
 那時候每個動作都會停下來問你，你才有機會看清楚它要做什麼。
 </p>
@@ -241,7 +318,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 </div>
 <p>
 看到 <code>Read</code>、<code>Write</code>、<code>$</code> 這三種箭頭，代表 agent 的三種能力
-（讀檔、寫檔、執行指令）都正常。而且它讀了 <code>AGENTS.md</code>、用了 <code>uv run</code>——
+（讀檔、寫檔、執行指令）都正常。而且它讀了 <code>AGENTS.md</code>、用了 <code>uv run</code>，
 表示你的專案規則有生效。
 </p>
 
@@ -263,6 +340,12 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <tr><td><code>opencode: command not found</code><br><code>無法辨識 'opencode'</code></td>
     <td>PATH 沒重新載入</td>
     <td>把終端機<strong>完全關掉重開</strong>。Windows 請用 PowerShell，不要用 cmd。</td></tr>
+<tr><td><code>curl: command not found</code></td>
+    <td>Linux/WSL 沒有內建 <code>curl</code></td>
+    <td>先跑 <code>sudo apt update &amp;&amp; sudo apt install -y curl ca-certificates</code>，再重跑安裝指令。</td></tr>
+<tr><td><code>無法辨識 'winget'</code></td>
+    <td>Windows 版本較舊，沒有內建 App Installer</td>
+    <td>Microsoft Store 搜尋 <strong>App Installer</strong> 安裝，關掉 PowerShell 重開。</td></tr>
 <tr><td>winget 停在 <code>Do you agree...[Y] Yes [N] No</code> 不動</td>
     <td>互動式條款同意收不到鍵盤輸入</td>
     <td>Ctrl+C 中斷，改用本頁那組帶 <code>--accept-source-agreements</code> 的指令。</td></tr>
@@ -290,7 +373,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <div class="bt">還是不行的話</div>
 <p style="margin-bottom:0">
 把<strong>你打的指令</strong>和<strong>完整的錯誤訊息</strong>截圖，工作坊開始前傳給助教。
-請不要只說「裝不起來」——那樣沒辦法幫你。
+請不要只說「裝不起來」，那樣沒辦法幫你。
 </p>
 </div>
 </section>

@@ -10,7 +10,7 @@
 
 <div class="box tip"><p>適用版本：opencode 1.18.30 · Ollama 0.21.2</p></div>
 <p>工作坊主線用的是 <code>opencode/big-pickle</code>，免登入、不用設定、速度夠快。這一章講的是另一條路： 把模型放在自己的筆電上跑。<strong>這不是必修</strong>，做不做都不影響你的作業。</p>
-<p>先把話講在前面：<strong>對大多數人的筆電來說，本地模型的體驗會明顯比雲端差。</strong> 慢、比較笨、比較容易亂來，而且要花時間調設定。這一章不是要推銷本地模型， 是要讓你在「真的需要」的時候知道怎麼做，以及知道什麼時候不該做。</p>
+<p>先把話講在前面：<strong>對大多數人的筆電來說，本地模型的體驗會明顯比雲端差。</strong> 慢、比較笨、比較容易亂來，而且要花時間調設定。這一章要做的，是讓你在「真的需要」的時候知道怎麼做，也知道什麼時候不該做。</p>
 <hr>
 <h2>什麼時候才真的需要本地模型</h2>
 <div class="tw"><table><tr><th>本地模型的好處</th><th>代價</th></tr><tr><td><strong>隱私</strong>：程式碼與資料不離開你的電腦</td><td><strong>慢</strong>：沒有獨顯的筆電，回一段話可能要等好幾十秒</td></tr><tr><td><strong>離線</strong>：沒網路也能用（飛機上、網路爛的地方）</td><td><strong>笨</strong>：2B–9B 的小模型跟雲端大模型不是同一個量級</td></tr><tr><td><strong>沒有配額</strong>：想跑多少跑多少，不會被限流</td><td><strong>耗電發燙</strong>：筆電風扇會全速轉，電池撐不久</td></tr><tr><td><strong>可以隨便實驗</strong>：換模型、改參數、看 log</td><td><strong>要調設定</strong>：不設定的話，預設值幾乎一定不能用（見下面最長的那一節）</td></tr></table></div>
@@ -39,7 +39,7 @@
 <p>標「未實測」的是我沒有那台機器可以驗證的，只有 12GB VRAM 那一列是下面實測數據的來源。</p>
 <h3>記憶體怎麼估</h3>
 <p>粗略公式：</p>
-<pre class="cmd"><code>模型權重（GB） ≈ 參數量（B） × quantization 位元數 ÷ 8</code></pre>
+<pre class="out"><code>模型權重（GB） ≈ 參數量（B） × quantization 位元數 ÷ 8</code></pre>
 <p><code>q4_K_M</code> 大約是 4.5 bits/參數（不是剛好 4，因為有些層保留較高精度）。所以：</p>
 <ul>
 <li><code>qwen3.5:9b</code> 的 <code>ollama show</code> 顯示實際參數是 <strong>9.7B</strong>：9.7 × 4.5 ÷ 8 ≈ <strong>5.5GB</strong></li>
@@ -55,29 +55,29 @@
 <h2>安裝 Ollama</h2>
 <p>Ollama 是負責「把模型載入記憶體、提供一個本機 API」的程式。opencode 只是它的客戶端。</p>
 <h3>macOS</h3>
-<p>到 &lt;https://ollama.com/download&gt; 下載 .dmg，拖進 Applications。裝完會有一個選單列圖示。</p>
+<p>到 <a class="ext" href="https://ollama.com/download" target="_blank" rel="noopener">https://ollama.com/download</a> 下載 .dmg，拖進 Applications。裝完會有一個選單列圖示。</p>
 <h3>Windows</h3>
-<p>到 &lt;https://ollama.com/download&gt; 下載安裝檔，一路下一步。裝完會常駐在系統列。</p>
+<p>到 <a class="ext" href="https://ollama.com/download" target="_blank" rel="noopener">https://ollama.com/download</a> 下載安裝檔，一路下一步。裝完會常駐在系統列。</p>
 <div class="box tip"><p>如果你用 WSL2 寫作業：<strong>建議把 Ollama 裝在 WSL 裡面</strong>（用下面的 Linux 步驟）， 不要裝 Windows 版再跨過去連，這樣網路位址和 GPU 都比較單純。</p></div>
 <h3>Linux（含 WSL2）</h3>
-<pre class="cmd"><code>curl -fsSL https://ollama.com/install.sh | sh</code></pre>
+<pre class="cmd" data-lang="bash"><code>curl -fsSL https://ollama.com/install.sh | sh</code></pre>
 <p>安裝腳本會建立並啟動一個 systemd service。確認它在跑：</p>
-<pre class="cmd"><code>systemctl status ollama
+<pre class="cmd" data-lang="bash"><code>systemctl status ollama
 curl http://localhost:11434/api/version</code></pre>
 <p>應該會看到類似 <code>{"version":"0.21.2"}</code>。</p>
 <h3>抓第一個模型</h3>
-<pre class="cmd"><code>ollama pull qwen3.5:4b-q4_K_M     # 依你上面那張表挑一個
+<pre class="cmd" data-lang="bash"><code>ollama pull qwen3.5:4b-q4_K_M     # 依你上面那張表挑一個
 ollama list                        # 看有哪些模型
 ollama run qwen3.5:4b-q4_K_M       # 聊天測試，打 /bye 離開</code></pre>
 <hr>
 <h2>挑模型：tool calling 是硬門檻</h2>
-<p><strong>agent 的本質就是「模型呼叫工具」。</strong> 不支援 tool calling（又叫 function calling）的模型， 在 opencode 裡<strong>完全不能用</strong>——不是「效果差一點」，是連第一步都走不到。</p>
+<p><strong>agent 的本質就是「模型呼叫工具」。</strong> 不支援 tool calling（又叫 function calling）的模型， 在 opencode 裡<strong>完全不能用</strong>。這不是「效果差一點」，是連第一步都走不到。</p>
 <p>這是初學者最容易踩的坑：看到一個模型很小、跑得動、聊天也正常，就以為可以用， 結果接到 opencode 就直接壞掉。</p>
 <h3>怎麼檢查</h3>
 <p><strong>一行指令搞定</strong>，看 <code>Capabilities</code> 有沒有 <code>tools</code>：</p>
-<pre class="cmd"><code>ollama show qwen3.5:9b-q4_K_M</code></pre>
+<pre class="cmd" data-lang="bash"><code>ollama show qwen3.5:9b-q4_K_M</code></pre>
 <p>本機輸出（節錄）：</p>
-<pre class="cmd"><code>  Model
+<pre class="out"><code>  Model
     architecture        qwen35
     parameters          9.7B
     context length      262144
@@ -89,11 +89,11 @@ ollama run qwen3.5:4b-q4_K_M       # 聊天測試，打 /bye 離開</code></pre>
     tools          ← 有這行才能用
     thinking</code></pre>
 <p>對照組，<code>gemma3:1b</code>：</p>
-<pre class="cmd"><code>  Capabilities
+<pre class="out"><code>  Capabilities
     completion     ← 只有這個，沒有 tools</code></pre>
 <h3>如果硬用不支援的模型會怎樣</h3>
 <p>實測：對 <code>gemma3:1b</code> 發一個帶 <code>tools</code> 的請求，Ollama 直接回錯誤，模型根本不會被呼叫：</p>
-<pre class="cmd"><code>{"error":{"message":"registry.ollama.ai/library/gemma3:1b does not support tools",
+<pre class="out"><code>{"error":{"message":"registry.ollama.ai/library/gemma3:1b does not support tools",
           "type":"invalid_request_error"}}</code></pre>
 <p>在 opencode 裡你會看到請求失敗、對話卡住。<strong>這不是設定問題，是模型選錯了，換一個就好。</strong></p>
 <h3>已知不支援 tool calling 的常見小模型</h3>
@@ -104,11 +104,23 @@ ollama run qwen3.5:4b-q4_K_M       # 聊天測試，打 /bye 離開</code></pre>
 <div class="tw"><table><tr><th>模型</th><th>可選大小</th><th>備註</th></tr><tr><td><code>qwen3.5</code></td><td>0.8b / 2b / 4b / 9b / 27b / 35b / 122b</td><td>tools + vision + thinking，原生 context 256K</td></tr><tr><td><code>granite4.1</code></td><td>3b / 8b / 30b</td><td>IBM，Apache 2.0，明講支援 tool use 與 JSON 輸出，128K context</td></tr><tr><td><code>llama3.2</code></td><td>1b / 3b</td><td>128K context</td></tr><tr><td><code>qwen3</code></td><td>0.6b / 1.7b / 4b / 8b</td><td>tools + thinking</td></tr><tr><td><code>qwen2.5</code> / <code>qwen2.5-coder</code></td><td>0.5b / 1.5b / 3b / 7b</td><td>較舊但穩定</td></tr><tr><td><code>phi4-mini</code></td><td>3.8b</td><td></td></tr><tr><td><code>ministral-3</code></td><td>3b / 8b / 14b</td><td>tools + vision</td></tr><tr><td><code>smollm2</code></td><td>135m / 360m / 1.7b</td><td>有 tools 標籤，但<strong>這個尺寸做 agent 實務上不會成功</strong>，別浪費時間</td></tr></table></div>
 <p><strong>實務建議</strong>：跑得動的前提下，<strong>選最大的那個</strong>。小模型省下來的記憶體， 遠遠補不回它在工具呼叫上犯的錯。</p>
 <hr>
+<h2>先搞清楚：token 與 context 是什麼</h2>
+<details class="bg"><summary>token 與 context 是什麼（沒概念的話先看這個）</summary><div class="bg-body"><p>語言模型讀文字的方式是先把它切成一塊一塊的 <strong>token</strong>，不是一個字一個字讀。 中文大約 <strong>一個字 ≈ 1 到 2 個 token</strong>，英文大約 <strong>一個單字 ≈ 1.3 個 token</strong>， 程式碼因為符號多，通常更耗 token。</p>
+<p><strong>context</strong>（上下文長度）就是「模型一次最多能看到幾個 token」。 它是一個硬性上限，不是建議值。超過就有東西會被丟掉。</p>
+<p>這個上限要裝的東西比你想的多：</p>
+<ul>
+<li>系統提示（agent 的行為規則）</li>
+<li>所有工具的定義（read / write / bash… 每個都是一大段 JSON）</li>
+<li>你的 <code>AGENTS.md</code></li>
+<li>agent 讀進來的檔案內容</li>
+<li>到目前為止的整段對話，以及每次工具執行的輸出</li>
+</ul>
+<p><strong>一般聊天 4k 綽綽有餘，但 agent 光是「還沒開始工作」就可能用掉一大半。</strong> 這就是下面這一節要處理的問題。</p></div></details>
 <h2>最重要的一節：context 要設兩次</h2>
-<p>這一節是整章的重點。<strong>只設一邊完全沒有用</strong>，而且失敗的方式是「安靜地壞掉」—— 不會報錯，只會讓模型看起來很笨。</p>
+<p>這一節是整章的重點。<strong>只設一邊完全沒有用</strong>，而且失敗的方式是「安靜地壞掉」： 不會報錯，只會讓模型看起來很笨。</p>
 <h3>為什麼是兩個地方</h3>
 <p>opencode 透過 <strong>OpenAI 相容端點</strong>（<code>http://localhost:11434/v1</code>）跟 Ollama 講話。 這個協定裡<strong>沒有</strong>「context 要多大」這個欄位。所以：</p>
-<pre class="cmd"><code>  opencode                                        Ollama
+<pre class="out"><code>  opencode                                        Ollama
   --------                                        ------
   limit.context  ──── POST /v1/chat/completions ───&gt;  num_ctx
   設定 A                                             設定 B
@@ -124,17 +136,17 @@ ollama run qwen3.5:4b-q4_K_M       # 聊天測試，打 /bye 離開</code></pre>
 </ul>
 <p>（官方文件稱為 compaction）的依據。opencode 的自動 compaction 門檻就是從 catalog 裡的 context limit 算出來的，而 Ollama 這種自訂 provider 的 context limit 只能由你手寫。 opencode <strong>沒辦法</strong>問 Ollama「你的 context 多大」，只能相信你在設定檔裡寫的數字。</p>
 <p><strong>實測證明這兩者互不相通</strong>：我在 <code>/v1/chat/completions</code> 請求裡同時塞了 <code>"num_ctx": 32768</code> 和 <code>"options": {"num_ctx": 32768}</code>，然後看 <code>ollama ps</code>：</p>
-<pre class="cmd"><code>NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL
+<pre class="out" style="font-size:0.749rem"><code>NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL
 qwen3.5:9b-q4_K_M    6488c96fa5fa    8.6 GB    100% GPU     4096       4 minutes from now
                                                             ^^^^ 還是 4096，請求裡的設定被忽略</code></pre>
 <p>所以：<strong>你在 opencode 那邊怎麼寫，都不會改變 Ollama 的 num_ctx。</strong> 必須分開設。</p>
 <h3>預設值是多少（這裡有陷阱）</h3>
-<p>較新版本的 Ollama <strong>不是固定 4096</strong>，而是<strong>開機時依可用 VRAM 自動決定</strong>：</p>
+<p>較新版本的 Ollama 已經不用固定的 4096，改成<strong>開機時依可用 VRAM 自動決定</strong>：</p>
 <div class="tw"><table><tr><th>可用 VRAM</th><th>預設 context</th></tr><tr><td>小於 24 GiB</td><td><strong>4k</strong></td></tr><tr><td>24–48 GiB</td><td>32k</td></tr><tr><td>48 GiB 以上</td><td>256k</td></tr></table></div>
 <p>本機（RTX 5070 12GB）啟動時的 log，可以直接看到這個判斷：</p>
-<pre class="cmd"><code>level=INFO source=routes.go:1860 msg="vram-based default context"
+<pre class="out"><code>level=INFO source=routes.go:1860 msg="vram-based default context"
     total_vram="11.9 GiB" default_num_ctx=4096</code></pre>
-<p><strong>注意這個門檻有多高</strong>：24 GiB。RTX 4090 是 24GB、RTX 5070 是 12GB、 M2 MacBook Air 是 8 或 16GB——<strong>幾乎所有學生的機器都落在第一層，也就是 4k</strong>。 「我沒改過設定所以應該是預設的最佳值」這個想法在這裡是錯的。</p>
+<p><strong>注意這個門檻有多高</strong>：24 GiB。RTX 4090 是 24GB、RTX 5070 是 12GB、 M2 MacBook Air 是 8 或 16GB。<strong>幾乎所有學生的機器都落在第一層，也就是 4k。</strong> 「我沒改過設定所以應該是預設的最佳值」這個想法在這裡是錯的。</p>
 <div class="box tip"><p>Ollama 的 FAQ 頁面目前還寫著「預設 4096」，跟 context-length 那一頁的分層說明不一致。 以 context-length 頁與你自己機器的 log 為準。</p></div>
 <h3>4k 為什麼對 agent 完全不夠</h3>
 <p>一般聊天 4k 綽綽有餘。但 agent 的 context 裡塞的是：</p>
@@ -156,9 +168,9 @@ qwen3.5:9b-q4_K_M    6488c96fa5fa    8.6 GB    100% GPU     4096       4 minutes
 </ul>
 <p>並要求執行 <code>ls -la</code></p>
 <h4>設定前：<code>qwen3.5:9b-q4_K_M</code>（num_ctx = 4096 預設）</h4>
-<pre class="cmd"><code>usage = {'prompt_tokens': 4049, 'completion_tokens': 961, 'total_tokens': 5010}</code></pre>
+<pre class="out"><code>usage = {'prompt_tokens': 4049, 'completion_tokens': 961, 'total_tokens': 5010}</code></pre>
 <p>模型的回答（原文節錄）：</p>
-<pre class="cmd"><code>（說明）：作為語言模型，我無法在您的系統中執行命令……
+<pre class="out"><code>（說明）：作為語言模型，我無法在您的系統中執行命令……
 (a) 系統提示驗證碼：不知道（對話中未提及）
 (b) 第 1 段筆記代號：GOLF07
 (c) 第 8 段筆記代號：HOTEL8</code></pre>
@@ -167,26 +179,26 @@ qwen3.5:9b-q4_K_M    6488c96fa5fa    8.6 GB    100% GPU     4096       4 minutes
 <li><strong>內容被吃掉了</strong>：送進去約 10000 token，<code>prompt_tokens</code> 只有 <strong>4049</strong>。</li>
 <li><strong>舊的對話輪不見了</strong>：第 1 段代號實際是 <code>ALPHA1</code>，它很有自信地回答 <code>GOLF07</code></li>
 </ol>
-<p>（那是第 7 段的代號）。最新的第 8 段 <code>HOTEL8</code> 它答對了—— 因為 Ollama 保留的是<strong>最後面</strong>的訊息。<strong>它不會說「我不知道」，它會編一個。</strong></p>
+<p>（那是第 7 段的代號）。最新的第 8 段 <code>HOTEL8</code> 它答對了， 因為 Ollama 保留的是<strong>最後面</strong>的訊息。<strong>它不會說「我不知道」，它會編一個。</strong></p>
 <ol>
 <li><strong>連 system message 裡的驗證碼也答不出來</strong>：它回「對話中未提及」。</li>
 </ol>
-<p>這一點要講精確：Ollama 的 <code>chatPrompt</code> <strong>明文保證一定保留 system 訊息</strong>， 所以驗證碼其實還在 context 裡。它答不出來不是因為被刪掉， 而是因為 4k 的空間被塞爆之後，小模型在一堆雜訊裡<strong>用不到</strong>那條指令。 （同樣結構的另一次實測它答對了 <code>BANANA7</code>——這一條的表現不穩定， 這本身就是「context 太擠」的典型徵兆。）</p>
-<p>順帶一提，它也沒有呼叫 <code>bash</code> 工具，而是回「作為語言模型，我無法在您的系統中執行命令」。 但這一項<strong>不能歸因於 context</strong>——見下面 32k 的對照。</p>
+<p>這一點要講精確：Ollama 的 <code>chatPrompt</code> <strong>明文保證一定保留 system 訊息</strong>， 所以驗證碼其實還在 context 裡。它答不出來的原因不是被刪掉， 是 4k 的空間被塞爆之後，小模型在一堆雜訊裡<strong>用不到</strong>那條指令。 （同樣結構的另一次實測它答對了 <code>BANANA7</code>，這一條的表現不穩定， 這本身就是「context 太擠」的典型徵兆。）</p>
+<p>順帶一提，它也沒有呼叫 <code>bash</code> 工具，而是回「作為語言模型，我無法在您的系統中執行命令」。 但這一項<strong>不能歸因於 context</strong>，見下面 32k 的對照。</p>
 <h4>設定後：<code>qwen3.5-32k</code>（num_ctx = 32768）</h4>
 <p>同一份請求，只把 model 名稱換掉：</p>
-<pre class="cmd"><code>usage = {'prompt_tokens': 10190, 'completion_tokens': 3262, 'total_tokens': 13452}</code></pre>
-<pre class="cmd"><code>(a) 系統提示驗證碼：BANANA7
+<pre class="out"><code>usage = {'prompt_tokens': 10190, 'completion_tokens': 3262, 'total_tokens': 13452}</code></pre>
+<pre class="out"><code>(a) 系統提示驗證碼：BANANA7
 (b) 第 1 段筆記的代號：ALPHA1
 (c) 第 8 段筆記的代號：HOTEL8</code></pre>
-<p><strong>三題全對</strong>，<code>prompt_tokens</code> 是完整的 10190。<strong>這不是「模型變聰明了」， 是它終於看得到完整的指令。</strong></p>
-<p>（<strong>重要的對照</strong>：即使 context 開到 32k、內容完整送達，這一輪它<strong>還是</strong>沒有呼叫 <code>bash</code> 工具，同樣用「我是語言模型，無法執行命令」打發。 所以「不呼叫工具」是<strong>模型本身的能力問題，不是 context 問題</strong>。 context 設對是必要條件，不是充分條件——剩下的問題在最後一節處理。）</p>
+<p><strong>三題全對</strong>，<code>prompt_tokens</code> 是完整的 10190。<strong>模型沒有變聰明，它只是終於看得到完整的指令。</strong></p>
+<p>（<strong>重要的對照</strong>：即使 context 開到 32k、內容完整送達，這一輪它<strong>還是</strong>沒有呼叫 <code>bash</code> 工具，同樣用「我是語言模型，無法執行命令」打發。 所以「不呼叫工具」是<strong>模型本身的能力問題，不是 context 問題</strong>。 context 設對是必要條件，不是充分條件。剩下的問題在最後一節處理。）</p>
 <h4>最陰險的一點：完全不會有警告</h4>
 <p><strong>在 <code>/v1/chat/completions</code> 這條路上，Ollama 的 log 一個字都不會印。</strong> 上面那次 4k 的截斷，<code>journalctl -u ollama | grep truncat</code> 完全沒有輸出。</p>
 <p>只有在走 <code>/api/generate</code>（直接送一整段 prompt，不是 messages）時才看得到 WARN：</p>
-<pre class="cmd"><code>level=WARN source=runner.go:187 msg="truncating input prompt"
+<pre class="out"><code>level=WARN source=runner.go:187 msg="truncating input prompt"
     limit=4096 prompt=10020 keep=4 new=4096</code></pre>
-<p>也就是說：<strong>opencode 走的那條路，是安靜失敗的。</strong> 你唯一能依靠的訊號是 <code>usage.prompt_tokens</code> 和 <code>ollama ps</code> 的 CONTEXT 欄——不要指望 log 會告訴你。</p>
+<p>也就是說：<strong>opencode 走的那條路，是安靜失敗的。</strong> 你唯一能依靠的訊號是 <code>usage.prompt_tokens</code> 和 <code>ollama ps</code> 的 CONTEXT 欄，不要指望 log 會告訴你。</p>
 <p>（同樣的 10020 token prompt 送給 <code>qwen3.5-32k</code> 走 <code>/api/generate</code>： <code>prompt_eval_count = 10020</code>，log 沒有 <code>truncating input prompt</code>。設定確實生效。）</p>
 <h4>這解釋了所有症狀</h4>
 <p>下面把「確定是 context 造成的」跟「可能只是模型太小」分開，這樣你才知道該調設定還是該換模型。</p>
@@ -213,34 +225,34 @@ qwen3.5:9b-q4_K_M    6488c96fa5fa    8.6 GB    100% GPU     4096       4 minutes
 <h4>路線一：環境變數 <code>OLLAMA_CONTEXT_LENGTH</code></h4>
 <p>影響這台機器上的<strong>所有</strong>模型。</p>
 <p><strong>Linux / WSL2</strong>（Ollama 由 systemd 管理）：</p>
-<pre class="cmd"><code>sudo systemctl edit ollama</code></pre>
+<pre class="cmd" data-lang="bash"><code>sudo systemctl edit ollama</code></pre>
 <p>在編輯器開啟的區塊裡加入：</p>
-<pre class="cmd"><code>[Service]
+<pre class="cmd" data-lang="ini"><code>[Service]
 Environment="OLLAMA_CONTEXT_LENGTH=32768"</code></pre>
 <p>存檔後重啟：</p>
-<pre class="cmd"><code>sudo systemctl daemon-reload
+<pre class="cmd" data-lang="bash"><code>sudo systemctl daemon-reload
 sudo systemctl restart ollama</code></pre>
 <p><strong>macOS</strong>（Ollama 是 app，不是 systemd service）：</p>
-<pre class="cmd"><code>launchctl setenv OLLAMA_CONTEXT_LENGTH 32768</code></pre>
+<pre class="cmd" data-lang="bash"><code>launchctl setenv OLLAMA_CONTEXT_LENGTH 32768</code></pre>
 <p>然後從選單列<strong>完全結束 Ollama 再重開</strong>。</p>
 <div class="box tip"><p><code>launchctl setenv</code> 設的變數<strong>重開機後不會保留</strong>（未實測；若要永久生效， 建議直接用下面提到的 app 設定滑桿）。</p></div>
 <p><strong>Windows</strong>：</p>
 <p>「設定」→ 搜尋「環境變數」→「編輯系統環境變數」→「環境變數」→ 在「使用者變數」新增 <code>OLLAMA_CONTEXT_LENGTH</code> = <code>32768</code> → 確定 → <strong>從系統列結束 Ollama 再重新啟動</strong>。</p>
 <p><strong>臨時測試用</strong>（任何平台，先關掉常駐的 Ollama）：</p>
-<pre class="cmd"><code>OLLAMA_CONTEXT_LENGTH=32768 ollama serve</code></pre>
-<div class="box tip"><p>Ollama 桌面 app（macOS / Windows）的設定畫面裡也有一個 context length 滑桿， 效果和這個環境變數相同，圖形介面比較好操作。 滑桿和環境變數同時設定時誰優先（未實測）——建議只用一種。</p></div>
+<pre class="cmd" data-lang="bash"><code>OLLAMA_CONTEXT_LENGTH=32768 ollama serve</code></pre>
+<div class="box tip"><p>Ollama 桌面 app（macOS / Windows）的設定畫面裡也有一個 context length 滑桿， 效果和這個環境變數相同，圖形介面比較好操作。 滑桿和環境變數同時設定時誰優先（未實測），建議只用一種。</p></div>
 <div class="box tip"><p>有一個會讓人困惑的地方：即使設了環境變數，server 啟動的 log <strong>還是會印</strong> <code>vram-based default context ... default_num_ctx=4096</code>。那行只是在報告「VRAM 推算出來的預設值」， 環境變數會在<strong>載入模型時</strong>覆蓋它。實測 <code>OLLAMA_CONTEXT_LENGTH=16384</code> 的 server， 用 <code>/v1</code> 且不帶任何參數載入模型後，<code>context_length</code> 確實是 <code>16384</code>。以 <code>ollama ps</code> 為準，不要看那行 log。</p></div>
 <h4>路線二：用 Modelfile 做一個固定 num_ctx 的模型（建議）</h4>
 <p>不用動系統服務、不用 sudo、不影響其他模型，而且<strong>透過 <code>/v1</code> 端點也一定生效</strong>。 （路線一和路線二在本機都實測生效過；路線二勝在不用碰系統設定， 也不會影響你電腦上其他模型。）</p>
 <p>建立一個檔案 <code>Modelfile</code>（沒有副檔名）：</p>
-<pre class="cmd"><code>FROM qwen3.5:9b-q4_K_M
+<pre class="out"><code>FROM qwen3.5:9b-q4_K_M
 PARAMETER num_ctx 32768</code></pre>
 <p>建立模型：</p>
-<pre class="cmd"><code>ollama create qwen3.5-32k -f ./Modelfile</code></pre>
+<pre class="cmd" data-lang="bash"><code>ollama create qwen3.5-32k -f ./Modelfile</code></pre>
 <p>檢查參數有沒有寫進去：</p>
-<pre class="cmd"><code>ollama show --parameters qwen3.5-32k</code></pre>
+<pre class="cmd" data-lang="bash"><code>ollama show --parameters qwen3.5-32k</code></pre>
 <p>本機實際輸出：</p>
-<pre class="cmd"><code>presence_penalty               1.5
+<pre class="out"><code>presence_penalty               1.5
 temperature                    1
 top_k                          20
 top_p                          0.95
@@ -255,7 +267,7 @@ num_ctx                        32768     ← 有這行就對了</code></pre>
 <hr>
 <h2>接到 opencode</h2>
 <p>在你的專案根目錄建立或修改 <code>opencode.json</code>：</p>
-<pre class="cmd"><code>{
+<pre class="cmd" data-lang="json"><code>{
   "$schema": "https://opencode.ai/config.json",
   "provider": {
     "ollama": {
@@ -286,7 +298,7 @@ num_ctx                        32768     ← 有這行就對了</code></pre>
 }</code></pre>
 <p>幾個容易搞錯的地方：</p>
 <ul>
-<li><code>"npm": "@ai-sdk/openai-compatible"</code> —— Ollama 走的是 OpenAI 相容協定，這行是官方寫法。</li>
+<li><code>"npm": "@ai-sdk/openai-compatible"</code>：Ollama 走的是 OpenAI 相容協定，這行是官方寫法。</li>
 <li><code>baseURL</code> 結尾<strong>要有 <code>/v1</code></strong>。少了它連不上。</li>
 <li><code>models</code> 底下那個 key（這裡是 <code>qwen3.5-32k</code>）<strong>必須和 <code>ollama list</code> 裡的名字完全一致</strong>，</li>
 </ul>
@@ -296,30 +308,30 @@ num_ctx                        32768     ← 有這行就對了</code></pre>
 <li><code>limit.context</code> 和 <code>limit.output</code> 都是必填。<code>output</code> 是單次回覆上限，8192 夠用。</li>
 <li><code>tool_call: true</code> 明確告訴 opencode 這個模型會呼叫工具。</li>
 </ul>
-<div class="box tip"><p>驗證程度說明：上面這份設定檔在撰寫環境裡實測過 —— <code>opencode models ollama</code> 確實列出 <code>ollama/qwen3.5-32k</code>（代表設定檔語法與 provider 註冊都正確）， <code>/v1</code> 端點的工具呼叫也實測通過。但<strong>在撰寫環境裡沒有成功跑完一輪完整的 agent 任務</strong> （<code>opencode run</code> 在無終端機的批次環境下沒有送出任何請求就結束）。 這一段的 opencode 端行為請當成「依官方文件與 schema 寫成、部分實測」（未實測完整 agent 回合）。</p></div>
+<div class="box tip"><p>驗證程度說明：上面這份設定檔在撰寫環境裡實測過，<code>opencode models ollama</code> 確實列出 <code>ollama/qwen3.5-32k</code>（代表設定檔語法與 provider 註冊都正確）， <code>/v1</code> 端點的工具呼叫也實測通過。但<strong>在撰寫環境裡沒有成功跑完一輪完整的 agent 任務</strong> （<code>opencode run</code> 在無終端機的批次環境下沒有送出任何請求就結束）。 這一段的 opencode 端行為請當成「依官方文件與 schema 寫成、部分實測」（未實測完整 agent 回合）。</p></div>
 <h3>想保留雲端模型隨時切換</h3>
 <p>把 <code>"model"</code> 留成 <code>"opencode/big-pickle"</code>，需要時在 opencode 裡用 <code>/models</code> 切換， 或在指令列直接指定：</p>
-<pre class="cmd"><code>opencode run -m ollama/qwen3.5-32k "幫我看一下 lab1_cluster.py"</code></pre>
+<pre class="cmd" data-lang="bash"><code>opencode run -m ollama/qwen3.5-32k "幫我看一下 lab1_cluster.py"</code></pre>
 <hr>
 <h2>驗證有沒有設成功</h2>
 <p><strong>照順序跑，任何一步不對就先別往下走。</strong></p>
 <h3>1. Ollama 活著嗎</h3>
-<pre class="cmd"><code>curl http://localhost:11434/api/version</code></pre>
+<pre class="cmd" data-lang="bash"><code>curl http://localhost:11434/api/version</code></pre>
 <h3>2. 模型支援 tool calling 嗎</h3>
-<pre class="cmd"><code>ollama show qwen3.5-32k | grep -A6 Capabilities</code></pre>
+<pre class="cmd" data-lang="bash"><code>ollama show qwen3.5-32k | grep -A6 Capabilities</code></pre>
 <p>要看到 <code>tools</code>。沒有的話，換模型，不用再往下。</p>
 <h3>3. Modelfile 的 num_ctx 有寫進去嗎</h3>
-<pre class="cmd"><code>ollama show --parameters qwen3.5-32k | grep num_ctx</code></pre>
+<pre class="cmd" data-lang="bash"><code>ollama show --parameters qwen3.5-32k | grep num_ctx</code></pre>
 <p>要看到 <code>num_ctx    32768</code>。</p>
 <h3>4. 實際載入後真的是這個 context 嗎（最關鍵的一步）</h3>
 <p>先發一個請求把模型載入記憶體，<strong>注意這個請求故意不帶任何 context 參數</strong>， 就是要驗證設定檔有沒有生效：</p>
-<pre class="cmd"><code>curl -s http://localhost:11434/v1/chat/completions \
+<pre class="cmd" data-lang="bash"><code>curl -s http://localhost:11434/v1/chat/completions \
   -H 'Content-Type: application/json' \
   -d '{"model":"qwen3.5-32k","messages":[{"role":"user","content":"hi"}]}' &gt; /dev/null</code></pre>
 <p>趁模型還在記憶體裡馬上看（Ollama 預設會保留 5 分鐘，<code>ollama ps</code> 的 UNTIL 欄會倒數）：</p>
-<pre class="cmd"><code>ollama ps</code></pre>
+<pre class="cmd" data-lang="bash"><code>ollama ps</code></pre>
 <p>本機實際輸出：</p>
-<pre class="cmd"><code>NAME                  ID              SIZE      PROCESSOR    CONTEXT    UNTIL
+<pre class="out" style="font-size:0.782rem"><code>NAME                  ID              SIZE      PROCESSOR    CONTEXT    UNTIL
 qwen3.5-32k:latest    d4eb55d51d55    9.9 GB    100% GPU     32768      4 minutes from now</code></pre>
 <p>三件事要同時對：</p>
 <ul>
@@ -332,7 +344,7 @@ qwen3.5-32k:latest    d4eb55d51d55    9.9 GB    100% GPU     32768      4 minute
 </ul>
 <h3>5. 模型真的會呼叫工具嗎</h3>
 <p>繞過 opencode 直接測，這樣出問題時才知道是誰的錯：</p>
-<pre class="cmd"><code>curl -s http://localhost:11434/v1/chat/completions \
+<pre class="cmd" data-lang="bash"><code>curl -s http://localhost:11434/v1/chat/completions \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "qwen3.5-32k",
@@ -351,20 +363,20 @@ qwen3.5-32k:latest    d4eb55d51d55    9.9 GB    100% GPU     32768      4 minute
     }]
   }' | python3 -m json.tool | grep -A8 tool_calls</code></pre>
 <p>正常的話會看到類似（本機實測輸出）：</p>
-<pre class="cmd"><code>"tool_calls": [{
+<pre class="cmd" data-lang="json"><code>"tool_calls": [{
   "id": "call_17khfbth",
   "type": "function",
   "function": {"name": "bash", "arguments": "{\"command\":\"ls -la\"}"}
 }]</code></pre>
-<p>如果 <code>tool_calls</code> 是 <code>null</code>，而模型在 <code>content</code> 裡「用文字描述」它要執行 <code>ls -la</code>， 那就是這個模型的 tool calling 能力太弱——換大一點的模型。</p>
+<p>如果 <code>tool_calls</code> 是 <code>null</code>，而模型在 <code>content</code> 裡「用文字描述」它要執行 <code>ls -la</code>， 那就是這個模型的 tool calling 能力太弱，換大一點的模型。</p>
 <h3>6. opencode 認得這個模型嗎</h3>
 <p>在放了 <code>opencode.json</code> 的目錄下：</p>
-<pre class="cmd"><code>opencode models ollama</code></pre>
+<pre class="cmd" data-lang="bash"><code>opencode models ollama</code></pre>
 <p>應該印出 <code>ollama/qwen3.5-32k</code>。沒印出來就是設定檔寫錯或放錯目錄。</p>
 <h3>7. 確認內容沒有被安靜地截掉</h3>
 <p><strong>這一步的重點是：不要只看 log。</strong> 前面實測過，走 <code>/v1/chat/completions</code> （也就是 opencode 走的路）時，Ollama 截斷內容<strong>不會印任何警告</strong>。</p>
 <p>可靠的做法是比對 <code>usage.prompt_tokens</code> 跟你送進去的量。送一份<strong>故意超過 4096</strong> 的請求，看它有沒有被吃掉：</p>
-<pre class="cmd"><code># 產生一份約 10000 token 的請求
+<pre class="cmd" data-lang="bash"><code># 產生一份約 10000 token 的請求
 python3 -c "
 import json
 filler = '主成分分析會先把資料中心化，再對共變異數矩陣做特徵分解。' * 400
@@ -375,27 +387,27 @@ print(json.dumps({'model':'qwen3.5-32k',
 curl -s http://localhost:11434/v1/chat/completions \
   -H 'Content-Type: application/json' --data-binary @big.json \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['usage'])"</code></pre>
-<p><code>prompt_tokens</code> 應該是<strong>八千到一萬</strong>（確切數字取決於 tokenizer；本機實測這一段是 <code>{'prompt_tokens': 8018, ...}</code>）。如果它剛好停在 <code>4049</code> 這種貼著 4096 的數字， 就是被截斷了——回到第 3、4 步。</p>
+<p><code>prompt_tokens</code> 應該是<strong>八千到一萬</strong>（確切數字取決於 tokenizer；本機實測這一段是 <code>{'prompt_tokens': 8018, ...}</code>）。如果它剛好停在 <code>4049</code> 這種貼著 4096 的數字， 就是被截斷了，回到第 3、4 步。</p>
 <p>log 檢查仍然有用，但只對 <code>/api/generate</code> 那條路有效（例如你用 <code>ollama run</code> 手動測試時）：</p>
-<pre class="cmd"><code># Linux / WSL2
+<pre class="cmd" data-lang="bash"><code># Linux / WSL2
 journalctl -u ollama --since "10 minutes ago" | grep -i truncat
 # 手動啟動的 server：直接看終端機輸出</code></pre>
 <p>如果看到這行，那是鐵證：</p>
-<pre class="cmd"><code>level=WARN source=runner.go:187 msg="truncating input prompt" limit=4096 prompt=10020 keep=4 new=4096</code></pre>
+<pre class="out" style="font-size:0.697rem"><code>level=WARN source=runner.go:187 msg="truncating input prompt" limit=4096 prompt=10020 keep=4 new=4096</code></pre>
 <hr>
 <h2>為什麼本地小模型常常「不聽話」</h2>
-<p>就算 context 設對了，小模型還是會做出一些雲端大模型不會做的蠢事。這不是你設定錯， 是 2B–9B 模型的能力天花板。認識這些模式，你才知道什麼時候該停止 debug、直接換模型。</p>
+<p>就算 context 設對了，小模型還是會做出一些雲端大模型不會做的蠢事。這跟你的設定無關，是 2B–9B 模型的能力天花板。認識這些模式，你才知道什麼時候該停止 debug、直接換模型。</p>
 <h3>常見失敗模式</h3>
 <p><strong>一、亂造不存在的工具名稱。</strong> opencode 的內建工具有固定名字：<code>read</code>、<code>write</code>、<code>edit</code>、<code>bash</code>、<code>glob</code>、<code>grep</code>、 <code>apply_patch</code>、<code>todowrite</code>、<code>webfetch</code>、<code>websearch</code>、<code>question</code>、<code>lsp</code>、<code>skill</code>。 小模型常常無視工具定義，自己發明 <code>execute</code>、<code>shell</code>、<code>run</code>、<code>terminal</code>、<code>run_command</code>、 <code>python</code> 這種「看起來很合理」的名字。因為它訓練時看過太多別的 agent 框架， 就直接套用印象中的名字。結果是工具呼叫失敗，agent 卡住或開始重試。</p>
 <p><strong>二、把該呼叫工具的動作變成「把指令印出來」，或乾脆說自己做不到。</strong> 本機實測，在明確給了 <code>bash</code> 工具定義、並要求「請執行 <code>ls -la</code>」的情況下， <code>qwen3.5:9b</code> 回的是（原文）：</p>
-<pre class="cmd"><code>（說明）：作為語言模型，我無法在您的系統中執行命令，但這可能是一個測試或模擬情境。</code></pre>
-<p><code>tool_calls</code> 是 <code>null</code>。它<strong>沒有真的呼叫 <code>bash</code> 工具</strong>，只輸出了一段文字。 值得注意的是：這在 context 開到 32k、內容完整送達的情況下<strong>仍然會發生</strong>。 這是小模型最常見的退化行為——退回成「聊天模型」而不是「agent」。 換句話說，context 設對是必要條件，不是充分條件。</p>
+<pre class="out"><code>（說明）：作為語言模型，我無法在您的系統中執行命令，但這可能是一個測試或模擬情境。</code></pre>
+<p><code>tool_calls</code> 是 <code>null</code>。它<strong>沒有真的呼叫 <code>bash</code> 工具</strong>，只輸出了一段文字。 值得注意的是：這在 context 開到 32k、內容完整送達的情況下<strong>仍然會發生</strong>。 這是小模型最常見的退化行為：退回成「聊天模型」，不再是「agent」。 換句話說，context 設對是必要條件，不是充分條件。</p>
 <p><strong>三、只做一步就停。</strong> 多步驟任務（讀檔 → 改 → 執行 → 看結果 → 修）常常在第一步之後就宣告完成。</p>
 <p><strong>四、幻覺自己的執行結果。</strong> 最危險的一種：它「假裝」執行過，然後<strong>編造</strong>一段輸出給你看。 前面 context 那一節的實測就是同一個毛病的另一面：資訊不在 context 裡時， 它不會說「我不知道」，而是很有自信地回答 <code>GOLF07</code>（正確答案是 <code>ALPHA1</code>）。 這正是工作坊主線 <code>AGENTS.md</code> 裡那條規則要防的：</p>
 <div class="box tip"><p><strong>自己驗證</strong>：寫完數值方法後，必須附一段驗證程式碼，並實際執行、印出比對結果。 不可以只說「應該正確」。</p></div>
 <h3>對策：<code>AGENTS.md</code> 要為小模型加碼</h3>
 <p>雲端模型你只要講原則，小模型<strong>必須把工具名稱明確寫死</strong>。 在專案的 <code>AGENTS.md</code> 裡加一段（只有用本地模型時才需要）：</p>
-<pre class="cmd"><code>## 工具使用規則（本地模型專用）
+<pre class="cmd" data-lang="markdown"><code>## 工具使用規則（本地模型專用）
 
 你只能使用以下工具，名稱必須完全一致：
 read, write, edit, bash, glob, grep, todowrite
@@ -433,27 +445,27 @@ execute, shell, run, terminal, run_command, python, execute_command
 <hr>
 <h2>資料來源</h2>
 <ul>
-<li>Ollama — Context length：&lt;https://docs.ollama.com/context-length&gt;</li>
-<li>Ollama — Context length（GitHub 原始檔）：&lt;https://github.com/ollama/ollama/blob/main/docs/context-length.mdx&gt;</li>
-<li>Ollama — FAQ：&lt;https://docs.ollama.com/faq&gt;</li>
-<li>Ollama — Modelfile 參考：&lt;https://docs.ollama.com/modelfile&gt;</li>
-<li>Ollama — Quickstart：&lt;https://docs.ollama.com/quickstart&gt;</li>
-<li>Ollama — Linux 安裝：&lt;https://docs.ollama.com/linux&gt;</li>
-<li>Ollama — 下載頁：&lt;https://ollama.com/download&gt;</li>
-<li>Ollama — 「New default context lengths will break」issue #14073：&lt;https://github.com/ollama/ollama/issues/14073&gt;</li>
-<li>Ollama library — 支援 tools 的模型：&lt;https://ollama.com/search?c=tools&gt;</li>
-<li>Ollama library — 模型總覽：&lt;https://ollama.com/library&gt;</li>
-<li>Ollama library — qwen3.5：&lt;https://ollama.com/library/qwen3.5&gt;／&lt;https://ollama.com/library/qwen3.5/tags&gt;</li>
-<li>Ollama library — granite4.1：&lt;https://ollama.com/library/granite4.1/tags&gt;</li>
-<li>Ollama library — llama3.2：&lt;https://ollama.com/library/llama3.2/tags&gt;</li>
-<li>Ollama library — gemma3：&lt;https://ollama.com/library/gemma3&gt;</li>
-<li>Ollama library — gemma3n：&lt;https://ollama.com/library/gemma3n&gt;</li>
-<li>opencode — Providers（Ollama 章節）：&lt;https://opencode.ai/docs/providers/&gt;</li>
-<li>opencode — Config：&lt;https://opencode.ai/docs/config/&gt;</li>
-<li>opencode — 內建工具清單：&lt;https://opencode.ai/docs/tools/&gt;</li>
-<li>opencode — Compaction（自動壓縮對話的觸發條件）：&lt;https://opencode.ai/v2/docs/compaction&gt;</li>
-<li>opencode — 設定檔 JSON schema：&lt;https://opencode.ai/config.json&gt;</li>
-<li>Ollama 原始碼 <code>server/prompt.go</code>（<code>chatPrompt</code> 的裁切策略）：&lt;https://github.com/ollama/ollama/blob/main/server/prompt.go&gt;</li>
+<li>Ollama — Context length：<a class="ext" href="https://docs.ollama.com/context-length" target="_blank" rel="noopener">https://docs.ollama.com/context-length</a></li>
+<li>Ollama — Context length（GitHub 原始檔）：<a class="ext" href="https://github.com/ollama/ollama/blob/main/docs/context-length.mdx" target="_blank" rel="noopener">https://github.com/ollama/ollama/blob/main/docs/context-length.mdx</a></li>
+<li>Ollama — FAQ：<a class="ext" href="https://docs.ollama.com/faq" target="_blank" rel="noopener">https://docs.ollama.com/faq</a></li>
+<li>Ollama — Modelfile 參考：<a class="ext" href="https://docs.ollama.com/modelfile" target="_blank" rel="noopener">https://docs.ollama.com/modelfile</a></li>
+<li>Ollama — Quickstart：<a class="ext" href="https://docs.ollama.com/quickstart" target="_blank" rel="noopener">https://docs.ollama.com/quickstart</a></li>
+<li>Ollama — Linux 安裝：<a class="ext" href="https://docs.ollama.com/linux" target="_blank" rel="noopener">https://docs.ollama.com/linux</a></li>
+<li>Ollama — 下載頁：<a class="ext" href="https://ollama.com/download" target="_blank" rel="noopener">https://ollama.com/download</a></li>
+<li>Ollama — 「New default context lengths will break」issue #14073：<a class="ext" href="https://github.com/ollama/ollama/issues/14073" target="_blank" rel="noopener">https://github.com/ollama/ollama/issues/14073</a></li>
+<li>Ollama library — 支援 tools 的模型：<a class="ext" href="https://ollama.com/search?c=tools" target="_blank" rel="noopener">https://ollama.com/search?c=tools</a></li>
+<li>Ollama library — 模型總覽：<a class="ext" href="https://ollama.com/library" target="_blank" rel="noopener">https://ollama.com/library</a></li>
+<li>Ollama library — qwen3.5：<a class="ext" href="https://ollama.com/library/qwen3.5" target="_blank" rel="noopener">https://ollama.com/library/qwen3.5</a>／<a class="ext" href="https://ollama.com/library/qwen3.5/tags" target="_blank" rel="noopener">https://ollama.com/library/qwen3.5/tags</a></li>
+<li>Ollama library — granite4.1：<a class="ext" href="https://ollama.com/library/granite4.1/tags" target="_blank" rel="noopener">https://ollama.com/library/granite4.1/tags</a></li>
+<li>Ollama library — llama3.2：<a class="ext" href="https://ollama.com/library/llama3.2/tags" target="_blank" rel="noopener">https://ollama.com/library/llama3.2/tags</a></li>
+<li>Ollama library — gemma3：<a class="ext" href="https://ollama.com/library/gemma3" target="_blank" rel="noopener">https://ollama.com/library/gemma3</a></li>
+<li>Ollama library — gemma3n：<a class="ext" href="https://ollama.com/library/gemma3n" target="_blank" rel="noopener">https://ollama.com/library/gemma3n</a></li>
+<li>opencode — Providers（Ollama 章節）：<a class="ext" href="https://opencode.ai/docs/providers/" target="_blank" rel="noopener">https://opencode.ai/docs/providers/</a></li>
+<li>opencode — Config：<a class="ext" href="https://opencode.ai/docs/config/" target="_blank" rel="noopener">https://opencode.ai/docs/config/</a></li>
+<li>opencode — 內建工具清單：<a class="ext" href="https://opencode.ai/docs/tools/" target="_blank" rel="noopener">https://opencode.ai/docs/tools/</a></li>
+<li>opencode — Compaction（自動壓縮對話的觸發條件）：<a class="ext" href="https://opencode.ai/v2/docs/compaction" target="_blank" rel="noopener">https://opencode.ai/v2/docs/compaction</a></li>
+<li>opencode — 設定檔 JSON schema：<a class="ext" href="https://opencode.ai/config.json" target="_blank" rel="noopener">https://opencode.ai/config.json</a></li>
+<li>Ollama 原始碼 <code>server/prompt.go</code>（<code>chatPrompt</code> 的裁切策略）：<a class="ext" href="https://github.com/ollama/ollama/blob/main/server/prompt.go" target="_blank" rel="noopener">https://github.com/ollama/ollama/blob/main/server/prompt.go</a></li>
 </ul>
 <p>查證日期：2026-09-12。</p>
 <p>本機實測環境：WSL2 Ubuntu 24.04 / Ollama 0.21.2 / opencode 1.18.30 / RTX 5070 12GB / RAM 15GB / 模型 <code>qwen3.5:9b-q4_K_M</code>（9.7B、Q4_K_M、原生 context 262144）。</p>

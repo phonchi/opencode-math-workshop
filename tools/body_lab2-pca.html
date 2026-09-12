@@ -1,5 +1,5 @@
 <!--TITLE:Lab 2 · 降維-->
-<!--DESC:手刻 PCA 與 sklearn 比對。四道驗證關卡全部通過，卻抓不出一個真實的錯誤——這一關要練的是設計驗證的能力，不是寫 PCA 的能力。-->
+<!--DESC:手刻 PCA 與 sklearn 比對。四道驗證關卡全部通過，卻抓不出一個真實的錯誤。這一關練的是設計驗證的能力，不是寫 PCA 的能力。-->
 
 <div class="container narrow">
 
@@ -7,7 +7,7 @@
   <div class="kicker"><span>Lab 2</span><span>·</span><span class="badge live">現場 40 分</span><span>·</span><span>agent 當被告</span></div>
   <h1>降維：設計一組真的抓得到錯的驗證</h1>
   <p class="lead">
-    這一關你要叫 agent 手刻 PCA，然後證明它對不對。聽起來很簡單——
+    這一關你要叫 agent 手刻 PCA，然後證明它對不對。聽起來很簡單。
     但你會發現，一組看起來很完整、跑起來全部 PASS 的驗證，
     可能對某一類錯誤<strong>完全免疫</strong>。
   </p>
@@ -15,6 +15,94 @@
 
 <section>
 <h2>先講清楚要驗什麼</h2>
+
+<details class="bg"><summary>PCA 在做什麼？為什麼要降維？</summary>
+<div class="bg-body">
+<p>
+每張手寫數字圖是 64 維向量。但這 64 個像素並<strong>不獨立</strong>。
+左上角那個像素幾乎永遠是 0，中間幾個像素則高度相關（筆畫是連著的）。
+換句話說，資料實際上只「住」在一個<strong>維度低得多的子空間附近</strong>。
+</p>
+<p>
+PCA 要做的就是找出那個子空間：在 $\mathbb{R}^{64}$ 裡找 $K$ 個互相正交的方向，
+讓資料投影上去之後<strong>保留最多的變異</strong>。
+</p>
+<h4>好消息：你已經學過需要的全部線代</h4>
+<div class="tw"><table>
+<tr><th>PCA 用到的</th><th>你在線代學過的</th></tr>
+<tr><td>共變異數矩陣 $C$</td><td>對稱矩陣</td></tr>
+<tr><td>主成分</td><td>$C$ 的特徵向量</td></tr>
+<tr><td>各主成分的重要性</td><td>對應的特徵值</td></tr>
+<tr><td>主成分彼此垂直</td><td>對稱矩陣的特徵向量可取為正交</td></tr>
+<tr><td>投影與重建</td><td>正交投影 $\mathbf{x}\mapsto W^\top W\mathbf{x}$</td></tr>
+</table></div>
+<p style="margin-bottom:0">
+所以這一關<strong>沒有新的數學</strong>。全部都是譜分解（spectral decomposition）
+套在一個特定的矩陣上。真正的新東西是「怎麼驗證別人寫的實作是對的」。
+</p>
+</div>
+</details>
+
+<details class="bg"><summary>共變異數矩陣是什麼？為什麼要先中心化？</summary>
+<div class="bg-body">
+<p>
+先把每一行（每個像素）減掉它自己的平均，得到中心化的 $X_c$。
+然後 $C=\frac{X_c^\top X_c}{n-1}$ 是一個 $64\times 64$ 的矩陣，其中
+</p>
+$$C_{jk}=\frac{1}{n-1}\sum_{i=1}^{n}(x_{ij}-\bar x_j)(x_{ik}-\bar x_k)$$
+<ul>
+<li><strong>對角線</strong> $C_{jj}$：第 $j$ 個像素自己的變異數，也就是它「變化得多劇烈」</li>
+<li><strong>非對角線</strong> $C_{jk}$：第 $j$ 與第 $k$ 個像素<strong>一起變動的程度</strong>。
+    正的代表「一個亮另一個也傾向亮」，負的代表相反，接近 0 代表兩者沒什麼關係</li>
+</ul>
+<h4>為什麼一定要先中心化</h4>
+<p style="margin-bottom:0">
+不減平均的話，$X^\top X$ 量到的是「離<strong>原點</strong>多遠」，
+而不是「離<strong>資料中心</strong>多分散」。第一個主成分會直接指向資料的平均位置，
+完全不是我們要的「變異最大的方向」。這一步漏掉是手刻 PCA 最常見的錯誤之一。
+</p>
+</div>
+</details>
+
+<details class="bg"><summary>「解釋變異比例」是什麼意思？</summary>
+<div class="bg-body">
+<p>
+把 $C$ 的特徵值由大到小排成 $\lambda_1\ge\lambda_2\ge\cdots$。
+每個 $\lambda_j$ 就是<strong>資料在第 $j$ 個主成分方向上的變異數</strong>。
+</p>
+<p>對稱矩陣的跡等於特徵值總和，而這個跡剛好是所有像素的變異數總和，所以</p>
+$$\text{第 }j\text{ 個主成分的解釋變異比例}=\frac{\lambda_j}{\sum_{m}\lambda_m}$$
+<p>
+意思是「整體變異裡，有百分之幾是由這個方向貢獻的」。
+本關實測第一個主成分是 <strong>14.89%</strong>，前十個加起來約 <strong>73%</strong>。
+換句話說，用 10 個數字就能保留原本 64 個數字約七成三的變異。
+</p>
+<p style="margin-bottom:0">
+注意這是個<strong>比例</strong>。待會會看到，正因為它是比例，
+分母上的常數會被約掉。那個驗證盲點就是這麼來的。
+</p>
+</div>
+</details>
+
+<details class="bg"><summary>會看到的 numpy 寫法</summary>
+<div class="bg-body">
+<div class="tw"><table>
+<tr><th>寫法</th><th>意思</th></tr>
+<tr><td><code>A @ B</code></td><td><strong>矩陣乘法</strong>（不是逐元素相乘）。<code>A * B</code> 才是逐元素</td></tr>
+<tr><td><code>A.T</code></td><td>轉置 $A^\top$</td></tr>
+<tr><td><code>X - mu</code></td><td><code>X</code> 是 (1797,64)、<code>mu</code> 是 (64,)，numpy 會自動把 <code>mu</code> 對每一列廣播相減（broadcasting）</td></tr>
+<tr><td><code>np.linalg.eigh(C)</code></td><td>對稱矩陣專用的特徵分解。回傳的特徵值是<strong>由小到大</strong>，所以要自己反轉</td></tr>
+<tr><td><code>np.argsort(v)[::-1]</code></td><td>取得「由大到小」的索引順序</td></tr>
+<tr><td><code>W[:K]</code></td><td>取前 $K$ 列</td></tr>
+</table></div>
+<p style="margin-bottom:0">
+用 <code>eigh</code> 而不是 <code>eig</code> 是有理由的：共變異數矩陣是對稱的，
+<code>eigh</code> 利用這個性質，數值更穩、而且保證回傳實數特徵值。
+用 <code>eig</code> 可能會拿到帶極小虛部的複數，然後你會花半小時懷疑人生。
+</p>
+</div>
+</details>
+
 <p>PCA 的定義：對中心化後的資料 $X_c$，計算共變異數矩陣</p>
 <div class="box math">
 <div class="bt">定義</div>
@@ -22,7 +110,7 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <p style="margin-bottom:0">取 $\Lambda$ 中最大的 $K$ 個特徵值對應的特徵向量，就是前 $K$ 個主成分。</p>
 </div>
 <p>
-所以一個「正確的 PCA 實作」至少要：中心化對、分母對、特徵分解對、由大到小排序對、取前 $K$ 個對。
+一個「正確的 PCA 實作」至少要做對這幾件事：中心化對、分母對、特徵分解對、由大到小排序對、取前 $K$ 個對。
 你的任務是設計檢查，讓<strong>其中任何一項寫錯都會被抓到</strong>。
 </p>
 </section>
@@ -43,7 +131,7 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 並且把每一項驗證的實際數值印出來。</code></pre>
 <p>
 注意最後一句：<strong>驗證方法是叫 agent 自己想的</strong>。
-這是刻意的——我們要先看看它會想出什麼。
+這是刻意的：先看看它會想出什麼。
 </p>
 </div>
 
@@ -176,7 +264,7 @@ evals[:10] 應該等於 sklearn 的 pca.explained_variance_。
 <h3>但書一：$|\cos|$ 不是永遠有效</h3>
 <p>
 $|\cos|$ 比對成立的前提是<strong>特徵值單純（沒有重根）且間隔夠大</strong>。
-如果 $\lambda_i=\lambda_{i+1}$，那個二維特徵空間裡<em>任何</em>一組正交基底都是合法的特徵向量——
+如果 $\lambda_i=\lambda_{i+1}$，那個二維特徵空間裡<em>任何</em>一組正交基底都是合法的特徵向量。
 兩個都正確的實作，逐向量 $|\cos|$ 甚至可以是 0。
 </p>
 <pre class="cmd"><code>請印出前 11 個特徵值，並計算相鄰特徵值的最小間隔，
@@ -193,13 +281,13 @@ $|\cos|$ 比對成立的前提是<strong>特徵值單純（沒有重根）且間
 </div>
 <p>
 digits 剛好安全。但如果你之後換一份資料，<strong>務必先檢查這件事</strong>。
-真的碰到重根時，要改成比較整個子空間——例如比投影矩陣 $W^\top W$，或算 principal angles。
+真的碰到重根時，要改成比較整個子空間，例如比投影矩陣 $W^\top W$，或算 principal angles。
 </p>
 
 <h3>但書二：關卡 4 只是必要條件</h3>
 <p>
 $WW^\top\approx I$ 確實不需要對照組，但它只證明「這 $K$ 個向量彼此正交且長度為 1」。
-<strong>隨便一組正交基底都會通過</strong>——包括「不小心取到最小的那 10 個特徵向量」這種錯誤。
+<strong>隨便一組正交基底都會通過</strong>，包括「不小心取到最小的那 10 個特徵向量」這種錯誤。
 要完整驗證還得檢查特徵方程殘差 $CW^\top-W^\top\Lambda$、特徵值大小與取用順序。
 </p>
 </section>
@@ -219,7 +307,7 @@ $WW^\top\approx I$ 確實不需要對照組，但它只證明「這 $K$ 個向�
 <section>
 <h2>如果還有時間</h2>
 <ul>
-<li>問 agent：<code>pca._fit_svd_solver</code> 是什麼？你會發現預設 <code>auto</code> 在這份資料上選的是 <code>covariance_eigh</code>——跟手刻同一種演算法。所以這根本不算「兩種演算法交叉驗證」。要真的交叉驗證必須明寫 <code>svd_solver='full'</code>。</li>
+<li>問 agent：<code>pca._fit_svd_solver</code> 是什麼？你會發現預設 <code>auto</code> 在這份資料上選的是 <code>covariance_eigh</code>，跟手刻是同一種演算法。所以這根本不算「兩種演算法交叉驗證」。要真的交叉驗證必須明寫 <code>svd_solver='full'</code>。</li>
 <li>設計一個「取錯順序」的錯誤（取最小的 10 個特徵值），看看五道關卡各自會不會抓到。</li>
 <li>把前 10 個主成分 reshape 回 8×8 畫出來，看看 PCA 學到了什麼樣的筆畫結構。</li>
 </ul>

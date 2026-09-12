@@ -7,7 +7,7 @@
   <div class="kicker"><span>Lab 3</span><span>·</span><span class="badge live">現場 40 分</span><span>·</span><span>agent 當學習夥伴</span></div>
   <h1>分類與筆記：讓 agent 幫你學，而不是幫你交差</h1>
   <p class="lead">
-    前兩關你在檢查 agent。這一關反過來——讓它當你的推導夥伴：
+    前兩關你在檢查 agent，這一關反過來，讓它當你的推導夥伴：
     寫程式、驗證公式、然後把整個推導過程整理成一份你之後真的會回去看的筆記。
   </p>
 </div>
@@ -17,6 +17,137 @@
 <p>
 從 digits 裡挑出數字 <strong>3</strong> 和 <strong>8</strong>（357 筆），手刻一個 logistic 迴歸做二元分類。
 </p>
+
+<details class="bg"><summary>「二元分類」在做什麼？logistic 迴歸為什麼長那樣？</summary>
+<div class="bg-body">
+<p>
+跟 Lab 1 的分群不同，這次<strong>我們有答案</strong>：每張圖都知道它是 3 還是 8。
+目標是學一個規則，看到新的圖能判斷它是哪一個。這叫<strong>監督式學習</strong>。
+</p>
+<h4>最直覺的想法，以及它的問題</h4>
+<p>
+最簡單的規則是「算一個加權總和 $z=\mathbf{w}^\top\mathbf{x}+b$，$z>0$ 說是 8，否則說是 3」。
+這就是一個超平面把空間切兩半，完全是線代的東西。
+</p>
+<p>
+問題是：這個規則只吐 0 或 1，<strong>沒有「有多確定」的資訊</strong>，
+而且它不連續，沒辦法微分，也就沒辦法用微積分找最佳的 $\mathbf{w}$。
+</p>
+<h4>sigmoid：把實數壓成機率</h4>
+<p>所以改成先算 $z$，再用一個函數把它壓到 $(0,1)$ 當成「是 8 的機率」：</p>
+$$\sigma(z)=\frac{1}{1+e^{-z}}$$
+<p>這個函數有幾個剛好合用的性質：</p>
+<ul>
+<li>$z\to+\infty$ 時趨近 1，$z\to-\infty$ 時趨近 0，$z=0$ 時剛好 0.5</li>
+<li>處處可微，而且導數漂亮得不像話：$\sigma'(z)=\sigma(z)\bigl(1-\sigma(z)\bigr)$
+    （值得自己動手驗一次，就是商法則）</li>
+<li>單調遞增，所以「$\sigma(z)>0.5$」跟「$z>0$」是同一件事，
+    決策邊界仍然是那個超平面，沒有變複雜</li>
+</ul>
+<p style="margin-bottom:0">
+名字裡有「迴歸」卻在做分類，是歷史遺留的命名，別被騙了。
+</p>
+</div>
+</details>
+
+<details class="bg"><summary>什麼是「概似」？為什麼要取 log？</summary>
+<div class="bg-body">
+<p>
+模型說「第 $i$ 張圖是 8 的機率是 $p_i=\sigma(z_i)$」。
+如果它的真實答案 $y_i=1$（是 8），模型給的機率就是 $p_i$；
+如果 $y_i=0$（是 3），模型給的機率是 $1-p_i$。兩種情況可以合寫成
+</p>
+$$P(y_i\mid\mathbf{x}_i)=p_i^{\,y_i}(1-p_i)^{1-y_i}$$
+<p>
+（把 $y_i=0$ 或 $1$ 代進去檢查一下，就是上面那兩句話。）
+假設各筆資料獨立，看到<strong>整批資料</strong>的機率就是連乘：
+</p>
+$$L(\mathbf{w})=\prod_{i=1}^{n}p_i^{\,y_i}(1-p_i)^{1-y_i}$$
+<p>
+這個 $L$ 叫<strong>概似（likelihood）</strong>。
+「最大概似估計」就是：<em>挑一組參數，讓「模型認為這批資料會發生」的機率最大</em>。
+這是統計學裡最基本的參數估計原則。
+</p>
+<h4>為什麼取 log</h4>
+<ul>
+<li><strong>連乘變連加</strong>：$\log\prod=\sum\log$，微分立刻好做很多</li>
+<li><strong>數值不會爆炸</strong>：357 個介於 0 和 1 的數連乘，會小到 float64 直接變成 0</li>
+<li><strong>不改變答案</strong>：$\log$ 是嚴格遞增的，最大化 $L$ 跟最大化 $\log L$ 的解完全相同</li>
+</ul>
+<p>
+習慣上會再取負號、除以 $n$，把「最大化概似」變成「最小化平均損失」，
+這樣就跟其他最佳化問題長得一樣了。得到的就是本關要驗證的那個 $L(\mathbf{w})$。
+</p>
+<p style="margin-bottom:0">
+接下來找最小值要用的梯度、偏微分、鏈鎖律，<strong>全部是你微積分課上的東西</strong>，
+只是變數多了一點。
+</p>
+</div>
+</details>
+
+<details class="bg"><summary>梯度下降在做什麼？</summary>
+<div class="bg-body">
+<p>
+你在微積分學過：梯度 $\nabla L(\mathbf{w})$ 指向函數<strong>上升最快</strong>的方向。
+那想下降就往反方向走：
+</p>
+$$\mathbf{w}\leftarrow\mathbf{w}-\eta\,\nabla L(\mathbf{w})$$
+<p>
+$\eta$ 是步伐大小（learning rate），本關用 0.5。反覆走，直到走不動為止。
+</p>
+<p>
+為什麼不像 k-means 那樣「令導數為零、直接解」？因為 $\nabla L=\mathbf{0}$
+在這裡是一組<strong>沒有閉式解</strong>的非線性方程式（$\sigma$ 卡在裡面），
+只能用迭代的方式逼近。
+</p>
+<p style="margin-bottom:0">
+這也是為什麼「驗證梯度公式對不對」這件事在本關這麼重要：
+梯度是整個過程唯一的方向感，公式寫錯，後面跑再多次都是往錯的方向走。
+</p>
+</div>
+</details>
+
+<details class="bg"><summary>過擬合與正則化是什麼？（本關最後會用到）</summary>
+<div class="bg-body">
+<p>
+<strong>過擬合</strong>：模型把訓練資料背下來了，包括裡面的雜訊，
+所以在訓練資料上表現完美，換一批新資料就崩。
+症狀之一是<strong>權重變得很大</strong>：模型用極端的係數去遷就個別樣本。
+</p>
+<p>
+<strong>正則化</strong>的做法是在要最小化的目標裡，加一項懲罰大權重的東西。
+最常見的 L2 正則化：
+</p>
+$$L_{\text{reg}}(\mathbf{w})=L(\mathbf{w})+\frac{1}{2C}\|\mathbf{w}\|^2$$
+<p>
+$\|\mathbf{w}\|^2$ 就是線代的平方範數。$C$ 越小懲罰越重。
+效果是逼模型「除非證據夠強，否則不要把係數調大」。
+</p>
+<p style="margin-bottom:0">
+本關會看到正則化的<strong>另一個</strong>作用，比防過擬合更基本：
+它能讓一個原本<strong>沒有解</strong>的問題變成有唯一解。這點待會見真章。
+</p>
+</div>
+</details>
+
+<details class="bg"><summary>sklearn 的 fit / predict 慣例</summary>
+<div class="bg-body">
+<p>scikit-learn 裡幾乎每個模型都長同一個樣子，學會一個就會全部：</p>
+<div class="tw"><table>
+<tr><th>寫法</th><th>意思</th></tr>
+<tr><td><code>m = LogisticRegression(...)</code></td><td>建立模型，括號裡放超參數（例如 <code>C</code>、<code>max_iter</code>）</td></tr>
+<tr><td><code>m.fit(X, y)</code></td><td><strong>訓練</strong>。把資料餵進去，模型把學到的參數存在自己身上</td></tr>
+<tr><td><code>m.coef_</code>　<code>m.intercept_</code></td><td>學到的權重與截距。<strong>結尾有底線</strong>是 sklearn 的慣例，代表「訓練完才有的東西」</td></tr>
+<tr><td><code>m.predict(X)</code></td><td>吐出預測的標籤（0 或 1）</td></tr>
+<tr><td><code>m.predict_proba(X)</code></td><td>吐出機率，兩欄分別是「是 0 的機率」「是 1 的機率」</td></tr>
+<tr><td><code>m.score(X, y)</code></td><td>準確率，也就是猜對的比例</td></tr>
+</table></div>
+<p style="margin-bottom:0">
+PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（做轉換）
+與 <code>inverse_transform</code>（轉回去）。Lab 2 用的就是這組。
+</p>
+</div>
+</details>
 <div class="box math">
 <div class="bt">你要驗證的公式</div>
 <p>令 $z=X_bw$、$\sigma(z)=\dfrac{1}{1+e^{-z}}$，平均對數損失與其梯度為</p>
@@ -39,8 +170,8 @@ $$L(w)=\frac1n\sum_i\Bigl[\log\bigl(1+e^{z_i}\bigr)-y_iz_i\Bigr],
 
 推導完再寫程式。</code></pre>
 <p>
-先推導後寫程式，不只是為了教學。<strong>你需要那份推導來當獨立對照組</strong>——
-待會的數值檢查只能證明「程式內部一致」，不能證明「公式本身正確」。
+先推導後寫程式，不只是為了教學。<strong>你需要那份推導來當獨立對照組</strong>。
+待會的數值檢查只能證明「程式內部一致」，證明不了「公式本身正確」。
 </p>
 </div>
 
@@ -81,7 +212,7 @@ $$E(h)\;\approx\;\underbrace{Ah^2}_{\text{截斷誤差}}\;+\;\underbrace{\frac{B
 $u$ 是浮點精度（float64 約 $2.2\times10^{-16}$）。
 $h$ 太大時泰勒展開的高階項來不及被忽略；
 $h$ 太小時 $L(w+h)$ 與 $L(w-h)$ 幾乎相等，相減會損失有效位數。
-令導數為零可得最佳量級 $h\sim u^{1/3}\approx 6\times10^{-6}$——
+令導數為零可得最佳量級 $h\sim u^{1/3}\approx 6\times10^{-6}$。
 實測最佳落在 $10^{-4}$ 附近，同一個量級。
 </p>
 </div>
@@ -90,7 +221,7 @@ $h$ 太小時 $L(w+h)$ 與 $L(w-h)$ 幾乎相等，相減會損失有效位數�
 <div class="bt">FAIL 不等於公式錯</div>
 <p style="margin-bottom:0">
 上表兩頭的 FAIL，程式完全沒問題。
-所以看到梯度檢查 FAIL 時，正確的說法是<strong>「有不一致，要查原因」</strong>——
+所以看到梯度檢查 FAIL 時，正確的說法是<strong>「有不一致，要查原因」</strong>：
 可能是公式錯、步長不當、捨入誤差，或該維梯度本身接近 0。
 反過來說，PASS 也只提供<strong>局部數值證據</strong>：如果 <code>loss()</code> 和 <code>grad()</code>
 一起照著同一個錯誤的目標函數寫，這關照樣全過。這就是為什麼第 1 步要先獨立推導。
@@ -167,7 +298,7 @@ $L(cv)=\frac1n\sum_i\log\bigl(1+e^{-c\,t_i\mathbf{x}_i^\top v}\bigr)\to 0$，
 <div class="bt">結論</div>
 <p style="margin-bottom:0">
 對線性可分的資料，<strong>無正則化 logistic 迴歸的最大概似估計不存在有限解</strong>。
-所以「手刻係數 vs sklearn 係數」根本沒有標準答案可以比——兩邊都只是在往無窮遠的路上停在不同位置。
+所以「手刻係數 vs sklearn 係數」根本沒有標準答案可以比。兩邊都只是在往無窮遠的路上停在不同位置。
 </p>
 </div>
 <div class="box warn">
@@ -239,7 +370,7 @@ $\|w\|$ 從 97.9 掉到 6.0，準確率完全沒變。
 <div class="bt">為什麼要寫成檔案，而不是在對話裡問</div>
 <p style="margin-bottom:0">
 因為檔案可以進 git。下次你叫 agent 補充或修改這份筆記，
-<code>git diff</code> 會告訴你它<strong>到底改了哪幾行</strong>——
+<code>git diff</code> 會告訴你它<strong>到底改了哪幾行</strong>。
 你不必重讀整份文件去找差異，也不會不知不覺讓它把你原本寫對的東西改掉。
 筆記因此變成會累積的資產，而不是散落在各個對話視窗裡的碎片。
 詳見<a href="git-safety.html">第 07 章</a>。
@@ -264,8 +395,8 @@ $\|w\|$ 從 97.9 掉到 6.0，準確率完全沒變。
 <section>
 <h2>如果還有時間</h2>
 <ul>
-<li>把梯度檢查的表格畫成 log-log 圖（$h$ 對最大誤差），你會看到一條漂亮的 V 型——左半段斜率 $-1$（捨入），右半段斜率 $+2$（截斷）。叫 agent 順便驗證這兩個斜率。</li>
-<li>換成 3 vs 5（比較難分的一對），重跑可分性檢查。如果 linprog 找不到可行解，那無正則化的 MLE 就存在有限解了——這時手刻與 sklearn 的係數才真的該收斂到同一組。</li>
+<li>把梯度檢查的表格畫成 log-log 圖（$h$ 對最大誤差），你會看到一條漂亮的 V 型：左半段斜率 $-1$（捨入），右半段斜率 $+2$（截斷）。叫 agent 順便驗證這兩個斜率。</li>
+<li>換成 3 vs 5（比較難分的一對），重跑可分性檢查。如果 linprog 找不到可行解，那無正則化的 MLE 就存在有限解了，這時手刻與 sklearn 的係數才真的該收斂到同一組。</li>
 <li>掃過 $C$ 從 $10^{-3}$ 到 $10^{3}$，畫 $\|w\|$ 與訓練／測試準確率的曲線，看正則化路徑長什麼樣子。</li>
 </ul>
 </section>

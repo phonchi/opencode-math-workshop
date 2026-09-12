@@ -286,7 +286,16 @@ pre{
   letter-spacing:0;box-shadow:var(--sh-2);
 }
 pre code{background:none;padding:0;font-size:inherit;color:inherit;}
-pre.cmd{position:relative;padding-right:4.2rem;}
+pre.cmd{
+  position:relative;padding-right:4.2rem;
+  /* 指令一律不裁切：太長就換行，並用懸掛縮排讓人看得出是同一行的延續。
+     複製鈕複製的仍是原始單行文字。 */
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  padding-left:2.4rem;
+  text-indent:-1.15rem;
+}
+pre.cmd code{display:block;}
 pre .copy{
   position:absolute;top:.6rem;right:.6rem;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
@@ -295,6 +304,73 @@ pre .copy{
   transition:background .16s var(--ease),color .16s var(--ease);
 }
 pre .copy:hover{background:rgba(255,255,255,.15);color:#fff;}
+
+/* ---------------- 輸出區塊（跟「指令」區分開）---------------- */
+/* 指令 = 學生要照抄的，給複製鈕；輸出 = 程式吐出來的，不給複製鈕。
+   兩者視覺上要看得出差別，否則學生會不知道哪些該打、哪些是結果。 */
+pre.out{
+  position:relative;
+  border-left:3px solid rgba(143,201,143,.45);
+  /* 左右邊緣的陰影只在「真的可以捲動」時出現，提示還有內容 */
+  background-image:
+    linear-gradient(to right, var(--term-bg) 30%, rgba(25,25,34,0)),
+    linear-gradient(to left,  var(--term-bg) 30%, rgba(25,25,34,0)),
+    radial-gradient(farthest-side at 0 50%,   rgba(255,255,255,.15), rgba(255,255,255,0)),
+    radial-gradient(farthest-side at 100% 50%,rgba(255,255,255,.15), rgba(255,255,255,0));
+  background-position:left center,right center,left center,right center;
+  background-repeat:no-repeat;
+  background-size:44px 100%,44px 100%,16px 100%,16px 100%;
+  background-attachment:local,local,scroll,scroll;
+  background-color:var(--term-bg);
+  padding-right:1.25rem;   /* 沒有複製鈕，右邊不需要留位 */
+}
+pre.out::after{
+  content:"輸出";
+  position:absolute;top:.45rem;right:.7rem;
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.14em;
+  color:var(--term-dim);opacity:.55;pointer-events:none;user-select:none;
+}
+pre.out code{display:block;padding-top:.15rem;}
+
+/* ---------------- 外部連結 ---------------- */
+a.ext::after{
+  content:"↗";
+  font-size:.72em;margin-left:.18em;vertical-align:.1em;
+  color:var(--ink-3);text-decoration:none;
+}
+a.ext:hover::after{color:var(--live);}
+
+/* ---------------- 背景補充（可收合）---------------- */
+/* 只修過微積分與線性代數的學生看得到解釋；已經懂的人直接跳過，
+   不會拖慢三小時的節奏。 */
+details.bg{
+  margin:1.6rem 0;border:1px dashed var(--rule);border-radius:var(--r-md);
+  background:rgba(255,253,248,.6);overflow:hidden;
+}
+details.bg > summary{
+  cursor:pointer;list-style:none;user-select:none;
+  padding:.7rem 1.1rem;font-size:.88rem;font-weight:500;color:var(--link);
+  display:flex;align-items:center;gap:.55rem;
+  transition:background .16s var(--ease);
+}
+details.bg > summary::-webkit-details-marker{display:none;}
+details.bg > summary::before{
+  content:"背景補充";
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;
+  letter-spacing:.12em;color:var(--warn);border:1px solid currentColor;
+  border-radius:999px;padding:.1rem .5rem;flex-shrink:0;
+}
+details.bg > summary::after{
+  content:"展開";margin-left:auto;font-size:.72rem;color:var(--ink-3);
+  font-family:'JetBrains Mono',monospace;letter-spacing:.06em;flex-shrink:0;
+}
+details.bg[open] > summary::after{content:"收合";}
+details.bg > summary:hover{background:rgba(222,214,198,.28);}
+details.bg[open] > summary{border-bottom:1px dashed var(--rule);}
+.bg-body{padding:1rem 1.3rem 1.15rem;font-size:.94rem;}
+.bg-body > :last-child{margin-bottom:0;}
+.bg-body h4{margin-top:1.1rem;}
+.bg-body h4:first-child{margin-top:0;}
 
 /* ---------------- 提示盒 ---------------- */
 .box{
@@ -324,12 +400,15 @@ table{width:100%;border-collapse:collapse;font-size:.87rem;background:var(--pape
 th{
   background:rgba(222,214,198,.4);padding:.62rem .9rem;text-align:left;
   font-weight:700;font-size:.76rem;letter-spacing:.06em;color:var(--ink-2);
-  white-space:nowrap;border-bottom:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
 }
 td{padding:.58rem .9rem;border-bottom:1px solid var(--rule-2);vertical-align:top;line-height:1.72;}
 tr:last-child td{border-bottom:none;}
 tbody tr:hover{background:rgba(222,214,198,.16);}
-td code{white-space:nowrap;}
+td code,th code{
+  /* 短的保持一行好讀，過長的允許換行，否則整個表格會被撐爆 */
+  white-space:normal;overflow-wrap:anywhere;
+}
 .ok{color:var(--after);font-weight:700;}
 .no{color:var(--live);font-weight:700;}
 
@@ -466,12 +545,12 @@ footer .stamp{
 <section>
 <h2>這場工作坊在做什麼</h2>
 <p class="lead">
-你已經在課堂上學過迴歸、分群、降維、分類背後的數學。這場工作坊要處理的是另一件事：
+你在微積分與線性代數學過的東西，足夠看懂這三個實作背後在算什麼。這場工作坊要處理的是另一件事：
 <strong>當一個 AI agent 三十秒就把這些方法實作出來，你的價值在哪裡？</strong>
 </p>
 <p>
 答案是判斷力。agent 寫得快，但它會用錯指標、會挑錯比較方式、會給你一個看起來很有道理但其實錯的結論。
-而你——修過線性代數與統計的人——有能力抓出來。這三小時就在練這件事。
+而你修過微積分與線性代數，有能力抓出來。這三小時練的就是這件事。
 </p>
 
 <div class="term">
@@ -487,14 +566,14 @@ footer .stamp{
 <div class="o">驗證 3：重建誤差　差異 = 0.000e+00　→ PASS</div>
 <div class="sp"></div>
 <div class="c">三項驗證都通過了。補充一點：第 4、7、8、9、10 個主成分的方向跟 sklearn 相反，
-這是正常的——特徵向量的正負號本來就任意，所以我用 |cos| 而不是直接相減。</div>
+這是正常的，特徵向量的正負號本來就任意，所以我用 |cos| 而不是直接相減。</div>
 </div>
 </div>
 
 <div class="box math">
 <div class="bt">給你的第一個問題</div>
-<p>上面那段話，agent 說得頭頭是道。但它其實<strong>漏了一個條件</strong>——
-在什麼情況下，用 <code>|cos|</code> 比對主成分方向這個做法會失效？</p>
+<p>上面那段話，agent 說得頭頭是道。但它<strong>漏了一個條件</strong>。
+在什麼情況下，用 <code>|cos|</code> 比對主成分方向會失效？</p>
 <p style="margin-bottom:0">Lab 2 會處理這題。這就是這場工作坊的樣子。</p>
 </div>
 </section>
@@ -507,7 +586,7 @@ footer .stamp{
 <tr><td class="t">00:10</td><td class="n">第一次對話 <span class="badge live">現場</span></td>
     <td class="d">TUI 操作、權限機制、session 的邊界。搞懂你在跟什麼東西說話。</td></tr>
 <tr><td class="t">00:40</td><td class="n">Lab 1 · 分群 <span class="badge live">現場</span></td>
-    <td class="d">agent 當加速器。一句話換來十一組 k-means 與兩張圖——然後你發現它選錯了 k。</td></tr>
+    <td class="d">agent 當加速器。一句話換來十一組 k-means 與兩張圖，然後你發現它選錯了 k。</td></tr>
 <tr><td class="t">01:20</td><td class="n">休息</td><td class="d"></td></tr>
 <tr><td class="t">01:30</td><td class="n">Lab 2 · 降維 <span class="badge live">現場</span></td>
     <td class="d">agent 當被告。手刻 PCA vs sklearn，你負責設計能抓出錯誤的驗證方法。</td></tr>
@@ -528,7 +607,7 @@ footer .stamp{
 <a class="ch-card" href="prep.html">
   <div class="num">00</div>
   <h3>課前準備</h3>
-  <p>裝好 opencode 與 uv，跑一次自測。<strong>務必在工作坊前做完</strong>——建 Python 環境實測要下載 287 MB、花六分半鐘，全班同時做會塞爆教室網路。</p>
+  <p>裝好 opencode 與 uv，跑一次自測。<strong>務必在工作坊前做完</strong>。建 Python 環境要下載 287 MB，全班同時做會塞爆教室網路。</p>
   <div class="foot"><span class="badge prep">課前</span><span class="arr">→</span></div>
 </a>
 
@@ -542,7 +621,7 @@ footer .stamp{
 <a class="ch-card" href="lab1-cluster.html">
   <div class="num">02</div>
   <h3>Lab 1 · 分群：agent 當加速器</h3>
-  <p>k-means 掃過 k=2 到 12，畫 elbow 與 silhouette。agent 會很有自信地告訴你最佳 k 是 9——但真實答案是 10。為什麼？</p>
+  <p>k-means 掃過 k=2 到 12，畫 elbow 與 silhouette。agent 會很有自信地告訴你最佳 k 是 9，但真實答案是 10。為什麼？</p>
   <div class="foot"><span class="badge live">現場 40 分</span><span class="arr">→</span></div>
 </a>
 
@@ -563,7 +642,7 @@ footer .stamp{
 <a class="ch-card" href="local-models.html">
   <div class="num">05</div>
   <h3>在自己電腦上跑本地模型</h3>
-  <p>Ollama 接 opencode。重點是 context 長度要在<strong>兩個地方各設一次</strong>——只設一邊，模型就會表現得像個笨蛋，而你會以為是模型不好。</p>
+  <p>Ollama 接 opencode。重點是 context 長度要在<strong>兩個地方各設一次</strong>。只設一邊，模型會表現得像個笨蛋，而你會以為是模型不好。</p>
   <div class="foot"><span class="badge after">課後</span><span class="arr">→</span></div>
 </a>
 
@@ -577,7 +656,7 @@ footer .stamp{
 <a class="ch-card" href="git-safety.html">
   <div class="num">07</div>
   <h3>git：讓你敢放手</h3>
-  <p>不用 GitHub 帳號也能用。動手前先 commit、改完看 diff、不滿意就還原——有這張安全網，你才敢真的讓 agent 改你的檔案。</p>
+  <p>不用 GitHub 帳號也能用。動手前先 commit、改完看 diff、不滿意就還原。有這張安全網，你才敢真的讓 agent 改你的檔案。</p>
   <div class="foot"><span class="badge after">課後</span><span class="arr">→</span></div>
 </a>
 

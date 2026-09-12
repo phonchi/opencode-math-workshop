@@ -8,7 +8,7 @@
   <h1>分群：一句話換來十一組實驗</h1>
   <p class="lead">
     這個實作要讓你體會 agent 最直觀的價值：把「本來要寫半小時程式」壓縮成「講一句話」。
-    但真正的重點在最後——當 agent 很有自信地報告一個數字時，你要有能力知道那個數字錯了。
+    不過這一關的重點在最後。agent 會很有自信地報告一個數字，而你要有能力知道它錯了。
   </p>
 </div>
 
@@ -18,11 +18,97 @@
 三個實作共用同一份資料：scikit-learn 內建的 <code>digits</code>，
 1797 張 8×8 的手寫數字灰階圖，攤平成 64 維向量，真實類別有 10 類（0 到 9）。
 </p>
+
+<details class="bg"><summary>資料到底長什麼樣？「64 維」是什麼意思？</summary>
+<div class="bg-body">
+<p>
+每張圖是 8×8 = 64 個像素，每個像素是 0 到 16 的灰階值。
+把這 64 個數字<strong>依序排成一列</strong>，一張圖就變成一個 64 維的向量
+$\mathbf{x}\in\mathbb{R}^{64}$。1797 張圖疊起來，就是一個 $1797\times 64$ 的矩陣 $X$。
+</p>
+<p>
+「64 維」不是什麼玄學，就是<strong>線代課上那個 $\mathbb{R}^n$</strong>，
+只是 $n=64$ 而已。你在線代學的內積、範數、正交、投影，
+在這裡全部原封不動可以用，Lab 2 就會派上用場。
+</p>
+<h4>兩個向量「像不像」怎麼量</h4>
+<p>用你已經會的歐氏距離：</p>
+$$\|\mathbf{x}-\mathbf{y}\|_2=\sqrt{\sum_{j=1}^{64}(x_j-y_j)^2}$$
+<p>
+兩張圖如果每個像素都差不多，距離就小。整個 k-means 就建立在這一個量上。
+</p>
+<h4>會看到的 numpy 寫法</h4>
+<div class="tw"><table>
+<tr><th>寫法</th><th>意思</th></tr>
+<tr><td><code>X.shape</code></td><td>回傳 <code>(1797, 64)</code>，也就是「1797 列、64 行」</td></tr>
+<tr><td><code>X[5]</code></td><td>第 6 張圖（從 0 數起）的那個 64 維向量</td></tr>
+<tr><td><code>X.mean(axis=0)</code></td><td>沿著「列」的方向壓扁，得到 64 個平均值＝每個像素的平均亮度</td></tr>
+<tr><td><code>X[y == 3]</code></td><td>只取出標籤是 3 的那些列（布林遮罩）</td></tr>
+</table></div>
+<p style="margin-bottom:0">
+<code>axis=0</code> 常讓人搞混。記法：<strong>axis 指的是「要被吃掉的那個維度」</strong>。
+<code>X</code> 是 (1797, 64)，<code>axis=0</code> 吃掉 1797 那一維，剩下 64 個數。
+</p>
+</div>
+</details>
+
+<details class="bg"><summary>什麼是「分群」？跟「分類」差在哪？</summary>
+<div class="bg-body">
+<p>這是機器學習裡最基本的一組區分，值得花三十秒搞清楚：</p>
+<div class="tw"><table>
+<tr><th></th><th>分類（classification）</th><th>分群（clustering）</th></tr>
+<tr><td>你有什麼</td><td>資料 <strong>＋ 正確答案</strong></td><td><strong>只有資料</strong></td></tr>
+<tr><td>在做什麼</td><td>學一個規則，看到新資料能說出它屬於哪一類</td><td>看資料自己長成幾坨，把靠近的歸在一起</td></tr>
+<tr><td>術語</td><td>監督式（supervised）</td><td>非監督式（unsupervised）</td></tr>
+<tr><td>本工作坊</td><td>Lab 3</td><td><strong>Lab 1（現在這關）</strong></td></tr>
+</table></div>
+<p>
+關鍵在於：<strong>分群演算法看不到答案</strong>。
+digits 雖然附了正確標籤，但我們<em>不會</em>把標籤餵給 k-means。
+它只看得到那 1797 個 64 維向量，得自己決定誰跟誰是一夥的。
+</p>
+<p style="margin-bottom:0">
+這就是為什麼待會會出現「它算出 9 群、但真實答案是 10 類」這種事。
+它<strong>本來就不知道</strong>答案是 10。
+</p>
+</div>
+</details>
+
+<details class="bg"><summary>k-means 到底在做什麼？（三行講完）</summary>
+<div class="bg-body">
+<p>給定你想分幾群（那個 $k$），演算法只做兩件事，反覆做到不變為止：</p>
+<ol>
+<li>隨機挑 $k$ 個點當「中心」$\boldsymbol{\mu}_1,\dots,\boldsymbol{\mu}_k$</li>
+<li><strong>指派</strong>：每個資料點歸到離它最近的那個中心</li>
+<li><strong>更新</strong>：每個中心移動到自己那群所有點的平均位置</li>
+</ol>
+<p>然後回到第 2 步，直到沒有點再換群為止。</p>
+<h4>它在最小化什麼</h4>
+<p>整個過程其實是在最小化這個量，sklearn 把它叫做 <code>inertia_</code>：</p>
+$$J=\sum_{i=1}^{n}\bigl\|\mathbf{x}_i-\boldsymbol{\mu}_{c(i)}\bigr\|^2$$
+<p>
+（$c(i)$ 是第 $i$ 個點被分到哪一群。）白話：<strong>每個點到自己那群中心的距離平方，全部加起來</strong>。
+</p>
+<p>
+第 3 步「取平均」不是隨便定的。它是微積分算出來的：
+固定分群之後，對 $\boldsymbol{\mu}$ 微分並令其為零，
+$\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\boldsymbol{\mu}_j)=0$，
+解出來就是 $\boldsymbol{\mu}_j=\frac{1}{|C_j|}\sum_{i\in C_j}\mathbf{x}_i$，也就是群內平均。
+<strong>這就是你在微積分課上做的「令導數為零求極值」。</strong>
+</p>
+<p style="margin-bottom:0">
+順帶一提：每一步都不會讓 $J$ 變大，所以一定會停。
+但停下來的地方<strong>不保證是全域最小</strong>。所以才要設
+<code>n_init=10</code>（跑 10 次不同起點取最好的），以及為什麼要固定
+<code>random_state</code> 才能重現結果。
+</p>
+</div>
+</details>
 <div class="box tip">
 <div class="bt">為什麼用這份</div>
 <p style="margin-bottom:0">
 不用下載（套件裡就有）、夠小（幾秒跑完）、維度夠高（64 維，PCA 才有意義）、
-而且<strong>你知道正確答案是 10 類</strong>——這點在待會會變成整堂課最重要的伏筆。
+而且<strong>你知道正確答案是 10 類</strong>。這點待會會變成整堂課最重要的伏筆。
 </p>
 </div>
 </section>
@@ -39,8 +125,8 @@
 
 <div class="step" data-n="2">
 <h3>下第一個指令</h3>
-<p>把下面這段整個貼進去。注意它的結構：<strong>做什麼、用什麼、存到哪、印出什麼</strong>——
-指令愈具體，你愈不需要來回修正。</p>
+<p>把下面這段整個貼進去。注意它的結構：<strong>做什麼、用什麼、存到哪、印出什麼</strong>。
+指令愈具體，來回修正的次數就愈少。</p>
 <pre class="cmd"><code>用 sklearn 內建的 digits 資料集做 k-means 分群。
 
 請掃過 k = 2 到 12，每個 k 都記錄 inertia 與 silhouette score，
@@ -94,7 +180,7 @@ agent 說最佳 k 是 <strong>9</strong>。但你知道這份資料有 <strong>1
 <h2>誰錯了</h2>
 <p>
 都沒錯。agent 的程式是對的，silhouette 的計算是對的，0.1893 確實是最高的。
-錯的是那句<strong>「所以建議用 9 群」</strong>——那是一個從數字跳到結論的推論，而那一跳沒有根據。
+錯的是那句<strong>「所以建議用 9 群」</strong>。那是從數字直接跳到結論，而那一跳沒有根據。
 </p>
 <p>
 更精確地說：10 是這份資料<strong>標註的類別數</strong>，它不保證原始像素空間裡
@@ -110,8 +196,8 @@ $b(i)$ 是它到<em>最近的其他群</em>所有點的平均距離，則
 <div class="box math">
 <div class="bt">silhouette</div>
 $$s(i)=\frac{b(i)-a(i)}{\max\{a(i),\,b(i)\}},\qquad s(i)\in[-1,1]$$
-<p style="margin-bottom:0">整體分數就是所有 $s(i)$ 的平均。它衡量的是<strong>「群內夠不夠緊、群間夠不夠開」</strong>——
-一個純粹的幾何性質，完全沒有用到真實標籤。</p>
+<p style="margin-bottom:0">整體分數就是所有 $s(i)$ 的平均。它衡量的是<strong>「群內夠不夠緊、群間夠不夠開」</strong>，
+一個純粹的幾何性質，完全沒有碰到真實標籤。</p>
 </div>
 
 <p>
@@ -122,8 +208,7 @@ $$s(i)=\frac{b(i)-a(i)}{\max\{a(i),\,b(i)\}},\qquad s(i)\in[-1,1]$$
 <h3>為什麼 digits 會是 9</h3>
 <p>
 因為在 64 維的像素空間裡，某些數字本來就長得像。
-1 和 7、4 和 9、3 和 8 的像素分布高度重疊——
-把它們合併成一群，群內距離會變小、群間距離會變大，silhouette 自然上升。
+1 和 7、4 和 9、3 和 8 的像素分布高度重疊。把它們合併成一群，群內距離會變小、群間距離會變大，silhouette 自然就上去了。
 </p>
 <p>
 換句話說：<strong>「幾何上最漂亮的分法」跟「語意上正確的分法」不一樣。</strong>
@@ -135,7 +220,7 @@ $$s(i)=\frac{b(i)-a(i)}{\max\{a(i),\,b(i)\}},\qquad s(i)\in[-1,1]$$
 <p style="margin-bottom:0">
 agent 給你的每個數字都是對的，但它擅自替你做了一個<strong>你才有資格做的判斷</strong>。
 它不知道你手上有真實標籤，也不知道你的研究問題是什麼。
-往後每次 agent 說「所以建議……」，那個「所以」就是你要停下來檢查的地方。
+往後每次 agent 說「所以建議……」，停在那個「所以」上面檢查一下。
 </p>
 </div>
 </section>
@@ -149,9 +234,38 @@ agent 給你的每個數字都是對的，但它擅自替你做了一個<strong>
 - 用 sklearn 的 adjusted_rand_score 與真實標籤比對 k=9 和 k=10 的結果
 - 告訴我在「不知道真實答案」的情境下，還有什麼方法可以判斷 k</code></pre>
 <p>
-這裡引入了 <strong>ARI（adjusted Rand index）</strong>——一個需要真實標籤的外部指標。
+這裡引入了 <strong>ARI（adjusted Rand index）</strong>，這是一個需要真實標籤的外部指標。
 對照 silhouette 這個內部指標，你會很清楚看到兩者的差別。
 </p>
+
+<details class="bg"><summary>ARI 是什麼？為什麼要「調整」？</summary>
+<div class="bg-body">
+<p>
+分群的編號是任意的：把「第 0 群」跟「第 3 群」的編號對調，分群結果<strong>完全沒變</strong>。
+所以不能直接比編號。要比的是<strong>「哪些點被放在一起」這個關係</strong>。
+</p>
+<h4>先看 Rand index</h4>
+<p>
+把所有資料點兩兩配對，總共 $\binom{n}{2}$ 對。對每一對問一個是非題：
+<em>這兩個點在真實標籤裡是同一類嗎？在分群結果裡是同一群嗎？</em>
+兩邊答案一致就算「同意」：
+</p>
+$$\text{RI}=\frac{\text{兩邊都說同群}+\text{兩邊都說不同群}}{\binom{n}{2}}$$
+<p>這完全繞開了編號問題，只看配對關係。</p>
+<h4>為什麼要「調整」</h4>
+<p>
+RI 有個毛病：<strong>就算亂分，也會拿到不低的分數</strong>。
+群數一多，隨便兩個點「剛好都不同群」的機率就很高，分母白白被灌水。
+所以會把隨機情況下的期望值扣掉、再正規化：
+</p>
+$$\text{ARI}=\frac{\text{RI}-\mathbb{E}[\text{RI}]}{\max(\text{RI})-\mathbb{E}[\text{RI}]}$$
+<p style="margin-bottom:0">
+調整之後：完全正確是 <strong>1</strong>，<strong>隨機亂分約等於 0</strong>（可以是小負數）。
+這才是一個「0 分真的代表沒有任何資訊」的尺度。
+你可以叫 agent 用隨機標籤實際跑一次驗證這點，五行程式就能做完。
+</p>
+</div>
+</details>
 <div class="box tip">
 <div class="bt">順便驗證一件事</div>
 <p style="margin-bottom:0">
@@ -175,9 +289,9 @@ ARI 是「調整過的」Rand index，意思是它<strong>扣掉了隨機分群�
 <section>
 <h2>如果還有時間</h2>
 <ul>
-<li>叫 agent 把 k=10 的十個群中心 reshape 回 8×8 畫出來。你會看到某幾個「數字」長得很模糊——那就是被合併的類別。</li>
+<li>叫 agent 把 k=10 的十個群中心 reshape 回 8×8 畫出來。你會看到某幾個「數字」長得很模糊，那就是被合併的類別。</li>
 <li>silhouette 的差距（0.1893 vs 0.1825）其實很小。問 agent：<strong>「這個差距有統計意義嗎？」</strong>——用不同 <code>random_state</code> 跑 30 次，看兩者的分布是否重疊。單次比較的大小關係不等於顯著差異。</li>
-<li>問它：<strong>「inertia 為什麼隨 k 遞減？用數學證明給我看。」</strong>（提示：$k+1$ 群的<em>最佳</em>解一定不差於 $k$ 群，因為可以把多的那群留空。但 k-means 找到的是局部解，所以實務上偶爾會出現不單調的情形——這也正是 elbow 法只能「看轉折」而不能「取最小值」的原因。）</li>
+<li>問它：<strong>「inertia 為什麼隨 k 遞減？用數學證明給我看。」</strong>（提示：$k+1$ 群的<em>最佳</em>解一定不差於 $k$ 群，因為可以把多的那群留空。但 k-means 找到的是局部解，所以實務上偶爾會出現不單調的情形。這也是 elbow 法只能「看轉折」、不能「取最小值」的原因。）</li>
 <li>換一個距離度量（例如先做 L2 正規化再分群），看 silhouette 的最佳 k 會不會變。</li>
 </ul>
 </section>

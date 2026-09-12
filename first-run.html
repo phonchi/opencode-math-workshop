@@ -286,7 +286,16 @@ pre{
   letter-spacing:0;box-shadow:var(--sh-2);
 }
 pre code{background:none;padding:0;font-size:inherit;color:inherit;}
-pre.cmd{position:relative;padding-right:4.2rem;}
+pre.cmd{
+  position:relative;padding-right:4.2rem;
+  /* 指令一律不裁切：太長就換行，並用懸掛縮排讓人看得出是同一行的延續。
+     複製鈕複製的仍是原始單行文字。 */
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  padding-left:2.4rem;
+  text-indent:-1.15rem;
+}
+pre.cmd code{display:block;}
 pre .copy{
   position:absolute;top:.6rem;right:.6rem;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
@@ -295,6 +304,73 @@ pre .copy{
   transition:background .16s var(--ease),color .16s var(--ease);
 }
 pre .copy:hover{background:rgba(255,255,255,.15);color:#fff;}
+
+/* ---------------- 輸出區塊（跟「指令」區分開）---------------- */
+/* 指令 = 學生要照抄的，給複製鈕；輸出 = 程式吐出來的，不給複製鈕。
+   兩者視覺上要看得出差別，否則學生會不知道哪些該打、哪些是結果。 */
+pre.out{
+  position:relative;
+  border-left:3px solid rgba(143,201,143,.45);
+  /* 左右邊緣的陰影只在「真的可以捲動」時出現，提示還有內容 */
+  background-image:
+    linear-gradient(to right, var(--term-bg) 30%, rgba(25,25,34,0)),
+    linear-gradient(to left,  var(--term-bg) 30%, rgba(25,25,34,0)),
+    radial-gradient(farthest-side at 0 50%,   rgba(255,255,255,.15), rgba(255,255,255,0)),
+    radial-gradient(farthest-side at 100% 50%,rgba(255,255,255,.15), rgba(255,255,255,0));
+  background-position:left center,right center,left center,right center;
+  background-repeat:no-repeat;
+  background-size:44px 100%,44px 100%,16px 100%,16px 100%;
+  background-attachment:local,local,scroll,scroll;
+  background-color:var(--term-bg);
+  padding-right:1.25rem;   /* 沒有複製鈕，右邊不需要留位 */
+}
+pre.out::after{
+  content:"輸出";
+  position:absolute;top:.45rem;right:.7rem;
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.14em;
+  color:var(--term-dim);opacity:.55;pointer-events:none;user-select:none;
+}
+pre.out code{display:block;padding-top:.15rem;}
+
+/* ---------------- 外部連結 ---------------- */
+a.ext::after{
+  content:"↗";
+  font-size:.72em;margin-left:.18em;vertical-align:.1em;
+  color:var(--ink-3);text-decoration:none;
+}
+a.ext:hover::after{color:var(--live);}
+
+/* ---------------- 背景補充（可收合）---------------- */
+/* 只修過微積分與線性代數的學生看得到解釋；已經懂的人直接跳過，
+   不會拖慢三小時的節奏。 */
+details.bg{
+  margin:1.6rem 0;border:1px dashed var(--rule);border-radius:var(--r-md);
+  background:rgba(255,253,248,.6);overflow:hidden;
+}
+details.bg > summary{
+  cursor:pointer;list-style:none;user-select:none;
+  padding:.7rem 1.1rem;font-size:.88rem;font-weight:500;color:var(--link);
+  display:flex;align-items:center;gap:.55rem;
+  transition:background .16s var(--ease);
+}
+details.bg > summary::-webkit-details-marker{display:none;}
+details.bg > summary::before{
+  content:"背景補充";
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;
+  letter-spacing:.12em;color:var(--warn);border:1px solid currentColor;
+  border-radius:999px;padding:.1rem .5rem;flex-shrink:0;
+}
+details.bg > summary::after{
+  content:"展開";margin-left:auto;font-size:.72rem;color:var(--ink-3);
+  font-family:'JetBrains Mono',monospace;letter-spacing:.06em;flex-shrink:0;
+}
+details.bg[open] > summary::after{content:"收合";}
+details.bg > summary:hover{background:rgba(222,214,198,.28);}
+details.bg[open] > summary{border-bottom:1px dashed var(--rule);}
+.bg-body{padding:1rem 1.3rem 1.15rem;font-size:.94rem;}
+.bg-body > :last-child{margin-bottom:0;}
+.bg-body h4{margin-top:1.1rem;}
+.bg-body h4:first-child{margin-top:0;}
 
 /* ---------------- 提示盒 ---------------- */
 .box{
@@ -324,12 +400,15 @@ table{width:100%;border-collapse:collapse;font-size:.87rem;background:var(--pape
 th{
   background:rgba(222,214,198,.4);padding:.62rem .9rem;text-align:left;
   font-weight:700;font-size:.76rem;letter-spacing:.06em;color:var(--ink-2);
-  white-space:nowrap;border-bottom:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
 }
 td{padding:.58rem .9rem;border-bottom:1px solid var(--rule-2);vertical-align:top;line-height:1.72;}
 tr:last-child td{border-bottom:none;}
 tbody tr:hover{background:rgba(222,214,198,.16);}
-td code{white-space:nowrap;}
+td code,th code{
+  /* 短的保持一行好讀，過長的允許換行，否則整個表格會被撐爆 */
+  white-space:normal;overflow-wrap:anywhere;
+}
 .ok{color:var(--after);font-weight:700;}
 .no{color:var(--live);font-weight:700;}
 
@@ -460,36 +539,38 @@ footer .stamp{
 <hr>
 <h2>1. 啟動</h2>
 <h3>1.1 安裝（如果你還沒裝）</h3>
-<p>Linux / macOS / WSL：</p>
-<pre class="cmd"><code>curl -fsSL https://opencode.ai/install | bash</code></pre>
-<p>Windows（PowerShell）：</p>
-<pre class="cmd"><code>winget install SST.opencode --accept-source-agreements --accept-package-agreements</code></pre>
+<p><strong>Linux / WSL</strong>：<code>curl</code> 不一定裝在你的系統裡（Ubuntu 的基本安裝不含它）， 所以先用一定有的 <code>apt</code> 把它補上，再裝 opencode：</p>
+<pre class="cmd" data-lang="bash"><code>sudo apt update &amp;&amp; sudo apt install -y curl ca-certificates
+curl -fsSL https://opencode.ai/install | bash</code></pre>
+<p><strong>macOS</strong>：內建 <code>curl</code>，直接跑第二行就好。</p>
+<p><strong>Windows（PowerShell）</strong>：<code>winget</code> 是 Windows 11 內建的，不用先裝東西。</p>
+<pre class="cmd" data-lang="powershell"><code>winget install SST.opencode --accept-source-agreements --accept-package-agreements</code></pre>
 <p>確認裝好了：</p>
-<pre class="cmd"><code>opencode --version</code></pre>
+<pre class="cmd" data-lang="bash"><code>opencode --version</code></pre>
 <p>本章所有內容都在 <code>1.18.30</code> 上實測。如果你的版本號不一樣，畫面可能會有差別。</p>
 <h3>1.2 建好 Python 環境</h3>
 <p>進到工作坊的專案資料夾（講師發的那個，例如 <code>ai-math-lab</code>），先把 Python 環境裝起來（第一次會跑幾分鐘）：</p>
-<pre class="cmd"><code>uv sync</code></pre>
+<pre class="cmd" data-lang="bash"><code>uv sync</code></pre>
 <p>檢查環境：</p>
-<pre class="cmd"><code>uv run python -c "import numpy, sklearn, matplotlib, networkx; print('環境 OK')"</code></pre>
+<pre class="cmd" data-lang="bash"><code>uv run python -c "import numpy, sklearn, matplotlib, networkx; print('環境 OK')"</code></pre>
 <p>這個專案一律用 <code>uv run python 檔名.py</code> 執行程式，不要用 <code>python</code>、<code>python3</code>，也不要用 <code>pip install</code>。要加套件用 <code>uv add 套件名</code>。這條規則已經寫在專案的 <code>AGENTS.md</code> 裡，agent 自己會遵守。</p>
 <h3>1.3 兩種啟動方式</h3>
 <p><strong>互動模式（本章都用這個）</strong>：</p>
-<pre class="cmd"><code>opencode</code></pre>
+<pre class="cmd" data-lang="bash"><code>opencode</code></pre>
 <p>直接進入 TUI（終端機介面），可以一句一句對話，agent 要動手之前會停下來問你。</p>
 <p><strong>非互動模式（先知道有這個就好，這一章不要用）</strong>：</p>
-<pre class="cmd"><code>opencode run "讀 pyproject.toml，用一句話說明這個專案裝了哪些套件"</code></pre>
+<pre class="cmd" data-lang="bash"><code>opencode run "讀 pyproject.toml，用一句話說明這個專案裝了哪些套件"</code></pre>
 <p><code>opencode run</code> 丟一句話進去、印出結果就結束。實測它<strong>不會問權限</strong>，會直接寫檔、直接執行指令。所以在你還不熟的階段，一律用 <code>opencode</code>（互動模式）。</p>
 <h3>1.4 模型不用設定</h3>
 <p>這個專案的 <code>opencode.json</code> 已經把模型指定成 <code>opencode/big-pickle</code>：</p>
-<pre class="cmd"><code>{
+<pre class="cmd" data-lang="json"><code>{
   "model": "opencode/big-pickle"
 }</code></pre>
-<p><code>big-pickle</code> 不用登入、不用 API key、不用信用卡。啟動後畫面上會有一行提示 <code>Run /connect to add an AI provider and start coding</code> ——<strong>忽略它</strong>。那是給要接自己帳號的人看的，你不需要。</p>
+<p><code>big-pickle</code> 不用登入、不用 API key、不用信用卡。啟動後畫面上會有一行提示 <code>Run /connect to add an AI provider and start coding</code>，<strong>忽略它</strong>。那是給要接自己帳號的人看的，你不需要。</p>
 <hr>
 <h2>2. 認識畫面</h2>
 <p>啟動後還沒開始對話時，畫面大概長這樣（實測擷取，位置會隨終端機寬度調整）：</p>
-<pre class="cmd"><code>                              █▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█
+<pre class="out"><code>                              █▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█
                               █  █ █  █ █▀▀▀ █  █ █    █  █ █  █ █▀▀▀
                               ▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
 
@@ -506,7 +587,7 @@ footer .stamp{
 <p>由上往下看：</p>
 <div class="tw"><table><tr><th>畫面上的東西</th><th>意思</th></tr><tr><td><code>Ask anything…</code></td><td>輸入框。游標在這裡，直接打字就行</td></tr><tr><td><code>Build · Big Pickle OpenCode Zen</code></td><td>現在用的 <strong>agent</strong>（Build）· <strong>模型</strong>（Big Pickle）· <strong>供應商</strong>（OpenCode Zen）</td></tr><tr><td><code>tab agents</code></td><td>按 <code>Tab</code> 可以換 agent</td></tr><tr><td><code>ctrl+p commands</code></td><td>按 <code>ctrl+p</code> 開指令面板</td></tr><tr><td>最底左邊</td><td>你現在在哪個資料夾。<strong>開始之前先確認這行是對的</strong></td></tr><tr><td>最底右邊</td><td>opencode 版本</td></tr></table></div>
 <p>開始對話之後，右邊會多出一欄側邊欄：</p>
-<pre class="cmd"><code>                                     列出資料夾內所有檔案     &lt;- session 名稱（自動命名）
+<pre class="out" style="font-size:0.791rem"><code>                                     列出資料夾內所有檔案     &lt;- session 名稱（自動命名）
 
                                      Context
                                      16,007 tokens
@@ -524,21 +605,23 @@ footer .stamp{
 <h2>3. 你的第一個指令</h2>
 <h3>3.1 先問一個不用動手的問題</h3>
 <p>在輸入框打下面這句，按 <code>Enter</code>：</p>
-<pre class="cmd"><code>請讀 AGENTS.md，用三句話說明這個專案的規矩</code></pre>
+<pre class="cmd" data-lang="text"><code>請讀 AGENTS.md，用三句話說明這個專案的規矩</code></pre>
 <p>你會看到三件事：</p>
 <ol>
 <li><strong>agent 先「想」</strong>。畫面上會出現一段淺色的思考過程（Thought），說它打算怎麼做。</li>
 <li><strong>它用了工具</strong>。你會看到 <code>read</code> 之類的工具呼叫列出來。</li>
-<li><strong>它用繁體中文回答</strong>。這不是巧合——<code>AGENTS.md</code> 裡寫了「一律使用台灣繁體中文回答」，agent 啟動時就把這個檔讀進去了。實測確認有效。</li>
+<li><strong>它用繁體中文回答</strong>。這不是巧合：<code>AGENTS.md</code> 裡寫了「一律使用台灣繁體中文回答」，agent 啟動時就把這個檔讀進去了。實測確認有效。</li>
 </ol>
 <p>這一句只是讀檔，不會跳出權限對話框。</p>
 <h3>3.2 再下一個要動手的指令</h3>
-<pre class="cmd"><code>請用 uv run python 印出 numpy 的版本</code></pre>
+<pre class="out"><code>請用 uv run python 印出 numpy 的版本</code></pre>
 <p>這次不一樣：agent 要跑 shell 指令，所以會停下來問你。往下看第 4 節。</p>
 <h3>3.3 一個完整的三步任務</h3>
 <p>講師實測 <code>big-pickle</code> 跑一個「讀檔 → 寫檔 → 執行」的三步任務大約 <strong>7.4 秒</strong>。你可以試這個：</p>
-<pre class="cmd"><code>讀 pyproject.toml，在 notes/ 寫一個 環境說明.md 列出這個專案用到的套件，然後用 uv run python -c "import numpy; print(numpy.__version__)" 確認環境能跑</code></pre>
-<p>跑的過程中如果你想停下來：按 <code>Esc</code>。<strong>注意按一次不夠</strong>——底部會從 <code>esc interrupt</code> 變成 <code>esc again to interrupt</code>，要再按一次才真的中斷（實測；如果它正在執行工具，可能要多按幾次）。</p>
+<pre class="cmd" data-lang="text"><code>讀 pyproject.toml，在 notes/ 寫一個 環境說明.md，列出這個專案用到的套件。
+然後執行 uv run python -c "import numpy; print(numpy.__version__)"
+確認環境真的跑得起來。</code></pre>
+<p>跑的過程中如果你想停下來：按 <code>Esc</code>。<strong>注意按一次不夠</strong>。底部會從 <code>esc interrupt</code> 變成 <code>esc again to interrupt</code>，要再按一次才真的中斷（實測；如果它正在執行工具，可能要多按幾次）。</p>
 <h3>3.4 打多行字</h3>
 <p>輸入框裡按 <code>Enter</code> 就送出了。要換行不送出，按 <strong><code>ctrl+j</code></strong>（實測可用）。<code>shift+Enter</code>、<code>alt+Enter</code>、<code>ctrl+Enter</code> 也綁著同樣的功能，但有些終端機吃不到這幾組，<code>ctrl+j</code> 最保險。</p>
 <p>要打很長的一段（例如整段數學推導），用 <code>/editor</code> 或 <code>ctrl+x e</code> 開你平常用的編輯器來寫。</p>
@@ -548,7 +631,7 @@ footer .stamp{
 <h2>4. 權限：agent 要動手之前會先問你</h2>
 <h3>4.1 你會看到什麼</h3>
 <p>你的 <code>opencode.json</code> 裡有這段：</p>
-<pre class="cmd"><code>{
+<pre class="cmd" data-lang="json"><code>{
   "permission": {
     "bash": "ask",
     "edit": "ask",
@@ -557,7 +640,7 @@ footer .stamp{
 }</code></pre>
 <p>意思是：agent 要<strong>跑指令</strong>（bash）、<strong>改檔案</strong>（edit）、<strong>上網抓資料</strong>（webfetch）之前，都要先問你。</p>
 <p>實測畫面（1.18.30）：</p>
-<pre class="cmd"><code>  ┃  △ Permission required
+<pre class="out" style="font-size:0.8rem"><code>  ┃  △ Permission required
   ┃    # Shell command
   ┃
   ┃  $ ls -la
@@ -571,7 +654,7 @@ footer .stamp{
 <p><code>opencode.json</code> 裡每個權限可以設成三個值之一：</p>
 <div class="tw"><table><tr><th>值</th><th>行為</th></tr><tr><td><code>"allow"</code></td><td>不問，直接做</td></tr><tr><td><code>"ask"</code></td><td>跳對話框問你</td></tr><tr><td><code>"deny"</code></td><td>直接擋掉，agent 不能做</td></tr></table></div>
 <p>也可以針對指令樣式分開設定，例如允許 <code>git status</code> 但禁止 <code>rm</code>：</p>
-<pre class="cmd"><code>{
+<pre class="cmd" data-lang="json"><code>{
   "permission": {
     "bash": {
       "*": "ask",
@@ -602,7 +685,7 @@ footer .stamp{
 <li>不相干的舊內容會干擾判斷（例如它以為你還在用 Lab 1 的資料）</li>
 </ul>
 <p>開新 session：</p>
-<pre class="cmd"><code>/new</code></pre>
+<pre class="out"><code>/new</code></pre>
 <p>或按 <code>ctrl+x n</code>。</p>
 <h3>5.3 context 滿了怎麼辦</h3>
 <p>看側邊欄的 <code>% used</code>（或底部的 <code>16.0K (8%)</code>）。判斷方式：</p>
@@ -619,10 +702,10 @@ footer .stamp{
 <p>注意：指令面板裡的 session 相關指令<strong>要先有對話才會出現</strong>。在剛啟動的首頁按 <code>ctrl+p</code> 搜 <code>compact</code> 會顯示 <code>No results found</code>（實測）。</p>
 <p>learnopencode.com 提到對話太長時 opencode 也會自動觸發壓縮（未實測）。</p>
 <h3>5.4 回到舊 session</h3>
-<pre class="cmd"><code>/sessions</code></pre>
+<pre class="out"><code>/sessions</code></pre>
 <p>或按 <code>ctrl+x l</code>。別名 <code>/resume</code>、<code>/continue</code> 也是同一個指令。session 名稱是 opencode 依你第一句話自動取的，會顯示在右上角。</p>
 <p>如果你已經離開 opencode 了，在終端機下：</p>
-<pre class="cmd"><code>opencode        # 進來後用 /sessions 挑
+<pre class="cmd" data-lang="bash"><code>opencode        # 進來後用 /sessions 挑
 opencode -c     # 直接接續上一個 session</code></pre>
 <hr>
 <h2>6. 常用斜線指令速查</h2>
@@ -635,7 +718,7 @@ opencode -c     # 直接接續上一個 session</code></pre>
 <p><code>ctrl+x</code> 是 <strong>leader key</strong>（前置鍵）。用法是：按 <code>ctrl+x</code>，<strong>整個放開</strong>，再按下一個字母。不要一起按。</p>
 <h3>你一定會用到的</h3>
 <div class="tw"><table><tr><th>按鍵</th><th>作用</th><th>來源</th></tr><tr><td><code>Enter</code></td><td>送出訊息</td><td>實測</td></tr><tr><td><code>ctrl+j</code></td><td>輸入框內換行，不送出</td><td>實測</td></tr><tr><td><code>Esc</code></td><td>中斷 agent。<strong>按一次會變成 <code>esc again to interrupt</code>，要再按一次</strong></td><td>實測</td></tr><tr><td><code>ctrl+c</code></td><td>輸入框<strong>有字</strong> → 清空；輸入框<strong>是空的</strong> → 直接關掉 opencode，沒有確認</td><td>實測</td></tr><tr><td><code>↑</code></td><td>輸入框空的時候，叫回你上一句話</td><td>實測</td></tr><tr><td><code>Tab</code></td><td>切換 agent：Build ↔ Plan</td><td>實測</td></tr><tr><td><code>ctrl+p</code></td><td>開指令面板（Commands）</td><td>實測</td></tr><tr><td><code>ctrl+x</code></td><td>leader key</td><td>實測</td></tr></table></div>
-<p>離開 opencode 請打 <code>/exit</code>。不要習慣性連按兩下 <code>ctrl+c</code>——輸入框一空掉，第二下就把程式關了。</p>
+<p>離開 opencode 請打 <code>/exit</code>。不要習慣性連按兩下 <code>ctrl+c</code>，輸入框一空掉，第二下就把程式關了。</p>
 <h3>leader 組合鍵</h3>
 <p>下面這些是在指令面板（<code>ctrl+p</code>）裡<strong>實際看到 opencode 自己標示</strong>的快捷鍵：</p>
 <div class="tw"><table><tr><th>按鍵</th><th>作用</th><th>來源</th></tr><tr><td><code>ctrl+x n</code></td><td>開新 session</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x l</code></td><td>切換 session</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x c</code></td><td>壓縮目前 session</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x u</code></td><td>復原上一則訊息</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x x</code></td><td>匯出對話記錄</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x m</code></td><td>切換模型</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x e</code></td><td>用外部編輯器寫訊息</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x g</code></td><td>跳到某一則訊息</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x s</code></td><td>看狀態</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x t</code></td><td>換主題</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+r</code></td><td>重新命名 session</td><td>實測（面板顯示）</td></tr></table></div>
@@ -653,25 +736,25 @@ opencode -c     # 直接接續上一個 session</code></pre>
 <p><strong>二、1.18.30 預設 keybind 表</strong></p>
 <p>從 <code>1.18.30</code> 執行檔內的預設 keybind 定義讀出（leader key 為 <code>ctrl+x</code>）。標註「二進位預設值（未實測）」的項目屬於此類。</p>
 <p><code>plan</code> agent 的權限與說明來自本機指令：</p>
-<pre class="cmd"><code>opencode debug agent plan
+<pre class="cmd" data-lang="bash"><code>opencode debug agent plan
 opencode agent list
 opencode debug config</code></pre>
 <p><strong>三、官方文件（opencode.ai）</strong></p>
 <ul>
-<li>&lt;https://opencode.ai/docs/tui/&gt; — TUI 斜線指令與快捷鍵清單（其中 <code>/compact</code>、<code>/undo</code>、<code>/redo</code>、<code>/share</code>、<code>/export</code>、<code>/details</code>、<code>/thinking</code> 在 1.18.30 實測不存在）</li>
-<li>&lt;https://opencode.ai/docs/keybinds/&gt; — 預設 keybind 與 leader key</li>
-<li>&lt;https://opencode.ai/docs/permissions/&gt; — <code>allow</code> / <code>ask</code> / <code>deny</code>、樣式比對規則、<code>--auto</code>、對話框三個選項</li>
-<li>&lt;https://opencode.ai/docs/agents/&gt; — build / plan / general / explore / scout 的定位</li>
+<li><a class="ext" href="https://opencode.ai/docs/tui/" target="_blank" rel="noopener">https://opencode.ai/docs/tui/</a> — TUI 斜線指令與快捷鍵清單（其中 <code>/compact</code>、<code>/undo</code>、<code>/redo</code>、<code>/share</code>、<code>/export</code>、<code>/details</code>、<code>/thinking</code> 在 1.18.30 實測不存在）</li>
+<li><a class="ext" href="https://opencode.ai/docs/keybinds/" target="_blank" rel="noopener">https://opencode.ai/docs/keybinds/</a> — 預設 keybind 與 leader key</li>
+<li><a class="ext" href="https://opencode.ai/docs/permissions/" target="_blank" rel="noopener">https://opencode.ai/docs/permissions/</a> — <code>allow</code> / <code>ask</code> / <code>deny</code>、樣式比對規則、<code>--auto</code>、對話框三個選項</li>
+<li><a class="ext" href="https://opencode.ai/docs/agents/" target="_blank" rel="noopener">https://opencode.ai/docs/agents/</a> — build / plan / general / explore / scout 的定位</li>
 </ul>
 <p><strong>四、中文教學站（learnopencode.com）</strong></p>
 <ul>
-<li>&lt;https://learnopencode.com/1-start/&gt; — 第一階段目錄</li>
-<li>&lt;https://learnopencode.com/sitemap.xml&gt; — 全站頁面清單</li>
-<li>&lt;https://learnopencode.com/2-daily/01-interface.html&gt; — 畫面分區、<code>@</code> / <code>!</code> / <code>/</code> 三個開頭字元</li>
-<li>&lt;https://learnopencode.com/2-daily/02-sessions.html&gt; — session 定義、存放位置、自動壓縮、匯入匯出</li>
-<li>&lt;https://learnopencode.com/2-daily/03-shortcuts.html&gt; — 快捷鍵表、leader key「按了要放開」的用法</li>
-<li>&lt;https://learnopencode.com/3-workflow/01-plan-build.html&gt; — Plan / Build 能力對照與建議流程</li>
-<li>&lt;https://learnopencode.com/3-workflow/03-init.html&gt; — <code>/init</code> 掃描專案產生 <code>AGENTS.md</code> 的行為</li>
+<li><a class="ext" href="https://learnopencode.com/1-start/" target="_blank" rel="noopener">https://learnopencode.com/1-start/</a> — 第一階段目錄</li>
+<li><a class="ext" href="https://learnopencode.com/sitemap.xml" target="_blank" rel="noopener">https://learnopencode.com/sitemap.xml</a> — 全站頁面清單</li>
+<li><a class="ext" href="https://learnopencode.com/2-daily/01-interface.html" target="_blank" rel="noopener">https://learnopencode.com/2-daily/01-interface.html</a> — 畫面分區、<code>@</code> / <code>!</code> / <code>/</code> 三個開頭字元</li>
+<li><a class="ext" href="https://learnopencode.com/2-daily/02-sessions.html" target="_blank" rel="noopener">https://learnopencode.com/2-daily/02-sessions.html</a> — session 定義、存放位置、自動壓縮、匯入匯出</li>
+<li><a class="ext" href="https://learnopencode.com/2-daily/03-shortcuts.html" target="_blank" rel="noopener">https://learnopencode.com/2-daily/03-shortcuts.html</a> — 快捷鍵表、leader key「按了要放開」的用法</li>
+<li><a class="ext" href="https://learnopencode.com/3-workflow/01-plan-build.html" target="_blank" rel="noopener">https://learnopencode.com/3-workflow/01-plan-build.html</a> — Plan / Build 能力對照與建議流程</li>
+<li><a class="ext" href="https://learnopencode.com/3-workflow/03-init.html" target="_blank" rel="noopener">https://learnopencode.com/3-workflow/03-init.html</a> — <code>/init</code> 掃描專案產生 <code>AGENTS.md</code> 的行為</li>
 </ul>
 <p><strong>已知的文件與實測衝突</strong></p>
 <p>learnopencode.com 與 opencode.ai/docs 都把 <code>/compact</code>、<code>/undo</code>、<code>/redo</code>、<code>/share</code>、<code>/export</code> 列為斜線指令，但 1.18.30 的 <code>/</code> 清單中不存在這些指令。本章一律<strong>以實測為準</strong>。</p>
