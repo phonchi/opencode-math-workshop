@@ -46,6 +46,54 @@
 </section>
 
 <section>
+<h2>TUI 斜線指令</h2>
+<p>在 opencode 互動畫面裡打 <code>/</code> 會跳出清單。以下是 1.18.30 <strong>實測存在</strong>的全部 17 個。</p>
+<div class="tw"><table>
+<tr><th>指令</th><th>作用</th><th>工作坊會不會用到</th></tr>
+<tr><td><code>/new</code></td><td>開新 session（別名 <code>/clear</code>）</td><td class="ok">會　換題目就用</td></tr>
+<tr><td><code>/sessions</code></td><td>切換 session（別名 <code>/resume</code>、<code>/continue</code>）</td><td class="ok">會　回到舊對話</td></tr>
+<tr><td><code>/diff</code></td><td>開 diff 檢視器</td><td class="ok">會　看它改了哪幾行</td></tr>
+<tr><td><code>/models</code></td><td>切換模型</td><td class="ok">會　確認是 Big Pickle</td></tr>
+<tr><td><code>/editor</code></td><td>開編輯器打長訊息</td><td class="ok">會　貼長指令時</td></tr>
+<tr><td><code>/exit</code></td><td>離開</td><td class="ok">會　請用這個離開</td></tr>
+<tr><td><code>/help</code></td><td>說明</td><td>忘記按鍵時</td></tr>
+<tr><td><code>/agents</code></td><td>切換 agent（Build / Plan）</td><td>按 <code>Tab</code> 更快</td></tr>
+<tr><td><code>/review</code></td><td>讓 agent 檢查改動</td><td>進階</td></tr>
+<tr><td><code>/themes</code></td><td>換配色</td><td>想換再說</td></tr>
+<tr><td><code>/init</code></td><td>引導式建立 AGENTS.md</td><td class="no">不用　已經有了</td></tr>
+<tr><td><code>/connect</code></td><td>連接 provider</td><td class="no">不用　big-pickle 免登入</td></tr>
+<tr><td><code>/mcps</code> <code>/skills</code> <code>/status</code> <code>/debug</code> <code>/move</code></td><td>其他</td><td class="no">不用</td></tr>
+</table></div>
+
+<div class="box warn">
+<div class="bt">官方文件列了、但實測不存在的</div>
+<p style="margin-bottom:0">
+<code>/compact</code>、<code>/undo</code>、<code>/redo</code>、<code>/share</code>、<code>/export</code>
+在 opencode.ai/docs 與坊間教學都還列著，但 <strong>1.18.30 的 <code>/</code> 清單裡沒有</strong>。
+這些功能移到了指令面板：按 <code>ctrl+p</code> 搜尋，或用下面的快捷鍵。
+</p>
+</div>
+
+<h2>常用快捷鍵</h2>
+<div class="tw"><table>
+<tr><th>按鍵</th><th>作用</th></tr>
+<tr><td><code>ctrl+p</code></td><td>開指令面板（找不到斜線指令時來這裡）</td></tr>
+<tr><td><code>ctrl+x c</code></td><td>壓縮 context（取代 <code>/compact</code>）</td></tr>
+<tr><td><code>ctrl+x u</code></td><td>復原（取代 <code>/undo</code>）</td></tr>
+<tr><td><code>ctrl+x x</code></td><td>匯出對話（取代 <code>/export</code>）</td></tr>
+<tr><td><code>ctrl+x l</code></td><td>session 清單</td></tr>
+<tr><td><code>Esc</code>（按兩次以上）</td><td>打斷 agent。第一次只會顯示 <code>esc again to interrupt</code></td></tr>
+<tr><td><code>ctrl+j</code></td><td>訊息內換行（<code>shift+Enter</code> 有些終端機吃不到）</td></tr>
+<tr><td><code>Tab</code></td><td>切換 Build / Plan agent</td></tr>
+<tr><td><code>ctrl+c</code>（輸入框為空時）</td><td><strong>直接離開，沒有確認</strong>。小心誤按</td></tr>
+</table></div>
+<p style="font-size:.88rem;color:var(--ink-3)">
+指令面板裡跟 session 有關的項目<strong>要先有對話才會出現</strong>——
+剛開的空白畫面搜 <code>compact</code> 會顯示 <code>No results found</code>，那是正常的。
+</p>
+</section>
+
+<section>
 <h2>uv</h2>
 <div class="tw"><table>
 <tr><th>指令</th><th>作用</th></tr>
@@ -102,7 +150,13 @@
 <tr><td>agent 開始「修」一個沒壞的程式</td>
     <td>按 <strong>Esc</strong> 打斷它，然後問它一個能戳破錯誤前提的問題。不要放任它亂改。</td></tr>
 <tr><td>回答愈來愈短、開始忘記前面講過的事</td>
-    <td>context 快滿了。用 <code>/compact</code> 壓縮，或開新 session 重講重點。</td></tr>
+    <td>context 快滿了。換題目就 <code>/new</code>；同一題按 <code>ctrl+x c</code> 壓縮（<strong>不是 <code>/compact</code></strong>，1.18.30 沒有那個斜線指令）。壓縮前先把結論寫進 <code>notes/</code>。</td></tr>
+<tr><td><code>/compact</code>、<code>/undo</code>、<code>/share</code>、<code>/export</code> 打了沒反應</td>
+    <td>1.18.30 <strong>沒有</strong>這幾個斜線指令（官方文件與坊間教學都還列著，但實測不存在）。改用 <code>ctrl+x c</code>／<code>ctrl+x u</code>／<code>ctrl+x x</code>，或 <code>ctrl+p</code> 開指令面板搜尋。</td></tr>
+<tr><td>按 <code>Esc</code> 停不下來</td>
+    <td>要按<strong>兩次以上</strong>。第一次只會顯示 <code>esc again to interrupt</code>。</td></tr>
+<tr><td>opencode 突然關掉了</td>
+    <td>輸入框空的時候按 <code>ctrl+c</code> 就是離開，沒有確認。重開後用 <code>opencode -c</code> 接回上一個 session。離開請用 <code>/exit</code>。</td></tr>
 <tr><td><code>ModuleNotFoundError</code></td>
     <td>套件沒裝或沒用 <code>uv run</code>。先跑 <code>uv sync</code>，再確認指令前面有 <code>uv run</code>。</td></tr>
 <tr><td>圖沒出現</td>
