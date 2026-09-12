@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>本地模型｜OpenCode × AI-Math 工作坊</title>
+<meta name="description" content="在自己電腦上跑 Ollama 接 opencode，重點是 context 要在兩個地方各設一次。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* =========================================================================
+   OpenCode × AI-Math 工作坊　設計系統
+   調色盤沿用 selfstudy 系列（暖紙色 / 靛藍 / 赤陶 / 松綠）
+   排版走編輯設計：大字級對比、慷慨留白、細線分隔、克制用色
+   ========================================================================= */
+:root{
+  --paper:#f6f2e9;
+  --paper-2:#fffdf8;
+  --ink:#1b1b2b;
+  --ink-2:#4a4a5e;
+  --ink-3:#7d7a72;
+  --rule:#ded6c6;
+  --rule-2:#ece5d6;
+
+  --live:#b8503c;   /* 現場 */
+  --link:#2a3c78;   /* 連結・標題 */
+  --after:#1a6247;  /* 課後・通過 */
+  --warn:#96660c;   /* 注意 */
+
+  --term-bg:#191922;
+  --term-bar:#23232f;
+  --term-fg:#d8d5cc;
+  --term-dim:#807d8e;
+  --term-user:#e3c273;
+  --term-tool:#77aecb;
+  --term-bash:#8ec392;
+  --term-chat:#a99fd0;
+  --term-err:#dd8877;
+
+  --r-sm:6px; --r-md:10px; --r-lg:16px;
+  --sh-1:0 1px 2px rgba(27,27,43,.04);
+  --sh-2:0 4px 16px rgba(27,27,43,.07);
+  --sh-3:0 14px 40px rgba(27,27,43,.13);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{
+  font-family:'Noto Sans TC',system-ui,sans-serif;
+  background-color:var(--paper);
+  /* 紙張紋理：兩層極淡的徑向漸層，不使用圖檔 */
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(184,80,60,.028), transparent 42%),
+    radial-gradient(circle at 82% 78%, rgba(42,60,120,.030), transparent 46%);
+  background-attachment:fixed;
+  color:var(--ink);
+  font-size:17px;
+  line-height:1.92;
+  letter-spacing:.01em;
+  text-wrap:pretty;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;height:auto;}
+::selection{background:rgba(227,194,115,.42);}
+
+/* ---------------- 導覽列 ---------------- */
+.topnav{
+  position:sticky;top:0;z-index:60;
+  background:rgba(246,242,233,.88);
+  backdrop-filter:saturate(1.5) blur(12px);
+  border-bottom:1px solid var(--rule-2);
+}
+.topnav .inner{
+  max-width:1140px;margin:0 auto;padding:.6rem 2rem;
+  display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;
+}
+.topnav .brand{
+  font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:700;
+  letter-spacing:.08em;color:var(--ink);text-decoration:none;white-space:nowrap;
+}
+.topnav .brand i{font-style:normal;color:var(--live);margin:0 .15em;}
+.topnav nav{display:flex;gap:.05rem;flex-wrap:wrap;margin-left:auto;}
+.topnav nav a{
+  font-size:.78rem;color:var(--ink-3);text-decoration:none;
+  padding:.2rem .6rem;border-radius:var(--r-sm);white-space:nowrap;
+  transition:color .16s var(--ease),background .16s var(--ease);
+}
+.topnav nav a:hover{color:var(--ink);background:rgba(255,253,248,.9);}
+.topnav nav a[aria-current]{color:var(--live);font-weight:700;}
+
+/* ---------------- 版面骨架 ---------------- */
+.container{max-width:1140px;margin:0 auto;padding:4.5rem 2rem;}
+.container.narrow{max-width:780px;}
+section{margin-bottom:4.5rem;}
+section:last-child{margin-bottom:0;}
+
+/* ---------------- 字級階層 ---------------- */
+h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.1rem,5.2vw,3.4rem);
+  line-height:1.28;letter-spacing:-.015em;margin-bottom:1rem;
+}
+h2{
+  font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:clamp(1.45rem,2.6vw,1.85rem);
+  line-height:1.45;letter-spacing:-.01em;
+  margin:4rem 0 1.2rem;padding-top:1.2rem;
+  border-top:1px solid var(--rule);
+  position:relative;
+}
+h2::before{
+  content:"";position:absolute;top:-1px;left:0;width:56px;height:2px;background:var(--live);
+}
+h3{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.16rem;
+  line-height:1.6;margin:2.4rem 0 .7rem;color:var(--link);
+}
+h4{font-size:.98rem;font-weight:700;margin:1.6rem 0 .5rem;color:var(--ink-2);}
+p{margin-bottom:1.15rem;}
+.lead{font-size:1.09rem;line-height:1.95;color:var(--ink-2);}
+ul,ol{margin:0 0 1.2rem 1.5rem;}
+li{margin-bottom:.45rem;}
+li::marker{color:var(--ink-3);}
+a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:.2em;}
+a:hover{color:var(--live);}
+hr{border:0;border-top:1px solid var(--rule);margin:3rem 0;}
+strong{font-weight:700;color:var(--ink);}
+em{font-style:normal;background:linear-gradient(transparent 62%,rgba(227,194,115,.5) 0);}
+code{
+  font-family:'JetBrains Mono',monospace;font-size:.85em;
+  background:rgba(222,214,198,.42);padding:.12em .4em;border-radius:4px;
+  letter-spacing:0;
+  /* 一長串連續的行內 code 會撐破手機版，允許在任何位置斷行 */
+  overflow-wrap:anywhere;word-break:break-word;
+}
+p,li,td,th,h1,h2,h3,h4,dd,dt{overflow-wrap:break-word;}
+
+/* ---------------- Hero ---------------- */
+.hero{
+  background:
+    radial-gradient(ellipse 120% 80% at 78% 8%, rgba(227,194,115,.10), transparent 58%),
+    linear-gradient(152deg,#262636 0%,#16161f 62%,#101018 100%);
+  color:#f4f0e7;padding:6rem 2rem 5rem;position:relative;overflow:hidden;
+}
+.hero .inner{max-width:1140px;margin:0 auto;position:relative;z-index:2;}
+.hero .kicker{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--term-user);
+  margin-bottom:1.3rem;display:flex;align-items:center;gap:.8rem;
+}
+.hero .kicker::after{content:"";flex:1;max-width:180px;height:1px;background:rgba(227,194,115,.3);}
+.hero h1{color:#fff;max-width:18em;margin-bottom:1.2rem;}
+.hero h1 i{font-style:normal;color:var(--term-user);}
+.hero .sub{
+  font-size:1.06rem;line-height:1.9;color:rgba(255,255,255,.74);
+  max-width:38em;margin-bottom:2.6rem;
+}
+.hero .meta{
+  display:flex;gap:3.2rem;flex-wrap:wrap;
+  padding-top:1.6rem;border-top:1px solid rgba(255,255,255,.13);
+}
+.hero .meta div{min-width:0;}
+.hero .meta b{
+  display:block;font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:1.75rem;line-height:1.2;color:#fff;margin-bottom:.25rem;
+}
+.hero .meta span{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(255,255,255,.46);
+}
+.hero-glyph{
+  position:absolute;right:3.5rem;bottom:2.2rem;
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:clamp(5rem,13vw,11rem);line-height:.85;letter-spacing:-.04em;
+  color:transparent;
+  background:linear-gradient(135deg,rgba(227,194,115,.16),rgba(255,255,255,.03) 62%,transparent);
+  -webkit-background-clip:text;background-clip:text;
+  pointer-events:none;user-select:none;white-space:nowrap;
+}
+.hero-glyph::after{
+  content:"";position:absolute;left:.06em;bottom:.14em;width:.52em;height:.075em;
+  background:rgba(227,194,115,.22);animation:blink 1.45s steps(1) infinite;
+}
+@keyframes blink{0%,54%{opacity:1}55%,100%{opacity:0}}
+@media (max-width:900px){.hero-glyph{display:none;}}
+
+/* 章節頁的頁首（比 hero 輕） */
+.pagehead{padding:3.6rem 0 0;}
+.pagehead .kicker{
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:.9rem;
+  display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;
+}
+.pagehead h1{max-width:16em;}
+.pagehead .lead{max-width:34em;margin-top:.6rem;}
+
+/* ---------------- 徽章 ---------------- */
+.badge{
+  display:inline-block;font-family:'JetBrains Mono',monospace;
+  font-size:.64rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:.16rem .62rem;border-radius:999px;border:1px solid currentColor;
+  vertical-align:.16em;white-space:nowrap;line-height:1.6;
+}
+.badge.live{color:var(--live);}
+.badge.after{color:var(--after);}
+.badge.prep{color:var(--warn);}
+
+/* ---------------- 章節卡 ---------------- */
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:1.15rem;}
+.ch-card{
+  display:flex;flex-direction:column;position:relative;
+  background:var(--paper-2);border:1px solid var(--rule-2);border-radius:var(--r-lg);
+  padding:1.5rem 1.55rem 1.25rem;text-decoration:none;color:var(--ink);
+  box-shadow:var(--sh-1);
+  transition:transform .22s var(--ease),box-shadow .22s var(--ease),border-color .22s var(--ease);
+}
+.ch-card:hover{transform:translateY(-4px);border-color:var(--rule);box-shadow:var(--sh-3);}
+.ch-card:hover .arr{transform:translateX(3px);opacity:1;}
+.ch-card .num{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;
+  letter-spacing:.18em;color:var(--ink-3);
+}
+.ch-card h3{font-size:1.2rem;margin:.3rem 0 .5rem;color:var(--ink);}
+.ch-card p{font-size:.875rem;line-height:1.78;color:var(--ink-2);flex:1;margin-bottom:1rem;}
+.ch-card .foot{
+  display:flex;justify-content:space-between;align-items:center;gap:.6rem;
+  padding-top:.7rem;border-top:1px solid var(--rule-2);
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ink-3);
+  letter-spacing:.06em;
+}
+.ch-card .arr{opacity:.45;transition:transform .22s var(--ease),opacity .22s var(--ease);}
+
+/* ---------------- 終端機（本站主角） ---------------- */
+.term{
+  background:var(--term-bg);border-radius:var(--r-md);overflow:hidden;
+  margin:1.7rem 0;box-shadow:var(--sh-3);
+  font-family:'JetBrains Mono',monospace;
+}
+.term-bar{
+  background:var(--term-bar);padding:.55rem .95rem;
+  display:flex;align-items:center;gap:.42rem;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.term-bar .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.term-bar .dot:nth-of-type(1){background:#d9614f;}
+.term-bar .dot:nth-of-type(2){background:#d8a747;}
+.term-bar .dot:nth-of-type(3){background:#66ab68;}
+.term-bar .label{
+  margin-left:.6rem;font-size:.68rem;letter-spacing:.1em;color:var(--term-dim);
+}
+.term-body{
+  padding:1.1rem 1.2rem;font-size:.815rem;line-height:1.85;color:var(--term-fg);
+  overflow-x:auto;white-space:pre-wrap;word-break:break-word;letter-spacing:0;
+}
+.term-body > div{padding:.02rem 0;}
+.term-body .u{color:var(--term-user);}
+.term-body .u::before{content:"> ";color:var(--term-dim);}
+.term-body .t::before{content:"→ ";color:var(--term-dim);}
+.term-body .t{color:var(--term-tool);}
+.term-body .w::before{content:"← ";color:var(--term-dim);}
+.term-body .w{color:var(--term-tool);}
+.term-body .b::before{content:"$ ";color:var(--term-dim);}
+.term-body .b{color:var(--term-bash);}
+.term-body .o{color:var(--term-dim);}
+.term-body .e{color:var(--term-err);}
+.term-body .c{color:var(--term-chat);}
+.term-body .sp{height:.55rem;}
+.term details{margin:.2rem 0;}
+.term summary{
+  color:var(--term-dim);cursor:pointer;font-size:.75rem;list-style:none;
+  user-select:none;letter-spacing:.04em;transition:color .16s var(--ease);
+}
+.term summary::-webkit-details-marker{display:none;}
+.term summary::before{content:"▸  ";}
+.term details[open] summary::before{content:"▾  ";}
+.term summary:hover{color:var(--term-fg);}
+.term details[open] > summary{margin-bottom:.35rem;}
+
+/* ---------------- 程式碼區塊 ---------------- */
+pre{
+  background:var(--term-bg);color:var(--term-fg);border-radius:var(--r-md);
+  padding:1.05rem 1.25rem;overflow-x:auto;margin:1.35rem 0;
+  font-family:'JetBrains Mono',monospace;font-size:.815rem;line-height:1.8;
+  letter-spacing:0;box-shadow:var(--sh-2);
+}
+pre code{background:none;padding:0;font-size:inherit;color:inherit;}
+pre.cmd{position:relative;padding-right:4.2rem;}
+pre .copy{
+  position:absolute;top:.6rem;right:.6rem;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
+  color:var(--term-dim);font-family:inherit;font-size:.66rem;letter-spacing:.06em;
+  padding:.2rem .55rem;border-radius:var(--r-sm);cursor:pointer;
+  transition:background .16s var(--ease),color .16s var(--ease);
+}
+pre .copy:hover{background:rgba(255,255,255,.15);color:#fff;}
+
+/* ---------------- 提示盒 ---------------- */
+.box{
+  border:1px solid var(--rule-2);border-left-width:3px;border-radius:var(--r-md);
+  padding:1.15rem 1.4rem;margin:1.6rem 0;background:var(--paper-2);box-shadow:var(--sh-1);
+}
+.box .bt{
+  font-family:'JetBrains Mono',monospace;font-size:.67rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;margin-bottom:.55rem;
+}
+.box > :last-child{margin-bottom:0;}
+.box.tip{border-left-color:var(--after);}    .box.tip .bt{color:var(--after);}
+.box.warn{border-left-color:var(--warn);background:#fdf9ef;} .box.warn .bt{color:var(--warn);}
+.box.danger{border-left-color:var(--live);background:#fdf3f0;} .box.danger .bt{color:var(--live);}
+.box.math{border-left-color:var(--link);}    .box.math .bt{color:var(--link);}
+
+/* ---------------- 數學式 ---------------- */
+mjx-container[display]{
+  overflow-x:auto;overflow-y:hidden;max-width:100%;
+  padding:.35rem 0 .55rem;
+}
+mjx-container{max-width:100%;}
+
+/* ---------------- 表格 ---------------- */
+.tw{overflow-x:auto;margin:1.6rem 0;border-radius:var(--r-md);box-shadow:var(--sh-1);}
+table{width:100%;border-collapse:collapse;font-size:.87rem;background:var(--paper-2);}
+th{
+  background:rgba(222,214,198,.4);padding:.62rem .9rem;text-align:left;
+  font-weight:700;font-size:.76rem;letter-spacing:.06em;color:var(--ink-2);
+  white-space:nowrap;border-bottom:1px solid var(--rule);
+}
+td{padding:.58rem .9rem;border-bottom:1px solid var(--rule-2);vertical-align:top;line-height:1.72;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(222,214,198,.16);}
+td code{white-space:nowrap;}
+.ok{color:var(--after);font-weight:700;}
+.no{color:var(--live);font-weight:700;}
+
+/* ---------------- 檢查清單 ---------------- */
+.ckl{list-style:none;margin:1.5rem 0;padding:0;}
+.ckl li{
+  background:var(--paper-2);border:1px solid var(--rule-2);border-radius:var(--r-md);
+  margin-bottom:.55rem;padding:.85rem 1.1rem;display:flex;gap:.85rem;align-items:flex-start;
+  box-shadow:var(--sh-1);transition:opacity .2s var(--ease),background .2s var(--ease);
+}
+.ckl input{
+  margin-top:.44rem;width:1.05rem;height:1.05rem;accent-color:var(--after);
+  cursor:pointer;flex-shrink:0;
+}
+.ckl label{cursor:pointer;font-size:.91rem;line-height:1.78;}
+.ckl li:has(input:checked){opacity:.46;background:rgba(222,214,198,.22);}
+.ckl li:has(input:checked) label{text-decoration:line-through;}
+
+/* ---------------- 編號步驟 ---------------- */
+.step{
+  position:relative;padding-left:3.2rem;margin-bottom:2.6rem;
+}
+.step::before{
+  content:attr(data-n);position:absolute;left:0;top:.05rem;
+  width:2.1rem;height:2.1rem;border-radius:50%;
+  background:var(--paper-2);border:1px solid var(--rule);color:var(--link);
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-1);
+}
+.step > h3:first-child{margin-top:.1rem;}
+
+/* ---------------- 時程表 ---------------- */
+.sched{width:100%;border-collapse:collapse;font-size:.9rem;}
+.sched td{padding:.7rem .3rem;border-bottom:1px solid var(--rule-2);vertical-align:baseline;}
+.sched tr:last-child td{border-bottom:none;}
+.sched .t{
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--ink-3);
+  white-space:nowrap;width:5.5rem;letter-spacing:.04em;
+}
+.sched .n{font-weight:700;}
+.sched .d{color:var(--ink-2);font-size:.86rem;}
+
+/* ---------------- 頁尾導覽 ---------------- */
+.pager{display:flex;gap:1rem;margin:4.5rem 0 0;flex-wrap:wrap;}
+.pager a{
+  flex:1;min-width:230px;background:var(--paper-2);border:1px solid var(--rule-2);
+  border-radius:var(--r-md);padding:1rem 1.25rem;text-decoration:none;color:var(--ink);
+  box-shadow:var(--sh-1);transition:border-color .2s var(--ease),box-shadow .2s var(--ease);
+}
+.pager a:hover{border-color:var(--rule);box-shadow:var(--sh-2);}
+.pager .d{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.pager .t2{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--link);font-size:1.02rem;}
+.pager .next{text-align:right;}
+
+footer{
+  border-top:1px solid var(--rule);margin-top:5rem;
+  padding:2.6rem 2rem 3.2rem;text-align:center;font-size:.82rem;color:var(--ink-3);
+}
+footer .stamp{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.06em;
+  margin-top:.6rem;color:var(--rule);color:#a49e92;
+}
+
+@media (max-width:720px){
+  body{font-size:16px;line-height:1.88;}
+  .container{padding:2.8rem 1.25rem;}
+  .hero{padding:3.6rem 1.25rem 3rem;}
+  .hero .meta{gap:1.8rem;}
+  .hero .meta b{font-size:1.4rem;}
+  .term-body,pre{font-size:.755rem;}
+  .topnav .inner{padding:.5rem 1.25rem;}
+  .topnav nav{
+    width:100%;margin-left:0;gap:0;flex-wrap:nowrap;
+    overflow-x:auto;scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);
+            mask-image:linear-gradient(90deg,#000 88%,transparent);
+  }
+  .topnav nav::-webkit-scrollbar{display:none;}
+  .topnav nav a{padding:.2rem .55rem;}
+  .step{padding-left:2.6rem;}
+  h2{margin-top:3rem;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+  html{scroll-behavior:auto;}
+}
+@media print{
+  .topnav,.pager,pre .copy{display:none;}
+  body{background:#fff;}
+}
+</style>
+</head>
+<body>
+
+<div class="topnav"><div class="inner">
+<a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
+<nav>
+<a href="prep.html">課前準備</a>
+<a href="first-run.html">第一次對話</a>
+<a href="lab1-cluster.html">Lab 1</a>
+<a href="lab2-pca.html">Lab 2</a>
+<a href="lab3-notes.html">Lab 3</a>
+<a href="local-models.html">本地模型</a>
+<a href="agents-md.html">AGENTS.md</a>
+<a href="git-safety.html">git</a>
+<a href="mcp-skills.html">MCP</a>
+<a href="cheatsheet.html">速查</a>
+</nav>
+</div></div>
+
+<div class="container narrow">
+
+<div class="pagehead">
+  <div class="kicker"><span>05</span><span>·</span><span class="badge after">課後延伸</span></div>
+  <h1>在自己電腦上跑本地模型</h1>
+</div>
+
+<p>工作坊主線用的是 <code>opencode/big-pickle</code>，免登入、不用設定、速度夠快。這一章講的是另一條路： 把模型放在自己的筆電上跑。<strong>這不是必修</strong>，做不做都不影響你的作業。</p>
+<p>先把話講在前面：<strong>對大多數人的筆電來說，本地模型的體驗會明顯比雲端差。</strong> 慢、比較笨、比較容易亂來，而且要花時間調設定。這一章不是要推銷本地模型， 是要讓你在「真的需要」的時候知道怎麼做，以及知道什麼時候不該做。</p>
+<hr>
+<h2>什麼時候才真的需要本地模型</h2>
+<div class="tw"><table><tr><th>本地模型的好處</th><th>代價</th></tr><tr><td><strong>隱私</strong>：程式碼與資料不離開你的電腦</td><td><strong>慢</strong>：沒有獨顯的筆電，回一段話可能要等好幾十秒</td></tr><tr><td><strong>離線</strong>：沒網路也能用（飛機上、網路爛的地方）</td><td><strong>笨</strong>：2B–9B 的小模型跟雲端大模型不是同一個量級</td></tr><tr><td><strong>沒有配額</strong>：想跑多少跑多少，不會被限流</td><td><strong>耗電發燙</strong>：筆電風扇會全速轉，電池撐不久</td></tr><tr><td><strong>可以隨便實驗</strong>：換模型、改參數、看 log</td><td><strong>要調設定</strong>：不設定的話，預設值幾乎一定不能用（見下面最長的那一節）</td></tr></table></div>
+<h3>誠實的建議</h3>
+<ul>
+<li><strong>只是想把工作坊的三個 lab 做完</strong> → 用 <code>opencode/big-pickle</code> 就好，別折騰。</li>
+<li><strong>修課報告裡要處理不能外流的資料</strong> → 本地模型是對的選擇。</li>
+<li><strong>想搞懂 agent 到底怎麼運作</strong> → 值得做一次。本地跑的時候你看得到 log、</li>
+</ul>
+<p>看得到 context 被截掉、看得到模型亂叫工具，這些在雲端是看不到的。 這一章最大的價值其實在這裡。</p>
+<ul>
+<li><strong>筆電 8GB RAM 又沒獨顯</strong> → 可以裝起來玩，但<strong>不要期待它能完成 lab</strong>。</li>
+</ul>
+<p>把它當成「觀察 agent 失敗的實驗室」，比當成生產工具實際得多。</p>
+<hr>
+<h2>你的機器跑得動嗎</h2>
+<p>判斷標準只有一個數字：<strong>模型檔案 + KV cache 能不能塞進記憶體</strong>。</p>
+<ul>
+<li>有獨顯（NVIDIA/AMD）→ 看 <strong>VRAM</strong>（顯示卡自己的記憶體）。</li>
+<li>Mac（M 系列）→ 看<strong>整機統一記憶體（unified memory）</strong>，Ollama 會把它當 VRAM 用。</li>
+<li>沒獨顯的 Windows/Linux 筆電 → 看 <strong>RAM</strong>，而且要扣掉作業系統和瀏覽器吃掉的部分</li>
+</ul>
+<p>（實務上 OS + 瀏覽器就要 3–4GB，8GB 機器真正能給模型的大概只剩 4GB）。</p>
+<h3>分層建議</h3>
+<div class="tw"><table><tr><th>你的機器</th><th>建議模型（含 quantization）</th><th>檔案大小</th><th>實際能開的 context</th><th>預期體感</th></tr><tr><td>8GB RAM，無獨顯</td><td><code>qwen3.5:2b-q4_K_M</code></td><td>1.9GB</td><td>8k–16k</td><td>很慢，勉強能動（未實測）</td></tr><tr><td>8GB RAM，無獨顯</td><td><code>llama3.2:3b-instruct-q4_K_M</code></td><td>2.0GB</td><td>8k–16k</td><td>很慢（未實測）</td></tr><tr><td>8GB RAM，無獨顯</td><td><code>granite4.1:3b-q4_K_M</code></td><td>2.1GB</td><td>8k–16k</td><td>很慢（未實測）</td></tr><tr><td>16GB RAM，無獨顯</td><td><code>qwen3.5:4b-q4_K_M</code></td><td>3.4GB</td><td>16k–32k</td><td>慢但可用（未實測）</td></tr><tr><td>16GB RAM，無獨顯</td><td><code>granite4.1:8b-q4_K_M</code></td><td>5.3GB</td><td>16k–32k</td><td>慢（未實測）</td></tr><tr><td>8GB VRAM 獨顯</td><td><code>qwen3.5:4b-q4_K_M</code></td><td>3.4GB</td><td>32k</td><td>順（未實測）</td></tr><tr><td>8GB VRAM 獨顯</td><td><code>granite4.1:8b-q4_K_M</code></td><td>5.3GB</td><td>16k–32k</td><td>普通（未實測）</td></tr><tr><td>12GB VRAM 獨顯</td><td><code>qwen3.5:9b-q4_K_M</code></td><td>6.6GB</td><td>32k</td><td>順（本機實測）</td></tr><tr><td>16GB 以上 Mac</td><td><code>qwen3.5:4b-q4_K_M</code> 或 <code>9b-q4_K_M</code></td><td>3.4 / 6.6GB</td><td>16k–32k</td><td>普通（未實測）</td></tr></table></div>
+<p>標「未實測」的是我沒有那台機器可以驗證的，只有 12GB VRAM 那一列是下面實測數據的來源。</p>
+<h3>記憶體怎麼估</h3>
+<p>粗略公式：</p>
+<pre class="cmd"><code>模型權重（GB） ≈ 參數量（B） × quantization 位元數 ÷ 8</code></pre>
+<p><code>q4_K_M</code> 大約是 4.5 bits/參數（不是剛好 4，因為有些層保留較高精度）。所以：</p>
+<ul>
+<li>9B 參數 × 4.5 ÷ 8 ≈ <strong>5.1GB</strong> → 實際檔案 6.6GB（還有 embedding 等其他東西）</li>
+<li>4B 參數 × 4.5 ÷ 8 ≈ <strong>2.3GB</strong> → 實際檔案 3.4GB</li>
+</ul>
+<p><strong>但檔案大小不等於執行時吃的記憶體</strong>，還要加上 KV cache。KV cache 會隨 context 線性長大， 這是下面那一節的重點。本機 <code>qwen3.5:9b-q4_K_M</code>（檔案 6.6GB）實測：</p>
+<div class="tw"><table><tr><th>context</th><th>實際佔用（<code>ollama ps</code> 的 SIZE）</th><th>放在哪</th></tr><tr><td>4096（預設）</td><td>8.6 GB</td><td>100% GPU</td></tr><tr><td>16384</td><td>9.2 GB</td><td>100% GPU</td></tr><tr><td>32768</td><td>9.9 GB</td><td>100% GPU</td></tr><tr><td>65536</td><td>11 GB</td><td>22% CPU / 78% GPU ← <strong>溢出到 CPU，速度大跌</strong></td></tr></table></div>
+<p>看最後一列：在 12GB 的卡上把 context 開到 64k，模型就塞不下，一部分被推到 CPU 跑。 <strong>不是開越大越好。</strong></p>
+<hr>
+<h2>安裝 Ollama</h2>
+<p>Ollama 是負責「把模型載入記憶體、提供一個本機 API」的程式。opencode 只是它的客戶端。</p>
+<h3>macOS</h3>
+<p>到 &lt;https://ollama.com/download&gt; 下載 .dmg，拖進 Applications。裝完會有一個選單列圖示。</p>
+<h3>Windows</h3>
+<p>到 &lt;https://ollama.com/download&gt; 下載安裝檔，一路下一步。裝完會常駐在系統列。</p>
+<div class="box tip"><p>如果你用 WSL2 寫作業：<strong>建議把 Ollama 裝在 WSL 裡面</strong>（用下面的 Linux 步驟）， 不要裝 Windows 版再跨過去連，這樣網路位址和 GPU 都比較單純。</p></div>
+<h3>Linux（含 WSL2）</h3>
+<pre class="cmd"><code>curl -fsSL https://ollama.com/install.sh | sh</code></pre>
+<p>安裝腳本會建立並啟動一個 systemd service。確認它在跑：</p>
+<pre class="cmd"><code>systemctl status ollama
+curl http://localhost:11434/api/version</code></pre>
+<p>應該會看到類似 <code>{"version":"0.21.2"}</code>。</p>
+<h3>抓第一個模型</h3>
+<pre class="cmd"><code>ollama pull qwen3.5:4b-q4_K_M     # 依你上面那張表挑一個
+ollama list                        # 看有哪些模型
+ollama run qwen3.5:4b-q4_K_M       # 聊天測試，打 /bye 離開</code></pre>
+<hr>
+<h2>挑模型：tool calling 是硬門檻</h2>
+<p><strong>agent 的本質就是「模型呼叫工具」。</strong> 不支援 tool calling（又叫 function calling）的模型， 在 opencode 裡<strong>完全不能用</strong>——不是「效果差一點」，是連第一步都走不到。</p>
+<p>這是初學者最容易踩的坑：看到一個模型很小、跑得動、聊天也正常，就以為可以用， 結果接到 opencode 就直接壞掉。</p>
+<h3>怎麼檢查</h3>
+<p><strong>一行指令搞定</strong>，看 <code>Capabilities</code> 有沒有 <code>tools</code>：</p>
+<pre class="cmd"><code>ollama show qwen3.5:9b-q4_K_M</code></pre>
+<p>本機輸出（節錄）：</p>
+<pre class="cmd"><code>  Model
+    architecture        qwen35
+    parameters          9.7B
+    context length      262144
+    quantization        Q4_K_M
+
+  Capabilities
+    completion
+    vision
+    tools          ← 有這行才能用
+    thinking</code></pre>
+<p>對照組，<code>gemma3:1b</code>：</p>
+<pre class="cmd"><code>  Capabilities
+    completion     ← 只有這個，沒有 tools</code></pre>
+<h3>如果硬用不支援的模型會怎樣</h3>
+<p>實測：對 <code>gemma3:1b</code> 發一個帶 <code>tools</code> 的請求，Ollama 直接回錯誤，模型根本不會被呼叫：</p>
+<pre class="cmd"><code>{"error":{"message":"registry.ollama.ai/library/gemma3:1b does not support tools",
+          "type":"invalid_request_error"}}</code></pre>
+<p>在 opencode 裡你會看到請求失敗、對話卡住。<strong>這不是設定問題，是模型選錯了，換一個就好。</strong></p>
+<h3>已知不支援 tool calling 的常見小模型</h3>
+<p>以下都是 Ollama library 上該模型頁面<strong>沒有</strong> <code>tools</code> capability 標籤的（2026-09 查）：</p>
+<div class="tw"><table><tr><th>模型</th><th>有的 capability</th><th>備註</th></tr><tr><td><code>gemma3</code>（270m / 1b / 4b / 12b / 27b）</td><td>vision</td><td>很多教學推薦它，但<strong>不能拿來做 agent</strong></td></tr><tr><td><code>gemma3n</code>（e2b / e4b）</td><td>只有 text</td><td></td></tr><tr><td><code>gemma2</code>（2b / 9b）</td><td>無</td><td></td></tr><tr><td><code>codegemma</code>（2b / 7b）</td><td>無</td><td>名字有 code，一樣不能做 agent</td></tr><tr><td><code>phi3</code>（3.8b）</td><td>無</td><td>但 <code>phi4-mini</code> 有 tools</td></tr><tr><td><code>tinyllama</code>（1.1b）</td><td>無</td><td></td></tr><tr><td><code>smollm</code>（135m / 360m / 1.7b）</td><td>無</td><td>但 <code>smollm2</code> 有 tools</td></tr><tr><td><code>falcon3</code></td><td>無</td><td></td></tr><tr><td><code>starcoder2</code></td><td>無</td><td>是 completion 模型，不是 chat/agent 模型</td></tr></table></div>
+<div class="box tip"><p>注意 Gemma 家族的分歧：<code>gemma2</code> / <code>gemma3</code> / <code>gemma3n</code> / <code>codegemma</code> <strong>都沒有</strong> tools， 但 <code>gemma4</code>（12b / 26b / 31b）<strong>有</strong> tools。看版本號不能判斷，一定要 <code>ollama show</code> 確認。</p></div>
+<h3>已知支援 tool calling 的小模型</h3>
+<div class="tw"><table><tr><th>模型</th><th>可選大小</th><th>備註</th></tr><tr><td><code>qwen3.5</code></td><td>0.8b / 2b / 4b / 9b / 27b / 35b / 122b</td><td>tools + vision + thinking，原生 context 256K</td></tr><tr><td><code>granite4.1</code></td><td>3b / 8b / 30b</td><td>IBM，Apache 2.0，明講支援 tool use 與 JSON 輸出，128K context</td></tr><tr><td><code>llama3.2</code></td><td>1b / 3b</td><td>128K context</td></tr><tr><td><code>qwen3</code></td><td>0.6b / 1.7b / 4b / 8b</td><td>tools + thinking</td></tr><tr><td><code>qwen2.5</code> / <code>qwen2.5-coder</code></td><td>0.5b / 1.5b / 3b / 7b</td><td>較舊但穩定</td></tr><tr><td><code>phi4-mini</code></td><td>3.8b</td><td></td></tr><tr><td><code>ministral-3</code></td><td>3b / 8b / 14b</td><td>tools + vision</td></tr><tr><td><code>smollm2</code></td><td>135m / 360m / 1.7b</td><td>有 tools 標籤，但<strong>這個尺寸做 agent 實務上不會成功</strong>，別浪費時間</td></tr></table></div>
+<p><strong>實務建議</strong>：跑得動的前提下，<strong>選最大的那個</strong>。小模型省下來的記憶體， 遠遠補不回它在工具呼叫上犯的錯。</p>
+<hr>
+<h2>最重要的一節：context 要設兩次</h2>
+<p>這一節是整章的重點。<strong>只設一邊完全沒有用</strong>，而且失敗的方式是「安靜地壞掉」—— 不會報錯，只會讓模型看起來很笨。</p>
+<h3>為什麼是兩個地方</h3>
+<p>opencode 透過 <strong>OpenAI 相容端點</strong>（<code>http://localhost:11434/v1</code>）跟 Ollama 講話。 這個協定裡<strong>沒有</strong>「context 要多大」這個欄位。所以：</p>
+<pre class="cmd"><code>┌──────────────────────┐                    ┌──────────────────────┐
+│  opencode            │   POST /v1/chat/   │  Ollama              │
+│                      │   completions      │                      │
+│  limit.context       │ ────────────────&gt; │  num_ctx             │
+│  ＝我「以為」模型     │   （請求裡帶不了    │  ＝模型「實際」      │
+│    能吃多少 token     │     context 大小） │    能吃多少 token    │
+└──────────────────────┘                    └──────────────────────┘
+        設定 A                                      設定 B
+   決定何時壓縮對話                            決定超過就截斷</code></pre>
+<ul>
+<li><strong>設定 B（Ollama 的 <code>num_ctx</code>）</strong> 決定模型真正看得到多少。超過就<strong>直接把前面砍掉</strong>。</li>
+<li><strong>設定 A（opencode 的 <code>limit.context</code>）</strong> 決定 opencode 什麼時候該壓縮／摘要對話。</li>
+</ul>
+<p>opencode 沒辦法問 Ollama「你的 context 多大」，只能相信你在設定檔裡寫的數字。</p>
+<p><strong>實測證明這兩者互不相通</strong>：我在 <code>/v1/chat/completions</code> 請求裡同時塞了 <code>"num_ctx": 32768</code> 和 <code>"options": {"num_ctx": 32768}</code>，然後看 <code>ollama ps</code>：</p>
+<pre class="cmd"><code>NAME                 ID              SIZE      PROCESSOR    CONTEXT    UNTIL
+qwen3.5:9b-q4_K_M    6488c96fa5fa    8.6 GB    100% GPU     4096       4 minutes from now
+                                                            ^^^^ 還是 4096，請求裡的設定被忽略</code></pre>
+<p>所以：<strong>你在 opencode 那邊怎麼寫，都不會改變 Ollama 的 num_ctx。</strong> 必須分開設。</p>
+<h3>預設值是多少（這裡有陷阱）</h3>
+<p>較新版本的 Ollama <strong>不是固定 4096</strong>，而是<strong>開機時依可用 VRAM 自動決定</strong>：</p>
+<div class="tw"><table><tr><th>可用 VRAM</th><th>預設 context</th></tr><tr><td>小於 24 GiB</td><td><strong>4k</strong></td></tr><tr><td>24–48 GiB</td><td>32k</td></tr><tr><td>48 GiB 以上</td><td>256k</td></tr></table></div>
+<p>本機（RTX 5070 12GB）啟動時的 log，可以直接看到這個判斷：</p>
+<pre class="cmd"><code>level=INFO source=routes.go:1860 msg="vram-based default context"
+    total_vram="11.9 GiB" default_num_ctx=4096</code></pre>
+<p><strong>注意這個門檻有多高</strong>：24 GiB。RTX 4090 是 24GB、RTX 5070 是 12GB、 M2 MacBook Air 是 8 或 16GB——<strong>幾乎所有學生的機器都落在第一層，也就是 4k</strong>。 「我沒改過設定所以應該是預設的最佳值」這個想法在這裡是錯的。</p>
+<div class="box tip"><p>Ollama 的 FAQ 頁面目前還寫著「預設 4096」，跟 context-length 那一頁的分層說明不一致。 以 context-length 頁與你自己機器的 log 為準。</p></div>
+<h3>4k 為什麼對 agent 完全不夠</h3>
+<p>一般聊天 4k 綽綽有餘。但 agent 的 context 裡塞的是：</p>
+<div class="tw"><table><tr><th>內容</th><th>大約 token 數</th></tr><tr><td>系統提示（agent 的行為規則）</td><td>1k–3k</td></tr><tr><td>工具定義（read / write / bash / glob / grep… 的 JSON schema）</td><td>2k–5k</td></tr><tr><td><code>AGENTS.md</code> 專案規則</td><td>0.5k–2k</td></tr><tr><td>讀進來的檔案內容</td><td>每個檔案 0.5k–5k</td></tr><tr><td>到目前為止的對話與工具輸出</td><td>持續累積</td></tr></table></div>
+<p><strong>光是系統提示加工具定義就可能超過 4k。</strong> 也就是說，在預設設定下， 模型有可能在「還沒看到你第一句話」之前，context 就已經滿了。</p>
+<h3>設定前 vs 設定後</h3>
+<p>我實測了一次「送超過 4k 的內容給預設設定的模型」，這是 Ollama server 的 log：</p>
+<pre class="cmd"><code>level=WARN source=runner.go:187 msg="truncating input prompt"
+    limit=4096 prompt=10020 keep=4 new=4096</code></pre>
+<p>10020 個 token 進去，<strong>只有 4096 個留下來</strong>。API 回傳的 <code>prompt_eval_count</code> 也確實是 <code>4096</code>。 而且——<strong>呼叫端完全不會收到任何錯誤或警告</strong>。opencode 那邊看起來一切正常。</p>
+<p>被砍掉的是<strong>最前面</strong>的部分，也就是系統提示和工具定義所在的位置。這直接解釋了所有症狀：</p>
+<div class="tw"><table><tr><th>你看到的症狀</th><th>真正的原因</th></tr><tr><td>「一直忘記我前面說什麼」</td><td>對話前半被截斷了</td></tr><tr><td>「亂呼叫不存在的工具，像 <code>execute</code>、<code>shell</code>」</td><td>工具定義被截掉，模型只能用猜的</td></tr><tr><td>「同一件事重複做好幾次」</td><td>它看不到自己剛才已經做過的紀錄</td></tr><tr><td>「不遵守 <code>AGENTS.md</code> 的規則」</td><td><code>AGENTS.md</code> 在 context 最前面，最先被砍</td></tr><tr><td>「講到一半突然變得很笨」</td><td>累積內容剛好越過 4096 這條線</td></tr></table></div>
+<p>對照設定成 32k 之後：同樣的 prompt 完整進去，log 沒有 <code>truncating input prompt</code>， 工具呼叫正常。<strong>這不是「模型變聰明了」，是它終於看得到完整的指令。</strong></p>
+<h3>該設多大</h3>
+<p>兩個官方說法看起來矛盾，其實不衝突：</p>
+<ul>
+<li><strong>Ollama 官方文件</strong>：「需要大量 context 的任務，像是 web search、agents、coding tools，</li>
+</ul>
+<p>應該至少設到 <strong>64000</strong>。」</p>
+<ul>
+<li><strong>opencode 官方文件</strong>：「如果 tool call 表現不好，把 Ollama 的 <code>num_ctx</code> 調大，</li>
+</ul>
+<p><strong>從 16k–32k 開始</strong>。」</p>
+<p>64k 是理想值，16k–32k 是在學生筆電上的現實下限。回頭看前面那張實測表： 12GB 的卡開到 64k 就已經溢出到 CPU 了。所以：</p>
+<div class="tw"><table><tr><th>你的記憶體</th><th>建議 num_ctx</th></tr><tr><td>8GB RAM 無獨顯</td><td>8192，勉強 16384</td></tr><tr><td>16GB RAM 無獨顯</td><td>16384</td></tr><tr><td>8–12GB VRAM</td><td>32768</td></tr><tr><td>24GB 以上 VRAM / 32GB 以上 Mac</td><td>65536</td></tr></table></div>
+<p><strong>從 32768 開始試</strong>，如果 <code>ollama ps</code> 顯示 PROCESSOR 不是 100% GPU（或機器開始瘋狂 swap）， 就往下調。</p>
+<hr>
+<h3>設定 B：Ollama 端的 num_ctx</h3>
+<p>有兩條路，<strong>建議用第二條</strong>。</p>
+<h4>路線一：環境變數 <code>OLLAMA_CONTEXT_LENGTH</code></h4>
+<p>影響這台機器上的<strong>所有</strong>模型。</p>
+<p><strong>Linux / WSL2</strong>（Ollama 由 systemd 管理）：</p>
+<pre class="cmd"><code>sudo systemctl edit ollama</code></pre>
+<p>在編輯器開啟的區塊裡加入：</p>
+<pre class="cmd"><code>[Service]
+Environment="OLLAMA_CONTEXT_LENGTH=32768"</code></pre>
+<p>存檔後重啟：</p>
+<pre class="cmd"><code>sudo systemctl daemon-reload
+sudo systemctl restart ollama</code></pre>
+<p><strong>macOS</strong>（Ollama 是 app，不是 systemd service）：</p>
+<pre class="cmd"><code>launchctl setenv OLLAMA_CONTEXT_LENGTH 32768</code></pre>
+<p>然後從選單列<strong>完全結束 Ollama 再重開</strong>。</p>
+<p><strong>Windows</strong>：</p>
+<p>「設定」→ 搜尋「環境變數」→「編輯系統環境變數」→「環境變數」→ 在「使用者變數」新增 <code>OLLAMA_CONTEXT_LENGTH</code> = <code>32768</code> → 確定 → <strong>從系統列結束 Ollama 再重新啟動</strong>。</p>
+<p><strong>臨時測試用</strong>（任何平台，先關掉常駐的 Ollama）：</p>
+<pre class="cmd"><code>OLLAMA_CONTEXT_LENGTH=32768 ollama serve</code></pre>
+<div class="box tip"><p>Ollama 桌面 app（macOS / Windows）的設定畫面裡也有一個 context length 滑桿， 效果和這個環境變數相同，圖形介面比較好操作。 滑桿和環境變數同時設定時誰優先（未實測）——建議只用一種。</p></div>
+<div class="box tip"><p>有一個會讓人困惑的地方：即使設了環境變數，server 啟動的 log <strong>還是會印</strong> <code>vram-based default context ... default_num_ctx=4096</code>。那行只是在報告「VRAM 推算出來的預設值」， 環境變數會在<strong>載入模型時</strong>覆蓋它。實測 <code>OLLAMA_CONTEXT_LENGTH=16384</code> 的 server， 用 <code>/v1</code> 且不帶任何參數載入模型後，<code>context_length</code> 確實是 <code>16384</code>。以 <code>ollama ps</code> 為準，不要看那行 log。</p></div>
+<h4>路線二：用 Modelfile 做一個固定 num_ctx 的模型（建議）</h4>
+<p>不用動系統服務、不用 sudo、不影響其他模型，而且<strong>透過 <code>/v1</code> 端點也一定生效</strong>—— 這是本機唯一完整驗證過、從頭到尾都對的路線。</p>
+<p>建立一個檔案 <code>Modelfile</code>（沒有副檔名）：</p>
+<pre class="cmd"><code>FROM qwen3.5:9b-q4_K_M
+PARAMETER num_ctx 32768</code></pre>
+<p>建立模型：</p>
+<pre class="cmd"><code>ollama create qwen3.5-32k -f ./Modelfile</code></pre>
+<p>檢查參數有沒有寫進去：</p>
+<pre class="cmd"><code>ollama show --parameters qwen3.5-32k</code></pre>
+<p>本機實際輸出：</p>
+<pre class="cmd"><code>presence_penalty               1.5
+temperature                    1
+top_k                          20
+top_p                          0.95
+num_ctx                        32768     ← 有這行就對了</code></pre>
+<p>對照原本的模型（<code>ollama show --parameters qwen3.5:9b-q4_K_M</code>）<strong>沒有 <code>num_ctx</code> 這一行</strong>， 那就代表它在用預設值。</p>
+<p>這個做法不會複製一份權重，<code>ollama list</code> 裡新模型的 SIZE 和原模型一樣， 磁碟不會多佔 6.6GB。</p>
+<h3>設定 A：opencode 端的 limit.context</h3>
+<p>見下一節的設定檔。<strong>這個數字要和 Ollama 那邊設的一樣。</strong></p>
+<p>兩邊不一致會怎樣，方向不同後果差很多：</p>
+<div class="tw"><table><tr><th>情況</th><th>後果</th></tr><tr><td><code>limit.context</code> <strong>大於</strong> 真實 <code>num_ctx</code></td><td><strong>危險</strong>。opencode 以為還有空間、不壓縮對話，Ollama 安靜地截斷。模型莫名其妙變笨，<strong>完全沒有錯誤訊息</strong></td></tr><tr><td><code>limit.context</code> <strong>小於</strong> 真實 <code>num_ctx</code></td><td>只是浪費。opencode 太早壓縮對話，模型其實吃得下更多</td></tr><tr><td>兩邊相同</td><td>正確</td></tr></table></div>
+<p><strong>寧可設小，不要設大。</strong> 但最好就是設成一樣。</p>
+<hr>
+<h2>接到 opencode</h2>
+<p>在你的專案根目錄建立或修改 <code>opencode.json</code>：</p>
+<pre class="cmd"><code>{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": {
+        "baseURL": "http://localhost:11434/v1"
+      },
+      "models": {
+        "qwen3.5-32k": {
+          "name": "Qwen3.5 9B (local, 32k)",
+          "tool_call": true,
+          "limit": {
+            "context": 32768,
+            "output": 8192
+          }
+        }
+      }
+    }
+  },
+  "model": "ollama/qwen3.5-32k",
+  "permission": {
+    "bash": "ask",
+    "edit": "ask",
+    "webfetch": "ask"
+  },
+  "instructions": ["AGENTS.md"]
+}</code></pre>
+<p>幾個容易搞錯的地方：</p>
+<ul>
+<li><code>"npm": "@ai-sdk/openai-compatible"</code> —— Ollama 走的是 OpenAI 相容協定，這行是官方寫法。</li>
+<li><code>baseURL</code> 結尾<strong>要有 <code>/v1</code></strong>。少了它連不上。</li>
+<li><code>models</code> 底下那個 key（這裡是 <code>qwen3.5-32k</code>）<strong>必須和 <code>ollama list</code> 裡的名字完全一致</strong>，</li>
+</ul>
+<p>這才是真正送給 Ollama 的 model id。旁邊的 <code>"name"</code> 只是給你自己看的顯示名稱。</p>
+<ul>
+<li>頂層 <code>"model"</code> 用 <code>provider/model-id</code> 的格式，也就是 <code>"ollama/qwen3.5-32k"</code>。</li>
+<li><code>limit.context</code> 和 <code>limit.output</code> 都是必填。<code>output</code> 是單次回覆上限，8192 夠用。</li>
+<li><code>tool_call: true</code> 明確告訴 opencode 這個模型會呼叫工具。</li>
+</ul>
+<h3>想保留雲端模型隨時切換</h3>
+<p>把 <code>"model"</code> 留成 <code>"opencode/big-pickle"</code>，需要時在 opencode 裡用 <code>/models</code> 切換， 或在指令列直接指定：</p>
+<pre class="cmd"><code>opencode run -m ollama/qwen3.5-32k "幫我看一下 lab1_cluster.py"</code></pre>
+<hr>
+<h2>驗證有沒有設成功</h2>
+<p><strong>照順序跑，任何一步不對就先別往下走。</strong></p>
+<h3>1. Ollama 活著嗎</h3>
+<pre class="cmd"><code>curl http://localhost:11434/api/version</code></pre>
+<h3>2. 模型支援 tool calling 嗎</h3>
+<pre class="cmd"><code>ollama show qwen3.5-32k | grep -A6 Capabilities</code></pre>
+<p>要看到 <code>tools</code>。沒有的話，換模型，不用再往下。</p>
+<h3>3. Modelfile 的 num_ctx 有寫進去嗎</h3>
+<pre class="cmd"><code>ollama show --parameters qwen3.5-32k | grep num_ctx</code></pre>
+<p>要看到 <code>num_ctx    32768</code>。</p>
+<h3>4. 實際載入後真的是這個 context 嗎（最關鍵的一步）</h3>
+<p>先發一個請求把模型載入記憶體，<strong>注意這個請求故意不帶任何 context 參數</strong>， 就是要驗證設定檔有沒有生效：</p>
+<pre class="cmd"><code>curl -s http://localhost:11434/v1/chat/completions \
+  -H 'Content-Type: application/json' \
+  -d '{"model":"qwen3.5-32k","messages":[{"role":"user","content":"hi"}]}' &gt; /dev/null</code></pre>
+<p>趁模型還在記憶體裡（預設約 4 分鐘）馬上看：</p>
+<pre class="cmd"><code>ollama ps</code></pre>
+<p>本機實際輸出：</p>
+<pre class="cmd"><code>NAME                  ID              SIZE      PROCESSOR    CONTEXT    UNTIL
+qwen3.5-32k:latest    d4eb55d51d55    9.9 GB    100% GPU     32768      4 minutes from now</code></pre>
+<p>三件事要同時對：</p>
+<ul>
+<li><strong>CONTEXT 欄 = 32768</strong>（不是 4096）。是 4096 就代表設定沒生效。</li>
+<li><strong>PROCESSOR = 100% GPU</strong>。出現 <code>xx%/xx% CPU/GPU</code> 表示塞不下、溢出到 CPU 了，</li>
+</ul>
+<p>會非常慢，要把 num_ctx 調小或換小一點的模型。</p>
+<ul>
+<li><strong>SIZE</strong> 就是實際佔用的記憶體，拿它跟你的 VRAM／RAM 比對。</li>
+</ul>
+<h3>5. 模型真的會呼叫工具嗎</h3>
+<p>繞過 opencode 直接測，這樣出問題時才知道是誰的錯：</p>
+<pre class="cmd"><code>curl -s http://localhost:11434/v1/chat/completions \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "model": "qwen3.5-32k",
+    "messages": [{"role":"user","content":"列出目前目錄的檔案"}],
+    "tools": [{
+      "type": "function",
+      "function": {
+        "name": "bash",
+        "description": "Run a shell command",
+        "parameters": {
+          "type": "object",
+          "properties": {"command": {"type": "string"}},
+          "required": ["command"]
+        }
+      }
+    }]
+  }' | python3 -m json.tool | grep -A8 tool_calls</code></pre>
+<p>正常的話會看到類似（本機實測輸出）：</p>
+<pre class="cmd"><code>"tool_calls": [{
+  "id": "call_17khfbth",
+  "type": "function",
+  "function": {"name": "bash", "arguments": "{\"command\":\"ls -la\"}"}
+}]</code></pre>
+<p>如果 <code>tool_calls</code> 是 <code>null</code>，而模型在 <code>content</code> 裡「用文字描述」它要執行 <code>ls -la</code>， 那就是這個模型的 tool calling 能力太弱——換大一點的模型。</p>
+<h3>6. opencode 認得這個模型嗎</h3>
+<p>在放了 <code>opencode.json</code> 的目錄下：</p>
+<pre class="cmd"><code>opencode models ollama</code></pre>
+<p>應該印出 <code>ollama/qwen3.5-32k</code>。沒印出來就是設定檔寫錯或放錯目錄。</p>
+<h3>7. 看 Ollama 的 log 有沒有在截斷</h3>
+<p>跑完一輪真實的 agent 任務後：</p>
+<pre class="cmd"><code># Linux / WSL2
+journalctl -u ollama --since "10 minutes ago" | grep -i truncat
+
+# 手動啟動的 server：直接看終端機輸出</code></pre>
+<p><strong>沒有任何輸出才是對的。</strong> 如果看到：</p>
+<pre class="cmd"><code>level=WARN source=runner.go:187 msg="truncating input prompt" limit=4096 prompt=10020 keep=4 new=4096</code></pre>
+<p>代表 <code>num_ctx</code> 根本沒設成功，回到第 3、4 步。這個 log 是最誠實的證據。</p>
+<hr>
+<h2>為什麼本地小模型常常「不聽話」</h2>
+<p>就算 context 設對了，小模型還是會做出一些雲端大模型不會做的蠢事。這不是你設定錯， 是 2B–9B 模型的能力天花板。認識這些模式，你才知道什麼時候該停止 debug、直接換模型。</p>
+<h3>常見失敗模式</h3>
+<p><strong>一、亂造不存在的工具名稱。</strong> opencode 的內建工具有固定名字：<code>read</code>、<code>write</code>、<code>edit</code>、<code>bash</code>、<code>glob</code>、<code>grep</code>、 <code>apply_patch</code>、<code>todowrite</code>、<code>webfetch</code>、<code>websearch</code>、<code>question</code>、<code>lsp</code>、<code>skill</code>。 小模型常常無視工具定義，自己發明 <code>execute</code>、<code>shell</code>、<code>run</code>、<code>terminal</code>、<code>run_command</code>、 <code>python</code> 這種「看起來很合理」的名字。因為它訓練時看過太多別的 agent 框架， 就直接套用印象中的名字。結果是工具呼叫失敗，agent 卡住或開始重試。</p>
+<p><strong>二、把該呼叫工具的動作變成「把指令印出來」。</strong> 你要它跑測試，它回你：</p>
+<div class="box tip"><p>你可以執行以下指令來跑測試：</p>
+<pre class="cmd"><code>uv run python lab1_cluster.py</code></pre></div>
+<p>它<strong>沒有真的呼叫 <code>bash</code> 工具</strong>，只是輸出了一段文字。這是小模型最常見的退化行為—— 退回成「聊天模型」而不是「agent」。</p>
+<p><strong>三、只做一步就停。</strong> 多步驟任務（讀檔 → 改 → 執行 → 看結果 → 修）常常在第一步之後就宣告完成。</p>
+<p><strong>四、幻覺自己的執行結果。</strong> 最危險的一種：它「假裝」執行過，然後<strong>編造</strong>一段輸出給你看。 這正是工作坊主線 <code>AGENTS.md</code> 裡那條規則要防的：</p>
+<div class="box tip"><p><strong>自己驗證</strong>：寫完數值方法後，必須附一段驗證程式碼，並實際執行、印出比對結果。 不可以只說「應該正確」。</p></div>
+<h3>對策：<code>AGENTS.md</code> 要為小模型加碼</h3>
+<p>雲端模型你只要講原則，小模型<strong>必須把工具名稱明確寫死</strong>。 在專案的 <code>AGENTS.md</code> 裡加一段（只有用本地模型時才需要）：</p>
+<pre class="cmd"><code>## 工具使用規則（本地模型專用）
+
+你只能使用以下工具，名稱必須完全一致：
+read, write, edit, bash, glob, grep, todowrite
+
+不存在的工具名稱包括（絕對不要使用）：
+execute, shell, run, terminal, run_command, python, execute_command
+
+### 重要
+1. 要執行指令時，**呼叫 `bash` 工具**，不要把指令當成文字印出來給我看。
+   「印出指令」不算完成任務。
+2. 每次只做一件事，做完看實際結果，再決定下一步。
+3. 沒有真的呼叫工具就不要報告結果。你不可以編造執行輸出。
+4. 完成多步驟任務前，先用一句話列出你的步驟，然後一步一步做完。</code></pre>
+<p><strong>這種寫法對雲端大模型是囉嗦，對本地小模型是必要的。</strong></p>
+<p>還有兩個實用招數：</p>
+<ul>
+<li><strong>把任務切小。</strong> 不要說「幫我完成 lab1」，要說「讀 <code>lab1_cluster.py</code> 的第 1 到 40 行，</li>
+</ul>
+<p>告訴我 <code>kmeans</code> 函式在做什麼」。小模型的成功率跟任務長度成反比。</p>
+<ul>
+<li><strong>關掉不需要的權限。</strong> <code>opencode.json</code> 裡把 <code>webfetch</code> 設成 <code>"deny"</code>，</li>
+</ul>
+<p>工具清單變短，工具定義佔的 context 變少，模型選錯工具的機會也變少。</p>
+<h3>什麼時候該放棄</h3>
+<p>如果調完 context、寫完 <code>AGENTS.md</code> 約束，模型還是：</p>
+<ul>
+<li>連續三次叫出不存在的工具</li>
+<li>一直用文字描述而不呼叫工具</li>
+<li>讀檔讀到一半就忘記在做什麼</li>
+</ul>
+<p>那就是<strong>模型太小</strong>，不是設定問題。往上換一級（2b → 4b → 9b）， 或這次就用 <code>opencode/big-pickle</code> 把作業做完。<strong>這不是失敗，是正確的工程判斷。</strong></p>
+<hr>
+<h2>卡住了？</h2>
+<div class="tw"><table><tr><th>症狀</th><th>最可能的原因</th><th>怎麼處理</th></tr><tr><td><code>connection refused</code> / opencode 連不上</td><td>Ollama 沒在跑</td><td><code>systemctl status ollama</code>（Linux）或檢查系統列圖示；<code>curl http://localhost:11434/api/version</code></td></tr><tr><td><code>404</code> 或找不到模型</td><td><code>baseURL</code> 少了 <code>/v1</code>，或 <code>models</code> 的 key 跟 <code>ollama list</code> 的名字對不上</td><td>兩邊逐字比對</td></tr><tr><td><code>does not support tools</code></td><td>模型不支援 tool calling</td><td><code>ollama show &lt;模型&gt;</code> 看有沒有 <code>tools</code>；換模型</td></tr><tr><td><code>ollama ps</code> 的 CONTEXT 是 4096</td><td><code>num_ctx</code> 沒設成功</td><td>用 Modelfile 路線重做，再跑一次驗證第 3、4 步</td></tr><tr><td>模型一直忘記前面的事</td><td>context 被截斷</td><td>`journalctl -u ollama \</td><td>grep truncat` 確認；把 num_ctx 調到 16k–32k</td></tr><tr><td>模型叫出 <code>execute</code> / <code>shell</code> 這種工具</td><td>小模型的典型錯誤</td><td>在 <code>AGENTS.md</code> 加工具名稱約束；還是不行就換大一點的模型</td></tr><tr><td>模型只印出指令、不執行</td><td>退化成聊天模式</td><td>同上；並把任務切小</td></tr><tr><td>超級慢，風扇狂轉</td><td>溢出到 CPU 了</td><td><code>ollama ps</code> 看 PROCESSOR 是不是 100% GPU；調小 num_ctx 或換小模型</td></tr><tr><td>開大 context 後反而變慢</td><td>KV cache 塞爆 VRAM</td><td>看前面那張實測表；12GB 卡上 9B 模型的上限大約是 32k</td></tr><tr><td>回答前先吐一長串思考過程</td><td><code>qwen3.5</code> 是 thinking 模型</td><td>思考 token 會吃 context 也吃時間。opencode 預設是否開啟 thinking（未實測），想關掉可換非 thinking 模型如 <code>granite4.1</code></td></tr><tr><td>Mac 上改了環境變數沒反應</td><td>app 沒完全重啟</td><td>從選單列 Quit 再開；或直接用 app 設定裡的 context length 滑桿</td></tr><tr><td>Windows 改了環境變數沒反應</td><td>同上</td><td>從系統列結束 Ollama 再重開</td></tr><tr><td>磁碟快滿了</td><td>模型檔案很大</td><td><code>ollama list</code> 看清單，<code>ollama rm &lt;模型&gt;</code> 刪掉不用的</td></tr></table></div>
+<hr>
+<h2>資料來源</h2>
+<ul>
+<li>Ollama — Context length：&lt;https://docs.ollama.com/context-length&gt;</li>
+<li>Ollama — Context length（GitHub 原始檔）：&lt;https://github.com/ollama/ollama/blob/main/docs/context-length.mdx&gt;</li>
+<li>Ollama — FAQ：&lt;https://docs.ollama.com/faq&gt;</li>
+<li>Ollama — Modelfile 參考：&lt;https://docs.ollama.com/modelfile&gt;</li>
+<li>Ollama — Quickstart：&lt;https://docs.ollama.com/quickstart&gt;</li>
+<li>Ollama — Linux 安裝：&lt;https://docs.ollama.com/linux&gt;</li>
+<li>Ollama — 下載頁：&lt;https://ollama.com/download&gt;</li>
+<li>Ollama — 「New default context lengths will break」issue #14073：&lt;https://github.com/ollama/ollama/issues/14073&gt;</li>
+<li>Ollama library — 支援 tools 的模型：&lt;https://ollama.com/search?c=tools&gt;</li>
+<li>Ollama library — 模型總覽：&lt;https://ollama.com/library&gt;</li>
+<li>Ollama library — qwen3.5：&lt;https://ollama.com/library/qwen3.5&gt;／&lt;https://ollama.com/library/qwen3.5/tags&gt;</li>
+<li>Ollama library — granite4.1：&lt;https://ollama.com/library/granite4.1/tags&gt;</li>
+<li>Ollama library — llama3.2：&lt;https://ollama.com/library/llama3.2/tags&gt;</li>
+<li>Ollama library — gemma3：&lt;https://ollama.com/library/gemma3&gt;</li>
+<li>Ollama library — gemma3n：&lt;https://ollama.com/library/gemma3n&gt;</li>
+<li>opencode — Providers（Ollama 章節）：&lt;https://opencode.ai/docs/providers/&gt;</li>
+<li>opencode — Config：&lt;https://opencode.ai/docs/config/&gt;</li>
+<li>opencode — 設定檔 JSON schema：&lt;https://opencode.ai/config.json&gt;</li>
+</ul>
+<p>本機實測環境：WSL2 Ubuntu 24.04 / Ollama 0.21.2 / opencode 1.18.30 / RTX 5070 12GB / RAM 15GB / 模型 <code>qwen3.5:9b-q4_K_M</code>。 文中所有 <code>ollama ps</code>、<code>ollama show</code>、server log 與 curl 的輸出，都是在這台機器上實際跑出來的。 標註「（未實測）」的部分是我沒有對應硬體可以驗證的推估。查證日期：2026-09-12。</p>
+
+<div class="pager">
+  <a href="lab3-notes.html"><div class="d">上一章</div><div class="t2">← 04 · Lab 3</div></a>
+  <a href="agents-md.html" class="next"><div class="d">下一章</div><div class="t2">06 · AGENTS.md →</div></a>
+</div>
+
+</div>
+
+<footer>
+<div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
+<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+</footer>
+
+<script>
+// 導覽列高亮目前頁面
+(function(){
+  var f=(location.pathname.split('/').pop()||'index.html');
+  document.querySelectorAll('.topnav nav a').forEach(function(a){
+    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+  });
+})();
+
+// 指令複製鈕
+document.querySelectorAll('pre.cmd').forEach(function(pre){
+  var b=document.createElement('button');
+  b.className='copy'; b.type='button'; b.textContent='複製';
+  b.addEventListener('click',function(){
+    var t=pre.querySelector('code');
+    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
+      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
+    },function(){ b.textContent='複製失敗'; });
+  });
+  pre.appendChild(b);
+});
+
+// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
+(function(){
+  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
+  var saved={};
+  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
+    var id=cb.id||('ck'+i); cb.id=id;
+    if(saved[id]) cb.checked=true;
+    cb.addEventListener('change',function(){
+      saved[id]=cb.checked;
+      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+    });
+  });
+})();
+</script>
+
+<script>
+// MathJax 3：啟用 $...$ 行內數學（預設不開）
+window.MathJax={
+  tex:{
+    inlineMath:[['$','$'],['\\(','\\)']],
+    displayMath:[['$$','$$'],['\\[','\\]']],
+    processEscapes:true
+  },
+  options:{
+    skipHtmlTags:['script','noscript','style','textarea','pre','code'],
+    ignoreHtmlClass:'term|tw'
+  },
+  chtml:{ scale:1.02 }
+};
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

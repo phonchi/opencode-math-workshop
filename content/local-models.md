@@ -226,7 +226,7 @@ opencode 透過 **OpenAI 相容端點**（`http://localhost:11434/v1`）跟 Olla
 ┌──────────────────────┐                    ┌──────────────────────┐
 │  opencode            │   POST /v1/chat/   │  Ollama              │
 │                      │   completions      │                      │
-│  limit.context       │ ─────────────────► │  num_ctx             │
+│  limit.context       │ ────────────────> │  num_ctx             │
 │  ＝我「以為」模型     │   （請求裡帶不了    │  ＝模型「實際」      │
 │    能吃多少 token     │     context 大小） │    能吃多少 token    │
 └──────────────────────┘                    └──────────────────────┘
