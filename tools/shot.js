@@ -29,13 +29,14 @@ const pages=process.argv.slice(2).length?process.argv.slice(2)
       const errs=[];
       p.on('console',m=>{if(m.type()==='error')errs.push(m.text());});
       p.on('pageerror',e=>errs.push('pageerror: '+e.message));
+      p.on('requestfailed',r=>errs.push('requestfailed: '+r.url()+' '+r.failure().errorText));
       await p.setViewport({width:w,height:h,deviceScaleFactor:2});
       await p.goto('file://'+file,{waitUntil:'networkidle0',timeout:45000});
-      await new Promise(r=>setTimeout(r,900));   // 等字體
+      await p.evaluate(async()=>{await document.fonts.ready;if(window.MathJax&&MathJax.startup)await MathJax.startup.promise;});
       // 橫向溢出檢查
       const over=await p.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
       if(over>2) problems.push(`[${name}/${tag}] 橫向溢出 ${over}px`);
-      errs.filter(e=>!/favicon|net::ERR/.test(e)).forEach(e=>problems.push(`[${name}/${tag}] console: ${e}`));
+      errs.forEach(e=>problems.push(`[${name}/${tag}] runtime: ${e}`));
       await p.screenshot({path:path.join(OUT,`${name}-${tag}.png`),fullPage:tag==='desktop'});
       await p.close();
     }
@@ -45,4 +46,5 @@ const pages=process.argv.slice(2).length?process.argv.slice(2)
   console.log('\n'+(problems.length?'發現問題：\n'+problems.map(s=>'  '+s).join('\n')
                                    :'無橫向溢出、無 console 錯誤。'));
   console.log('截圖：'+OUT);
+  if(problems.length)process.exitCode=1;
 })().catch(e=>{console.error(e);process.exit(1);});

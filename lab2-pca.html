@@ -502,30 +502,215 @@ footer .stamp{
   .topnav,.pager,pre .copy{display:none;}
   body{background:#fff;}
 }
+/* 共用教材骨架：由 build_site.py 內嵌至每個頁面，離線複製仍保留版面。 */
+:root{--shell-width:1440px;--sidebar-width:232px;--column-gap:32px;--prose-width:46em;}
+.topnav .inner{max-width:var(--shell-width);min-height:60px;}
+.topnav .brand{font-size:.82rem;}
+.topnav nav a{font-size:.82rem;color:var(--ink-2);}
+.site-shell{
+  display:grid;grid-template-columns:var(--sidebar-width) minmax(0,1fr);
+  gap:var(--column-gap);max-width:var(--shell-width);margin:0 auto;padding:0 32px;
+}
+.lesson-sidebar{
+  position:sticky;top:80px;align-self:start;max-height:calc(100dvh - 100px);
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  padding:24px 16px 24px 0;margin-top:16px;border-right:1px solid var(--rule);
+}
+.course-menu{display:none;}
+.course-nav ul{list-style:none;margin:0;padding:0;}
+.course-nav li{margin:0;}
+.nav-group{margin-bottom:22px;}
+.nav-group:last-child{margin-bottom:0;}
+.nav-group-title{font-size:.72rem;font-weight:700;color:var(--ink-3);letter-spacing:.08em;margin:0 0 8px 10px;}
+.chapter-link{
+  display:block;font-size:.86rem;color:var(--ink-2);line-height:1.6;
+  padding:7px 10px;border-radius:var(--r-sm);text-decoration:none;
+}
+.chapter-link:hover{background:var(--paper-2);color:var(--ink);}
+.chapter-link[aria-current="page"]{color:var(--live);font-weight:700;background:rgba(184,80,60,.075);}
+.course-nav .section-nav{border-left:1px solid var(--rule);margin:8px 0 12px 14px;padding-left:8px;}
+.section-nav a{display:block;font-size:.76rem;line-height:1.6;padding:5px 8px;text-decoration:none;color:var(--ink-3);}
+.section-nav a:hover,.section-nav a[aria-current="location"]{color:var(--link);background:rgba(42,60,120,.05);border-radius:4px;}
+.section-nav a[aria-current="location"]{font-weight:700;}
+.lesson-main{min-width:0;padding:16px 0 0;}
+.lesson-main > .container{width:100%;max-width:none;padding:24px 0 0;}
+.lesson-main .pagehead{padding-top:24px;}
+.lesson-main .pagehead h1{max-width:20em;}
+.lesson-main .pagehead .lead{max-width:var(--prose-width);}
+.lesson-main p,.lesson-main ul:not(.ckl),.lesson-main ol{max-width:var(--prose-width);}
+.lesson-main .term-body p,.lesson-main .term-body ul{max-width:none;}
+.lesson-main h2{scroll-margin-top:88px;margin-top:3rem;}
+.lesson-main h3,.lesson-main h4{scroll-margin-top:88px;}
+.lesson-main .hero{border-radius:var(--r-lg);padding:48px 36px 40px;margin-top:24px;}
+.lesson-main .hero .kicker{letter-spacing:.09em;}
+.lesson-main .hero-glyph{right:24px;bottom:24px;opacity:.6;}
+.lesson-main .hero h1{font-size:clamp(2.1rem,3.8vw,3.15rem);}
+.lesson-main .hero .inner{max-width:none;}
+.lesson-main .hero .meta{gap:24px;}
+.lesson-main .ch-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));}
+.lesson-main .step{padding-left:3.2rem;}
+/* 原始輸出保留等寬對齊；寬表格與輸出可在自己的容器捲動。 */
+.lesson-main pre.out{font-size:.875rem!important;}
+.lesson-main pre,.lesson-main .tw{max-width:100%;}
+.lesson-main pre:focus-visible,.lesson-main .tw:focus-visible{outline-offset:4px;}
+.lesson-diagram{margin:28px 0 36px;max-width:100%;}
+.lesson-diagram > svg{display:block;width:100%;height:auto;max-width:100%;}
+.lesson-diagram figcaption{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:.78rem;color:var(--ink-2);margin-top:12px;}
+.lesson-diagram figcaption a{margin-left:auto;white-space:nowrap;}
+.pager{margin-top:40px;}
+.pager a{min-width:min(230px,100%);}
+footer{max-width:var(--shell-width);margin:56px auto 0;}
+.skip-link{position:fixed;left:16px;top:8px;transform:translateY(-160%);padding:8px 16px;background:var(--paper-2);z-index:100;border:2px solid var(--link);border-radius:var(--r-sm);}
+.skip-link:focus{transform:none;}
+:focus-visible{outline:2px solid var(--link);outline-offset:3px;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
+@media(max-width:1100px){
+  .site-shell{display:block;padding:0 24px;}
+  .lesson-sidebar{position:static;margin:20px 0 0;padding:0;border:0;max-height:none;overflow:visible;}
+  .desktop-course-menu{display:none;}
+  .course-menu{display:block;border:1px solid var(--rule);border-radius:var(--r-md);background:var(--paper-2);}
+  .course-menu > summary{padding:12px 16px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--link);}
+  .course-menu .course-nav{padding:16px;border-top:1px solid var(--rule);}
+  .course-menu[open] .course-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;}
+  .lesson-main{padding-top:0;}
+  .lesson-main > .container{padding-top:12px;}
+  .lesson-main .hero{margin-top:24px;}
+}
+@media(max-width:720px){
+  .site-shell{padding:0 20px;}
+  .topnav .inner{padding:8px 20px;min-height:56px;flex-wrap:nowrap;gap:12px;}
+  .topnav .brand{font-size:.72rem;letter-spacing:.02em;}
+  .topnav nav{width:auto;margin-left:auto;overflow:visible;mask-image:none;-webkit-mask-image:none;gap:4px;}
+  .topnav nav a{padding:4px;font-size:.72rem;}
+  .lesson-main .hero{padding:32px 24px;}
+  .lesson-main .pagehead{padding-top:20px;}
+  .lesson-main .hero h1{font-size:2.05rem;}
+  .lesson-main .hero .kicker{font-size:.66rem;}
+  .course-menu[open] .course-nav{display:block;}
+  .lesson-main .step{padding-left:2.6rem;}
+  .lesson-main pre.out{font-size:.8125rem!important;}
+  .lesson-diagram figcaption a{margin-left:0;}
+  .pager{display:block;}
+  .pager a{display:block;margin-bottom:12px;}
+}
+@media print{
+  .lesson-sidebar,.skip-link{display:none;}
+  .site-shell{display:block;max-width:none;padding:0;}
+  .lesson-main{padding:0;}
+  .lesson-main .hero{color:var(--ink);background:none;padding:0;}
+  .lesson-main .hero h1,.lesson-main .hero .sub,.lesson-main .hero .kicker{color:var(--ink);}
+  .lesson-main pre{white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:none;}
+  .lesson-diagram{break-inside:avoid;}
+}
+
 </style>
 </head>
 <body>
-
+<a class="skip-link" href="#main-content">跳到本章內容</a>
 <div class="topnav"><div class="inner">
 <a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
-<nav>
+<nav aria-label="常用入口">
 <a href="prep.html">課前準備</a>
-<a href="first-run.html">第一次對話</a>
-<a href="lab1-cluster.html">Lab 1</a>
-<a href="lab2-pca.html">Lab 2</a>
-<a href="lab3-notes.html">Lab 3</a>
-<a href="local-models.html">本地模型</a>
-<a href="agents-md.html">AGENTS.md</a>
-<a href="git-safety.html">git</a>
-<a href="mcp-skills.html">MCP</a>
-<a href="cheatsheet.html">速查</a>
+<a href="cheatsheet.html">速查表</a>
 </nav>
 </div></div>
 
-<div class="container narrow">
+<div class="site-shell"><aside class="lesson-sidebar" aria-label="教材導覽"><div class="desktop-course-menu"><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html" aria-current="page">Lab 2 · PCA</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#projection-title">先轉一轉：把平面上的點投影到一條線</a></li>
+<li><a href="#section-從投影接到-pca">從投影接到 PCA</a></li>
+<li><a href="#section-動手">動手</a></li>
+<li><a href="#section-但是這組驗證有一個洞">但是這組驗證有一個洞</a></li>
+<li><a href="#section-兩個必須講清楚的但書">兩個必須講清楚的但書</a></li>
+<li><a href="#section-檢查清單">檢查清單</a></li>
+<li><a href="#section-如果還有時間">如果還有時間</a></li>
+</ul>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></div><details class="course-menu"><summary>課程與本章目錄</summary><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html" aria-current="page">Lab 2 · PCA</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#projection-title">先轉一轉：把平面上的點投影到一條線</a></li>
+<li><a href="#section-從投影接到-pca">從投影接到 PCA</a></li>
+<li><a href="#section-動手">動手</a></li>
+<li><a href="#section-但是這組驗證有一個洞">但是這組驗證有一個洞</a></li>
+<li><a href="#section-兩個必須講清楚的但書">兩個必須講清楚的但書</a></li>
+<li><a href="#section-檢查清單">檢查清單</a></li>
+<li><a href="#section-如果還有時間">如果還有時間</a></li>
+</ul>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></details></aside><main id="main-content" class="lesson-main" tabindex="-1"><div class="container narrow">
 
 <div class="pagehead">
-  <div class="kicker"><span>Lab 2</span><span>·</span><span class="badge live">現場 40 分</span><span>·</span><span>agent 當被告</span></div>
+  <div class="kicker"><span>Lab 2</span><span>·</span><span class="badge live">現場 40 分</span><span>·</span><span>用數學檢查結果</span></div>
   <h1>降維：設計一組真的抓得到錯的驗證</h1>
   <p class="lead">
     這一關你要叫 agent 手刻 PCA，然後證明它對不對。聽起來很簡單。
@@ -534,8 +719,93 @@ footer .stamp{
   </p>
 </div>
 
+<section class="pca-explorer" aria-labelledby="projection-title">
+<h2 id="projection-title">先轉一轉：把平面上的點投影到一條線</h2>
+<p>假設每個點代表一筆只有兩個特徵的資料。現在只准用一個數字描述它：把點垂直投影到藍線，記下沿線的位置。<strong>你會把線轉向哪裡，讓投影後的點盡量分散？</strong></p>
+<div class="projection-panel">
+  <div class="projection-controls">
+    <label for="projection-angle">投影方向 <output id="projection-angle-value" for="projection-angle">0.0°</output></label>
+    <input id="projection-angle" type="range" min="0" max="180" step="any" value="0" aria-describedby="projection-help">
+    <div class="projection-actions"><button type="button" id="projection-principal">轉到主成分方向</button><button type="button" id="projection-reset">重設</button></div>
+  </div>
+  <figure>
+    <svg id="projection-plot" viewBox="0 0 680 390" role="img" aria-labelledby="projection-svg-title projection-svg-desc">
+      <title id="projection-svg-title">二維資料與一維投影</title>
+      <desc id="projection-svg-desc">圓點是原始資料，方框是垂直投影到藍線後的位置。轉動藍線，比較投影後的分散程度與點到線的距離。</desc>
+      <g id="projection-grid" stroke="#ded6c6" stroke-width="1"></g>
+      <line x1="36" y1="195" x2="644" y2="195" stroke="#7d7a72"/>
+      <line x1="340" y1="28" x2="340" y2="362" stroke="#7d7a72"/>
+      <line id="projection-axis" stroke="#2a3c78" stroke-width="3"/>
+      <g id="projection-drops" stroke="#7d7a72" stroke-dasharray="4 5" stroke-width="1.5"></g>
+      <g id="projection-originals" fill="#1b1b2b"></g>
+      <g id="projection-projected" fill="#fffdf8" stroke="#b8503c" stroke-width="2"></g>
+    </svg>
+    <figcaption>實心圓：原始資料　空心方框：投影與重建的位置　虛線：重建的偏差</figcaption>
+  </figure>
+  <dl class="projection-readouts">
+    <div><dt>投影變異</dt><dd><output id="projection-variance">—</output></dd></div>
+    <div><dt>平均重建平方距離</dt><dd><output id="projection-error">—</output></dd></div>
+  </dl>
+  <p id="projection-help">拖曳滑桿，也可用鍵盤方向鍵調整。先找出你認為最好的方向，再按「轉到主成分方向」比較。</p>
+</div>
+<p>主成分方向保留最多變異，也讓重建的平方距離總和最小。這裡的「重建」是把線上的位置放回平面：它仍在投影線上，通常不會回到原來的點。</p>
+<details class="bg"><summary>把剛才看到的圖寫成公式</summary><div class="bg-body">
+<p>這組固定點雲的平均為零。令單位方向 $u=(\cos\theta,\sin\theta)^\top$，第 $i$ 點投影的位置是 $z_i=x_i^\top u$，重建為 $\hat x_i=z_i u$。</p>
+<p>上方分別顯示樣本變異 $\sum_i z_i^2/(n-1)$ 與平均平方距離 $\sum_i\|x_i-\hat x_i\|^2/n$。兩者分母不同，不能直接相加；方向最佳化的結論不受這兩個固定分母影響。</p>
+<p>把方向反過來，$u$ 換成 $-u$，投影座標會變號，但重建位置與這兩個指標都不變。稍後比對兩種 PCA 實作時，這點很有用。</p>
+</div></details>
+<noscript><p>此互動需要 JavaScript。也可以用下方公式：沿點雲較長的方向投影，保留的變異較大；垂直偏差較小。</p></noscript>
+</section>
+<style>
+.projection-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
+.projection-controls{display:grid;grid-template-columns:1fr auto;gap:.6rem 1.5rem;align-items:center}
+.projection-controls label{font-weight:600}.projection-controls label output{color:var(--link);font-variant-numeric:tabular-nums;margin-left:.6rem}
+.projection-controls input{grid-column:1;min-width:0;width:100%;accent-color:var(--link);min-height:44px}
+.projection-actions{grid-column:2;grid-row:1 / 3;display:flex;gap:.5rem;flex-wrap:wrap}
+.projection-actions button{font:inherit;font-size:.86rem;min-height:44px;padding:.4rem .8rem;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
+.projection-actions button:hover{border-color:var(--link);color:var(--link)}.projection-actions button:focus-visible,.projection-controls input:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+.projection-panel figure{margin:1rem 0}.projection-panel svg{display:block;width:100%;height:auto}.projection-panel figcaption{font-size:.82rem;color:var(--ink-2);text-align:center}
+.projection-readouts{display:flex;gap:2.5rem;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:1rem}.projection-readouts dt{font-size:.86rem;color:var(--ink-2)}.projection-readouts dd{margin:0;font-size:1.65rem;color:var(--link);font-variant-numeric:tabular-nums}.projection-panel #projection-help{font-size:.86rem;color:var(--ink-2);margin:.8rem 0 0}
+@media(max-width:600px){.projection-controls{display:block}.projection-actions{margin-top:.5rem}.projection-readouts{gap:1.2rem}.projection-panel figcaption{text-align:left}}
+@media print{.projection-controls input,.projection-actions{display:none}}
+</style>
+<script>
+(function(){
+  'use strict';
+  const points=[[-3,-1],[-2.5,-1.6],[-2,-.6],[-1.5,-1.2],[-1,-.2],[-.5,-.8],[.5,.8],[1,.2],[1.5,1.2],[2,.6],[2.5,1.6],[3,1]];
+  const root=document.querySelector('.pca-explorer');
+  const ns='http://www.w3.org/2000/svg';
+  const el=id=>document.getElementById('projection-'+id);
+  const xy=(x,y)=>[340+x*70,195-y*70];
+  function shape(tag,attrs,parent){const node=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))node.setAttribute(k,v);parent.appendChild(node);return node;}
+  for(let x=-4;x<=4;x++){const [px]=xy(x,0);shape('line',{x1:px,y1:30,x2:px,y2:360},el('grid'));}
+  for(let y=-2;y<=2;y++){const [,py]=xy(0,y);shape('line',{x1:40,y1:py,x2:640,y2:py},el('grid'));}
+  const originals=points.map(([x,y])=>{const [cx,cy]=xy(x,y);return shape('circle',{cx,cy,r:5},el('originals'));});
+  const drops=points.map(()=>shape('line',{},el('drops')));
+  const projected=points.map(()=>shape('rect',{width:8,height:8},el('projected')));
+  function draw(){
+    const degrees=Number(el('angle').value),t=degrees*Math.PI/180,ux=Math.cos(t),uy=Math.sin(t);
+    // Intersect the direction with the drawing bounds, preserving the data scale.
+    const length=Math.min(300/Math.max(Math.abs(ux),1e-12),160/Math.max(Math.abs(uy),1e-12));
+    for(const [k,v] of Object.entries({x1:340-length*ux,y1:195+length*uy,x2:340+length*ux,y2:195-length*uy}))el('axis').setAttribute(k,v);
+    let ss=0,error=0;
+    points.forEach(([x,y],i)=>{const z=x*ux+y*uy,rx=z*ux,ry=z*uy;ss+=z*z;error+=(x-rx)**2+(y-ry)**2;const [px,py]=xy(rx,ry),[ox,oy]=xy(x,y);for(const [k,v] of Object.entries({x1:ox,y1:oy,x2:px,y2:py}))drops[i].setAttribute(k,v);projected[i].setAttribute('x',px-4);projected[i].setAttribute('y',py-4);});
+    const variance=ss/(points.length-1),mse=error/points.length;
+    el('angle-value').value=degrees.toFixed(1)+'°';el('variance').value=variance.toFixed(4);el('error').value=mse.toFixed(4);
+    root.dataset.angle=String(degrees);root.dataset.variance=String(variance);root.dataset.error=String(mse);
+    el('angle').setAttribute('aria-valuetext',degrees.toFixed(1)+' 度');
+  }
+  el('angle').addEventListener('input',draw);
+  el('principal').addEventListener('click',()=>{let xx=0,yy=0,xy=0;for(const [x,y]of points){xx+=x*x;yy+=y*y;xy+=x*y;}let angle=Math.atan2(2*xy,xx-yy)*90/Math.PI;if(angle<0)angle+=180;el('angle').value=String(angle);draw();});
+  el('reset').addEventListener('click',()=>{el('angle').value='0';draw();});
+  draw();
+})();
+</script>
+
+
 <section>
-<h2>先講清楚要驗什麼</h2>
+<h2 id="section-從投影接到-pca">從投影接到 PCA</h2>
+<p>剛才是二維變一維；接下來每張手寫數字有 64 個像素，我們要保留 10 個方向。先讀懂「減去平均、找方向、投影」這三步，再讓 agent 寫程式。還沒學過特徵向量也可以先跟著做，下方會補上意義。</p>
 
 <details class="bg"><summary>PCA 在做什麼？為什麼要降維？</summary>
 <div class="bg-body">
@@ -548,9 +818,10 @@ footer .stamp{
 PCA 要做的就是找出那個子空間：在 $\mathbb{R}^{64}$ 裡找 $K$ 個互相正交的方向，
 讓資料投影上去之後<strong>保留最多的變異</strong>。
 </p>
-<h4>好消息：你已經學過需要的全部線代</h4>
+<h4>這裡會用到哪些線性代數概念</h4>
+<p>向量代表一筆資料，矩陣把許多筆資料排在一起。若還沒學到特徵向量，可以先把它理解為：矩陣作用後，只會縮放、不會改變所在直線的方向；縮放倍數就是特徵值。</p>
 <div class="tw"><table>
-<tr><th>PCA 用到的</th><th>你在線代學過的</th></tr>
+<tr><th>PCA 用到的</th><th>對應的線代概念</th></tr>
 <tr><td>共變異數矩陣 $C$</td><td>對稱矩陣</td></tr>
 <tr><td>主成分</td><td>$C$ 的特徵向量</td></tr>
 <tr><td>各主成分的重要性</td><td>對應的特徵值</td></tr>
@@ -558,8 +829,7 @@ PCA 要做的就是找出那個子空間：在 $\mathbb{R}^{64}$ 裡找 $K$ 個�
 <tr><td>投影與重建</td><td>正交投影 $\mathbf{x}\mapsto W^\top W\mathbf{x}$</td></tr>
 </table></div>
 <p style="margin-bottom:0">
-所以這一關<strong>沒有新的數學</strong>。全部都是譜分解（spectral decomposition）
-套在一個特定的矩陣上。真正的新東西是「怎麼驗證別人寫的實作是對的」。
+這些概念不必一次記熟。先掌握 PCA 要保留資料變化最大的方向，再練習「怎麼驗證別人寫的實作」。特徵分解的細節可以配合線性代數課程回來閱讀。
 </p>
 </div>
 </details>
@@ -574,13 +844,13 @@ $$C_{jk}=\frac{1}{n-1}\sum_{i=1}^{n}(x_{ij}-\bar x_j)(x_{ik}-\bar x_k)$$
 <ul>
 <li><strong>對角線</strong> $C_{jj}$：第 $j$ 個像素自己的變異數，也就是它「變化得多劇烈」</li>
 <li><strong>非對角線</strong> $C_{jk}$：第 $j$ 與第 $k$ 個像素<strong>一起變動的程度</strong>。
-    正的代表「一個亮另一個也傾向亮」，負的代表相反，接近 0 代表兩者沒什麼關係</li>
+    正的代表「一個亮另一個也傾向亮」，負的代表相反，接近 0 代表線性共同變動較弱，仍可能有非線性關係</li>
 </ul>
 <h4>為什麼一定要先中心化</h4>
 <p style="margin-bottom:0">
 不減平均的話，$X^\top X$ 量到的是「離<strong>原點</strong>多遠」，
-而不是「離<strong>資料中心</strong>多分散」。第一個主成分會直接指向資料的平均位置，
-完全不是我們要的「變異最大的方向」。這一步漏掉是手刻 PCA 最常見的錯誤之一。
+而不是「離<strong>資料中心</strong>多分散」。資料平均的位置也會影響求出的方向，
+這時找出的就不一定是「相對資料中心，變異最大的方向」。這一步漏掉是手刻 PCA 最常見的錯誤之一。
 </p>
 </div>
 </details>
@@ -595,7 +865,7 @@ $$C_{jk}=\frac{1}{n-1}\sum_{i=1}^{n}(x_{ij}-\bar x_j)(x_{ik}-\bar x_k)$$
 $$\text{第 }j\text{ 個主成分的解釋變異比例}=\frac{\lambda_j}{\sum_{m}\lambda_m}$$
 <p>
 意思是「整體變異裡，有百分之幾是由這個方向貢獻的」。
-本關實測第一個主成分是 <strong>14.89%</strong>，前十個加起來約 <strong>73%</strong>。
+在這份資料中，第一個主成分約占 <strong>14.89%</strong>，前十個加起來約 <strong>73%</strong>。
 換句話說，用 10 個數字就能保留原本 64 個數字約七成三的變異。
 </p>
 <p style="margin-bottom:0">
@@ -632,12 +902,12 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 </div>
 <p>
 一個「正確的 PCA 實作」至少要做對這幾件事：中心化對、分母對、特徵分解對、由大到小排序對、取前 $K$ 個對。
-你的任務是設計檢查，讓<strong>其中任何一項寫錯都會被抓到</strong>。
+你的任務是設計檢查，盡可能抓出這些步驟中的錯誤，並留意每項檢查仍可能漏掉什麼。
 </p>
 </section>
 
 <section>
-<h2>動手</h2>
+<h2 id="section-動手">動手</h2>
 
 <div class="step" data-n="1">
 <h3>要求 agent 手刻</h3>
@@ -658,7 +928,7 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 
 <div class="step" data-n="2">
 <h3>第一個坑：它可能會直接相減</h3>
-<p>多數情況下 agent 會想到比對 <code>components_</code>。執行後你會看到：</p>
+<p>如果 agent 直接逐項比對 <code>components_</code>，可能得到下面的結果。你的模型回覆與末位數字不必完全相同：</p>
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">opencode　build · big-pickle</span></div>
   <div class="term-body"><div class="b">uv run python lab2_pca.py</div>
@@ -671,7 +941,7 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <div class="box danger">
 <div class="bt">這裡不要讓它亂改</div>
 <p style="margin-bottom:0">
-agent 會開始「修」一個其實沒壞的程式。<strong>打斷它</strong>（按 Esc 或 Ctrl+C），
+如果 agent 因此直接修改 PCA 程式，先停下來檢查比較方式。<strong>打斷它</strong>（按 Esc 或 Ctrl+C），
 然後問它一個問題：<br>
 <em>「$v$ 是 $C$ 的特徵向量，那 $-v$ 是不是？如果是，你的比較方法有什麼問題？」</em>
 </p>
@@ -716,7 +986,7 @@ $$\bigl|\cos\theta_i\bigr|=\bigl|\,\mathbf{w}^{\text{manual}}_i\cdot\mathbf{w}^{
 </section>
 
 <section>
-<h2>但是這組驗證有一個洞</h2>
+<h2 id="section-但是這組驗證有一個洞">但是這組驗證有一個洞</h2>
 <p class="lead">
 現在做一件事：<strong>故意把程式寫錯</strong>，把共變異數的分母從 $n-1$ 改成 $n$，然後重跑那四關。
 </p>
@@ -774,13 +1044,13 @@ evals[:10] 應該等於 sklearn 的 pca.explained_variance_。
 <p style="margin-bottom:0">
 設計驗證的時候，該問的不是「我檢查了幾項」，
 而是「<strong>什麼樣的錯誤會從我的檢查縫隙中溜過去</strong>」。
-這個思考方式在寫論文、審稿、做實驗的時候一樣好用。
+以後檢查作業或自己的數學程式，也可以用同樣的方式思考。
 </p>
 </div>
 </section>
 
 <section>
-<h2>兩個必須講清楚的但書</h2>
+<h2 id="section-兩個必須講清楚的但書">兩個必須講清楚的但書</h2>
 
 <h3>但書一：$|\cos|$ 不是永遠有效</h3>
 <p>
@@ -802,7 +1072,7 @@ $|\cos|$ 比對成立的前提是<strong>特徵值單純（沒有重根）且間
 </div>
 <p>
 digits 剛好安全。但如果你之後換一份資料，<strong>務必先檢查這件事</strong>。
-真的碰到重根時，要改成比較整個子空間，例如比投影矩陣 $W^\top W$，或算 principal angles。
+若要處理重複特徵值，應把對應的整個區塊一起比較，例如比較投影矩陣 $W^\top W$。還要確認保留的第 $K$ 與第 $K+1$ 個特徵值有間隔；若剛好從重根區塊中間切開，兩個都最佳的 $K$ 維子空間也可能不同，不能要求投影矩陣相等。
 </p>
 
 <h3>但書二：關卡 4 只是必要條件</h3>
@@ -814,7 +1084,7 @@ $WW^\top\approx I$ 確實不需要對照組，但它只證明「這 $K$ 個向�
 </section>
 
 <section>
-<h2>檢查清單</h2>
+<h2 id="section-檢查清單">檢查清單</h2>
 <ul class="ckl">
 <li><input type="checkbox" id="l2a"><label for="l2a">我的手刻 PCA 只用 numpy，沒有偷呼叫 <code>sklearn.decomposition.PCA</code></label></li>
 <li><input type="checkbox" id="l2b"><label for="l2b">我能解釋為什麼直接比 <code>components_</code> 會得到 0.94 的差</label></li>
@@ -826,7 +1096,7 @@ $WW^\top\approx I$ 確實不需要對照組，但它只證明「這 $K$ 個向�
 </section>
 
 <section>
-<h2>如果還有時間</h2>
+<h2 id="section-如果還有時間">如果還有時間</h2>
 <ul>
 <li>問 agent：<code>pca._fit_svd_solver</code> 是什麼？你會發現預設 <code>auto</code> 在這份資料上選的是 <code>covariance_eigh</code>，跟手刻是同一種演算法。所以這根本不算「兩種演算法交叉驗證」。要真的交叉驗證必須明寫 <code>svd_solver='full'</code>。</li>
 <li>設計一個「取錯順序」的錯誤（取最小的 10 個特徵值），看看五道關卡各自會不會抓到。</li>
@@ -834,54 +1104,121 @@ $WW^\top\approx I$ 確實不需要對照組，但它只證明「這 $K$ 個向�
 </ul>
 </section>
 
-<div class="pager">
-  <a href="lab1-cluster.html"><div class="d">上一章</div><div class="t2">← 02 · Lab 1 · 分群</div></a>
-  <a href="lab3-notes.html" class="next"><div class="d">下一章</div><div class="t2">04 · Lab 3 · 分類與筆記 →</div></a>
-</div>
+
 
 </div>
+<nav class="pager" aria-label="章節順序"><a href="lab1-cluster.html" class="prev"><div class="d">上一章</div><div class="t2">← Lab 1 · 分群</div></a><a href="lab3-notes.html" class="next"><div class="d">下一章</div><div class="t2">Lab 3 · 分類與筆記 →</div></a></nav></main></div>
 
 <footer>
 <div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
-<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+<div class="stamp">讓 agent 動手，讓數學說明結果。</div>
 </footer>
 
 <script>
-// 導覽列高亮目前頁面
+/* Progressive enhancement: navigation and disclosure work without JavaScript. */
 (function(){
-  var f=(location.pathname.split('/').pop()||'index.html');
+  'use strict';
+  var pageName=location.pathname.split('/').pop()||'index.html';
   document.querySelectorAll('.topnav nav a').forEach(function(a){
-    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+    if(a.getAttribute('href')===pageName) a.setAttribute('aria-current','page');
   });
-})();
 
-// 指令複製鈕
-document.querySelectorAll('pre.cmd').forEach(function(pre){
-  var b=document.createElement('button');
-  b.className='copy'; b.type='button'; b.textContent='複製';
-  b.addEventListener('click',function(){
-    var t=pre.querySelector('code');
-    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
-      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
-    },function(){ b.textContent='複製失敗'; });
-  });
-  pre.appendChild(b);
-});
-
-// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
-(function(){
-  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
-  var saved={};
-  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
-  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
-    var id=cb.id||('ck'+i); cb.id=id;
-    if(saved[id]) cb.checked=true;
-    cb.addEventListener('change',function(){
-      saved[id]=cb.checked;
-      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+  var sections=Array.from(document.querySelectorAll('.lesson-main h2[id]'));
+  var sectionLinks=Array.from(document.querySelectorAll('.section-nav a'));
+  var scheduled=false;
+  function markSection(){
+    scheduled=false;
+    var current=sections[0];
+    sections.forEach(function(section){if(section.getBoundingClientRect().top<=145) current=section;});
+    sectionLinks.forEach(function(link){
+      if(current&&link.getAttribute('href')==='#'+current.id) link.setAttribute('aria-current','location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  function scheduleSection(){
+    if(!scheduled){scheduled=true;requestAnimationFrame(markSection);}
+  }
+  window.addEventListener('scroll',scheduleSection,{passive:true});
+  window.addEventListener('resize',scheduleSection);
+  window.addEventListener('hashchange',scheduleSection);
+  markSection();
+  document.querySelectorAll('.course-menu .section-nav a').forEach(function(link){
+    link.addEventListener('click',function(){
+      link.closest('details').open=false;
+      // Closing the menu moves the heading; resolve the anchor after that reflow.
+      var id=link.getAttribute('href').slice(1),target=document.getElementById(id);
+      if(target){
+        requestAnimationFrame(function(){
+          var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({top:window.scrollY+target.getBoundingClientRect().top-88,behavior:reduced?'auto':'smooth'});
+        });
+      }
     });
   });
+
+  var status=document.createElement('span');
+  status.className='sr-only';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+  document.body.appendChild(status);
+  function fallbackCopy(text){
+    var active=document.activeElement,selection=window.getSelection();
+    var ranges=[];
+    if(selection) for(var i=0;i<selection.rangeCount;i++) ranges.push(selection.getRangeAt(i).cloneRange());
+    var area=document.createElement('textarea');
+    area.value=text;area.setAttribute('readonly','');
+    area.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(area);area.select();
+    var copied=false;
+    try{copied=document.execCommand('copy');}catch(error){}
+    area.remove();
+    if(active&&active.focus) active.focus({preventScroll:true});
+    if(selection){selection.removeAllRanges();ranges.forEach(function(range){selection.addRange(range);});}
+    return copied;
+  }
+  async function copyText(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      try{await navigator.clipboard.writeText(text);return true;}catch(error){}
+    }
+    return fallbackCopy(text);
+  }
+  document.querySelectorAll('pre.cmd').forEach(function(pre){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='複製';
+    button.addEventListener('click',async function(){
+      var code=pre.querySelector('code')||pre;
+      var text=(code===pre?Array.from(pre.childNodes).filter(function(node){return node!==button;}).map(function(node){return node.textContent;}).join(''):code.textContent).trim();
+      if(await copyText(text)){
+        button.textContent='已複製';status.textContent='指令已複製。';
+      }else{
+        var range=document.createRange();range.selectNodeContents(code);
+        var selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);
+        button.textContent='請按 Ctrl+C';status.textContent='已選取指令，請按 Ctrl+C 複製。';
+      }
+      setTimeout(function(){button.textContent='複製';status.textContent='';},2200);
+    });
+    pre.appendChild(button);
+  });
+
+  // Keep the existing storage key and checkbox IDs so prior progress survives.
+  var key='ocmw:'+pageName,saved={};
+  try{
+    var parsed=JSON.parse(localStorage.getItem(key)||'{}');
+    if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)) saved=parsed;
+  }catch(error){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(checkbox,index){
+    var id=checkbox.id||('ck'+index);checkbox.id=id;
+    if(saved[id]) checkbox.checked=true;
+    checkbox.addEventListener('change',function(){
+      saved[id]=checkbox.checked;
+      try{localStorage.setItem(key,JSON.stringify(saved));}catch(error){}
+    });
+  });
+  // Wide output stays readable and can be scrolled from the keyboard.
+  document.querySelectorAll('pre.out,.tw').forEach(function(block){
+    block.tabIndex=0;
+    block.setAttribute('aria-label',block.matches('.tw')?'表格；較寬時可左右捲動':'程式輸出；較寬時可左右捲動');
+  });
 })();
+
 </script>
 
 <script>

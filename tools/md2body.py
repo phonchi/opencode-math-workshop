@@ -15,36 +15,37 @@
     :::math 標題 / :::
     :::bg 標題 / :::   → <details class="bg">　可收合的背景補充
 """
-import re, sys, html, pathlib, unicodedata
+import re, sys, html, pathlib, json
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
-# 桌機下 .container.narrow 的可用寬度：780px 減兩側 2rem 內距 = 716px，
-# 再減 pre 自己的左右內距 1.25rem x 2 = 40px，實際能放字的是 676px。
-# JetBrains Mono 的西文字寬是 0.6em，但 **CJK 與全形字元佔兩倍寬**，
-# 用 len() 會低估，必須改算顯示寬度，否則含中文註解的輸出會被右邊裁掉。
-TEXT_PX = 676
-BASE_REM = 0.815      # 一般 pre 的字級
-MIN_REM = 0.58        # 再小就難讀了，剩下的交給水平捲動
-
-
-def disp_width(line):
-    """等寬字體下的顯示寬度（以西文字元為單位）。CJK 與全形算兩格。"""
-    return sum(2 if unicodedata.east_asian_width(c) in 'WF' else 1
-               for c in line)
-
-
-def fit_style(lines):
-    """寬輸出縮字級，讓它在桌機一眼看完，不要被右邊裁掉。"""
-    w = max((disp_width(x) for x in lines), default=0)
-    if w <= 0:
-        return ''
-    need = TEXT_PX / (w * 16 * 0.6)
-    if need >= BASE_REM:
-        return ''
-    size = max(MIN_REM, round(need, 3))
-    return ' style="font-size:%srem"' % size
+def table_cells(line):
+    """表格分隔線不包含 code span 或跳脫的直線字元。"""
+    text = line.strip()
+    if text.startswith('|'):
+        text = text[1:]
+    if text.endswith('|') and not text.endswith('\\|'):
+        text = text[:-1]
+    cells, current, ticks = [], [], 0
+    i = 0
+    while i < len(text):
+        if text[i:i + 2] == '\\|':
+            current.append('|'); i += 2; continue
+        if text[i] == '`':
+            end = i
+            while end < len(text) and text[end] == '`':
+                end += 1
+            count = end - i
+            ticks = 0 if ticks == count else (count if not ticks else ticks)
+            current.append(text[i:end]); i = end; continue
+        if text[i] == '|' and not ticks:
+            cells.append(''.join(current).strip()); current = []
+        else:
+            current.append(text[i])
+        i += 1
+    cells.append(''.join(current).strip())
+    return cells
 
 
 def _link(url, text=None):
@@ -77,8 +78,10 @@ def inline(s):
     s = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', s)
 
     # --- [文字](網址) ---
-    s = re.sub(r'\[([^\]]+)\]\((https?://[^)]+)\)',
-               lambda m: _link(m.group(2), m.group(1)), s)
+    s = re.sub(r'\[([^\]]+)\]\(([^\s)]+)\)',
+               lambda m: (_link(m.group(2), m.group(1))
+                          if m.group(2).startswith(('https://', 'http://'))
+                          else f'<a href="{html.escape(html.unescape(m.group(2)), quote=True)}">{m.group(1)}</a>'), s)
 
     # --- <網址> 自動連結（html.escape 後變成 &lt;…&gt;）---
     s = re.sub(r'&lt;(https?://[^\s&]+?)&gt;', lambda m: _link(m.group(1)), s)
@@ -107,6 +110,10 @@ def convert(md, title, desc, pager_prev=None, pager_next=None, badge=None):
     while i < n:
         ln = lines[i]
 
+        # 建置期可信資產標記，不當作一般段落跳脫。
+        if re.fullmatch(r'\s*<!--(?:DIAGRAM|INCLUDE):[^\n]+-->\s*', ln):
+            close_list(); out.append(ln.strip()); i += 1; continue
+
         # 程式碼區塊
         if ln.startswith('```'):
             close_list()
@@ -123,7 +130,7 @@ def convert(md, title, desc, pager_prev=None, pager_next=None, badge=None):
                            f'<code>{body}</code></pre>')
             else:
                 # 無語言標記 = 程式的輸出 -> 不給複製鈕（沒人要複製輸出）
-                out.append(f'<pre class="out"{fit_style(buf)}>'
+                out.append('<pre class="out">'
                            f'<code>{body}</code></pre>')
             continue
 
@@ -161,11 +168,14 @@ def convert(md, title, desc, pager_prev=None, pager_next=None, badge=None):
         # 表格
         if ln.strip().startswith('|') and i + 1 < n and re.match(r'^\s*\|[\s:|-]+\|\s*$', lines[i+1]):
             close_list()
-            hdr = [c.strip() for c in ln.strip().strip('|').split('|')]
+            hdr = table_cells(ln)
             i += 2
             rows = []
             while i < n and lines[i].strip().startswith('|'):
-                rows.append([c.strip() for c in lines[i].strip().strip('|').split('|')])
+                row = table_cells(lines[i])
+                if len(row) != len(hdr):
+                    raise ValueError(f'表格第 {i + 1} 行有 {len(row)} 欄，標題有 {len(hdr)} 欄')
+                rows.append(row)
                 i += 1
             t = ['<div class="tw"><table><tr>']
             t += [f'<th>{inline(c)}</th>' for c in hdr]
@@ -205,7 +215,7 @@ def convert(md, title, desc, pager_prev=None, pager_next=None, badge=None):
         close_list()
         buf = [ln]; i += 1
         while i < n and lines[i].strip() and not re.match(
-                r'^(#{1,4} |```|\||>|:::|\s*([-*]|\d+\.)\s|\s*---+\s*$)', lines[i]):
+                r'^(#{1,4} |```|\||>|:::|<!--(?:DIAGRAM|INCLUDE):|\s*([-*]|\d+\.)\s|\s*---+\s*$)', lines[i]):
             buf.append(lines[i]); i += 1
         out.append(f'<p>{inline(" ".join(b.strip() for b in buf))}</p>')
 
@@ -218,30 +228,15 @@ def convert_fragment(md):
     return convert(md, '', '')
 
 
-def main():
-    name = sys.argv[1]
-    meta = {
-        'local-models': ('本地模型', '課後', '在自己電腦上跑 Ollama 接 opencode，重點是 context 要在兩個地方各設一次。',
-                         ('lab3-notes.html', '04 · Lab 3'), ('agents-md.html', '06 · AGENTS.md')),
-        'agents-md':    ('AGENTS.md', '課後', '把專案規則寫成 AGENTS.md，讓 agent 每次都照做，不必你每次重講。',
-                         ('local-models.html', '05 · 本地模型'), ('git-safety.html', '07 · git')),
-        'git-safety':   ('git 安全網', '課後', '不用 GitHub 帳號也能用。動手前 commit、改完看 diff、不滿意就還原。',
-                         ('agents-md.html', '06 · AGENTS.md'), ('mcp-skills.html', '08 · MCP')),
-        'mcp-skills':   ('MCP 與 subagent', '課後', 'MCP、自訂 agent、subagent 各解決什麼問題。加分項，不是必修。',
-                         ('git-safety.html', '07 · git'), ('cheatsheet.html', '09 · 速查表')),
-        'first-run':    ('第一次對話', '現場', 'TUI 操作、權限機制、session 的邊界。搞懂你在跟什麼東西說話。',
-                         ('prep.html', '00 · 課前準備'), ('lab1-cluster.html', '02 · Lab 1')),
-    }[name]
-    title, badge_kind, desc, prev, nxt = meta
-    md = (ROOT / 'content' / f'{name}.md').read_text()
+def render_page(name, md, meta):
+    """純函式：由 Markdown 與共用頁面資訊產生 body，不寫檔。"""
+    title, desc = meta['title'], meta['description']
+    badge_kind = meta.get('badge', '課後延伸')
     h1 = next((l[2:].strip() for l in md.split('\n') if l.startswith('# ')), title)
     # 開頭如果只是「> 現場 30 分鐘」這種重複徽章的引言，去掉
     md = re.sub(r'^# .*\n+(> *[^\n]*(現場|課後|加分項|分鐘)[^\n]*\n)+', 
                 lambda m: m.group(0).split('\n')[0] + '\n', md, count=1)
-    num = {'first-run': '01', 'local-models': '05', 'agents-md': '06',
-           'git-safety': '07', 'mcp-skills': '08'}[name]
     bcls = 'live' if badge_kind == '現場' else 'after'
-    blabel = '現場 30 分' if badge_kind == '現場' else '課後延伸'
     body = convert(md, title, desc)
     page = f'''<!--TITLE:{title}-->
 <!--DESC:{desc}-->
@@ -249,19 +244,22 @@ def main():
 <div class="container narrow">
 
 <div class="pagehead">
-  <div class="kicker"><span>{num}</span><span>·</span><span class="badge {bcls}">{blabel}</span></div>
+  <div class="kicker"><span class="badge {bcls}">{html.escape(badge_kind)}</span></div>
   <h1>{html.escape(h1)}</h1>
 </div>
 
 {body}
 
-<div class="pager">
-  <a href="{prev[0]}"><div class="d">上一章</div><div class="t2">← {prev[1]}</div></a>
-  <a href="{nxt[0]}" class="next"><div class="d">下一章</div><div class="t2">{nxt[1]} →</div></a>
-</div>
-
 </div>
 '''
+    return page
+
+
+def main():
+    name = sys.argv[1]
+    meta = json.loads((ROOT / 'tools/pages.json').read_text())['pages'][name]
+    md = (ROOT / 'content' / f'{name}.md').read_text()
+    page = render_page(name, md, meta)
     dst = ROOT / 'tools' / f'body_{name}.html'
     dst.write_text(page)
     print(f'{name}.md -> {dst.name}  ({len(page)} bytes)')

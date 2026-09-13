@@ -4,7 +4,7 @@
 <div class="container narrow">
 
 <div class="pagehead">
-  <div class="kicker"><span>Lab 2</span><span>·</span><span class="badge live">現場 40 分</span><span>·</span><span>agent 當被告</span></div>
+  <div class="kicker"><span>Lab 2</span><span>·</span><span class="badge live">現場 40 分</span><span>·</span><span>用數學檢查結果</span></div>
   <h1>降維：設計一組真的抓得到錯的驗證</h1>
   <p class="lead">
     這一關你要叫 agent 手刻 PCA，然後證明它對不對。聽起來很簡單。
@@ -13,8 +13,11 @@
   </p>
 </div>
 
+<!--INCLUDE:tools/pca-explorer.html-->
+
 <section>
-<h2>先講清楚要驗什麼</h2>
+<h2>從投影接到 PCA</h2>
+<p>剛才是二維變一維；接下來每張手寫數字有 64 個像素，我們要保留 10 個方向。先讀懂「減去平均、找方向、投影」這三步，再讓 agent 寫程式。還沒學過特徵向量也可以先跟著做，下方會補上意義。</p>
 
 <details class="bg"><summary>PCA 在做什麼？為什麼要降維？</summary>
 <div class="bg-body">
@@ -27,9 +30,10 @@
 PCA 要做的就是找出那個子空間：在 $\mathbb{R}^{64}$ 裡找 $K$ 個互相正交的方向，
 讓資料投影上去之後<strong>保留最多的變異</strong>。
 </p>
-<h4>好消息：你已經學過需要的全部線代</h4>
+<h4>這裡會用到哪些線性代數概念</h4>
+<p>向量代表一筆資料，矩陣把許多筆資料排在一起。若還沒學到特徵向量，可以先把它理解為：矩陣作用後，只會縮放、不會改變所在直線的方向；縮放倍數就是特徵值。</p>
 <div class="tw"><table>
-<tr><th>PCA 用到的</th><th>你在線代學過的</th></tr>
+<tr><th>PCA 用到的</th><th>對應的線代概念</th></tr>
 <tr><td>共變異數矩陣 $C$</td><td>對稱矩陣</td></tr>
 <tr><td>主成分</td><td>$C$ 的特徵向量</td></tr>
 <tr><td>各主成分的重要性</td><td>對應的特徵值</td></tr>
@@ -37,8 +41,7 @@ PCA 要做的就是找出那個子空間：在 $\mathbb{R}^{64}$ 裡找 $K$ 個�
 <tr><td>投影與重建</td><td>正交投影 $\mathbf{x}\mapsto W^\top W\mathbf{x}$</td></tr>
 </table></div>
 <p style="margin-bottom:0">
-所以這一關<strong>沒有新的數學</strong>。全部都是譜分解（spectral decomposition）
-套在一個特定的矩陣上。真正的新東西是「怎麼驗證別人寫的實作是對的」。
+這些概念不必一次記熟。先掌握 PCA 要保留資料變化最大的方向，再練習「怎麼驗證別人寫的實作」。特徵分解的細節可以配合線性代數課程回來閱讀。
 </p>
 </div>
 </details>
@@ -53,13 +56,13 @@ $$C_{jk}=\frac{1}{n-1}\sum_{i=1}^{n}(x_{ij}-\bar x_j)(x_{ik}-\bar x_k)$$
 <ul>
 <li><strong>對角線</strong> $C_{jj}$：第 $j$ 個像素自己的變異數，也就是它「變化得多劇烈」</li>
 <li><strong>非對角線</strong> $C_{jk}$：第 $j$ 與第 $k$ 個像素<strong>一起變動的程度</strong>。
-    正的代表「一個亮另一個也傾向亮」，負的代表相反，接近 0 代表兩者沒什麼關係</li>
+    正的代表「一個亮另一個也傾向亮」，負的代表相反，接近 0 代表線性共同變動較弱，仍可能有非線性關係</li>
 </ul>
 <h4>為什麼一定要先中心化</h4>
 <p style="margin-bottom:0">
 不減平均的話，$X^\top X$ 量到的是「離<strong>原點</strong>多遠」，
-而不是「離<strong>資料中心</strong>多分散」。第一個主成分會直接指向資料的平均位置，
-完全不是我們要的「變異最大的方向」。這一步漏掉是手刻 PCA 最常見的錯誤之一。
+而不是「離<strong>資料中心</strong>多分散」。資料平均的位置也會影響求出的方向，
+這時找出的就不一定是「相對資料中心，變異最大的方向」。這一步漏掉是手刻 PCA 最常見的錯誤之一。
 </p>
 </div>
 </details>
@@ -74,7 +77,7 @@ $$C_{jk}=\frac{1}{n-1}\sum_{i=1}^{n}(x_{ij}-\bar x_j)(x_{ik}-\bar x_k)$$
 $$\text{第 }j\text{ 個主成分的解釋變異比例}=\frac{\lambda_j}{\sum_{m}\lambda_m}$$
 <p>
 意思是「整體變異裡，有百分之幾是由這個方向貢獻的」。
-本關實測第一個主成分是 <strong>14.89%</strong>，前十個加起來約 <strong>73%</strong>。
+在這份資料中，第一個主成分約占 <strong>14.89%</strong>，前十個加起來約 <strong>73%</strong>。
 換句話說，用 10 個數字就能保留原本 64 個數字約七成三的變異。
 </p>
 <p style="margin-bottom:0">
@@ -111,7 +114,7 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 </div>
 <p>
 一個「正確的 PCA 實作」至少要做對這幾件事：中心化對、分母對、特徵分解對、由大到小排序對、取前 $K$ 個對。
-你的任務是設計檢查，讓<strong>其中任何一項寫錯都會被抓到</strong>。
+你的任務是設計檢查，盡可能抓出這些步驟中的錯誤，並留意每項檢查仍可能漏掉什麼。
 </p>
 </section>
 
@@ -137,7 +140,7 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 
 <div class="step" data-n="2">
 <h3>第一個坑：它可能會直接相減</h3>
-<p>多數情況下 agent 會想到比對 <code>components_</code>。執行後你會看到：</p>
+<p>如果 agent 直接逐項比對 <code>components_</code>，可能得到下面的結果。你的模型回覆與末位數字不必完全相同：</p>
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">opencode　build · big-pickle</span></div>
   <div class="term-body"><div class="b">uv run python lab2_pca.py</div>
@@ -150,7 +153,7 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <div class="box danger">
 <div class="bt">這裡不要讓它亂改</div>
 <p style="margin-bottom:0">
-agent 會開始「修」一個其實沒壞的程式。<strong>打斷它</strong>（按 Esc 或 Ctrl+C），
+如果 agent 因此直接修改 PCA 程式，先停下來檢查比較方式。<strong>打斷它</strong>（按 Esc 或 Ctrl+C），
 然後問它一個問題：<br>
 <em>「$v$ 是 $C$ 的特徵向量，那 $-v$ 是不是？如果是，你的比較方法有什麼問題？」</em>
 </p>
@@ -253,7 +256,7 @@ evals[:10] 應該等於 sklearn 的 pca.explained_variance_。
 <p style="margin-bottom:0">
 設計驗證的時候，該問的不是「我檢查了幾項」，
 而是「<strong>什麼樣的錯誤會從我的檢查縫隙中溜過去</strong>」。
-這個思考方式在寫論文、審稿、做實驗的時候一樣好用。
+以後檢查作業或自己的數學程式，也可以用同樣的方式思考。
 </p>
 </div>
 </section>
@@ -281,7 +284,7 @@ $|\cos|$ 比對成立的前提是<strong>特徵值單純（沒有重根）且間
 </div>
 <p>
 digits 剛好安全。但如果你之後換一份資料，<strong>務必先檢查這件事</strong>。
-真的碰到重根時，要改成比較整個子空間，例如比投影矩陣 $W^\top W$，或算 principal angles。
+若要處理重複特徵值，應把對應的整個區塊一起比較，例如比較投影矩陣 $W^\top W$。還要確認保留的第 $K$ 與第 $K+1$ 個特徵值有間隔；若剛好從重根區塊中間切開，兩個都最佳的 $K$ 維子空間也可能不同，不能要求投影矩陣相等。
 </p>
 
 <h3>但書二：關卡 4 只是必要條件</h3>

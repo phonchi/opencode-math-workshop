@@ -88,11 +88,11 @@ res = linprog(c=np.zeros(d + 1),
 if res.success:
     v = res.x
     margins = t * (Xb @ v)
-    # 約束寫成 >= 1，所以 margins.min() 必然是 1，那個數字本身沒有意義。
+    # 約束寫成 >= 1，所以可行解的 margins.min() 至少為 1；不能用這個未正規化的數字比較幾何間隔。
     # 有意義的是「可行解存在」，以及除以 ||v|| 之後的幾何間隔。
     geo = margins.min() / np.linalg.norm(v[:d])   # 只用權重部分，不含截距
     print(f"可行解存在  ->  {P(res.success)}")
-    print(f"最小 signed margin = {margins.min():.6f}（約束即為 >= 1，故必為 1）")
+    print(f"最小 signed margin = {margins.min():.6f}（約束要求 >= 1；此值尚未除以權重長度）")
     print(f"幾何間隔 = margin / ||v|| = {geo:.6e}  ->  {P(geo > 0)}")
     print("結論：這 357 筆樣本**嚴格線性可分**（有正的分隔間隔）。")
     print("      注意這只針對這批有限樣本，不代表所有手寫 3 與 8 都可分。\n")

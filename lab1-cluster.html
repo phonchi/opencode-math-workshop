@@ -502,39 +502,223 @@ footer .stamp{
   .topnav,.pager,pre .copy{display:none;}
   body{background:#fff;}
 }
+/* 共用教材骨架：由 build_site.py 內嵌至每個頁面，離線複製仍保留版面。 */
+:root{--shell-width:1440px;--sidebar-width:232px;--column-gap:32px;--prose-width:46em;}
+.topnav .inner{max-width:var(--shell-width);min-height:60px;}
+.topnav .brand{font-size:.82rem;}
+.topnav nav a{font-size:.82rem;color:var(--ink-2);}
+.site-shell{
+  display:grid;grid-template-columns:var(--sidebar-width) minmax(0,1fr);
+  gap:var(--column-gap);max-width:var(--shell-width);margin:0 auto;padding:0 32px;
+}
+.lesson-sidebar{
+  position:sticky;top:80px;align-self:start;max-height:calc(100dvh - 100px);
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  padding:24px 16px 24px 0;margin-top:16px;border-right:1px solid var(--rule);
+}
+.course-menu{display:none;}
+.course-nav ul{list-style:none;margin:0;padding:0;}
+.course-nav li{margin:0;}
+.nav-group{margin-bottom:22px;}
+.nav-group:last-child{margin-bottom:0;}
+.nav-group-title{font-size:.72rem;font-weight:700;color:var(--ink-3);letter-spacing:.08em;margin:0 0 8px 10px;}
+.chapter-link{
+  display:block;font-size:.86rem;color:var(--ink-2);line-height:1.6;
+  padding:7px 10px;border-radius:var(--r-sm);text-decoration:none;
+}
+.chapter-link:hover{background:var(--paper-2);color:var(--ink);}
+.chapter-link[aria-current="page"]{color:var(--live);font-weight:700;background:rgba(184,80,60,.075);}
+.course-nav .section-nav{border-left:1px solid var(--rule);margin:8px 0 12px 14px;padding-left:8px;}
+.section-nav a{display:block;font-size:.76rem;line-height:1.6;padding:5px 8px;text-decoration:none;color:var(--ink-3);}
+.section-nav a:hover,.section-nav a[aria-current="location"]{color:var(--link);background:rgba(42,60,120,.05);border-radius:4px;}
+.section-nav a[aria-current="location"]{font-weight:700;}
+.lesson-main{min-width:0;padding:16px 0 0;}
+.lesson-main > .container{width:100%;max-width:none;padding:24px 0 0;}
+.lesson-main .pagehead{padding-top:24px;}
+.lesson-main .pagehead h1{max-width:20em;}
+.lesson-main .pagehead .lead{max-width:var(--prose-width);}
+.lesson-main p,.lesson-main ul:not(.ckl),.lesson-main ol{max-width:var(--prose-width);}
+.lesson-main .term-body p,.lesson-main .term-body ul{max-width:none;}
+.lesson-main h2{scroll-margin-top:88px;margin-top:3rem;}
+.lesson-main h3,.lesson-main h4{scroll-margin-top:88px;}
+.lesson-main .hero{border-radius:var(--r-lg);padding:48px 36px 40px;margin-top:24px;}
+.lesson-main .hero .kicker{letter-spacing:.09em;}
+.lesson-main .hero-glyph{right:24px;bottom:24px;opacity:.6;}
+.lesson-main .hero h1{font-size:clamp(2.1rem,3.8vw,3.15rem);}
+.lesson-main .hero .inner{max-width:none;}
+.lesson-main .hero .meta{gap:24px;}
+.lesson-main .ch-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));}
+.lesson-main .step{padding-left:3.2rem;}
+/* 原始輸出保留等寬對齊；寬表格與輸出可在自己的容器捲動。 */
+.lesson-main pre.out{font-size:.875rem!important;}
+.lesson-main pre,.lesson-main .tw{max-width:100%;}
+.lesson-main pre:focus-visible,.lesson-main .tw:focus-visible{outline-offset:4px;}
+.lesson-diagram{margin:28px 0 36px;max-width:100%;}
+.lesson-diagram > svg{display:block;width:100%;height:auto;max-width:100%;}
+.lesson-diagram figcaption{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:.78rem;color:var(--ink-2);margin-top:12px;}
+.lesson-diagram figcaption a{margin-left:auto;white-space:nowrap;}
+.pager{margin-top:40px;}
+.pager a{min-width:min(230px,100%);}
+footer{max-width:var(--shell-width);margin:56px auto 0;}
+.skip-link{position:fixed;left:16px;top:8px;transform:translateY(-160%);padding:8px 16px;background:var(--paper-2);z-index:100;border:2px solid var(--link);border-radius:var(--r-sm);}
+.skip-link:focus{transform:none;}
+:focus-visible{outline:2px solid var(--link);outline-offset:3px;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
+@media(max-width:1100px){
+  .site-shell{display:block;padding:0 24px;}
+  .lesson-sidebar{position:static;margin:20px 0 0;padding:0;border:0;max-height:none;overflow:visible;}
+  .desktop-course-menu{display:none;}
+  .course-menu{display:block;border:1px solid var(--rule);border-radius:var(--r-md);background:var(--paper-2);}
+  .course-menu > summary{padding:12px 16px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--link);}
+  .course-menu .course-nav{padding:16px;border-top:1px solid var(--rule);}
+  .course-menu[open] .course-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;}
+  .lesson-main{padding-top:0;}
+  .lesson-main > .container{padding-top:12px;}
+  .lesson-main .hero{margin-top:24px;}
+}
+@media(max-width:720px){
+  .site-shell{padding:0 20px;}
+  .topnav .inner{padding:8px 20px;min-height:56px;flex-wrap:nowrap;gap:12px;}
+  .topnav .brand{font-size:.72rem;letter-spacing:.02em;}
+  .topnav nav{width:auto;margin-left:auto;overflow:visible;mask-image:none;-webkit-mask-image:none;gap:4px;}
+  .topnav nav a{padding:4px;font-size:.72rem;}
+  .lesson-main .hero{padding:32px 24px;}
+  .lesson-main .pagehead{padding-top:20px;}
+  .lesson-main .hero h1{font-size:2.05rem;}
+  .lesson-main .hero .kicker{font-size:.66rem;}
+  .course-menu[open] .course-nav{display:block;}
+  .lesson-main .step{padding-left:2.6rem;}
+  .lesson-main pre.out{font-size:.8125rem!important;}
+  .lesson-diagram figcaption a{margin-left:0;}
+  .pager{display:block;}
+  .pager a{display:block;margin-bottom:12px;}
+}
+@media print{
+  .lesson-sidebar,.skip-link{display:none;}
+  .site-shell{display:block;max-width:none;padding:0;}
+  .lesson-main{padding:0;}
+  .lesson-main .hero{color:var(--ink);background:none;padding:0;}
+  .lesson-main .hero h1,.lesson-main .hero .sub,.lesson-main .hero .kicker{color:var(--ink);}
+  .lesson-main pre{white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:none;}
+  .lesson-diagram{break-inside:avoid;}
+}
+
 </style>
 </head>
 <body>
-
+<a class="skip-link" href="#main-content">跳到本章內容</a>
 <div class="topnav"><div class="inner">
 <a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
-<nav>
+<nav aria-label="常用入口">
 <a href="prep.html">課前準備</a>
-<a href="first-run.html">第一次對話</a>
-<a href="lab1-cluster.html">Lab 1</a>
-<a href="lab2-pca.html">Lab 2</a>
-<a href="lab3-notes.html">Lab 3</a>
-<a href="local-models.html">本地模型</a>
-<a href="agents-md.html">AGENTS.md</a>
-<a href="git-safety.html">git</a>
-<a href="mcp-skills.html">MCP</a>
-<a href="cheatsheet.html">速查</a>
+<a href="cheatsheet.html">速查表</a>
 </nav>
 </div></div>
 
-<div class="container narrow">
+<div class="site-shell"><aside class="lesson-sidebar" aria-label="教材導覽"><div class="desktop-course-menu"><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html" aria-current="page">Lab 1 · 分群</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-這一關的資料">這一關的資料</a></li>
+<li><a href="#section-動手">動手</a></li>
+<li><a href="#section-誰錯了">誰錯了</a></li>
+<li><a href="#section-追問">追問</a></li>
+<li><a href="#section-檢查清單">檢查清單</a></li>
+<li><a href="#section-如果還有時間">如果還有時間</a></li>
+</ul>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></div><details class="course-menu"><summary>課程與本章目錄</summary><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html" aria-current="page">Lab 1 · 分群</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-這一關的資料">這一關的資料</a></li>
+<li><a href="#section-動手">動手</a></li>
+<li><a href="#section-誰錯了">誰錯了</a></li>
+<li><a href="#section-追問">追問</a></li>
+<li><a href="#section-檢查清單">檢查清單</a></li>
+<li><a href="#section-如果還有時間">如果還有時間</a></li>
+</ul>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></details></aside><main id="main-content" class="lesson-main" tabindex="-1"><div class="container narrow">
 
 <div class="pagehead">
   <div class="kicker"><span>Lab 1</span><span>·</span><span class="badge live">現場 40 分</span><span>·</span><span>agent 當加速器</span></div>
-  <h1>分群：一句話換來十一組實驗</h1>
+  <h1>分群：請 agent 做實驗，再判讀結果</h1>
   <p class="lead">
-    這個實作要讓你體會 agent 最直觀的價值：把「本來要寫半小時程式」壓縮成「講一句話」。
+    這個實作要讓你體會 agent 最直觀的價值：把重複寫程式、跑參數與畫圖的工作交給 agent，自己專心比較結果。
     不過這一關的重點在最後。agent 會很有自信地報告一個數字，而你要有能力知道它錯了。
   </p>
 </div>
 
 <section>
-<h2>這一關的資料</h2>
+<h2 id="section-這一關的資料">這一關的資料</h2>
+<p><strong>分群</strong>是先不看答案，依資料的相似程度把樣本分組。本關的每張圖都是一個樣本，像素值是描述它的特徵；數字標籤留到後面檢查分群結果時才使用。</p>
 <p>
 三個實作共用同一份資料：scikit-learn 內建的 <code>digits</code>，
 1797 張 8×8 的手寫數字灰階圖，攤平成 64 維向量，真實類別有 10 類（0 到 9）。
@@ -589,7 +773,7 @@ digits 雖然附了正確標籤，但我們<em>不會</em>把標籤餵給 k-mean
 它只看得到那 1797 個 64 維向量，得自己決定誰跟誰是一夥的。
 </p>
 <p style="margin-bottom:0">
-這就是為什麼待會會出現「它算出 9 群、但真實答案是 10 類」這種事。
+這就是為什麼待會會出現「指標偏好 9 群、但資料有 10 種數字標籤」這種事。
 它<strong>本來就不知道</strong>答案是 10。
 </p>
 </div>
@@ -618,7 +802,7 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <strong>這就是你在微積分課上做的「令導數為零求極值」。</strong>
 </p>
 <p style="margin-bottom:0">
-順帶一提：每一步都不會讓 $J$ 變大，所以一定會停。
+順帶一提：每一步不會讓 $J$ 變大；實作會在分群不再改變、變化小於容差，或達到最大迭代次數時停止。
 但停下來的地方<strong>不保證是全域最小</strong>。所以才要設
 <code>n_init=10</code>（跑 10 次不同起點取最好的），以及為什麼要固定
 <code>random_state</code> 才能重現結果。
@@ -629,13 +813,13 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <div class="bt">為什麼用這份</div>
 <p style="margin-bottom:0">
 不用下載（套件裡就有）、夠小（幾秒跑完）、維度夠高（64 維，PCA 才有意義）、
-而且<strong>你知道正確答案是 10 類</strong>。這點待會會變成整堂課最重要的伏筆。
+而且<strong>它附有 10 種數字的標籤</strong>。這點待會會變成整堂課最重要的伏筆。
 </p>
 </div>
 </section>
 
 <section>
-<h2>動手</h2>
+<h2 id="section-動手">動手</h2>
 
 <div class="step" data-n="1">
 <h3>啟動 agent</h3>
@@ -647,7 +831,7 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <div class="step" data-n="2">
 <h3>下第一個指令</h3>
 <p>把下面這段整個貼進去。注意它的結構：<strong>做什麼、用什麼、存到哪、印出什麼</strong>。
-指令愈具體，來回修正的次數就愈少。</p>
+再補上「如何判斷完成」，就成為可反覆使用的任務格式。完整練習見<a href="agent-workflows.html">需求與續作</a>。</p>
 <pre class="cmd"><code>用 sklearn 內建的 digits 資料集做 k-means 分群。
 
 請掃過 k = 2 到 12，每個 k 都記錄 inertia 與 silhouette score，
@@ -661,7 +845,7 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 
 <div class="step" data-n="3">
 <h3>看著它工作</h3>
-<p>agent 會依序讀規則、寫檔、執行。實測大約半分鐘內完成：</p>
+<p>觀察 agent 是否讀取規則、寫出檔案並實際執行。下面是一份範例輸出：</p>
 
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">opencode　build · big-pickle</span></div>
@@ -698,14 +882,13 @@ agent 說最佳 k 是 <strong>9</strong>。但你知道這份資料有 <strong>1
 </section>
 
 <section>
-<h2>誰錯了</h2>
+<h2 id="section-誰錯了">誰錯了</h2>
 <p>
-都沒錯。agent 的程式是對的，silhouette 的計算是對的，0.1893 確實是最高的。
-錯的是那句<strong>「所以建議用 9 群」</strong>。那是從數字直接跳到結論，而那一跳沒有根據。
+這組計算中，0.1893 確實是最高的 silhouette。若目標就是最大化這個指標，選 9 群有依據；但<strong>這還不能回答「如何辨識十種數字」</strong>。閱讀建議前，先確認它回答的是哪個問題。
 </p>
 <p>
 更精確地說：10 是這份資料<strong>標註的類別數</strong>，它不保證原始像素空間裡
-恰好存在 10 個符合 k-means 幾何假設（球形、等變異、等大小）的群。
+恰好存在 10 個符合 k-means 偏好的緊密、近似球形群組結構的群。
 所以這裡沒有「誰算錯了」，只有「兩個不同的問題被當成同一個」。
 </p>
 
@@ -728,26 +911,25 @@ $$s(i)=\frac{b(i)-a(i)}{\max\{a(i),\,b(i)\}},\qquad s(i)\in[-1,1]$$
 
 <h3>為什麼 digits 會是 9</h3>
 <p>
-因為在 64 維的像素空間裡，某些數字本來就長得像。
-1 和 7、4 和 9、3 和 8 的像素分布高度重疊。把它們合併成一群，群內距離會變小、群間距離會變大，silhouette 自然就上去了。
+在這份資料、本次初始化與搜尋範圍中，$k=9$ 的 silhouette 最高。這是已觀察到的結果；單靠這個分數，還不能知道哪些數字混在一起，或為什麼這組分群較好。合併兩群也不保證讓群內距離下降或 silhouette 上升。
 </p>
 <p>
 換句話說：<strong>「幾何上最漂亮的分法」跟「語意上正確的分法」不一樣。</strong>
-這不是資料的瑕疵，這是無監督學習的本質。
+如果想解釋原因，可以請 agent 畫群中心，或列出每群包含各種數字的筆數，再對照標籤判讀。
 </p>
 
 <div class="box danger">
 <div class="bt">這一關真正要你帶走的</div>
 <p style="margin-bottom:0">
 agent 給你的每個數字都是對的，但它擅自替你做了一個<strong>你才有資格做的判斷</strong>。
-它不知道你手上有真實標籤，也不知道你的研究問題是什麼。
+它沒有先確認你要優化的是幾何分群品質，還是辨識數字類別。
 往後每次 agent 說「所以建議……」，停在那個「所以」上面檢查一下。
 </p>
 </div>
 </section>
 
 <section>
-<h2>追問</h2>
+<h2 id="section-追問">追問</h2>
 <p>把這句話丟回給 agent，看它怎麼回應：</p>
 <pre class="cmd"><code>這份資料我知道真實類別有 10 類，但你算出 silhouette 最高是 k=9。
 
@@ -782,7 +964,7 @@ RI 有個毛病：<strong>就算亂分，也會拿到不低的分數</strong>。
 $$\text{ARI}=\frac{\text{RI}-\mathbb{E}[\text{RI}]}{\max(\text{RI})-\mathbb{E}[\text{RI}]}$$
 <p style="margin-bottom:0">
 調整之後：完全正確是 <strong>1</strong>，<strong>隨機亂分約等於 0</strong>（可以是小負數）。
-這才是一個「0 分真的代表沒有任何資訊」的尺度。
+接近 0 表示與這個隨機分群基準相近，不能據此斷言資料中完全沒有資訊。
 你可以叫 agent 用隨機標籤實際跑一次驗證這點，五行程式就能做完。
 </p>
 </div>
@@ -797,7 +979,7 @@ ARI 是「調整過的」Rand index，意思是它<strong>扣掉了隨機分群�
 </section>
 
 <section>
-<h2>檢查清單</h2>
+<h2 id="section-檢查清單">檢查清單</h2>
 <ul class="ckl">
 <li><input type="checkbox" id="l1a"><label for="l1a">agent 產生了 <code>lab1_cluster.py</code>，而且我打開看過裡面在做什麼</label></li>
 <li><input type="checkbox" id="l1b"><label for="l1b"><code>figs/lab1_k_selection.png</code> 存在，兩張圖都畫出來了</label></li>
@@ -808,63 +990,130 @@ ARI 是「調整過的」Rand index，意思是它<strong>扣掉了隨機分群�
 </section>
 
 <section>
-<h2>如果還有時間</h2>
+<h2 id="section-如果還有時間">如果還有時間</h2>
 <ul>
-<li>叫 agent 把 k=10 的十個群中心 reshape 回 8×8 畫出來。你會看到某幾個「數字」長得很模糊，那就是被合併的類別。</li>
-<li>silhouette 的差距（0.1893 vs 0.1825）其實很小。問 agent：<strong>「這個差距有統計意義嗎？」</strong>——用不同 <code>random_state</code> 跑 30 次，看兩者的分布是否重疊。單次比較的大小關係不等於顯著差異。</li>
+<li>叫 agent 把 k=10 的十個群中心 reshape 回 8×8 畫出來。觀察哪些群中心比較模糊，再列出各群的數字標籤組成；不能只憑模糊就判定合併了哪些類別。</li>
+<li>silhouette 的差距（0.1893 vs 0.1825）其實很小。用不同 <code>random_state</code> 重跑，比較兩個 k 的分數與差值，觀察排序對初始化是否穩定。這是初始化敏感性分析，不是對樣本母體做顯著性檢定。</li>
 <li>問它：<strong>「inertia 為什麼隨 k 遞減？用數學證明給我看。」</strong>（提示：$k+1$ 群的<em>最佳</em>解一定不差於 $k$ 群，因為可以把多的那群留空。但 k-means 找到的是局部解，所以實務上偶爾會出現不單調的情形。這也是 elbow 法只能「看轉折」、不能「取最小值」的原因。）</li>
 <li>換一個距離度量（例如先做 L2 正規化再分群），看 silhouette 的最佳 k 會不會變。</li>
 </ul>
 </section>
 
-<div class="pager">
-  <a href="first-run.html"><div class="d">上一章</div><div class="t2">← 01 · 第一次對話</div></a>
-  <a href="lab2-pca.html" class="next"><div class="d">下一章</div><div class="t2">03 · Lab 2 · 降維 →</div></a>
-</div>
+
 
 </div>
+<nav class="pager" aria-label="章節順序"><a href="first-run.html" class="prev"><div class="d">上一章</div><div class="t2">← 第一次對話</div></a><a href="lab2-pca.html" class="next"><div class="d">下一章</div><div class="t2">Lab 2 · PCA →</div></a></nav></main></div>
 
 <footer>
 <div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
-<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+<div class="stamp">讓 agent 動手，讓數學說明結果。</div>
 </footer>
 
 <script>
-// 導覽列高亮目前頁面
+/* Progressive enhancement: navigation and disclosure work without JavaScript. */
 (function(){
-  var f=(location.pathname.split('/').pop()||'index.html');
+  'use strict';
+  var pageName=location.pathname.split('/').pop()||'index.html';
   document.querySelectorAll('.topnav nav a').forEach(function(a){
-    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+    if(a.getAttribute('href')===pageName) a.setAttribute('aria-current','page');
   });
-})();
 
-// 指令複製鈕
-document.querySelectorAll('pre.cmd').forEach(function(pre){
-  var b=document.createElement('button');
-  b.className='copy'; b.type='button'; b.textContent='複製';
-  b.addEventListener('click',function(){
-    var t=pre.querySelector('code');
-    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
-      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
-    },function(){ b.textContent='複製失敗'; });
-  });
-  pre.appendChild(b);
-});
-
-// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
-(function(){
-  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
-  var saved={};
-  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
-  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
-    var id=cb.id||('ck'+i); cb.id=id;
-    if(saved[id]) cb.checked=true;
-    cb.addEventListener('change',function(){
-      saved[id]=cb.checked;
-      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+  var sections=Array.from(document.querySelectorAll('.lesson-main h2[id]'));
+  var sectionLinks=Array.from(document.querySelectorAll('.section-nav a'));
+  var scheduled=false;
+  function markSection(){
+    scheduled=false;
+    var current=sections[0];
+    sections.forEach(function(section){if(section.getBoundingClientRect().top<=145) current=section;});
+    sectionLinks.forEach(function(link){
+      if(current&&link.getAttribute('href')==='#'+current.id) link.setAttribute('aria-current','location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  function scheduleSection(){
+    if(!scheduled){scheduled=true;requestAnimationFrame(markSection);}
+  }
+  window.addEventListener('scroll',scheduleSection,{passive:true});
+  window.addEventListener('resize',scheduleSection);
+  window.addEventListener('hashchange',scheduleSection);
+  markSection();
+  document.querySelectorAll('.course-menu .section-nav a').forEach(function(link){
+    link.addEventListener('click',function(){
+      link.closest('details').open=false;
+      // Closing the menu moves the heading; resolve the anchor after that reflow.
+      var id=link.getAttribute('href').slice(1),target=document.getElementById(id);
+      if(target){
+        requestAnimationFrame(function(){
+          var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({top:window.scrollY+target.getBoundingClientRect().top-88,behavior:reduced?'auto':'smooth'});
+        });
+      }
     });
   });
+
+  var status=document.createElement('span');
+  status.className='sr-only';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+  document.body.appendChild(status);
+  function fallbackCopy(text){
+    var active=document.activeElement,selection=window.getSelection();
+    var ranges=[];
+    if(selection) for(var i=0;i<selection.rangeCount;i++) ranges.push(selection.getRangeAt(i).cloneRange());
+    var area=document.createElement('textarea');
+    area.value=text;area.setAttribute('readonly','');
+    area.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(area);area.select();
+    var copied=false;
+    try{copied=document.execCommand('copy');}catch(error){}
+    area.remove();
+    if(active&&active.focus) active.focus({preventScroll:true});
+    if(selection){selection.removeAllRanges();ranges.forEach(function(range){selection.addRange(range);});}
+    return copied;
+  }
+  async function copyText(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      try{await navigator.clipboard.writeText(text);return true;}catch(error){}
+    }
+    return fallbackCopy(text);
+  }
+  document.querySelectorAll('pre.cmd').forEach(function(pre){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='複製';
+    button.addEventListener('click',async function(){
+      var code=pre.querySelector('code')||pre;
+      var text=(code===pre?Array.from(pre.childNodes).filter(function(node){return node!==button;}).map(function(node){return node.textContent;}).join(''):code.textContent).trim();
+      if(await copyText(text)){
+        button.textContent='已複製';status.textContent='指令已複製。';
+      }else{
+        var range=document.createRange();range.selectNodeContents(code);
+        var selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);
+        button.textContent='請按 Ctrl+C';status.textContent='已選取指令，請按 Ctrl+C 複製。';
+      }
+      setTimeout(function(){button.textContent='複製';status.textContent='';},2200);
+    });
+    pre.appendChild(button);
+  });
+
+  // Keep the existing storage key and checkbox IDs so prior progress survives.
+  var key='ocmw:'+pageName,saved={};
+  try{
+    var parsed=JSON.parse(localStorage.getItem(key)||'{}');
+    if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)) saved=parsed;
+  }catch(error){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(checkbox,index){
+    var id=checkbox.id||('ck'+index);checkbox.id=id;
+    if(saved[id]) checkbox.checked=true;
+    checkbox.addEventListener('change',function(){
+      saved[id]=checkbox.checked;
+      try{localStorage.setItem(key,JSON.stringify(saved));}catch(error){}
+    });
+  });
+  // Wide output stays readable and can be scrolled from the keyboard.
+  document.querySelectorAll('pre.out,.tw').forEach(function(block){
+    block.tabIndex=0;
+    block.setAttribute('aria-label',block.matches('.tw')?'表格；較寬時可左右捲動':'程式輸出；較寬時可左右捲動');
+  });
 })();
+
 </script>
 
 <script>

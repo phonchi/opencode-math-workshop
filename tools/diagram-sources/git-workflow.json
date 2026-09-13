@@ -1,0 +1,94 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "先檢查，再決定是否保留",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "main",
+      "label": "每次處理一小步"
+    },
+    {
+      "id": "undo",
+      "label": "不採用這次修改"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "save",
+      "lane": "main",
+      "col": 0,
+      "type": "database",
+      "label": "保存起點",
+      "width": 160
+    },
+    {
+      "id": "edit",
+      "lane": "main",
+      "col": 1,
+      "type": "backend",
+      "label": "請 agent 修改",
+      "width": 160
+    },
+    {
+      "id": "inspect",
+      "lane": "main",
+      "col": 2,
+      "type": "frontend",
+      "label": "查看差異並執行",
+      "width": 160
+    },
+    {
+      "id": "accept",
+      "lane": "main",
+      "col": 3,
+      "type": "database",
+      "label": "確認後 commit",
+      "width": 160
+    },
+    {
+      "id": "restore",
+      "lane": "undo",
+      "col": 2,
+      "type": "security",
+      "label": "選定檔案 restore",
+      "width": 160
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "from": "save",
+      "to": "edit"
+    },
+    {
+      "id": "e1",
+      "from": "edit",
+      "to": "inspect"
+    },
+    {
+      "id": "e2",
+      "from": "inspect",
+      "to": "accept",
+      "label": "採用"
+    },
+    {
+      "id": "e3",
+      "from": "inspect",
+      "to": "restore",
+      "label": "不採用",
+      "role": "branch"
+    }
+  ],
+  "mainPath": [
+    "save",
+    "edit",
+    "inspect",
+    "accept"
+  ]
+}

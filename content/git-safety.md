@@ -1,7 +1,6 @@
 # git：讓你敢放手讓 agent 改檔案
 
-> 課後延伸．預計閱讀與練習時間 50 分鐘
-> 適用版本：opencode 1.18.30
+> 課後延伸 · 保存、比較與還原自己的檔案
 
 這章不教 git 的全部，只教**七個指令**。目標很明確：讓你在按下 Enter 讓 agent 改你的檔案時，心裡不會怕。
 
@@ -26,7 +25,7 @@ git 解決的正是這件事。一句話：
 
 當還原成本趨近於零，恐懼就消失了，你才敢真的放手用。git 在這門課裡的角色不是「軟體工程規範」，是**心理安全網**。
 
-另外先講一個有關聯的設定。opencode 有個 `--auto` 參數，`--help` 裡它自己標註為「auto-approve permissions that are not explicitly denied (**dangerous!**)」。**學習階段絕對不要用它。** 逐次確認權限，加上這章的 git 工作流，是你目前最好的組合。
+互動練習請逐次閱讀並確認權限，不加 `--auto`。課前的小型非互動自測是例外，使用方式見 [課前準備](prep.html)。本章用 Git 保存與比較檔案，配合每次動手前的確認。
 
 ---
 
@@ -45,7 +44,13 @@ git 解決的正是這件事。一句話：
 git --version
 ```
 
-有版本號就可以了。沒有的話，Ubuntu/WSL 用 `sudo apt install git`。
+有版本號就可以了。Ubuntu/WSL 尚未安裝時用 `sudo apt install git`。Windows 在 PowerShell 執行：
+
+```powershell
+winget install --id Git.Git -e --source winget --accept-source-agreements --accept-package-agreements
+```
+
+安裝後關掉終端機再開，重新檢查 `git --version`。也可依 [Git for Windows 官方安裝頁](https://git-scm.com/install/windows) 下載安裝檔。
 
 第一次用要設定身分（只設定一次，之後所有專案通用）：
 
@@ -60,10 +65,28 @@ git config --global user.email "你的信箱"
 
 ## 3. 最小可用的 git：七個指令
 
+### 第一次存檔前：先確認資料夾與排除項目
+
+請在課前建立的同一個 `ai-math-lab` 資料夾開啟終端機；位置以你當時選的路徑為準。先查看：
+
+```bash
+pwd
+ls
+```
+
+在**第一次 `git add` 前**，用文字編輯器建立專案根目錄的 `.gitignore`。若已經有這個檔案，只補上缺少的項目，保留原內容：
+
+```gitignore
+.venv/
+__pycache__/
+*.pyc
+```
+
+這些是可重建的環境與快取，不要納入版本紀錄。第 6 節會再說明其他可排除項目；你的程式、`figs/` 與 `notes/` 仍會保存。
+
 ### `git init` — 開始追蹤這個資料夾
 
 ```bash
-cd ~/ai-math-lab
 git init
 ```
 
@@ -83,7 +106,9 @@ git status
 git add -A
 ```
 
-`-A` 是 all 的意思，把所有新增、修改、刪除的檔案都納入。
+`-A` 是 all 的意思，把未被忽略的新增、修改與刪除放進**暫存區（index）**。暫存區保存的是「下一次 commit 要記錄的版本」。
+
+先用 `git status` 看清單，打開新檔查看內容；已追蹤檔案的修改用 `git diff` 檢查。確認要保留後再 `git add`，不要先全部加入才開始判斷。
 
 ### `git commit -m` — 存檔
 
@@ -91,30 +116,42 @@ git add -A
 git commit -m "完成 PCA 手刻版本"
 ```
 
-`-m` 後面是這次存檔的說明，寫給未來的自己看。`git add -A` 和 `git commit` 幾乎總是一起用，可以連起來：
+`-m` 後面是這次存檔的說明，寫給未來的自己看。`git add -A` 和 `git commit` 經常一起使用，請逐行執行：
 
 ```bash
-git add -A && git commit -m "完成 PCA 手刻版本"
+git add -A
+git diff --cached
+git commit -m "完成 PCA 手刻版本"
 ```
 
-**把這行背起來。** 這是整章使用頻率最高的指令。
+加入暫存區後，再讀一次 `git diff --cached`；確認內容符合預期，才執行 commit。
 
-### `git diff` — 看從上次存檔到現在改了什麼
+### `git diff` — 看尚未加入暫存區的修改
 
 ```bash
 git diff
 ```
 
-**這是這章最重要的指令。** 它回答「agent 到底改了我什麼」。下一節專門講怎麼讀它的輸出。
+`git diff` 比較目前檔案與暫存區；已經 `git add` 的修改，要用 `--cached` 看：
 
-### `git restore` — 丟掉未存檔的修改，回到上次 commit 的樣子
+| 指令 | 比較哪兩個版本 |
+|---|---|
+| `git diff` | 工作目錄與暫存區：尚未暫存的修改 |
+| `git diff --cached` | 暫存區與上一個 commit（HEAD）：準備存檔的修改 |
+| `git diff HEAD` | 工作目錄與 HEAD：合看已暫存和未暫存的修改 |
+
+這些 diff 不會顯示未追蹤新檔的內文；新檔先用 `git status` 找出，再打開閱讀。下一節會帶你讀懂 diff 的行首符號。
+
+### `git restore` — 丟掉尚未暫存的修改
 
 ```bash
 git restore lab2_pca.py     # 只還原這個檔案
-git restore .               # 還原所有檔案
+git restore .               # 還原目前目錄下已追蹤檔案的未暫存修改
 ```
 
-**這是你的後悔藥。** 注意：它丟掉的是「還沒 commit 的修改」，這個動作**無法復原**，所以要先用 `git diff` 確認你真的不要那些修改。
+預設 `git restore` 從**暫存區**還原工作目錄，所以會丟掉 `git diff` 顯示的未暫存修改。先查看差異，確定不要了才執行；被丟掉而未另存的內容不能靠這個指令復原。
+
+如果已經 `git add`，修改就在暫存區，普通 `git restore` 不會把它退回上一個 commit。先用 `git diff --cached` 查看；只是想取消暫存、保留檔案內容時，可用 `git restore --staged 檔名`，再決定是否要丟掉工作目錄中的修改。
 
 ### `git log --oneline` — 看存檔歷史
 
@@ -134,52 +171,49 @@ c4d5a22 初始環境
 
 ---
 
+<!--DIAGRAM:git-workflow-->
+
 ## 4. 核心工作流：三步驟
 
 這是整章的骨幹。**每次叫 agent 動手之前、之後，各做一件事。**
 
-```
-  ┌─────────────────────────────────────────┐
-  │  1. 動手前先存檔                          │
-  │     git add -A && git commit -m "..."    │
-  └─────────────────┬───────────────────────┘
-                    ↓
-  ┌─────────────────────────────────────────┐
-  │  2. 讓 agent 改（在 opencode 裡）          │
-  └─────────────────┬───────────────────────┘
-                    ↓
-  ┌─────────────────────────────────────────┐
-  │  3. 檢查                                 │
-  │     git diff                             │
-  └─────────────────┬───────────────────────┘
-                    ↓
-        ┌───────────┴───────────┐
-        ↓                       ↓
-   滿意 → 再 commit         不滿意 → git restore .
-   git add -A &&            （回到步驟 1 的狀態）
-   git commit -m "..."
-```
+動手前存檔，完成後檢查差異，再決定保留或還原。下面用實際指令走一遍。
 
-實際操作起來是這樣：
+先保存開始前的狀態：
 
 ```bash
-# 1. 動手前先存檔（這是關鍵，不要跳過）
-cd ~/ai-math-lab
-git add -A && git commit -m "叫 agent 改 PCA 之前的狀態"
-
-# 2. 開 opencode 讓它改
-opencode
-# ...在裡面對話，讓它修改 lab2_pca.py...
-# 改完離開（Ctrl+C 或 /exit）
-
-# 3. 檢查它改了什麼
+git status
 git diff
+```
 
-# 4a. 覺得不錯 → 存起來
-uv run python lab2_pca.py        # 先確認真的能跑
-git add -A && git commit -m "PCA 加上 scree plot"
+檢查目前修改與新檔，確認要保留後，逐行執行：
 
-# 4b. 覺得不行 → 全部丟掉
+```bash
+git add -A
+git diff --cached
+git commit -m "叫 agent 改 PCA 之前的狀態"
+opencode
+```
+
+如果沒有變更可存，Git 會告訴你工作目錄乾淨，可以直接進入 OpenCode。請 agent 修改 `lab2_pca.py`，完成後用 `/exit` 離開，再回到終端機：
+
+```bash
+git status
+git diff
+```
+
+**要保留這次修改時**，先確認程式能跑，再加入暫存區與存檔：
+
+```bash
+uv run python lab2_pca.py
+git add -A
+git diff --cached
+git commit -m "PCA 加上 scree plot"
+```
+
+**不保留，而且還沒 `git add` 時**，先查看 `git diff`，再執行：
+
+```bash
 git restore .
 ```
 
@@ -196,11 +230,11 @@ git clean -f      # 確認清單沒問題後，真的刪掉
 
 ### 為什麼「動手前先 commit」不能跳過
 
-因為 `git diff` 和 `git restore` 都是**相對於上一次 commit** 運作的。
+剛 commit 完且沒有其他修改時，工作目錄、暫存區與 HEAD 一致。之後讓 agent 修改、暫時不做 `git add`，`git diff` 就能清楚顯示這一輪的差異。
 
-如果你上次 commit 是三天前，中間你自己改了很多東西，那 `git diff` 會把「你自己改的」和「agent 改的」混在一起顯示，你分不出誰是誰。而 `git restore .` 會把你自己三天的心血也一起丟掉。
+如果你上次 commit 是三天前，中間你自己改了很多東西，那 `git diff` 會把「你自己改的」和「agent 改的」混在一起顯示，你分不出誰是誰。若那些修改尚未暫存，`git restore .` 也會一起丟掉。
 
-**先 commit，等於畫一條乾淨的起跑線。** 之後 `git diff` 顯示的每一行，都保證是 agent 幹的。
+**先 commit，等於畫一條乾淨的起跑線。** 之後就能用 `git diff` 檢查這一輪的修改；如果你也手動改過，差異裡會包含你的修改。
 
 commit 訊息隨便寫沒關係，`git commit -m "wip"` 也行。**重點是有 commit，不是訊息寫得漂亮。**
 
@@ -208,7 +242,7 @@ commit 訊息隨便寫沒關係，`git commit -m "wip"` 也行。**重點是有 
 
 ## 5. 怎麼看懂 `git diff` 的輸出
 
-這是一段真實的 `git diff` 輸出（實際跑出來的，不是示意）：
+下面是一段 `git diff`，先看修改的內容：
 
 ```diff
 diff --git a/kmeans.py b/kmeans.py
@@ -236,8 +270,8 @@ index 94c687d..3b8b876 100644
 |---|---|
 | `diff --git a/kmeans.py b/kmeans.py` | 接下來講的是 `kmeans.py` 這個檔案 |
 | `index 94c687d..3b8b876` | 內部編號，**看不懂沒關係，直接跳過** |
-| `--- a/kmeans.py` | `a/` 代表**舊版**（你上次 commit 的） |
-| `+++ b/kmeans.py` | `b/` 代表**新版**（agent 改完的） |
+| `--- a/kmeans.py` | `a/` 代表比較中的**舊版**（這個例子是暫存區的版本） |
+| `+++ b/kmeans.py` | `b/` 代表比較中的**新版**（這個例子是工作目錄） |
 | `@@ -1,10 +1,9 @@` | 位置標記：舊版從第 1 行起算 10 行，新版從第 1 行起算 9 行 |
 | 開頭是 `-` 的行 | **被刪掉的**（舊版有，新版沒有） |
 | 開頭是 `+` 的行 | **新增的**（新版才有） |
@@ -295,10 +329,10 @@ git diff --word-diff      # 以「詞」為單位標示，改一兩個字時比�
 
 有些檔案不該被 git 追蹤。在專案根目錄建立一個叫 `.gitignore` 的檔案：
 
-```bash
-cd ~/ai-math-lab
-cat > .gitignore <<'EOF'
-# Python 虛擬環境（幾百 MB，可以用 uv sync 重建）
+用文字編輯器開啟 `.gitignore`，貼上下列內容；若檔案已存在，只補上缺少的項目，保留原設定：
+
+```gitignore
+# Python 虛擬環境（可以用 uv sync 重建）
 .venv/
 
 # Python 快取
@@ -311,9 +345,13 @@ Thumbs.db
 
 # Jupyter
 .ipynb_checkpoints/
-EOF
+```
 
-git add -A && git commit -m "加上 .gitignore"
+存檔後回到終端機：
+
+```bash
+git add -A
+git commit -m "加上 .gitignore"
 ```
 
 ### 逐項說明
@@ -324,7 +362,7 @@ git add -A && git commit -m "加上 .gitignore"
 
 **`__pycache__/`、`*.pyc` — 一定要排除。** Python 自動產生的編譯快取，沒有保存價值。
 
-**`uv.lock` — 要進版控。** 它記錄了每個套件的精確版本，是可重現性的保證。不要把它加進 `.gitignore`。
+**`uv.lock` — 要進版控。** 它記錄了每個套件的精確版本，可用來重建相同的套件版本。不要把它加進 `.gitignore`。
 
 ### `figs/` 要不要進版控：這題沒有標準答案
 
@@ -359,39 +397,51 @@ git add -A && git commit -m "加上 .gitignore"
 
 ### 好處 1：看得到 agent 改了你筆記的哪一個字
 
-純文字檔的 diff 精準到字元層級。假設你請 agent 潤飾筆記：
+使用 Lab 3 已完成的 `notes/logistic.md` 練習。先打開筆記確認內容，查看 `git status` 與 `git diff`，再保存目前版本：
 
 ```bash
-git add -A && git commit -m "PCA 筆記初稿"
-opencode run "幫我潤飾 notes/pca.md 的說明，讓推導更清楚"
-git diff notes/pca.md
+git add -A
+git commit -m "保存 logistic 筆記初稿"
+opencode
+```
+
+在互動介面貼上：
+
+```text
+幫我潤飾 notes/logistic.md 的說明，讓推導更清楚。保留原公式與數值，修改前先說明要調整什麼。
+```
+
+檢查並確認修改要求。完成後退出 OpenCode，再回到終端機查看差異：
+
+```bash
+git diff notes/logistic.md
 ```
 
 你會看到類似這樣：
 
 ```diff
--我們要找一個方向 $w$，讓投影後的變異數最大。
-+我們要找一個單位向量 $w$（即 $\|w\|=1$），使投影 $Xw$ 的變異數最大。
+-我們用梯度檢查驗證公式。
++我們用中央差分，在指定的檢查點與步長核對解析梯度。
 ```
 
-一眼就知道它加了「單位向量」的限制條件。**這是真的改好了**，你學到了一個原本漏掉的條件。
+這段補上了檢查方法與適用範圍。請回頭核對自己的程式確實用了中央差分與指定的檢查點，才能接受這個修改。
 
 但也可能看到：
 
 ```diff
--特徵值 $\lambda_i$ 代表第 $i$ 個主成分解釋的變異量。
-+特徵值 $\lambda_i$ 代表第 $i$ 個主成分的重要性。
+-這次檢查只支持指定位置附近的數值一致性。
++這次檢查證明整個公式在所有位置都正確。
 ```
 
-「重要性」比「解釋的變異量」模糊，**這是改差了**，`git restore notes/pca.md` 退回去。
+新句把局部數值證據放大成全域保證，不能接受。若尚未暫存，可用 `git restore notes/logistic.md` 放棄這次對該檔的修改。
 
 ### 好處 2：你自己的理解歷程被保留下來
 
-`git log --oneline notes/pca.md` 可以看到這份筆記的所有版本。期末複習時翻回三週前的版本，你會看到當時的自己哪裡想錯了。**那個「想錯又改對」的過程，比最終正確的版本更有學習價值。**
+`git log --oneline notes/logistic.md` 可以看到這份筆記的所有版本。期末複習時翻回三週前的版本，你會看到當時的自己哪裡想錯了。**你也能回頭看自己當時如何修正理解。**
 
 ### 好處 3：安心讓 agent 大改
 
-知道隨時能還原，你才敢下「幫我重寫這一節，用更直觀的方式解釋特徵值分解」這種大動作的指令。不敢放手，就只能請它做無關痛癢的小修改。
+知道隨時能還原，你才敢下「幫我重寫這一節，用更直觀的方式解釋梯度檢查」這種大動作的指令。不敢放手，就只能請它做無關痛癢的小修改。
 
 ---
 
@@ -414,7 +464,7 @@ git diff notes/pca.md
 - 不要 `git commit`、`git push`，除非我明講。
 ```
 
-為什麼連 commit 都不給：**commit 是「我檢查過了，這個版本我認可」的意思。** 如果 agent 改完自己 commit 了，`git diff` 就沒東西可看了（變動已經被存進歷史），你就失去了檢查的機會。
+為什麼連 commit 都不給：**commit 是「我檢查過了，這個版本我認可」的意思。** 如果 agent 改完自己 commit，一般的 `git diff` 就不再顯示那些修改，需要到歷史裡另行比較。先檢查再 commit，才能在每一步確認要保留什麼。
 
 **分工要清楚：agent 負責改，你負責檢查和存檔。**
 
@@ -443,14 +493,14 @@ AGENTS.md 是請求，不是強制。要真的擋住，用 `opencode.json` 的 `
 }
 ```
 
-其中 **`"git push *": "deny"` 這條是我實際驗證過的**：存檔後執行 `opencode agent list`，可以在解析後的權限規則裡看到 `{"permission": "bash", "pattern": "git push *", "action": "deny"}`。同一份設定裡的 `git status` / `git diff *` 樣式也一併正確解析。`rm -rf *` 那條我沒有單獨測試，它只是同樣語法的套用。
+存檔後用 `opencode agent list` 檢查解析後的權限規則。`deny` 規則只封鎖符合樣式的工具請求，不能把一小組字串規則當成所有刪除或外傳行為的完整防護。
 
 四個要點：
 
 1. **`deny` 代表直接拒絕**，連問都不問。`ask` 是每次問你，`allow` 是直接放行。
 2. **最後一條符合的規則勝出**，所以萬用的 `"*": "ask"` 要寫在最前面，特例寫在後面。順序寫反了就沒效果。
 3. 把 `git status`、`git diff`、`git log` 設成 `allow`，是因為它們是唯讀的、不會改任何東西，讓 agent 自由查詢反而方便（它可以自己檢查改了什麼）。
-4. **`"git push"` 和 `"git push *"` 兩條都要寫。** 前者擋不帶參數的 `git push`（最常見的形式），後者擋 `git push origin main` 這種帶參數的。我沒有實測單寫帶 `*` 的能不能同時擋住不帶參數的情況，所以兩條都寫。
+4. **`"git push"` 和 `"git push *"` 兩條都要寫。** 前者擋不帶參數的 `git push`（最常見的形式），後者擋 `git push origin main` 這種帶參數的。把兩種形式都明列，方便核對。
 
 改完設定用這個指令確認生效：
 
@@ -464,9 +514,11 @@ opencode debug config
 
 | 狀況 | 指令 |
 |---|---|
-| agent 改壞了，還沒 commit | `git restore .` |
+| agent 改壞了，修改尚未 git add | 先 `git diff`，確認不要後再 `git restore .` |
 | 只想還原其中一個檔案 | `git restore lab2_pca.py` |
-| 想看 agent 到底改了什麼 | `git diff` |
+| 想看尚未暫存的修改 | `git diff` |
+| 已經 git add，想看準備存檔的內容 | `git diff --cached` |
+| 想合看已暫存與未暫存的修改 | `git diff HEAD` |
 | 改很多檔，想先看規模 | `git diff --stat` |
 | 不確定現在是什麼狀態 | `git status` |
 | 想看歷史版本 | `git log --oneline` |
@@ -485,12 +537,12 @@ opencode debug config
 1. git 的價值是**心理安全網**：還原成本趨近於零，你才敢放手讓 agent 做事。
 2. **不需要 GitHub 帳號**，純本機 repo 就能得到全部好處。
 3. 七個指令：`init` / `status` / `add -A` / `commit -m` / `diff` / `restore` / `log --oneline`。
-4. 核心工作流：**動手前 commit → 讓 agent 改 → `git diff` 檢查 → 滿意再 commit，不滿意 `git restore`**。
+4. 核心工作流：**動手前 commit → 讓 agent 改 → `git diff` 檢查 → 滿意再 commit，不滿意且尚未暫存時 `git restore`**。
 5. 讀 diff：`-` 是刪掉、`+` 是新增、`@@` 是位置。**特別注意被刪掉的行**。
 6. `.gitignore` 放 `.venv/`、`__pycache__/`；`uv.lock` 要進版控；`figs/` 這門課建議進版控。
 7. 筆記進版控，看得到 agent 改了哪個字，也保留你自己的理解歷程。
 8. **絕對不要叫 agent `git push`**，並用 `permission` 的 `"git push *": "deny"` 真正擋住。
-9. 學習階段不要用 `opencode --auto`。
+9. 互動練習逐次確認權限；`--auto` 的課前自測例外見課前準備。
 
 ---
 
@@ -498,7 +550,7 @@ opencode debug config
 
 1. 在你的專案跑 `git init`，建立 `.gitignore`，做出第一個 commit。
 2. 跑 `git log --oneline` 確認 commit 存在。
-3. 做一次完整工作流：commit → 叫 agent 改 `reference/` 裡任一支程式 → `git diff` 逐行讀 → 判斷好壞 → commit 或 restore。
+3. 做一次完整工作流：commit → 叫 agent 改自己已完成的任一個 Lab 程式 → `git diff` 逐行讀 → 判斷好壞 → commit 或 restore。
 4. 故意做一次 `git restore .`，親手體驗「改壞了也沒關係」的感覺。**這一步不要跳過**，恐懼是靠實際經驗消除的，不是靠讀文章。
 5. 把第 8 節的 `permission` 設定寫進 `opencode.json`，用 `opencode debug config` 確認生效，然後叫 agent 執行 `git push`，看它是不是真的被擋下來。
 
@@ -511,10 +563,3 @@ opencode debug config
 - https://opencode.ai/docs/rules/ — AGENTS.md 與 git 相關規則的寫法
 - https://learnopencode.com/2-daily/06-git-basics.html — git 基礎指令與「保留最後一次人工確認」的原則（中文教學站，簡體）
 - https://learnopencode.com/5-advanced/05-permissions.html — bash 樣式規則範例、「最後匹配的規則生效」（中文教學站，簡體）
-
-本機實測（opencode 1.18.30，Linux/WSL2）：
-
-- 第 5 節的 `git diff` 輸出為實際執行 git 產生，非示意
-- `opencode agent list` 確認 `"git push *": "deny"` 規則正確解析
-- `opencode --help` 中 `--auto` 的原文警語 "(dangerous!)"
-- `starter/.venv/.gitignore` 內容確為 `*`

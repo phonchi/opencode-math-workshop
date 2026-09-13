@@ -1,45 +1,11 @@
 
 <footer>
 <div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
-<div class="stamp">本教材以 opencode __OCVER__ 於 __TESTDATE__ 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+<div class="stamp">讓 agent 動手，讓數學說明結果。</div>
 </footer>
 
 <script>
-// 導覽列高亮目前頁面
-(function(){
-  var f=(location.pathname.split('/').pop()||'index.html');
-  document.querySelectorAll('.topnav nav a').forEach(function(a){
-    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
-  });
-})();
-
-// 指令複製鈕
-document.querySelectorAll('pre.cmd').forEach(function(pre){
-  var b=document.createElement('button');
-  b.className='copy'; b.type='button'; b.textContent='複製';
-  b.addEventListener('click',function(){
-    var t=pre.querySelector('code');
-    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
-      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
-    },function(){ b.textContent='複製失敗'; });
-  });
-  pre.appendChild(b);
-});
-
-// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
-(function(){
-  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
-  var saved={};
-  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
-  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
-    var id=cb.id||('ck'+i); cb.id=id;
-    if(saved[id]) cb.checked=true;
-    cb.addEventListener('change',function(){
-      saved[id]=cb.checked;
-      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
-    });
-  });
-})();
+__SITE_JS__
 </script>
 
 <script>

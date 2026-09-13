@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AGENTS.md｜OpenCode × AI-Math 工作坊</title>
-<meta name="description" content="把專案規則寫成 AGENTS.md，讓 agent 每次都照做，不必你每次重講。">
+<title>AGENTS.md 專案規則｜OpenCode × AI-Math 工作坊</title>
+<meta name="description" content="把專案規則寫成 AGENTS.md，讓 agent 知道工作方式與驗證要求。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2213%22%20fill%3D%22%23191922%22%2F%3E%3Cpath%20d%3D%22M16%2020l12%2012-12%2012%22%20fill%3D%22none%22%20stroke%3D%22%23e3c273%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Crect%20x%3D%2233%22%20y%3D%2240%22%20width%3D%2217%22%20height%3D%226%22%20rx%3D%223%22%20fill%3D%22%23b8503c%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -502,34 +502,228 @@ footer .stamp{
   .topnav,.pager,pre .copy{display:none;}
   body{background:#fff;}
 }
+/* 共用教材骨架：由 build_site.py 內嵌至每個頁面，離線複製仍保留版面。 */
+:root{--shell-width:1440px;--sidebar-width:232px;--column-gap:32px;--prose-width:46em;}
+.topnav .inner{max-width:var(--shell-width);min-height:60px;}
+.topnav .brand{font-size:.82rem;}
+.topnav nav a{font-size:.82rem;color:var(--ink-2);}
+.site-shell{
+  display:grid;grid-template-columns:var(--sidebar-width) minmax(0,1fr);
+  gap:var(--column-gap);max-width:var(--shell-width);margin:0 auto;padding:0 32px;
+}
+.lesson-sidebar{
+  position:sticky;top:80px;align-self:start;max-height:calc(100dvh - 100px);
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  padding:24px 16px 24px 0;margin-top:16px;border-right:1px solid var(--rule);
+}
+.course-menu{display:none;}
+.course-nav ul{list-style:none;margin:0;padding:0;}
+.course-nav li{margin:0;}
+.nav-group{margin-bottom:22px;}
+.nav-group:last-child{margin-bottom:0;}
+.nav-group-title{font-size:.72rem;font-weight:700;color:var(--ink-3);letter-spacing:.08em;margin:0 0 8px 10px;}
+.chapter-link{
+  display:block;font-size:.86rem;color:var(--ink-2);line-height:1.6;
+  padding:7px 10px;border-radius:var(--r-sm);text-decoration:none;
+}
+.chapter-link:hover{background:var(--paper-2);color:var(--ink);}
+.chapter-link[aria-current="page"]{color:var(--live);font-weight:700;background:rgba(184,80,60,.075);}
+.course-nav .section-nav{border-left:1px solid var(--rule);margin:8px 0 12px 14px;padding-left:8px;}
+.section-nav a{display:block;font-size:.76rem;line-height:1.6;padding:5px 8px;text-decoration:none;color:var(--ink-3);}
+.section-nav a:hover,.section-nav a[aria-current="location"]{color:var(--link);background:rgba(42,60,120,.05);border-radius:4px;}
+.section-nav a[aria-current="location"]{font-weight:700;}
+.lesson-main{min-width:0;padding:16px 0 0;}
+.lesson-main > .container{width:100%;max-width:none;padding:24px 0 0;}
+.lesson-main .pagehead{padding-top:24px;}
+.lesson-main .pagehead h1{max-width:20em;}
+.lesson-main .pagehead .lead{max-width:var(--prose-width);}
+.lesson-main p,.lesson-main ul:not(.ckl),.lesson-main ol{max-width:var(--prose-width);}
+.lesson-main .term-body p,.lesson-main .term-body ul{max-width:none;}
+.lesson-main h2{scroll-margin-top:88px;margin-top:3rem;}
+.lesson-main h3,.lesson-main h4{scroll-margin-top:88px;}
+.lesson-main .hero{border-radius:var(--r-lg);padding:48px 36px 40px;margin-top:24px;}
+.lesson-main .hero .kicker{letter-spacing:.09em;}
+.lesson-main .hero-glyph{right:24px;bottom:24px;opacity:.6;}
+.lesson-main .hero h1{font-size:clamp(2.1rem,3.8vw,3.15rem);}
+.lesson-main .hero .inner{max-width:none;}
+.lesson-main .hero .meta{gap:24px;}
+.lesson-main .ch-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));}
+.lesson-main .step{padding-left:3.2rem;}
+/* 原始輸出保留等寬對齊；寬表格與輸出可在自己的容器捲動。 */
+.lesson-main pre.out{font-size:.875rem!important;}
+.lesson-main pre,.lesson-main .tw{max-width:100%;}
+.lesson-main pre:focus-visible,.lesson-main .tw:focus-visible{outline-offset:4px;}
+.lesson-diagram{margin:28px 0 36px;max-width:100%;}
+.lesson-diagram > svg{display:block;width:100%;height:auto;max-width:100%;}
+.lesson-diagram figcaption{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:.78rem;color:var(--ink-2);margin-top:12px;}
+.lesson-diagram figcaption a{margin-left:auto;white-space:nowrap;}
+.pager{margin-top:40px;}
+.pager a{min-width:min(230px,100%);}
+footer{max-width:var(--shell-width);margin:56px auto 0;}
+.skip-link{position:fixed;left:16px;top:8px;transform:translateY(-160%);padding:8px 16px;background:var(--paper-2);z-index:100;border:2px solid var(--link);border-radius:var(--r-sm);}
+.skip-link:focus{transform:none;}
+:focus-visible{outline:2px solid var(--link);outline-offset:3px;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
+@media(max-width:1100px){
+  .site-shell{display:block;padding:0 24px;}
+  .lesson-sidebar{position:static;margin:20px 0 0;padding:0;border:0;max-height:none;overflow:visible;}
+  .desktop-course-menu{display:none;}
+  .course-menu{display:block;border:1px solid var(--rule);border-radius:var(--r-md);background:var(--paper-2);}
+  .course-menu > summary{padding:12px 16px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--link);}
+  .course-menu .course-nav{padding:16px;border-top:1px solid var(--rule);}
+  .course-menu[open] .course-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;}
+  .lesson-main{padding-top:0;}
+  .lesson-main > .container{padding-top:12px;}
+  .lesson-main .hero{margin-top:24px;}
+}
+@media(max-width:720px){
+  .site-shell{padding:0 20px;}
+  .topnav .inner{padding:8px 20px;min-height:56px;flex-wrap:nowrap;gap:12px;}
+  .topnav .brand{font-size:.72rem;letter-spacing:.02em;}
+  .topnav nav{width:auto;margin-left:auto;overflow:visible;mask-image:none;-webkit-mask-image:none;gap:4px;}
+  .topnav nav a{padding:4px;font-size:.72rem;}
+  .lesson-main .hero{padding:32px 24px;}
+  .lesson-main .pagehead{padding-top:20px;}
+  .lesson-main .hero h1{font-size:2.05rem;}
+  .lesson-main .hero .kicker{font-size:.66rem;}
+  .course-menu[open] .course-nav{display:block;}
+  .lesson-main .step{padding-left:2.6rem;}
+  .lesson-main pre.out{font-size:.8125rem!important;}
+  .lesson-diagram figcaption a{margin-left:0;}
+  .pager{display:block;}
+  .pager a{display:block;margin-bottom:12px;}
+}
+@media print{
+  .lesson-sidebar,.skip-link{display:none;}
+  .site-shell{display:block;max-width:none;padding:0;}
+  .lesson-main{padding:0;}
+  .lesson-main .hero{color:var(--ink);background:none;padding:0;}
+  .lesson-main .hero h1,.lesson-main .hero .sub,.lesson-main .hero .kicker{color:var(--ink);}
+  .lesson-main pre{white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:none;}
+  .lesson-diagram{break-inside:avoid;}
+}
+
 </style>
 </head>
 <body>
-
+<a class="skip-link" href="#main-content">跳到本章內容</a>
 <div class="topnav"><div class="inner">
 <a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
-<nav>
+<nav aria-label="常用入口">
 <a href="prep.html">課前準備</a>
-<a href="first-run.html">第一次對話</a>
-<a href="lab1-cluster.html">Lab 1</a>
-<a href="lab2-pca.html">Lab 2</a>
-<a href="lab3-notes.html">Lab 3</a>
-<a href="local-models.html">本地模型</a>
-<a href="agents-md.html">AGENTS.md</a>
-<a href="git-safety.html">git</a>
-<a href="mcp-skills.html">MCP</a>
-<a href="cheatsheet.html">速查</a>
+<a href="cheatsheet.html">速查表</a>
 </nav>
 </div></div>
 
-<div class="container narrow">
+<div class="site-shell"><aside class="lesson-sidebar" aria-label="教材導覽"><div class="desktop-course-menu"><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html" aria-current="page">AGENTS.md 專案規則</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-agents-md-是什麼">1. AGENTS.md 是什麼</a></li>
+<li><a href="#section-opencode-什麼時候讀它">2. opencode 什麼時候讀它</a></li>
+<li><a href="#section-agents-md-與-instructions-設定的關係">3. AGENTS.md 與 instructions 設定的關係</a></li>
+<li><a href="#section-全域-vs-專案層的-agents-md">4. 全域 vs 專案層的 AGENTS.md</a></li>
+<li><a href="#section-init-指令會做什麼">5. /init 指令會做什麼</a></li>
+<li><a href="#section-實用寫法-六件值得寫進去的事">6. 實用寫法：六件值得寫進去的事</a></li>
+<li><a href="#section-完整範例-可直接複製">7. 完整範例（可直接複製）</a></li>
+<li><a href="#section-反例-哪些寫法沒用或有反效果">8. 反例：哪些寫法沒用或有反效果</a></li>
+<li><a href="#section-怎麼驗證-agents-md-真的生效了">9. 怎麼驗證 AGENTS.md 真的生效了</a></li>
+<li><a href="#section-本章重點">10. 本章重點</a></li>
+<li><a href="#section-練習">練習</a></li>
+<li><a href="#section-資料來源">資料來源</a></li>
+</ul>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></div><details class="course-menu"><summary>課程與本章目錄</summary><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html" aria-current="page">AGENTS.md 專案規則</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-agents-md-是什麼">1. AGENTS.md 是什麼</a></li>
+<li><a href="#section-opencode-什麼時候讀它">2. opencode 什麼時候讀它</a></li>
+<li><a href="#section-agents-md-與-instructions-設定的關係">3. AGENTS.md 與 instructions 設定的關係</a></li>
+<li><a href="#section-全域-vs-專案層的-agents-md">4. 全域 vs 專案層的 AGENTS.md</a></li>
+<li><a href="#section-init-指令會做什麼">5. /init 指令會做什麼</a></li>
+<li><a href="#section-實用寫法-六件值得寫進去的事">6. 實用寫法：六件值得寫進去的事</a></li>
+<li><a href="#section-完整範例-可直接複製">7. 完整範例（可直接複製）</a></li>
+<li><a href="#section-反例-哪些寫法沒用或有反效果">8. 反例：哪些寫法沒用或有反效果</a></li>
+<li><a href="#section-怎麼驗證-agents-md-真的生效了">9. 怎麼驗證 AGENTS.md 真的生效了</a></li>
+<li><a href="#section-本章重點">10. 本章重點</a></li>
+<li><a href="#section-練習">練習</a></li>
+<li><a href="#section-資料來源">資料來源</a></li>
+</ul>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></details></aside><main id="main-content" class="lesson-main" tabindex="-1"><div class="container narrow">
 
 <div class="pagehead">
-  <div class="kicker"><span>06</span><span>·</span><span class="badge after">課後延伸</span></div>
+  <div class="kicker"><span class="badge after">課後延伸</span></div>
   <h1>用 AGENTS.md 馴服 agent</h1>
 </div>
 
-<div class="box tip"><p>適用版本：opencode 1.18.30</p></div>
 <p>工作坊上你已經會叫 opencode 幫你寫程式了。但你大概也遇過這些狀況：</p>
 <ul>
 <li>它用英文回你，你要的是中文</li>
@@ -539,12 +733,12 @@ footer .stamp{
 </ul>
 <p>這章要解決的就是最後一句。<code>AGENTS.md</code> 是一個放在專案根目錄的 Markdown 檔，opencode 每次開始工作都會先讀它。把規矩寫一次，之後每個對話都自動生效。</p>
 <hr>
-<h2>1. AGENTS.md 是什麼</h2>
+<h2 id="section-agents-md-是什麼">1. AGENTS.md 是什麼</h2>
 <p>它就是一個純文字 Markdown 檔，沒有特殊語法、沒有必填欄位。裡面寫的是<strong>你希望 agent 每次都遵守的規則</strong>：用什麼語言、用什麼指令跑程式、圖存哪裡、什麼事不准做。</p>
 <p>opencode 會把這個檔案的內容接在系統提示後面送給模型。所以它的效力等同於「你每次對話開頭都手動貼上這段話」，只是你不用真的貼。</p>
 <p>重點觀念：<strong>AGENTS.md 是給模型看的，不是給人看的</strong>。它不是 README。README 寫給同學看「這專案怎麼跑」，AGENTS.md 寫給 agent 看「你該怎麼動手」。兩者內容可以重疊，但目的不同。</p>
 <hr>
-<h2>2. opencode 什麼時候讀它</h2>
+<h2 id="section-opencode-什麼時候讀它">2. opencode 什麼時候讀它</h2>
 <p>opencode 啟動時會依序尋找規則檔：</p>
 <ol>
 <li><strong>專案層</strong>：從目前目錄往上層逐層找 <code>AGENTS.md</code>（找不到才找 <code>CLAUDE.md</code>）</li>
@@ -553,16 +747,13 @@ footer .stamp{
 </ol>
 <p>找到的檔案會<strong>一起合併</strong>使用，不是只取第一個。同一類別中 <code>AGENTS.md</code> 優先於 <code>CLAUDE.md</code>。</p>
 <p>因為是「從目前目錄往上找」，所以有個很實際的後果：</p>
-<pre class="cmd" data-lang="bash"><code># 正確：在專案根目錄啟動，AGENTS.md 讀得到
-cd ~/ai-math-lab
-opencode
-
-# 有風險：在別的地方啟動，讀到的可能不是你的專案規則
-cd ~
-opencode</code></pre>
+<p>在課前建立的專案資料夾開啟終端機，先確認位置：</p>
+<pre class="cmd" data-lang="bash"><code>pwd
+ls</code></pre>
+<p>清單裡應有本課程的 <code>AGENTS.md</code> 與 <code>opencode.json</code>。如果沒有，先切回正確的資料夾，不要在目前位置另建一套。</p>
 <p><strong>養成習慣：一律 <code>cd</code> 進專案根目錄再打 <code>opencode</code>。</strong> 這是初學者最常見的「規則怎麼沒生效」原因。</p>
 <hr>
-<h2>3. AGENTS.md 與 <code>instructions</code> 設定的關係</h2>
+<h2 id="section-agents-md-與-instructions-設定的關係">3. AGENTS.md 與 <code>instructions</code> 設定的關係</h2>
 <p>你的 <code>opencode.json</code> 目前長這樣：</p>
 <pre class="cmd" data-lang="json"><code>{
   "$schema": "https://opencode.ai/config.json",
@@ -571,18 +762,6 @@ opencode</code></pre>
   "instructions": ["AGENTS.md"]
 }</code></pre>
 <p>很多人以為是 <code>instructions</code> 這行讓 AGENTS.md 生效的。<strong>不是。</strong> 根目錄的 <code>AGENTS.md</code> 是自動被找到的，不寫 <code>instructions</code> 也會讀。</p>
-<p>這點我實際驗證過。建一個乾淨的資料夾，<code>opencode.json</code> 裡<strong>完全沒有 <code>instructions</code> 這個鍵</strong>：</p>
-<pre class="cmd" data-lang="json"><code>{
-  "$schema": "https://opencode.ai/config.json",
-  "model": "opencode/big-pickle"
-}</code></pre>
-<p>旁邊放一份只寫了「執行 Python 一律用 <code>uv run python &lt;檔案&gt;</code>」的 <code>AGENTS.md</code>，然後問它：</p>
-<pre class="cmd" data-lang="bash"><code>opencode run "用一句話回答：依照專案規則，執行 Python 檔案應該用哪一個指令？"</code></pre>
-<p>實測回答：</p>
-<pre class="out"><code>&gt; build · big-pickle
-
-`uv run python &lt;檔案&gt;`</code></pre>
-<p><strong>規則生效了，而設定檔裡一個字都沒提到 AGENTS.md。</strong></p>
 <p><code>instructions</code> 真正的用途是<strong>追加其他檔案</strong>。它支援三種寫法：</p>
 <pre class="cmd" data-lang="json"><code>{
   "instructions": [
@@ -605,29 +784,22 @@ opencode</code></pre>
   → OPENCODE_CONFIG 環境變數指定的檔
   → 專案根目錄 opencode.json          ← 教材一律用這層</code></pre>
 <p>後面的會覆蓋前面同名的鍵。<strong>這門課的所有設定都寫在專案根目錄的 <code>opencode.json</code></strong>，這樣你的設定跟著專案走，換台電腦、交作業都不會掉。</p>
-<p>（附帶一提：opencode 會在全域設定目錄自動產生 <code>opencode.jsonc</code>，裡面只有一行 <code>$schema</code>，以及一個依賴 <code>@opencode-ai/plugin</code> 的 <code>package.json</code>。那是它自己要用的，不用去動。<code>.jsonc</code> 格式允許寫註解。）</p>
+<p><code>.jsonc</code> 是可以包含註解的 JSON 格式；本課程使用專案中的 <code>opencode.json</code>，不需要改全域設定。</p>
 <hr>
-<h2>4. 全域 vs 專案層的 AGENTS.md</h2>
+<h2 id="section-全域-vs-專案層的-agents-md">4. 全域 vs 專案層的 AGENTS.md</h2>
 <div class="tw"><table><tr><th></th><th>全域 <code>~/.config/opencode/AGENTS.md</code></th><th>專案 <code>&lt;專案&gt;/AGENTS.md</code></th></tr><tr><td>適合放</td><td>你個人的偏好</td><td>這個專案的技術規則</td></tr><tr><td>例子</td><td>「一律用繁體中文回答」「解釋時先講結論」</td><td>「用 <code>uv run python</code>」「圖存 <code>figs/</code>」</td></tr><tr><td>會不會跟著作業一起交</td><td>不會</td><td>會（建議進版控）</td></tr><tr><td>換專案還在嗎</td><td>在</td><td>不在</td></tr></table></div>
 <p>判斷原則很簡單：<strong>換一個專案還成立的，放全域；只對這個專案成立的，放專案層。</strong></p>
-<p>「用繁體中文」兩邊都可以。放全域你每個專案都不用再寫；放專案層則保證同學拿到你的專案也會得到中文回應。這門課建議<strong>放專案層</strong>，因為要交作業。</p>
+<p>「用繁體中文」兩邊都可以。放全域你每個專案都不用再寫；放專案層則讓同學拿到你的專案時，也能沿用相同的語言要求。這門課建議<strong>放專案層</strong>，讓規則和練習檔案一起保存。</p>
 <hr>
-<h2>5. <code>/init</code> 指令會做什麼</h2>
+<h2 id="section-init-指令會做什麼">5. <code>/init</code> 指令會做什麼</h2>
 <p>在 opencode 的對話介面裡輸入：</p>
 <pre class="out"><code>/init</code></pre>
 <p>它會掃描專案的重要檔案（<code>pyproject.toml</code>、目錄結構、既有設定等），可能問你幾個問題，然後產生或更新 <code>AGENTS.md</code>，內容涵蓋建置指令、架構、慣例。</p>
 <p><strong>什麼時候用</strong>：從零開始一個新專案，你懶得自己想要寫什麼，用 <code>/init</code> 生一份草稿再手動改。</p>
-<p><strong>警告</strong>：官方文件寫的是「產生或更新」<code>AGENTS.md</code>，中文教學站則說如果檔案已存在，它會「改善而非覆寫」。不管是哪一種，它都會動到你那個檔案。你的起始專案已經有一份精心寫好的 <code>AGENTS.md</code>，跑 <code>/init</code> 之後內容一定會變。</p>
-<p>（未實測：我沒有實際拿課程專案去跑 <code>/init</code>，因為風險不對稱：寫壞了要重來，跑對了也只是省幾分鐘。）</p>
-<p>如果你真的想試：</p>
-<pre class="cmd" data-lang="bash"><code>cd ~/ai-math-lab
-git add -A &amp;&amp; git commit -m "跑 /init 之前的存檔"   # 先存檔
-# 然後在 opencode 裡打 /init
-# 不滿意就：
-git restore AGENTS.md</code></pre>
-<p>這正是下一章要講的 git 工作流。<strong>先 commit 再讓 agent 動手</strong>，永遠不會錯。</p>
+<p><code>/init</code> 可能修改既有的 <code>AGENTS.md</code>。本課程已提供規則，現場不用再執行這個指令。</p>
+<p>想在其他專案試 <code>/init</code>，請先完成 <a href="git-safety.html">Git 安全網</a>，保存目前狀態，再產生草稿並檢查差異。本章先練習閱讀與修改現成規則。</p>
 <hr>
-<h2>6. 實用寫法：六件值得寫進去的事</h2>
+<h2 id="section-實用寫法-六件值得寫進去的事">6. 實用寫法：六件值得寫進去的事</h2>
 <p>以下每一條都對應一個真實會出錯的狀況。</p>
 <h3>6.1 語言</h3>
 <pre class="cmd" data-lang="markdown"><code>## 語言
@@ -665,10 +837,10 @@ sklearn 的版本，印出兩者的數值差異來驗證。</code></pre>
 - 不要執行 `git commit`、`git push`，除非我明講。
 - 不要改 `pyproject.toml` 以外的設定檔。
 - 不要刪除 `figs/` 或 `notes/` 裡既有的檔案。</code></pre>
-<p>為什麼不准 agent commit：<strong>commit 是你檢查過之後的動作</strong>。如果 agent 改完自己就 commit 了，你就失去了「用 <code>git diff</code> 看它改了什麼」的機會，而那正是下一章的核心工作流。讓 agent 只負責改，你負責檢查和存檔。</p>
+<p>為什麼不准 agent commit：<strong>commit 是你檢查過之後的動作</strong>。如果 agent 改完自己就 commit，一般的 <code>git diff</code> 就不再顯示那些修改，需要再到歷史中比較。先看差異再存檔，較容易逐步確認。讓 agent 只負責改，你負責檢查和存檔。</p>
 <p><code>git push</code> 更是絕對不行，那會把東西推到網路上，收不回來。</p>
 <hr>
-<h2>7. 完整範例（可直接複製）</h2>
+<h2 id="section-完整範例-可直接複製">7. 完整範例（可直接複製）</h2>
 <p>這是你的起始專案裡那份，可以直接用，也可以照自己的需要改：</p>
 <pre class="cmd" data-lang="markdown"><code># AI-Math 工作坊　專案規則
 
@@ -703,7 +875,7 @@ sklearn 的版本，印出兩者的數值差異來驗證。</code></pre>
 - 不要刪除 `figs/` 或 `notes/` 裡既有的檔案。</code></pre>
 <p>注意第 3 條「自己驗證」的寫法：它不只說「要驗證」，還說「<strong>必須實際執行、印出比對結果</strong>，不可以只說『應該正確』」。這個補充很關鍵。不加的話，agent 常常寫一段驗證程式碼然後直接宣稱通過，根本沒跑。</p>
 <hr>
-<h2>8. 反例：哪些寫法沒用或有反效果</h2>
+<h2 id="section-反例-哪些寫法沒用或有反效果">8. 反例：哪些寫法沒用或有反效果</h2>
 <h3>反例 1：寫得像許願，沒有可判斷的標準</h3>
 <pre class="cmd" data-lang="markdown"><code>請寫出高品質、優雅、專業的程式碼。</code></pre>
 <p>沒用。「高品質」對模型來說沒有可操作的意義，它本來就在盡力產生它認為好的程式碼。這行字佔了 context 卻改變不了任何行為。</p>
@@ -733,17 +905,16 @@ sklearn 的版本，印出兩者的數值差異來驗證。</code></pre>
     }
   }
 }</code></pre>
-<p>這是實測可用的：把上面這段放進 <code>opencode.json</code> 後，用 <code>opencode agent list</code> 檢視解析後的權限規則，可以看到 <code>{"permission": "bash", "pattern": "git push *", "action": "deny"}</code> 確實生效。規則以樣式比對，<strong>最後一條符合的規則勝出</strong>，所以 <code>"*": "ask"</code> 要寫在前面，特例寫後面。</p>
-<p>注意上面<strong>同時寫了 <code>"git push"</code> 和 <code>"git push *"</code> 兩條</strong>。前者擋不帶參數的 <code>git push</code>，後者擋 <code>git push origin main</code> 這類帶參數的。我沒有實測單寫 <code>"git push *"</code> 能不能擋住不帶參數的 <code>git push</code>，所以兩條都寫，比較保險。</p>
+<p>設定完成後，用 <code>opencode agent list</code> 檢視解析後的權限。規則以樣式比對，最後一條符合的規則生效，因此一般規則放前面、特例放後面。</p>
+<p>注意上面<strong>同時寫了 <code>"git push"</code> 和 <code>"git push *"</code> 兩條</strong>。前者擋不帶參數的 <code>git push</code>，後者擋 <code>git push origin main</code> 這類帶參數的。兩種形式都明列，閱讀設定時就能看出想限制哪些動作。</p>
 <p><code>permission</code> 的可用值是 <code>"allow"</code>、<code>"ask"</code>、<code>"deny"</code>。除了 <code>bash</code>、<code>edit</code>、<code>webfetch</code>，還有 <code>read</code>、<code>glob</code>、<code>grep</code>、<code>task</code>、<code>skill</code>、<code>websearch</code>、<code>external_directory</code> 等。</p>
 <p><strong>心法：想拜託的事寫 AGENTS.md，不能出事的事寫 permission。</strong></p>
 <hr>
-<h2>9. 怎麼驗證 AGENTS.md 真的生效了</h2>
+<h2 id="section-怎麼驗證-agents-md-真的生效了">9. 怎麼驗證 AGENTS.md 真的生效了</h2>
 <p>不要憑感覺。有三個層次的檢查。</p>
 <h3>層次 1：確認 opencode 讀到了你的設定</h3>
-<pre class="cmd" data-lang="bash"><code>cd ~/ai-math-lab
-opencode debug config</code></pre>
-<p>實測輸出（在起始專案裡執行）：</p>
+<pre class="cmd" data-lang="bash"><code>opencode debug config</code></pre>
+<p>起始專案中的輸出例子：</p>
 <pre class="cmd" data-lang="json"><code>{
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode/big-pickle",
@@ -763,37 +934,25 @@ opencode debug config</code></pre>
 }</code></pre>
 <p>這證明 opencode 找到了你的專案 <code>opencode.json</code>，模型是 <code>opencode/big-pickle</code>，權限是 <code>ask</code>。</p>
 <p><strong>注意這個指令的限制</strong>：它顯示的是<strong>合併後的設定</strong>，不會把 AGENTS.md 的內文印出來。所以它能證明「設定讀到了」，不能證明「規則被遵守了」。要驗證後者，往下看。</p>
-<h3>層次 2：直接問它（實測有效）</h3>
+<h3>層次 2：請它說明執行方式</h3>
 <p>最快的行為測試，在專案根目錄執行：</p>
-<pre class="cmd" data-lang="bash"><code>cd ~/ai-math-lab
-opencode run "用一句話回答：依照專案規則，執行 Python 檔案應該用哪一個指令？"</code></pre>
-<p>實測輸出：</p>
+<pre class="cmd" data-lang="bash"><code>opencode run "用一句話回答：依照專案規則，執行 Python 檔案應該用哪一個指令？"</code></pre>
+<p>輸出例子：</p>
 <pre class="out"><code>&gt; build · big-pickle
 
 `uv run python &lt;檔案&gt;`。</code></pre>
-<p>兩件事同時被驗證了：它<strong>用繁體中文回答</strong>（語言規則生效），而且<strong>答出了 <code>uv run python</code></strong>（執行環境規則生效）。</p>
-<h3>這個測試的陷阱（我實際踩到了）</h3>
-<p>我原本想做一個對照實驗：把 <code>AGENTS.md</code> 改名成 <code>AGENTS.md.bak</code>，預期 agent 就答不出 <code>uv run python</code> 了。<strong>結果完全不是這樣。</strong> 實測輸出：</p>
-<pre class="out"><code>→ Read AGENTS.md.bak
-→ Read opencode.json
-
-`uv run python &lt;檔案&gt;`。</code></pre>
-<p>看到沒有？它<strong>自己用讀檔工具去把 <code>AGENTS.md.bak</code> 翻出來讀了</strong>，然後照樣答對。</p>
-<p>這件事有兩個重要的意涵：</p>
-<ol>
-<li><strong>「問它規則」這個測試會有偽陽性。</strong> 它答對，不代表規則是透過 AGENTS.md 機制自動載入的；也可能是它自己去翻檔案翻到的。agent 比你想的還會找東西。</li>
-<li>所以<strong>要搭配層次 1 的 <code>opencode debug config</code> 一起看</strong>。<code>debug config</code> 是靜態的設定解析結果，不會被 agent 的臨場發揮干擾。</li>
-</ol>
-<p>真的想做乾淨的對照實驗，應該要把檔案<strong>移到專案目錄外面</strong>（例如 <code>mv AGENTS.md /tmp/</code>），不能只是改個副檔名放在原地。（我沒有再測這一步，所以不保證有效，agent 對某些外部路徑仍有讀取權限。）</p>
+<p>這次回答符合語言與執行方式的要求。接下來還要看它是否在實際任務中照做。</p>
+<details class="bg"><summary>回答正確，還不能確認什麼</summary><div class="bg-body"><p>agent 可能先自己讀檔，再回答規則。這表示它找得到規則，但不能單靠一句回答判斷規則是不是自動載入。也不要只把檔案改名成 <code>.bak</code> 就當成「沒有規則」的對照，agent 仍可能找到它。</p>
+<p>對這門課最實用的判斷，是查看下一個實際任務：它是否使用指定的執行方式，輸出是否放在正確位置。</p></div></details>
 <h3>層次 3：實際任務測試</h3>
-<p>最終還是要看真實行為。給它一個小任務：</p>
-<pre class="cmd" data-lang="bash"><code>opencode run "在 notes/ 寫一個 test.md，裡面用 LaTeX 寫出 PCA 的目標函式"</code></pre>
+<p>最終還是要看真實行為。先執行 <code>opencode</code>，在互動介面貼上下面的小任務，閱讀並確認寫檔要求：</p>
+<pre class="cmd" data-lang="text"><code>在 notes/ 寫一個 test.md，裡面用 LaTeX 寫出 PCA 的目標函式，並定義式子裡的符號。</code></pre>
 <p>然後檢查：檔案是不是寫在 <code>notes/</code>？數學式是不是用 <code>$$...$$</code>？說明是不是繁體中文？</p>
 <p>有任何一項不符，就回頭把 AGENTS.md 那條規則寫得更具體。通常是規則太含糊，不是模型不聽話。</p>
 <h3>常見「規則沒生效」的原因</h3>
-<div class="tw"><table><tr><th>症狀</th><th>最可能的原因</th><th>怎麼修</th></tr><tr><td>完全不理會規則</td><td>不在專案根目錄啟動 opencode</td><td><code>cd</code> 到根目錄再開</td></tr><tr><td>偶爾遵守偶爾不遵守</td><td>規則太含糊，或整份檔案太長</td><td>改具體、砍掉不重要的條文</td></tr><tr><td>改了 AGENTS.md 沒反應</td><td>可能是舊對話的脈絡還在</td><td>開新對話再試（中文教學站說規則是熱載入、改完立即生效，我未實測）</td></tr><tr><td>某條永遠沒用</td><td>跟另一條規則矛盾</td><td>從頭讀一次，找出打架的條文</td></tr></table></div>
+<div class="tw"><table><tr><th>症狀</th><th>最可能的原因</th><th>怎麼修</th></tr><tr><td>完全不理會規則</td><td>不在專案根目錄啟動 opencode</td><td><code>cd</code> 到根目錄再開</td></tr><tr><td>偶爾遵守偶爾不遵守</td><td>規則太含糊，或整份檔案太長</td><td>改具體、砍掉不重要的條文</td></tr><tr><td>改了 AGENTS.md 沒反應</td><td>可能是舊對話的脈絡還在</td><td>開新對話再試</td></tr><tr><td>某條永遠沒用</td><td>跟另一條規則矛盾</td><td>從頭讀一次，找出打架的條文</td></tr></table></div>
 <hr>
-<h2>10. 本章重點</h2>
+<h2 id="section-本章重點">10. 本章重點</h2>
 <ol>
 <li><code>AGENTS.md</code> 放專案根目錄，<strong>自動被讀取</strong>，不需要靠 <code>instructions</code> 宣告。</li>
 <li><code>instructions</code> 是用來<strong>追加</strong>其他檔案的（支援相對路徑、glob、遠端 URL）。</li>
@@ -804,7 +963,7 @@ opencode run "用一句話回答：依照專案規則，執行 Python 檔案應�
 <li>驗證三層次：<code>opencode debug config</code> 看設定、<code>opencode run</code> 問它規則、真實任務看行為。</li>
 </ol>
 <hr>
-<h2>練習</h2>
+<h2 id="section-練習">練習</h2>
 <ol>
 <li>在你的專案跑 <code>opencode debug config</code>，確認 <code>model</code> 是 <code>opencode/big-pickle</code>。</li>
 <li>跑一次層次 2 的行為測試，確認它答出 <code>uv run python</code>。</li>
@@ -812,7 +971,7 @@ opencode run "用一句話回答：依照專案規則，執行 Python 檔案應�
 <li>想一想：你加的那條規則，應該放 AGENTS.md 還是 <code>permission</code>？為什麼？</li>
 </ol>
 <hr>
-<h2>資料來源</h2>
+<h2 id="section-資料來源">資料來源</h2>
 <ul>
 <li><a class="ext" href="https://opencode.ai/docs/rules/" target="_blank" rel="noopener">https://opencode.ai/docs/rules/</a> — AGENTS.md 的尋找順序、<code>instructions</code> 設定、<code>/init</code> 指令</li>
 <li><a class="ext" href="https://opencode.ai/docs/config/" target="_blank" rel="noopener">https://opencode.ai/docs/config/</a> — 設定檔位置與多層合併順序、JSONC 支援、變數替換</li>
@@ -820,61 +979,120 @@ opencode run "用一句話回答：依照專案規則，執行 Python 檔案應�
 <li><a class="ext" href="https://learnopencode.com/3-workflow/03-init.html" target="_blank" rel="noopener">https://learnopencode.com/3-workflow/03-init.html</a> — <code>/init</code> 對既有 AGENTS.md 是「改善而非覆寫」（中文教學站，簡體）</li>
 <li><a class="ext" href="https://learnopencode.com/2-daily/04-global-rules.html" target="_blank" rel="noopener">https://learnopencode.com/2-daily/04-global-rules.html</a> — 全域規則路徑、規則熱載入的說法（中文教學站，簡體）</li>
 </ul>
-<p>本機實測（opencode 1.18.30，Linux/WSL2）：</p>
-<ul>
-<li><code>opencode debug config</code> 於起始專案的實際輸出</li>
-<li><code>opencode run</code> 的行為測試，含「無 <code>instructions</code> 鍵仍讀取 AGENTS.md」與「改名後 agent 自行讀檔」兩組對照</li>
-<li><code>opencode agent list</code> 解析後的 <code>permission</code> 規則（<code>git push *</code> → <code>deny</code>）</li>
-</ul>
-
-<div class="pager">
-  <a href="local-models.html"><div class="d">上一章</div><div class="t2">← 05 · 本地模型</div></a>
-  <a href="git-safety.html" class="next"><div class="d">下一章</div><div class="t2">07 · git →</div></a>
-</div>
 
 </div>
+<nav class="pager" aria-label="章節順序"><a href="agent-workflows.html" class="prev"><div class="d">上一章</div><div class="t2">← 讓 agent 把工作做完整</div></a><a href="git-safety.html" class="next"><div class="d">下一章</div><div class="t2">git 安全網 →</div></a></nav></main></div>
 
 <footer>
 <div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
-<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+<div class="stamp">讓 agent 動手，讓數學說明結果。</div>
 </footer>
 
 <script>
-// 導覽列高亮目前頁面
+/* Progressive enhancement: navigation and disclosure work without JavaScript. */
 (function(){
-  var f=(location.pathname.split('/').pop()||'index.html');
+  'use strict';
+  var pageName=location.pathname.split('/').pop()||'index.html';
   document.querySelectorAll('.topnav nav a').forEach(function(a){
-    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+    if(a.getAttribute('href')===pageName) a.setAttribute('aria-current','page');
   });
-})();
 
-// 指令複製鈕
-document.querySelectorAll('pre.cmd').forEach(function(pre){
-  var b=document.createElement('button');
-  b.className='copy'; b.type='button'; b.textContent='複製';
-  b.addEventListener('click',function(){
-    var t=pre.querySelector('code');
-    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
-      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
-    },function(){ b.textContent='複製失敗'; });
-  });
-  pre.appendChild(b);
-});
-
-// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
-(function(){
-  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
-  var saved={};
-  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
-  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
-    var id=cb.id||('ck'+i); cb.id=id;
-    if(saved[id]) cb.checked=true;
-    cb.addEventListener('change',function(){
-      saved[id]=cb.checked;
-      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+  var sections=Array.from(document.querySelectorAll('.lesson-main h2[id]'));
+  var sectionLinks=Array.from(document.querySelectorAll('.section-nav a'));
+  var scheduled=false;
+  function markSection(){
+    scheduled=false;
+    var current=sections[0];
+    sections.forEach(function(section){if(section.getBoundingClientRect().top<=145) current=section;});
+    sectionLinks.forEach(function(link){
+      if(current&&link.getAttribute('href')==='#'+current.id) link.setAttribute('aria-current','location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  function scheduleSection(){
+    if(!scheduled){scheduled=true;requestAnimationFrame(markSection);}
+  }
+  window.addEventListener('scroll',scheduleSection,{passive:true});
+  window.addEventListener('resize',scheduleSection);
+  window.addEventListener('hashchange',scheduleSection);
+  markSection();
+  document.querySelectorAll('.course-menu .section-nav a').forEach(function(link){
+    link.addEventListener('click',function(){
+      link.closest('details').open=false;
+      // Closing the menu moves the heading; resolve the anchor after that reflow.
+      var id=link.getAttribute('href').slice(1),target=document.getElementById(id);
+      if(target){
+        requestAnimationFrame(function(){
+          var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({top:window.scrollY+target.getBoundingClientRect().top-88,behavior:reduced?'auto':'smooth'});
+        });
+      }
     });
   });
+
+  var status=document.createElement('span');
+  status.className='sr-only';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+  document.body.appendChild(status);
+  function fallbackCopy(text){
+    var active=document.activeElement,selection=window.getSelection();
+    var ranges=[];
+    if(selection) for(var i=0;i<selection.rangeCount;i++) ranges.push(selection.getRangeAt(i).cloneRange());
+    var area=document.createElement('textarea');
+    area.value=text;area.setAttribute('readonly','');
+    area.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(area);area.select();
+    var copied=false;
+    try{copied=document.execCommand('copy');}catch(error){}
+    area.remove();
+    if(active&&active.focus) active.focus({preventScroll:true});
+    if(selection){selection.removeAllRanges();ranges.forEach(function(range){selection.addRange(range);});}
+    return copied;
+  }
+  async function copyText(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      try{await navigator.clipboard.writeText(text);return true;}catch(error){}
+    }
+    return fallbackCopy(text);
+  }
+  document.querySelectorAll('pre.cmd').forEach(function(pre){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='複製';
+    button.addEventListener('click',async function(){
+      var code=pre.querySelector('code')||pre;
+      var text=(code===pre?Array.from(pre.childNodes).filter(function(node){return node!==button;}).map(function(node){return node.textContent;}).join(''):code.textContent).trim();
+      if(await copyText(text)){
+        button.textContent='已複製';status.textContent='指令已複製。';
+      }else{
+        var range=document.createRange();range.selectNodeContents(code);
+        var selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);
+        button.textContent='請按 Ctrl+C';status.textContent='已選取指令，請按 Ctrl+C 複製。';
+      }
+      setTimeout(function(){button.textContent='複製';status.textContent='';},2200);
+    });
+    pre.appendChild(button);
+  });
+
+  // Keep the existing storage key and checkbox IDs so prior progress survives.
+  var key='ocmw:'+pageName,saved={};
+  try{
+    var parsed=JSON.parse(localStorage.getItem(key)||'{}');
+    if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)) saved=parsed;
+  }catch(error){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(checkbox,index){
+    var id=checkbox.id||('ck'+index);checkbox.id=id;
+    if(saved[id]) checkbox.checked=true;
+    checkbox.addEventListener('change',function(){
+      saved[id]=checkbox.checked;
+      try{localStorage.setItem(key,JSON.stringify(saved));}catch(error){}
+    });
+  });
+  // Wide output stays readable and can be scrolled from the keyboard.
+  document.querySelectorAll('pre.out,.tw').forEach(function(block){
+    block.tabIndex=0;
+    block.setAttribute('aria-label',block.matches('.tw')?'表格；較寬時可左右捲動':'程式輸出；較寬時可左右捲動');
+  });
 })();
+
 </script>
 
 <script>

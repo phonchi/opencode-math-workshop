@@ -1,33 +1,20 @@
-# 再往前一步：MCP、自訂 agent、subagent
+# MCP、skills 與 subagent
 
 > 課後延伸．**加分項，不是必修**
-> 適用版本：opencode 1.18.30
 
-## 先講清楚：這章你可以先跳過
+## 這章怎麼選著讀
 
-前兩章（`AGENTS.md`、git）是**地基**。這一章是**裝潢**。
+已經完成一個 Lab，就可以從第 5 節做自己的數學筆記 skill。想找另一個角色檢查程式，讀第 3、4 節；需要查外部套件文件，再讀第 2 節的 MCP。
 
-如果你目前還在這些狀況裡，請先回去把前兩章練熟，這章留到之後再看：
+所有練習都沿用課前建立的同一份專案；先在該資料夾開啟終端機，用 `pwd`、`ls` 確認位置與檔案。先查看要建立的檔案與權限，逐項增加需要的能力；不必一次完成全部設定。
 
-- 還不太確定 `git diff` 的輸出在講什麼
-- 還沒養成「叫 agent 動手前先 commit」的習慣
-- AGENTS.md 寫了但沒驗證過有沒有生效
-- 用 opencode 寫數學程式還不太順
+## 1. 這些工具各解決什麼問題
 
-理由很實際：**這章的東西都是在「你已經能順利用 agent 做事」之後，才會感覺到價值的優化。** 在地基還不穩的時候加裝潢，只會讓你要 debug 的東西變多。結果不如預期時，你會分不清是模型的問題、提示的問題，還是你多加的那個 MCP 的問題。
-
-而且老實說：**這門課的作業，只用前兩章的內容就能完整做完。** 這章是給已經吃飽、還想多學一點的人。
-
-準備好的話，我們開始。
-
----
-
-## 1. 三個東西各解決什麼問題
-
-初學者最容易混淆這三個名詞。一句話講清楚差別：
+先從你想解決的問題來選：
 
 | | 一句話 | 解決的問題 |
 |---|---|---|
+| **skill** | 保存某一類任務的流程 | 整理筆記時，每次都要重講同一套要求 |
 | **MCP** | 給 agent **新的工具**（外部能力） | 它**做不到**某件事 |
 | **自訂 agent** | 給 agent **新的人格**（專屬指令與權限） | 它**做得到，但做事方式**不對 |
 | **subagent** | 把工作**拆給另一個對話**去做 | 它**能做，但一次做太多**會亂 |
@@ -38,7 +25,7 @@
 >
 > - agent 不知道 scikit-learn 新版的 API 怎麼用，它的知識停在舊版 → **MCP**（接一個能查即時套件文件的工具）
 > - 你想要一個「只檢查數學對不對、絕對不准改你程式」的審查員 → **自訂 agent**（定義一個唯讀的 reviewer）
-> - 主線在寫 PCA，但你想順便查一下三份參考程式裡哪裡用到隨機性 → **subagent**（丟給子任務去翻，不要用這些細節污染主對話）
+> - 主線在寫 PCA，但你想順便查一下你完成的 Lab 程式裡哪裡用到隨機性 → **subagent**（丟給子任務去翻，不要用這些細節污染主對話）
 
 再換個比喻：MCP 是**多給它一隻手**，自訂 agent 是**換一個專家來**，subagent 是**找人分頭辦事**。
 
@@ -52,11 +39,11 @@ MCP（Model Context Protocol）是一套標準協定，讓 agent 能連上外部
 
 ### 對數學/研究最有用的例子：查套件文件
 
-這是我實際測試過、確認能用的例子。
+下面是一個選修的外部工具例子。先完成本機的 skill 與 reviewer 練習也可以，不必先設定 MCP。
 
 **問題**：`opencode/big-pickle` 和所有模型一樣，知識有時間截止點。你問它 scikit-learn 某個參數怎麼用，它可能給你一個兩年前的 API，跑起來噴 `TypeError`。你也可以叫它用 `webfetch` 去抓文件，但那是抓整頁 HTML，又慢又雜。
 
-**解法**：接上 Context7，它專門提供**套件的即時文件查詢**，agent 可以直接查 numpy、scipy、scikit-learn、matplotlib 的當前 API。
+Context7 可以替 agent 提供套件文件查詢；查到後仍要確認文件版本與本專案相符。官方安裝與使用條件見 [Context7 官方說明](https://github.com/upstash/context7)。
 
 在專案根目錄的 `opencode.json` 加上 `mcp` 區塊：
 
@@ -79,11 +66,10 @@ MCP（Model Context Protocol）是一套標準協定，讓 agent 能連上外部
 存檔後驗證：
 
 ```bash
-cd ~/ai-math-lab
 opencode mcp list
 ```
 
-實測輸出：
+連線成功時的輸出例子：
 
 ```
 ┌  MCP Servers
@@ -94,13 +80,25 @@ opencode mcp list
 └  1 server(s)
 ```
 
-看到 `connected` 就成功了。**這個 server 不需要註冊、不需要 API key、不需要付費**，和 `opencode/big-pickle` 一樣可以直接用。
+看到 `connected` 表示連線成功，還要實際查一次文件才知道服務能否使用。Context7 官方目前建議使用金鑰取得較高額度；本教材只示範不帶金鑰的連線，服務可用性與配額會變動。遇到認證、額度或付費要求就停止，改用下方的官方文件路線，不必申請帳號或啟用付費設定。
 
 接上之後可以這樣問：
 
 ```text
 scikit-learn 最新版的 PCA，取得解釋變異比例的屬性叫什麼？查文件確認再回答。
 ```
+
+### 不接 MCP 也能查官方文件
+
+把這段貼進 OpenCode，允許它讀取指定的公開文件：
+
+```text
+請讀 https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html，
+說明 n_init 的用途，並和 lab1_cluster.py 的設定比較。
+請附上來源連結；如果讀不到網頁，直接說明，不要靠猜測補上 API 行為。
+```
+
+網頁讀不到時，你也可以自己在瀏覽器開啟官方文件，把需要的短段落貼進對話。
 
 ### 兩種 MCP：remote 與 local
 
@@ -154,7 +152,7 @@ scikit-learn 最新版的 PCA，取得解釋變異比例的屬性叫什麼？查
 
 ### `opencode mcp` 這個 CLI
 
-實測 1.18.30 有這些子指令：
+可以先查看有哪些管理指令：
 
 ```bash
 opencode mcp add [name]      # 新增 MCP server
@@ -188,7 +186,7 @@ opencode mcp debug <name>    # 偵錯 OAuth 連線問題
 
 ### 這是什麼
 
-opencode 內建了幾個 agent。實測 1.18.30 用 `opencode agent list` 可以看到：
+用 `opencode agent list` 可查看目前的角色，常用的是：
 
 ```
 build (primary)
@@ -199,7 +197,7 @@ general (subagent)
 
 （另外還有 `compaction`、`summary`、`title` 等內部用的，不用管。）
 
-- **primary agent** 是你直接對話的對象，在介面裡按 **Tab** 切換。`build` 是預設，權限全開；`plan` 只規劃不動手（檔案編輯與 bash 預設是 `ask`）。
+- **primary agent** 是你直接對話的對象，在介面裡按 **Tab** 切換。本課程用 `build` 執行任務，改檔與執行依專案的 `ask` 設定詢問；`plan` 適合先分析步驟。實際限制會受版本與專案設定影響，請查看權限要求。
 - **subagent** 是被主 agent 呼叫去做特定工作的。`explore` 唯讀探索程式碼，`general` 通用。
 
 **自訂 agent 就是自己定義一個**，給它專屬的系統提示、溫度和權限。
@@ -213,7 +211,7 @@ general (subagent)
 
 **檔名就是 agent 的名字。** `math-reviewer.md` 會產生一個叫 `math-reviewer` 的 agent。專案層優先於全域。
 
-> 實測補充：1.18.30 底下 `.opencode/agent/`（單數）和 `.opencode/agents/`（複數）**兩種目錄名都能被載入**。文件寫的是複數，**建議統一用 `agents/`**，不要混用，免得以後找不到自己的檔案放哪。
+本課程統一用專案內的 `.opencode/agents/`，讓設定跟著練習檔案一起保存。
 
 ### 什麼情況值得做
 
@@ -221,11 +219,17 @@ general (subagent)
 
 值得做的是這種情形：**你需要一個權限跟主 agent 不同的角色。** 這是 AGENTS.md 做不到的。AGENTS.md 是全專案共用的提示，而 agent 可以有自己的權限設定。
 
-最典型的例子就是「**只做數學驗證的 reviewer**」：你想要一個看得到你的程式、但**在機制上不可能改你的程式**的審查員。
+最典型的例子就是「**只做數學驗證的 reviewer**」：你想要一個看得到你的程式、並關閉本練習會用到的編輯、執行指令與再委派入口的審查員。
 
 ### 完整範例：數學驗證 reviewer
 
-建立 `.opencode/agents/math-reviewer.md`：
+先在專案終端機建立資料夾：
+
+```bash
+uv run python -c "from pathlib import Path; Path('.opencode/agents').mkdir(parents=True, exist_ok=True)"
+```
+
+再用文字編輯器建立 `.opencode/agents/math-reviewer.md`，貼上以下內容。檔名結尾是 `.md`，不要多出 `.txt`：
 
 ```markdown
 ---
@@ -235,9 +239,11 @@ temperature: 0.1
 permission:
   edit: deny
   bash: deny
+  task: deny
+  external_directory: deny
 ---
 
-你是數學驗證審查員。你的工作是**檢查**，不是修改。
+你是數學驗證審查員。只讀取本專案內的程式與已有輸出，不讀其他資料夾或其他 Python 環境的套件。若本專案沒有對應證據，明確說明缺少。你的工作是**檢查**，不是修改。
 
 檢查以下項目，逐項回報「通過」或「有問題」，有問題要指出行號：
 
@@ -248,22 +254,21 @@ permission:
    sklearn 的對應函式來充數。
 4. **數值穩定性**：有沒有除以可能為零的量？有沒有對可能為負的數開根號？
    大數相減造成的抵消誤差？
-5. **驗證段落**：有沒有附上驗證程式碼，並且是真的執行過、印出比對結果，
-   而不只是宣稱「應該正確」？
+5. **驗證段落**：有沒有附上驗證程式碼？若提供了執行輸出，核對輸出與結論是否相符。
+   本角色不能執行指令；沒有現成紀錄時必須寫「尚無執行證據」，不能宣稱已通過測試。
 
 回報格式：用台灣繁體中文，條列，每一項先寫結論再寫理由。
 不要修改任何檔案。不要執行任何指令。
 ```
 
-**驗證它有沒有被正確載入**（實測可用）：
+**確認設定被載入**：
 
 ```bash
-cd ~/ai-math-lab
 opencode agent list                    # 看 math-reviewer 有沒有出現
 opencode debug agent math-reviewer     # 看解析後的完整設定
 ```
 
-`opencode debug agent math-reviewer` 的實測輸出裡可以確認這些欄位都正確生效：
+檢查 `opencode debug agent math-reviewer` 中的模式、提示與權限。輸出中應有對應欄位：
 
 ```json
 {
@@ -280,9 +285,11 @@ opencode debug agent math-reviewer     # 看解析後的完整設定
 ```json
 { "permission": "edit", "action": "deny", "pattern": "*" }
 { "permission": "bash", "action": "deny", "pattern": "*" }
+{ "permission": "task", "action": "deny", "pattern": "*" }
+{ "permission": "external_directory", "action": "deny", "pattern": "*" }
 ```
 
-**這就是自訂 agent 相對於 AGENTS.md 的關鍵優勢**：`edit: deny` 是機制上的封鎖，不是口頭請求。這個 reviewer 在技術上就是不可能改到你的程式。
+**這就是自訂 agent 相對於 AGENTS.md 的關鍵優勢**：`edit: deny` 是機制上的封鎖，不是口頭請求。這份設定拒絕本練習的編輯、執行指令與再委派入口；若日後加入其他工具，也要檢查那些工具的權限。
 
 ### 怎麼用它
 
@@ -306,7 +313,7 @@ opencode debug agent math-reviewer     # 看解析後的完整設定
 | `permission` | 權限覆寫，會蓋過全域設定 |
 | `disable` | 設 `true` 暫時停用 |
 
-> **關於 `model` 欄位的提醒**：官方文件和中文教學站的範例幾乎都寫 `model: anthropic/claude-sonnet-4-...`。**照抄會壞掉**，因為這門課只用 `opencode/big-pickle`（唯一免登入免付費的）。**直接把 `model` 那行刪掉**，agent 就會沿用你在 `opencode.json` 設的模型。上面的範例就是這樣寫的。
+> **關於 `model` 欄位的提醒**：官方文件和中文教學站的範例幾乎都寫 `model: anthropic/claude-sonnet-4-...`。**照抄會壞掉**，因為這門課只用 `opencode/big-pickle`（本工作坊選用的免費模型）。**直接把 `model` 那行刪掉**，agent 就會沿用你在 `opencode.json` 設的模型。上面的範例就是這樣寫的。
 
 ### 也可以寫在 opencode.json 裡
 
@@ -318,7 +325,8 @@ opencode debug agent math-reviewer     # 看解析後的完整設定
     "math-reviewer": {
       "description": "檢查數學程式的正確性與可重現性，只讀不改",
       "mode": "subagent",
-      "permission": { "edit": "deny", "bash": "deny" }
+      "prompt": "只讀本專案內的程式與已有輸出，不讀其他資料夾或Python環境。唯讀檢查數學公式、矩陣維度、隨機種子與驗證段落。指出實際檔案與行號。不修改、不執行、不再委派；沒有現成輸出時寫尚無執行證據，不可宣稱測試通過。",
+      "permission": { "edit": "deny", "bash": "deny", "task": "deny", "external_directory": "deny" }
     }
   }
 }
@@ -328,7 +336,7 @@ opencode debug agent math-reviewer     # 看解析後的完整設定
 
 ### `opencode agent create`
 
-實測 1.18.30 確實有這個指令：
+也可以用互動方式建立：
 
 ```bash
 opencode agent create
@@ -336,9 +344,11 @@ opencode agent create
 
 它會用互動問答引導你設定位置、描述、系統提示和權限。
 
-（注意：中文教學站 5.2a 那章沒提到這個指令，只教手寫 `.md` 檔。但**實測 1.18.30 確實有 `opencode agent create`**，以實測為準。不過它是互動式問答，還是建議直接手寫 `.md` 檔，你會更清楚每個欄位在幹嘛，也比較好改。）
+本章採直接建立 `.md` 檔的做法，方便閱讀每個欄位並修改。
 
 ---
+
+<!--DIAGRAM:agent-delegation-->
 
 ## 4. subagent / task：什麼時候該拆子任務
 
@@ -358,7 +368,7 @@ opencode agent create
 
 **該拆的情況：**
 
-1. **大範圍搜尋**：「三份 reference 程式裡，哪些地方用到隨機性？」需要翻很多檔案，但你只要一個清單。
+1. **大範圍搜尋**：「我完成的 Lab 程式裡，哪些地方用到隨機性？」需要翻很多檔案，但你只要一個清單。
 2. **獨立的檢查工作**：「檢查我的 PCA 實作對不對」，用上面那個 `math-reviewer`，不要讓審查的往返污染你寫程式的主線。
 3. **主線做到一半的岔題**：正在寫程式，突然想查個東西。拆出去，主線保持乾淨。
 4. **需要不同權限的工作**：主線需要能改檔案，審查工作**不該**能改檔案。
@@ -376,7 +386,7 @@ opencode agent create
 最簡單的方式就是直接 `@` 呼叫：
 
 ```text
-@explore 找出 reference/ 底下三支程式裡所有用到隨機性的地方
+@explore 請唯讀檢查 lab1_cluster.py、lab2_pca.py、lab3_logistic.py 裡用到隨機性的地方。只看實際存在的檔案，回報檔名、行號與用途，不要修改或執行。
 ```
 
 `explore` 是內建的唯讀探索 subagent，很適合這種「翻檔案找東西」的工作，而且它唯讀，不可能改壞你的東西。
@@ -384,41 +394,76 @@ opencode agent create
 或者直接描述工作，讓主 agent 自己決定要不要拆：
 
 ```text
-先用子任務調查 reference/ 裡三支程式的隨機性用法，整理成清單，
+先用子任務調查我已完成的 Lab 程式的隨機性用法，整理成清單，
 然後我們再討論要怎麼統一設定種子。
 ```
 
 ### 相關設定
 
-- `subagent_depth`：控制 subagent 能不能再呼叫 subagent，預設值 `1`。（未實測：我沒有實際測試改這個值的效果。預設值對這門課完全夠用，不用動它。）
+- 保留目前的子任務深度設定；練習先由主 agent 分派一層子任務即可。
 - `permission` 裡的 `task` 鍵可以控制能不能啟動 subagent。
 
 ---
 
-## 5. 還有一個：skills
+## 5. 自己做一個數學筆記 skill
 
-順帶一提，opencode 也支援 skills，可以把一組重複用到的工作流程打包成檔案。
+`AGENTS.md` 放整個專案一直適用的規則；**skill** 放某一類任務才需要的流程。下面把「根據實際結果整理數學筆記」做成一個 skill，之後換一個 Lab 也能沿用。
 
-檔案位置（依序搜尋）：
+### 建立資料夾與 SKILL.md
 
-```
-.opencode/skills/<名字>/SKILL.md
-~/.config/opencode/skills/<名字>/SKILL.md
-.claude/skills/<名字>/SKILL.md
-~/.claude/skills/<名字>/SKILL.md
-.agents/skills/<名字>/SKILL.md
-~/.agents/skills/<名字>/SKILL.md
+回到專案資料夾的終端機。下列指令在 PowerShell 與 WSL 都能使用：
+
+```bash
+uv run python -c "from pathlib import Path; Path('.opencode/skills/math-notes').mkdir(parents=True, exist_ok=True)"
 ```
 
-`SKILL.md` 的 frontmatter 必填 `name`（小寫英數與連字號，1–64 字元）和 `description`（1–1024 字元）。
+用文字編輯器建立 `.opencode/skills/math-notes/SKILL.md`，貼上以下完整內容。Windows 請確認副檔名是 `.md`，沒有多出 `.txt`。
 
-查看目前有哪些 skills：
+```markdown
+---
+name: math-notes
+description: 根據本專案已完成的數學實驗與輸出整理學習筆記；當使用者要求把 Lab 結果寫成可複習的筆記時使用。
+---
+
+# 數學實驗筆記
+
+先讀使用者指定的程式、結果與既有筆記，再整理這次任務。
+
+- 筆記寫清楚研究問題、符號與必要假設，再說明做了什麼、看到什麼。
+- 公式使用 Markdown 的 $...$ 與 $$...$$。沒有解釋過的符號要先定義。
+- 結果註明來源檔案與實際執行指令；沒有執行輸出時，標明只有程式可讀。
+- 保留原始數字與結論的適用範圍。分開寫已觀察結果、推論與尚未確認的事。
+- 以學生可以自己回答的一個檢查問題收尾，答案另列。
+- 依使用者指定路徑存檔；若檔案已存在，先讀內容再更新。不要為了寫筆記另做實驗。
+```
+
+資料夾名稱與 frontmatter 的 `name` 都是 `math-notes`。`description` 說明何時使用；下面的正文才是實際流程。這份練習只需一個檔案，沒有額外安裝或網路服務。[OpenCode 官方 skills 說明](https://opencode.ai/docs/skills/) 列出了命名、載入與權限規則。
+
+### 先確認發現，再確認真的載入
+
+在同一個專案資料夾執行：
 
 ```bash
 opencode debug skill
 ```
 
-**這門課不會用到 skills。** 列在這裡只是讓你知道有這個東西，之後看到別人的專案裡有 `SKILL.md` 不會一頭霧水。先把 AGENTS.md 寫好，那個的投資報酬率高得多。
+清單應出現 `math-notes` 和你剛建立的路徑。這只確認 **skill 被發現**，還不代表某次任務已經使用它。
+
+重新啟動 OpenCode，貼上：
+
+```text
+請用 skill 工具載入 math-notes。
+讀取 lab1_cluster.py 與 figs/lab1_k_selection.png；若目前模型不能讀圖，
+請明說，改以程式與這段對話裡實際提供的執行輸出為依據，不要猜圖上數值。
+將這次分群實驗整理成 notes/lab1-review.md。
+沒有的輸出請標示缺少，不要重新執行實驗。
+```
+
+觀察工具紀錄有沒有載入 `math-notes`，再打開產出的筆記。它應說明資料、參數與結論的範圍；只看到模型說「我用了 skill」還不夠。若沒載入，先檢查檔名、frontmatter 與 `opencode debug skill` 的清單，再要求它使用 skill 工具。
+
+### 換一個任務，看看流程能否沿用
+
+用自己已完成的 PCA 或 logistic 程式再做一次，指定不同筆記檔名。比較兩份筆記：流程可以一致，內容、數字和結論必須來自各自的實驗。最後刪掉或縮短你發現沒有幫助的規則，讓 skill 保持容易閱讀。
 
 ---
 
@@ -447,7 +492,7 @@ opencode debug skill
 
 **最後這一條請認真看待。** 初學者最常見的狀況是：結果不如預期 → 以為要加工具 → 裝了一堆 MCP 和自訂 agent → 結果更亂。
 
-**實際上八成的問題，是把需求講清楚就解決了。** 先改你的提示，再改你的 AGENTS.md，都沒用了才考慮這章的東西。
+先把需求、輸出與完成判準講清楚。 先改你的提示，再改你的 AGENTS.md，都沒用了才考慮這章的東西。
 
 ---
 
@@ -456,12 +501,12 @@ opencode debug skill
 1. **這章是加分項，不是必修。** 前兩章沒練熟就先回去練。
 2. MCP 給**新工具**，自訂 agent 給**新人格**，subagent 做**工作拆分**。
 3. MCP 寫在 `opencode.json` 的 `mcp` 區塊，分 `remote`（只要 `url`）和 `local`（`command` 要是**陣列**）。
-4. Context7（`https://mcp.context7.com/mcp`）是實測可用、免金鑰的套件文件查詢 server。
-5. 用 `opencode mcp list` 確認連線，看到 `connected` 才算成功。
+4. 外部 MCP 是選修；遇到認證或配額限制就改讀官方文件，不開啟付費設定。
+5. `opencode mcp list` 確認連線後，還要實際查一次文件。
 6. 自訂 agent 放 `.opencode/agents/<名字>.md`，用 `opencode debug agent <名字>` 驗證。
 7. 自訂 agent 的關鍵價值是**權限隔離**（`edit: deny` 是機制封鎖，不是口頭請求），這是 AGENTS.md 做不到的。
 8. **範例裡的 `model` 欄位要刪掉**，這門課只用 `opencode/big-pickle`。
-9. subagent 用在「翻很多東西、結論很短」的工作，保持主對話乾淨。
+9. skill 保存重複流程；subagent 用在「翻很多東西、結論很短」的工作，保持主對話乾淨。
 10. 加東西之前先問：**是不是我的提示沒講清楚？** 通常是。
 
 ---
@@ -470,20 +515,15 @@ opencode debug skill
 
 （做不完很正常，這章本來就是額外的。）
 
-1. 把 Context7 加進 `opencode.json`，用 `opencode mcp list` 確認 `connected`。
-2. 問它一個 scikit-learn 的 API 問題，要求它查文件確認再回答。
+1. 先建立本章的 `math-notes` skill，用 `opencode debug skill` 確認能找到它。
+2. 要求 agent 載入 skill，整理你已完成的一個 Lab；開啟筆記核對來源與結論。
 3. 建立 `.opencode/agents/math-reviewer.md`，用 `opencode debug agent math-reviewer` 確認 `edit` 是 `deny`。
 4. 用 `@math-reviewer` 檢查你寫過的一支程式，看它抓不抓得到問題。
-5. 用 `@explore` 找出 `reference/` 裡所有用到隨機性的地方。
+5. 用 `@explore` 檢查自己已完成的 Lab 檔案，找出用到隨機性的地方。
 6. 想一想：第 3 題那個 reviewer，哪些規則其實寫在 AGENTS.md 就夠了？哪些**非得**是獨立 agent 不可？
 
 ---
 
-## 查得到但這裡略過的東西
-
-這章只寫我實際驗證過、而且對這門課有用的部分。以下這些 opencode 有，但初學階段用不到，所以略過：plugins（`plugin` 設定與 `@opencode-ai/plugin`）、custom tools、LSP 設定、formatters、`command` 自訂指令、themes 與 keybinds、session 分享、GitHub/GitLab 整合、SDK 與 remote server、context compaction、git worktree。有興趣的話，資料來源第二項的中文教學站第 5 階段都有中文說明。
-
----
 
 ## 資料來源
 
@@ -495,11 +535,3 @@ opencode debug skill
 - https://learnopencode.com/5-advanced/07a-mcp-basics.html — MCP 設定範例與排錯表（中文教學站，簡體）
 - https://learnopencode.com/5-advanced/02a-agent-quickstart.html — 自訂 agent 快速上手（中文教學站，簡體）
 - https://learnopencode.com/4-scenarios/coder-agents.html — reviewer 類 agent 的 frontmatter 範例（中文教學站，簡體；其範例用 `~/.config/opencode/agent/` 單數路徑）
-
-本機實測（opencode 1.18.30，Linux/WSL2）：
-
-- `opencode mcp list` 連線 Context7 顯示 `connected` 的實際輸出（無需金鑰）
-- `opencode agent list` 的內建 agent 清單（`build` / `plan` / `explore` / `general`；**文件提到的 `scout` 在 1.18.30 並未出現**）
-- `opencode debug agent math-reviewer` 解析後的 `description` / `mode` / `temperature` / `prompt`，以及 `edit: deny`、`bash: deny` 兩條權限規則
-- `.opencode/agent/`（單數）與 `.opencode/agents/`（複數）兩種目錄名皆可被載入
-- `opencode agent --help`、`opencode mcp --help` 的子指令清單

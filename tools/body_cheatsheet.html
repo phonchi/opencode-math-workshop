@@ -6,7 +6,7 @@
 <div class="pagehead">
   <div class="kicker"><span>09</span><span>·</span><span class="badge after">隨時查</span></div>
   <h1>速查表</h1>
-  <p class="lead">現場卡住先翻這頁。所有指令都在 opencode 1.18.30 上實測過。</p>
+  <p class="lead">現場卡住先翻這頁。找不到對應操作時，按 ctrl+p 開啟指令面板。</p>
 </div>
 
 <section>
@@ -47,7 +47,7 @@
 
 <section>
 <h2>TUI 斜線指令</h2>
-<p>在 opencode 互動畫面裡打 <code>/</code> 會跳出清單。以下是 1.18.30 <strong>實測存在</strong>的全部 17 個。</p>
+<p>在 opencode 互動畫面裡打 <code>/</code> 會跳出清單。下面列出課程會用到及可以再探索的指令，實際清單以你的畫面為準。</p>
 <div class="tw"><table>
 <tr><th>指令</th><th>作用</th><th>工作坊會不會用到</th></tr>
 <tr><td><code>/new</code></td><td>開新 session（別名 <code>/clear</code>）</td><td class="ok">會　換題目就用</td></tr>
@@ -66,11 +66,9 @@
 </table></div>
 
 <div class="box warn">
-<div class="bt">官方文件列了、但實測不存在的</div>
+<div class="bt">在自己的介面裡找功能</div>
 <p style="margin-bottom:0">
-<code>/compact</code>、<code>/undo</code>、<code>/redo</code>、<code>/share</code>、<code>/export</code>
-在 opencode.ai/docs 與坊間教學都還列著，但 <strong>1.18.30 的 <code>/</code> 清單裡沒有</strong>。
-這些功能移到了指令面板：按 <code>ctrl+p</code> 搜尋，或用下面的快捷鍵。
+找不到斜線指令時，按 <code>ctrl+p</code> 搜尋功能名稱。壓縮、還原等操作也可以用下面的快捷鍵。
 </p>
 </div>
 
@@ -107,7 +105,7 @@
 <div class="box warn">
 <div class="bt">不要用的指令</div>
 <p style="margin-bottom:0">
-<code>pip install</code>、<code>python xxx.py</code>、<code>conda activate</code>　在這個專案裡都會出問題，因為套件裝在 uv 管理的 <code>.venv</code> 裡。
+<code>pip install</code>、<code>python xxx.py</code>、<code>conda activate</code>　可能用到不同的 Python 環境；本教材統一用 <code>uv run python</code>，讓套件與程式都來自 uv 管理的 <code>.venv</code> 裡。
 </p>
 </div>
 </section>
@@ -119,13 +117,13 @@
 <tr><td><code>git init</code></td><td>開始追蹤這個資料夾（只做一次）</td></tr>
 <tr><td><code>git add -A</code></td><td>把所有變動納入這次存檔</td></tr>
 <tr><td><code>git commit -m "說明"</code></td><td>存檔</td></tr>
-<tr><td><code>git diff</code></td><td>看從上次存檔到現在改了什麼</td></tr>
+<tr><td><code>git diff</code></td><td>看工作目錄相對暫存區，尚未 git add 的修改</td></tr>
 <tr><td><code>git status</code></td><td>現在有哪些檔案被動過</td></tr>
-<tr><td><code>git restore .</code></td><td><strong>丟掉所有未存檔的修改</strong>，回到上次 commit</td></tr>
+<tr><td><code>git restore .</code></td><td>從暫存區還原目前目錄下的已追蹤檔案，<strong>丟棄未暫存修改</strong>；不刪未追蹤檔案</td></tr>
 <tr><td><code>git log --oneline</code></td><td>看存檔歷史</td></tr>
 </table></div>
 <p>核心工作流只有三步：<strong>動手前 <code>git commit</code> → 讓 agent 改 → <code>git diff</code> 檢查</strong>。
-不滿意就 <code>git restore .</code>。詳見<a href="git-safety.html">第 07 章</a>。</p>
+檢查前先不要 <code>git add</code>；確認不要未暫存修改時才用 <code>git restore .</code>。已暫存的變更用 <code>git diff --cached</code> 查看。詳見<a href="git-safety.html">第 07 章</a>。</p>
 </section>
 
 <section>
@@ -151,7 +149,7 @@
 <tr><td>回答愈來愈短、開始忘記前面講過的事</td>
     <td>context 快滿了。換題目就 <code>/new</code>；同一題按 <code>ctrl+x c</code> 壓縮（<strong>不是 <code>/compact</code></strong>，1.18.30 沒有那個斜線指令）。壓縮前先把結論寫進 <code>notes/</code>。</td></tr>
 <tr><td><code>/compact</code>、<code>/undo</code>、<code>/share</code>、<code>/export</code> 打了沒反應</td>
-    <td>1.18.30 <strong>沒有</strong>這幾個斜線指令（官方文件與坊間教學都還列著，但實測不存在）。改用 <code>ctrl+x c</code>／<code>ctrl+x u</code>／<code>ctrl+x x</code>，或 <code>ctrl+p</code> 開指令面板搜尋。</td></tr>
+    <td>1.18.30 <strong>沒有</strong>這幾個斜線指令。改用 <code>ctrl+x c</code>／<code>ctrl+x u</code>／<code>ctrl+x x</code>，或 <code>ctrl+p</code> 開指令面板搜尋。</td></tr>
 <tr><td>按 <code>Esc</code> 停不下來</td>
     <td>要按<strong>兩次以上</strong>。第一次只會顯示 <code>esc again to interrupt</code>。</td></tr>
 <tr><td>opencode 突然關掉了</td>
@@ -165,6 +163,7 @@
 
 <section>
 <h2>下指令的四個習慣</h2>
+<p>想自己寫一份完整任務，或讓中斷的工作繼續，請看<a href="agent-workflows.html">需求與續作練習</a>。</p>
 <div class="tw"><table>
 <tr><th>習慣</th><th>差別</th></tr>
 <tr><td><strong>說清楚存到哪</strong></td>
@@ -179,8 +178,8 @@
 </section>
 
 <section>
-<h2>三個實作的關鍵數字</h2>
-<p>用來對答案。你的數值應該跟這些一致（都固定了隨機種子）。</p>
+<h2>三個實作怎麼判讀結果</h2>
+<p>下面是課程設定下的參考結果。先核對資料、參數與比較方式；浮點數用容差比對，不要求每一位都相同。</p>
 <div class="tw"><table>
 <tr><th>Lab</th><th>項目</th><th>參考值</th></tr>
 <tr><td rowspan="2">1</td><td>silhouette 最高的 k</td><td>9（分數 0.1893）</td></tr>

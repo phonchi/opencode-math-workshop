@@ -502,43 +502,227 @@ footer .stamp{
   .topnav,.pager,pre .copy{display:none;}
   body{background:#fff;}
 }
+/* 共用教材骨架：由 build_site.py 內嵌至每個頁面，離線複製仍保留版面。 */
+:root{--shell-width:1440px;--sidebar-width:232px;--column-gap:32px;--prose-width:46em;}
+.topnav .inner{max-width:var(--shell-width);min-height:60px;}
+.topnav .brand{font-size:.82rem;}
+.topnav nav a{font-size:.82rem;color:var(--ink-2);}
+.site-shell{
+  display:grid;grid-template-columns:var(--sidebar-width) minmax(0,1fr);
+  gap:var(--column-gap);max-width:var(--shell-width);margin:0 auto;padding:0 32px;
+}
+.lesson-sidebar{
+  position:sticky;top:80px;align-self:start;max-height:calc(100dvh - 100px);
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  padding:24px 16px 24px 0;margin-top:16px;border-right:1px solid var(--rule);
+}
+.course-menu{display:none;}
+.course-nav ul{list-style:none;margin:0;padding:0;}
+.course-nav li{margin:0;}
+.nav-group{margin-bottom:22px;}
+.nav-group:last-child{margin-bottom:0;}
+.nav-group-title{font-size:.72rem;font-weight:700;color:var(--ink-3);letter-spacing:.08em;margin:0 0 8px 10px;}
+.chapter-link{
+  display:block;font-size:.86rem;color:var(--ink-2);line-height:1.6;
+  padding:7px 10px;border-radius:var(--r-sm);text-decoration:none;
+}
+.chapter-link:hover{background:var(--paper-2);color:var(--ink);}
+.chapter-link[aria-current="page"]{color:var(--live);font-weight:700;background:rgba(184,80,60,.075);}
+.course-nav .section-nav{border-left:1px solid var(--rule);margin:8px 0 12px 14px;padding-left:8px;}
+.section-nav a{display:block;font-size:.76rem;line-height:1.6;padding:5px 8px;text-decoration:none;color:var(--ink-3);}
+.section-nav a:hover,.section-nav a[aria-current="location"]{color:var(--link);background:rgba(42,60,120,.05);border-radius:4px;}
+.section-nav a[aria-current="location"]{font-weight:700;}
+.lesson-main{min-width:0;padding:16px 0 0;}
+.lesson-main > .container{width:100%;max-width:none;padding:24px 0 0;}
+.lesson-main .pagehead{padding-top:24px;}
+.lesson-main .pagehead h1{max-width:20em;}
+.lesson-main .pagehead .lead{max-width:var(--prose-width);}
+.lesson-main p,.lesson-main ul:not(.ckl),.lesson-main ol{max-width:var(--prose-width);}
+.lesson-main .term-body p,.lesson-main .term-body ul{max-width:none;}
+.lesson-main h2{scroll-margin-top:88px;margin-top:3rem;}
+.lesson-main h3,.lesson-main h4{scroll-margin-top:88px;}
+.lesson-main .hero{border-radius:var(--r-lg);padding:48px 36px 40px;margin-top:24px;}
+.lesson-main .hero .kicker{letter-spacing:.09em;}
+.lesson-main .hero-glyph{right:24px;bottom:24px;opacity:.6;}
+.lesson-main .hero h1{font-size:clamp(2.1rem,3.8vw,3.15rem);}
+.lesson-main .hero .inner{max-width:none;}
+.lesson-main .hero .meta{gap:24px;}
+.lesson-main .ch-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));}
+.lesson-main .step{padding-left:3.2rem;}
+/* 原始輸出保留等寬對齊；寬表格與輸出可在自己的容器捲動。 */
+.lesson-main pre.out{font-size:.875rem!important;}
+.lesson-main pre,.lesson-main .tw{max-width:100%;}
+.lesson-main pre:focus-visible,.lesson-main .tw:focus-visible{outline-offset:4px;}
+.lesson-diagram{margin:28px 0 36px;max-width:100%;}
+.lesson-diagram > svg{display:block;width:100%;height:auto;max-width:100%;}
+.lesson-diagram figcaption{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:.78rem;color:var(--ink-2);margin-top:12px;}
+.lesson-diagram figcaption a{margin-left:auto;white-space:nowrap;}
+.pager{margin-top:40px;}
+.pager a{min-width:min(230px,100%);}
+footer{max-width:var(--shell-width);margin:56px auto 0;}
+.skip-link{position:fixed;left:16px;top:8px;transform:translateY(-160%);padding:8px 16px;background:var(--paper-2);z-index:100;border:2px solid var(--link);border-radius:var(--r-sm);}
+.skip-link:focus{transform:none;}
+:focus-visible{outline:2px solid var(--link);outline-offset:3px;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
+@media(max-width:1100px){
+  .site-shell{display:block;padding:0 24px;}
+  .lesson-sidebar{position:static;margin:20px 0 0;padding:0;border:0;max-height:none;overflow:visible;}
+  .desktop-course-menu{display:none;}
+  .course-menu{display:block;border:1px solid var(--rule);border-radius:var(--r-md);background:var(--paper-2);}
+  .course-menu > summary{padding:12px 16px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--link);}
+  .course-menu .course-nav{padding:16px;border-top:1px solid var(--rule);}
+  .course-menu[open] .course-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;}
+  .lesson-main{padding-top:0;}
+  .lesson-main > .container{padding-top:12px;}
+  .lesson-main .hero{margin-top:24px;}
+}
+@media(max-width:720px){
+  .site-shell{padding:0 20px;}
+  .topnav .inner{padding:8px 20px;min-height:56px;flex-wrap:nowrap;gap:12px;}
+  .topnav .brand{font-size:.72rem;letter-spacing:.02em;}
+  .topnav nav{width:auto;margin-left:auto;overflow:visible;mask-image:none;-webkit-mask-image:none;gap:4px;}
+  .topnav nav a{padding:4px;font-size:.72rem;}
+  .lesson-main .hero{padding:32px 24px;}
+  .lesson-main .pagehead{padding-top:20px;}
+  .lesson-main .hero h1{font-size:2.05rem;}
+  .lesson-main .hero .kicker{font-size:.66rem;}
+  .course-menu[open] .course-nav{display:block;}
+  .lesson-main .step{padding-left:2.6rem;}
+  .lesson-main pre.out{font-size:.8125rem!important;}
+  .lesson-diagram figcaption a{margin-left:0;}
+  .pager{display:block;}
+  .pager a{display:block;margin-bottom:12px;}
+}
+@media print{
+  .lesson-sidebar,.skip-link{display:none;}
+  .site-shell{display:block;max-width:none;padding:0;}
+  .lesson-main{padding:0;}
+  .lesson-main .hero{color:var(--ink);background:none;padding:0;}
+  .lesson-main .hero h1,.lesson-main .hero .sub,.lesson-main .hero .kicker{color:var(--ink);}
+  .lesson-main pre{white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:none;}
+  .lesson-diagram{break-inside:avoid;}
+}
+
 </style>
 </head>
 <body>
-
+<a class="skip-link" href="#main-content">跳到本章內容</a>
 <div class="topnav"><div class="inner">
 <a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
-<nav>
+<nav aria-label="常用入口">
 <a href="prep.html">課前準備</a>
-<a href="first-run.html">第一次對話</a>
-<a href="lab1-cluster.html">Lab 1</a>
-<a href="lab2-pca.html">Lab 2</a>
-<a href="lab3-notes.html">Lab 3</a>
-<a href="local-models.html">本地模型</a>
-<a href="agents-md.html">AGENTS.md</a>
-<a href="git-safety.html">git</a>
-<a href="mcp-skills.html">MCP</a>
-<a href="cheatsheet.html">速查</a>
+<a href="cheatsheet.html">速查表</a>
 </nav>
 </div></div>
 
-<div class="container narrow">
+<div class="site-shell"><aside class="lesson-sidebar" aria-label="教材導覽"><div class="desktop-course-menu"><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html" aria-current="page">Lab 3 · 分類與筆記</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-任務">任務</a></li>
+<li><a href="#section-動手">動手</a></li>
+<li><a href="#section-最後-把它變成一份筆記">最後：把它變成一份筆記</a></li>
+<li><a href="#section-檢查清單">檢查清單</a></li>
+<li><a href="#section-如果還有時間">如果還有時間</a></li>
+</ul>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></div><details class="course-menu"><summary>課程與本章目錄</summary><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html" aria-current="page">Lab 3 · 分類與筆記</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-任務">任務</a></li>
+<li><a href="#section-動手">動手</a></li>
+<li><a href="#section-最後-把它變成一份筆記">最後：把它變成一份筆記</a></li>
+<li><a href="#section-檢查清單">檢查清單</a></li>
+<li><a href="#section-如果還有時間">如果還有時間</a></li>
+</ul>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></details></aside><main id="main-content" class="lesson-main" tabindex="-1"><div class="container narrow">
 
 <div class="pagehead">
   <div class="kicker"><span>Lab 3</span><span>·</span><span class="badge live">現場 40 分</span><span>·</span><span>agent 當學習夥伴</span></div>
-  <h1>分類與筆記：讓 agent 幫你學，而不是幫你交差</h1>
+  <h1>分類與筆記：讓 agent 成為學習夥伴</h1>
   <p class="lead">
     前兩關你在檢查 agent，這一關反過來，讓它當你的推導夥伴：
     寫程式、驗證公式、然後把整個推導過程整理成一份你之後真的會回去看的筆記。
   </p>
 </div>
 
+<div class="box tip"><div class="bt">現場怎麼讀這一章</div><p>先理解分類、損失與梯度的意思，再完成程式、梯度檢查與筆記。概似推導、誤差階數與線性可分的完整證明放在深入補充，課後可以慢慢讀；不必先會全部推導才開始操作。</p></div>
 <section>
-<h2>任務</h2>
+<h2 id="section-任務">任務</h2>
 <p>
 從 digits 裡挑出數字 <strong>3</strong> 和 <strong>8</strong>（357 筆），手刻一個 logistic 迴歸做二元分類。
 </p>
 
+<p><strong>二元分類</strong>是從兩個答案中選一個。這裡把像素值當輸入、數字 3 或 8 當已知答案；模型先給出機率，再依機率判斷類別。<strong>損失函數</strong>用一個數字表示預測和答案差多少，訓練就是尋找讓它變小的參數。</p>
+<p><strong>梯度</strong>記錄損失對各個參數的變化率，幫我們決定參數往哪邊調。本關會用小幅改動參數的方法，檢查程式算出的梯度是否合理。</p>
 <details class="bg"><summary>「二元分類」在做什麼？logistic 迴歸為什麼長那樣？</summary>
 <div class="bg-body">
 <p>
@@ -592,7 +776,7 @@ $$L(\mathbf{w})=\prod_{i=1}^{n}p_i^{\,y_i}(1-p_i)^{1-y_i}$$
 <h4>為什麼取 log</h4>
 <ul>
 <li><strong>連乘變連加</strong>：$\log\prod=\sum\log$，微分立刻好做很多</li>
-<li><strong>數值不會爆炸</strong>：357 個介於 0 和 1 的數連乘，會小到 float64 直接變成 0</li>
+<li><strong>數值不會爆炸</strong>：許多介於 0 和 1 的數連乘，可能小到浮點數無法表示而變成 0</li>
 <li><strong>不改變答案</strong>：$\log$ 是嚴格遞增的，最大化 $L$ 跟最大化 $\log L$ 的解完全相同</li>
 </ul>
 <p>
@@ -639,14 +823,14 @@ $\eta$ 是步伐大小（learning rate），本關用 0.5。反覆走，直到�
 <strong>正則化</strong>的做法是在要最小化的目標裡，加一項懲罰大權重的東西。
 最常見的 L2 正則化：
 </p>
-$$L_{\text{reg}}(\mathbf{w})=L(\mathbf{w})+\frac{1}{2C}\|\mathbf{w}\|^2$$
+$$L_{\text{reg}}(\beta,b)=L(\beta,b)+\frac{\lambda}{2}\|\beta\|^2$$
 <p>
-$\|\mathbf{w}\|^2$ 就是線代的平方範數。$C$ 越小懲罰越重。
+這裡 $\beta$ 是特徵的權重，$b$ 是截距；平方範數只計算權重，不包含截距。$\lambda$ 越大，懲罰越重。
 效果是逼模型「除非證據夠強，否則不要把係數調大」。
 </p>
 <p style="margin-bottom:0">
 本關會看到正則化的<strong>另一個</strong>作用，比防過擬合更基本：
-它能讓一個原本<strong>沒有解</strong>的問題變成有唯一解。這點待會見真章。
+在本例兩個類別都存在時，正的 L2 懲罰能讓原本沒有有限最小值點的問題得到有限且唯一的解。<br>稍後 sklearn 的 L2 範例，在未加樣本或類別權重時，對應 $\lambda=1/(nC)$，其中 $n$ 是訓練樣本數；$C$ 越小，懲罰越重。
 </p>
 </div>
 </details>
@@ -671,7 +855,7 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 </details>
 <div class="box math">
 <div class="bt">你要驗證的公式</div>
-<p>令 $z=X_bw$、$\sigma(z)=\dfrac{1}{1+e^{-z}}$，平均對數損失與其梯度為</p>
+<p>把像素矩陣加上一欄 1 得到 $X_b$，並把截距放在參數向量 $w$ 的最後一項。令 $z=X_bw$、$\sigma(z)=\dfrac{1}{1+e^{-z}}$，平均對數損失與其梯度為</p>
 $$L(w)=\frac1n\sum_i\Bigl[\log\bigl(1+e^{z_i}\bigr)-y_iz_i\Bigr],
 \qquad \nabla_wL=\frac1nX_b^\top\bigl[\sigma(X_bw)-y\bigr]$$
 <p style="margin-bottom:0">agent 會很快寫出來。問題是：<strong>你怎麼知道它沒寫錯？</strong></p>
@@ -679,20 +863,23 @@ $$L(w)=\frac1n\sum_i\Bigl[\log\bigl(1+e^{z_i}\bigr)-y_iz_i\Bigr],
 </section>
 
 <section>
-<h2>動手</h2>
+<h2 id="section-動手">動手</h2>
 
 <div class="step" data-n="1">
-<h3>先要求推導，再要求程式</h3>
+<h3>先說明公式，再要求程式</h3>
 <pre class="cmd"><code>我要手刻一個二元 logistic 迴歸，資料是 digits 裡的 3 和 8。
 
-第一步請先不要寫程式。用文字跟數學式跟我推導兩件事：
-1. 從負對數概似出發，推到 L(w) = (1/n) Σ [log(1+e^z) - y z]
-2. 從 L(w) 推到 ∇L = (1/n) X^T (σ(Xw) - y)
+先用兩三句話說明：損失函數衡量什麼，梯度告訴我們什麼。
+依本頁公式 L(w) = (1/n) Σ [log(1+e^z) - y z]，
+以及 ∇L = (1/n) Xb^T (σ(Xb w) - y) 實作。
 
-推導完再寫程式。</code></pre>
+說明後寫成 lab3_logistic.py。本輪只實作資料讀取、loss(w) 與 grad(w)，
+先不要訓練、切分資料、增加其他演算法或產生新資料。
+使用全部 digits 的 3 與 8：像素除以 16，8 設為 1、3 設為 0；
+最後加一欄 1 作為截距，所以 Xb 有 65 欄。loss 使用平均值。
+用 uv run python lab3_logistic.py 執行，印出資料 shape 後停止，等我給下一步。</code></pre>
 <p>
-先推導後寫程式，不只是為了教學。<strong>你需要那份推導來當獨立對照組</strong>。
-待會的數值檢查只能證明「程式內部一致」，證明不了「公式本身正確」。
+先對照本頁公式，確認損失與梯度各自的意義。待會的數值檢查只能檢查「程式內部是否一致」，不能單獨確認「公式本身正確」。完整的概似推導可在課後慢慢閱讀。
 </p>
 </div>
 
@@ -707,7 +894,10 @@ $$\frac{\partial L}{\partial w_i}\;\approx\;\frac{L(w+h\mathbf{e}_i)-L(w-h\mathb
 
 - 用中央差分，檢查**全部** 65 個維度（不要只抽樣幾個）
 - 步長 h 掃過 1e-2 到 1e-9，每個 h 印出最大絕對誤差與最大相對誤差
-- 做成表格</code></pre>
+- 使用 np.random.RandomState(0).normal(size=65)*0.01 作為檢查點 w0
+- 最大絕對誤差小於 1e-8 記為 PASS，否則記為需調查；相對誤差分母至少取 1e-12
+- 做成表格，用 uv run python lab3_logistic.py 執行
+- 本輪只加梯度檢查，不訓練、不新增資料或演算法；完成後停止</code></pre>
 
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">opencode　build · big-pickle</span></div>
@@ -724,7 +914,7 @@ $$\frac{\partial L}{\partial w_i}\;\approx\;\frac{L(w+h\mathbf{e}_i)-L(w-h\mathb
 </div>
 </div>
 
-<h3>為什麼兩頭都會 FAIL</h3>
+<details class="bg"><summary>深入：為什麼步長太大或太小都可能 FAIL</summary><div class="bg-body"><h3>為什麼兩頭都會 FAIL</h3>
 <p>中央差分的總誤差有兩個來源，方向相反：</p>
 <div class="box math">
 <div class="bt">誤差分解</div>
@@ -734,7 +924,7 @@ $u$ 是浮點精度（float64 約 $2.2\times10^{-16}$）。
 $h$ 太大時泰勒展開的高階項來不及被忽略；
 $h$ 太小時 $L(w+h)$ 與 $L(w-h)$ 幾乎相等，相減會損失有效位數。
 令導數為零可得最佳量級 $h\sim u^{1/3}\approx 6\times10^{-6}$。
-實測最佳落在 $10^{-4}$ 附近，同一個量級。
+這份輸出的最佳位置約在 $10^{-4}$ 附近；實際位置還受常數、資料與誤差判準影響。
 </p>
 </div>
 
@@ -745,9 +935,10 @@ $h$ 太小時 $L(w+h)$ 與 $L(w-h)$ 幾乎相等，相減會損失有效位數�
 所以看到梯度檢查 FAIL 時，正確的說法是<strong>「有不一致，要查原因」</strong>：
 可能是公式錯、步長不當、捨入誤差，或該維梯度本身接近 0。
 反過來說，PASS 也只提供<strong>局部數值證據</strong>：如果 <code>loss()</code> 和 <code>grad()</code>
-一起照著同一個錯誤的目標函數寫，這關照樣全過。這就是為什麼第 1 步要先獨立推導。
+一起照著同一個錯誤的目標函數寫，這關照樣全過。因此仍要對照目標公式，不能只看數值 PASS。
 </p>
 </div>
+</div></details>
 </div>
 
 <div class="step" data-n="3">
@@ -783,10 +974,12 @@ $h$ 太小時 $L(w+h)$ 與 $L(w-h)$ 幾乎相等，相減會損失有效位數�
 </div>
 
 <div class="step" data-n="4">
+<p>這份資料能被一個線性邊界完全分開；下面的補充用程式檢查這件事。現場先觀察係數持續增大，再比較預測結果。</p>
+<details class="bg"><summary>深入：用線性規劃確認可分性與推導其影響</summary><div class="bg-body">
 <h3>證明它真的線性可分</h3>
 <p>
 「$\|w\|$ 一直變大」只是個徵兆，不是證明。要真的確認，解一個線性可行性問題：
-令 $t_i=2y_i-1\in\{-1,+1\}$，找 $v$ 使得
+以下 $\mathbf{x}_i$ 表示已加上常數 1 的第 $i$ 筆資料，$v$ 的最後一項是截距。令 $t_i=2y_i-1\in\{-1,+1\}$，找 $v$ 使得
 </p>
 <div class="box math">
 <div class="bt">可行性問題</div>
@@ -796,12 +989,12 @@ $$t_i\,(\mathbf{x}_i^\top v)\;\ge\;1\qquad\text{對所有 }i$$
 <pre class="cmd"><code>請用 scipy.optimize.linprog 解這個線性可行性問題：
 找 v 使得對所有 i 都有 t_i * (x_i · v) >= 1，其中 t_i = 2*y_i - 1。
 
-如果有解，印出幾何間隔 margin / ||v||。
+如果有解，v 的最後一項是截距；印出幾何間隔 min(t*(Xb@v)) / ||v[:-1]||，分母不含截距。
 然後對找到的 v，計算 c = 1, 5, 20, 100, 500 時的 L(c*v)。</code></pre>
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">可分性證明</span></div>
   <div class="term-body"><div class="o">可行解存在  ->  PASS</div>
-<div class="o">幾何間隔 = margin / ||v|| = 1.174682e-02  ->  PASS</div>
+<div class="o">幾何間隔 = margin / ||v[:-1]|| = 1.174682e-02  ->  PASS</div>
 <div class="sp"></div>
 <div class="o">      c =    1   L(cv) = 0.1022643878</div>
 <div class="o">      c =    5   L(cv) = 0.0011832838</div>
@@ -830,6 +1023,7 @@ $L(cv)=\frac1n\sum_i\log\bigl(1+e^{-c\,t_i\mathbf{x}_i^\top v}\bigr)\to 0$，
 另外，這個結論只適用於<strong>這 357 筆樣本</strong>，不代表所有手寫的 3 和 8 都線性可分。
 </p>
 </div>
+</div></details>
 </div>
 
 <div class="step" data-n="5">
@@ -864,18 +1058,26 @@ $L(cv)=\frac1n\sum_i\log\bigl(1+e^{-c\,t_i\mathbf{x}_i^\top v}\bigr)\to 0$，
 </div>
 <p>
 $\|w\|$ 從 97.9 掉到 6.0，準確率完全沒變。
-目標函數多了 $\frac{1}{2C}\|w\|^2$ 這一項之後變成嚴格凸且強制的（coercive），
-<strong>唯一最小值存在</strong>。這就是正則化除了「防過擬合」之外，更基本的一個理由。
+這裡 sklearn 的 L2 懲罰作用於不含截距的特徵權重 $\beta$，以本章平均損失的記法，懲罰項為 $\|\beta\|^2/(2nC)$。上方顯示的 $\|w\|$ 則仍包含截距，方便與前面的輸出對照。<br>在本例兩類樣本都存在的條件下，加入正的 L2 懲罰後有有限且唯一的解。它除了限制權重大小，也解決了這個例子原本沒有有限最小值點的問題。
 </p>
 </div>
 </section>
 
 <section>
-<h2>最後：把它變成一份筆記</h2>
+<h2 id="section-最後-把它變成一份筆記">最後：把它變成一份筆記</h2>
 <p>
-到這裡你已經推導了兩個公式、做了三種驗證、發現了一個反直覺的結論。
+把今天已完成的程式、檢查與發現整理成筆記。
 這些東西如果只留在終端機的捲動紀錄裡，下週就沒了。
 </p>
+<pre class="cmd"><code>請把今天已完成的步驟整理成 notes/logistic.md，寫給之後複習的我看。
+
+請說明：我們用什麼資料、損失與梯度各代表什麼、梯度檢查看到了什麼，
+以及為什麼準確率相同還不能判斷兩個模型完全相同。
+引用這次實際執行的指令、輸出與數字，數學式用 $...$ 與 $$...$$。
+沒有完成的推導或檢查列在「接下來想弄懂的事」，不要寫成已完成。
+最後給我一個可以不用看筆記就回答的問題，答案分開寫。</code></pre>
+<details class="bg"><summary>課後：補成包含完整推導的筆記</summary><div class="bg-body">
+<p>完成前面的深入補充後，再用這份需求擴充筆記。範例中的數值要核對自己實際的執行結果。</p>
 <pre class="cmd"><code>請把今天這一輪的推導與發現整理成 notes/logistic.md，內容包含：
 
 1. 從負對數概似到 L(w) 的完整推導（用 $...$ 與 $$...$$ 寫數學式）
@@ -886,6 +1088,7 @@ $\|w\|$ 從 97.9 掉到 6.0，準確率完全沒變。
 6. 正則化怎麼讓問題重新有解
 
 寫給三個月後的我看，那時我已經忘記細節了。</code></pre>
+</div></details>
 
 <div class="box tip">
 <div class="bt">為什麼要寫成檔案，而不是在對話裡問</div>
@@ -898,78 +1101,148 @@ $\|w\|$ 從 97.9 掉到 6.0，準確率完全沒變。
 </p>
 </div>
 
-<pre class="cmd"><code>git add notes/logistic.md && git commit -m "Lab 3: logistic 推導與驗證筆記"</code></pre>
+<p>課後若想保留筆記的修改歷程，再依<a href="git-safety.html">Git 安全網</a>建立版本紀錄。現場先確認 <code>notes/logistic.md</code> 存在，並讀過內容。</p>
 </section>
 
 <section>
-<h2>檢查清單</h2>
+<h2 id="section-檢查清單">檢查清單</h2>
 <ul class="ckl">
-<li><input type="checkbox" id="l3a"><label for="l3a">我有讓 agent <strong>先推導再寫程式</strong>，而且我看過那份推導</label></li>
-<li><input type="checkbox" id="l3b"><label for="l3b">梯度檢查掃過多個步長，我看到兩頭都會 FAIL 的 U 型曲線</label></li>
-<li><input type="checkbox" id="l3c"><label for="l3c">我能解釋截斷誤差與捨入誤差為什麼是相反方向</label></li>
-<li><input type="checkbox" id="l3d"><label for="l3d">我用 linprog 實際證明了資料線性可分，而不是只看 $\|w\|$ 變大</label></li>
+<li><input type="checkbox" id="l3a"><label for="l3a">我能說明損失與梯度的用途，並把程式對照過本頁公式</label></li>
+<li><input type="checkbox" id="l3b"><label for="l3b">梯度檢查掃過多個步長，我比較過步長改變時的誤差</label></li>
+<li><input type="checkbox" id="l3c"><label for="l3c">我能說明步長太大或太小都可能讓梯度檢查不準確</label></li>
+<li><input type="checkbox" id="l3d"><label for="l3d">我知道係數變大不能單獨證明線性可分；想深入時會回來完成 linprog 檢查</label></li>
 <li><input type="checkbox" id="l3e"><label for="l3e">我知道「準確率都 1.0」不代表決策邊界相同</label></li>
-<li><input type="checkbox" id="l3f"><label for="l3f"><code>notes/logistic.md</code> 存在，而且已經 commit 進 git</label></li>
+<li><input type="checkbox" id="l3f"><label for="l3f"><code>notes/logistic.md</code> 存在，而且我能用自己的話說明其中一個結論</label></li>
 </ul>
 </section>
 
 <section>
-<h2>如果還有時間</h2>
+<h2 id="section-如果還有時間">如果還有時間</h2>
+<details class="bg"><summary>課後練習：從概似推導損失與梯度</summary><div class="bg-body"><p>理解前面的操作後，可以請 agent 陪你逐步推導，遇到不熟的符號就停下來問：</p><pre class="cmd"><code>先定義 Bernoulli 模型的成功機率，解釋為什麼把獨立樣本的機率相乘。
+從負對數概似逐步推導本頁的平均損失，再推導梯度。
+每個新符號先定義，每一步說明用了哪個微分規則；先不要寫程式。</code></pre></div></details>
 <ul>
-<li>把梯度檢查的表格畫成 log-log 圖（$h$ 對最大誤差），你會看到一條漂亮的 V 型：左半段斜率 $-1$（捨入），右半段斜率 $+2$（截斷）。叫 agent 順便驗證這兩個斜率。</li>
-<li>換成 3 vs 5（比較難分的一對），重跑可分性檢查。如果 linprog 找不到可行解，那無正則化的 MLE 就存在有限解了，這時手刻與 sklearn 的係數才真的該收斂到同一組。</li>
+<li>把梯度檢查的表格畫成 log-log 圖（$h$ 對最大誤差），觀察是否有步長過大或過小時誤差增加的趨勢。截斷誤差常呈 $h^2$、捨入項常呈 $1/h$ 的量級，但有限的取樣點與具體函數不保證畫出理想斜率。</li>
+<li>換成 3 vs 5（比較難分的一對），重跑可分性檢查。若未找到嚴格分隔，先核對求解器狀態；這仍不足以保證無正則化的 MLE 有有限且唯一的解。還可能有準完全分離或特徵相依，因此不要直接要求兩套方法的係數一致。</li>
 <li>掃過 $C$ 從 $10^{-3}$ 到 $10^{3}$，畫 $\|w\|$ 與訓練／測試準確率的曲線，看正則化路徑長什麼樣子。</li>
 </ul>
 </section>
 
-<div class="pager">
-  <a href="lab2-pca.html"><div class="d">上一章</div><div class="t2">← 03 · Lab 2 · 降維</div></a>
-  <a href="local-models.html" class="next"><div class="d">下一章</div><div class="t2">05 · 本地模型 →</div></a>
-</div>
+
 
 </div>
+<nav class="pager" aria-label="章節順序"><a href="lab2-pca.html" class="prev"><div class="d">上一章</div><div class="t2">← Lab 2 · PCA</div></a><a href="agent-workflows.html" class="next"><div class="d">下一章</div><div class="t2">讓 agent 把工作做完整 →</div></a></nav></main></div>
 
 <footer>
 <div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
-<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+<div class="stamp">讓 agent 動手，讓數學說明結果。</div>
 </footer>
 
 <script>
-// 導覽列高亮目前頁面
+/* Progressive enhancement: navigation and disclosure work without JavaScript. */
 (function(){
-  var f=(location.pathname.split('/').pop()||'index.html');
+  'use strict';
+  var pageName=location.pathname.split('/').pop()||'index.html';
   document.querySelectorAll('.topnav nav a').forEach(function(a){
-    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+    if(a.getAttribute('href')===pageName) a.setAttribute('aria-current','page');
   });
-})();
 
-// 指令複製鈕
-document.querySelectorAll('pre.cmd').forEach(function(pre){
-  var b=document.createElement('button');
-  b.className='copy'; b.type='button'; b.textContent='複製';
-  b.addEventListener('click',function(){
-    var t=pre.querySelector('code');
-    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
-      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
-    },function(){ b.textContent='複製失敗'; });
-  });
-  pre.appendChild(b);
-});
-
-// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
-(function(){
-  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
-  var saved={};
-  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
-  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
-    var id=cb.id||('ck'+i); cb.id=id;
-    if(saved[id]) cb.checked=true;
-    cb.addEventListener('change',function(){
-      saved[id]=cb.checked;
-      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+  var sections=Array.from(document.querySelectorAll('.lesson-main h2[id]'));
+  var sectionLinks=Array.from(document.querySelectorAll('.section-nav a'));
+  var scheduled=false;
+  function markSection(){
+    scheduled=false;
+    var current=sections[0];
+    sections.forEach(function(section){if(section.getBoundingClientRect().top<=145) current=section;});
+    sectionLinks.forEach(function(link){
+      if(current&&link.getAttribute('href')==='#'+current.id) link.setAttribute('aria-current','location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  function scheduleSection(){
+    if(!scheduled){scheduled=true;requestAnimationFrame(markSection);}
+  }
+  window.addEventListener('scroll',scheduleSection,{passive:true});
+  window.addEventListener('resize',scheduleSection);
+  window.addEventListener('hashchange',scheduleSection);
+  markSection();
+  document.querySelectorAll('.course-menu .section-nav a').forEach(function(link){
+    link.addEventListener('click',function(){
+      link.closest('details').open=false;
+      // Closing the menu moves the heading; resolve the anchor after that reflow.
+      var id=link.getAttribute('href').slice(1),target=document.getElementById(id);
+      if(target){
+        requestAnimationFrame(function(){
+          var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({top:window.scrollY+target.getBoundingClientRect().top-88,behavior:reduced?'auto':'smooth'});
+        });
+      }
     });
   });
+
+  var status=document.createElement('span');
+  status.className='sr-only';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+  document.body.appendChild(status);
+  function fallbackCopy(text){
+    var active=document.activeElement,selection=window.getSelection();
+    var ranges=[];
+    if(selection) for(var i=0;i<selection.rangeCount;i++) ranges.push(selection.getRangeAt(i).cloneRange());
+    var area=document.createElement('textarea');
+    area.value=text;area.setAttribute('readonly','');
+    area.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(area);area.select();
+    var copied=false;
+    try{copied=document.execCommand('copy');}catch(error){}
+    area.remove();
+    if(active&&active.focus) active.focus({preventScroll:true});
+    if(selection){selection.removeAllRanges();ranges.forEach(function(range){selection.addRange(range);});}
+    return copied;
+  }
+  async function copyText(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      try{await navigator.clipboard.writeText(text);return true;}catch(error){}
+    }
+    return fallbackCopy(text);
+  }
+  document.querySelectorAll('pre.cmd').forEach(function(pre){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='複製';
+    button.addEventListener('click',async function(){
+      var code=pre.querySelector('code')||pre;
+      var text=(code===pre?Array.from(pre.childNodes).filter(function(node){return node!==button;}).map(function(node){return node.textContent;}).join(''):code.textContent).trim();
+      if(await copyText(text)){
+        button.textContent='已複製';status.textContent='指令已複製。';
+      }else{
+        var range=document.createRange();range.selectNodeContents(code);
+        var selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);
+        button.textContent='請按 Ctrl+C';status.textContent='已選取指令，請按 Ctrl+C 複製。';
+      }
+      setTimeout(function(){button.textContent='複製';status.textContent='';},2200);
+    });
+    pre.appendChild(button);
+  });
+
+  // Keep the existing storage key and checkbox IDs so prior progress survives.
+  var key='ocmw:'+pageName,saved={};
+  try{
+    var parsed=JSON.parse(localStorage.getItem(key)||'{}');
+    if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)) saved=parsed;
+  }catch(error){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(checkbox,index){
+    var id=checkbox.id||('ck'+index);checkbox.id=id;
+    if(saved[id]) checkbox.checked=true;
+    checkbox.addEventListener('change',function(){
+      saved[id]=checkbox.checked;
+      try{localStorage.setItem(key,JSON.stringify(saved));}catch(error){}
+    });
+  });
+  // Wide output stays readable and can be scrolled from the keyboard.
+  document.querySelectorAll('pre.out,.tw').forEach(function(block){
+    block.tabIndex=0;
+    block.setAttribute('aria-label',block.matches('.tw')?'表格；較寬時可左右捲動':'程式輸出；較寬時可左右捲動');
+  });
 })();
+
 </script>
 
 <script>

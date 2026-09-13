@@ -1,0 +1,437 @@
+[
+  {
+    "type": "text",
+    "text": "你是幕後僅讀不改的數學審查員。請為我審查目前專案裡的手刻 PCA 實作與其執行輸出，**只讀不改**，不要修改任何檔案、不要執行任何程式、不要跑實驗。\n\n要檢查的檔案：\n- /home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project/lab2_pca.py\n- /home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project/notes/lab2_pca-output.log\n\n請從以下角度檢查並回報：\n1. 手刻 PCA 的數學是否正確：中心化、共變異數矩陣或 SVD、特徵分解、投影方向/主成分的正交性與排序、變異數比與累積解釋變異數的計算。\n2. 是否符合「可重現」原則（random_state / 種子設定）。\n3. 是否如實「手刻」而沒有偷呼叫現成的 PCA（sklearn 只能用來當對照組）。\n4. 程式與 log 輸出是否一致：log 顯示的指令、數字、圖檔是否與程式會產生的結果吻合（可用計算推論，但不要執行）。\n5. 是否有任何只靠 log 無法確認的地方，請明確標示「無法從 log 確認」。\n\n請用台灣繁體中文回報，逐項列出：找到的程式位置（檔名:行號）、正確的地方、可疑或錯誤的地方、缺少/未確認的地方。最後給一句總評。"
+  },
+  {
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-start"
+  },
+  {
+    "type": "reasoning",
+    "text": "Let me start by reading the two files that need to be reviewed.",
+    "time": {
+      "start": 1789229138013,
+      "end": 1789229138131
+    }
+  },
+  {
+    "type": "tool",
+    "tool": "read",
+    "callID": "call_05bf4da022dd4137b94acbd2",
+    "state": {
+      "status": "completed",
+      "input": {
+        "filePath": "/home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project/lab2_pca.py"
+      },
+      "output": "<path>/home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project/lab2_pca.py</path>\n<type>file</type>\n<content>\n1: import numpy as np\n2: from sklearn.datasets import load_digits\n3: from sklearn.decomposition import PCA\n4: \n5: N_COMPONENTS = 10\n6: \n7: digits = load_digits()\n8: X = digits.data\n9: n_samples, n_features = X.shape\n10: \n11: \n12: def my_pca_topk(X, k):\n13:     \"\"\"手刻 PCA：只許用 numpy。中心化 -> 共變異數矩陣 -> eigh -> 排序 -> 取前 k。\"\"\"\n14:     X_centered = X - X.mean(axis=0)\n15:     cov = (X_centered.T @ X_centered) / (n_samples - 1)\n16:     eigvals, eigvecs = np.linalg.eigh(cov)\n17: \n18:     order = np.argsort(eigvals)[::-1]\n19:     top = order[:k]\n20:     components = eigvecs[:, top].T\n21:     explained_variance = eigvals[top]\n22: \n23:     # 對齊 sklearn 的 sign convention（svd_flip, u_based_decision=False）：\n24:     # 每個主成分在\"絕對值最大\"那一格必須為正。\n25:     max_idx = np.argmax(np.abs(components), axis=1)\n26:     signs = np.sign(components[np.arange(k), max_idx])\n27:     components = components * signs[:, None]\n28: \n29:     return components, explained_variance\n30: \n31: \n32: components_hand, var_hand = my_pca_topk(X, N_COMPONENTS)\n33: \n34: ref = PCA(n_components=N_COMPONENTS, svd_solver=\"full\", random_state=0)\n35: ref.fit(X)\n36: \n37: components_sk, var_sk = ref.components_, ref.explained_variance_\n38: \n39: print(f\"資料形狀: X{n_features} 維 x {n_samples} 個樣本\\n\")\n40: \n41: # 1. 特徵值本身（explained_variance_）\n42: print(\"=== 1. 特徵值 (explained_variance_) 比對 ===\")\n43: for i in range(N_COMPONENTS):\n44:     print(f\"  PC{i+1:2d}  手刻={var_hand[i]:12.6f}   sklearn={var_sk[i]:12.6f}\")\n45: max_diff_var = np.max(np.abs(var_hand - var_sk))\n46: print(f\"  最大絕對差 = {max_diff_var:.6e}  ->  {max_diff_var < 1e-10}\")\n47: \n48: # 2. 解釋變異比例\n49: print(\"\\n=== 2. 解釋變異比例 (explained_variance_ratio_) 比對 ===\")\n50: ratio_hand = var_hand / var_hand.sum()\n51: ratio_sk = var_sk / var_sk.sum()\n52: for i in range(N_COMPONENTS):\n53:     print(f\"  PC{i+1:2d}  手刻={ratio_hand[i]:.8f}   sklearn={ratio_sk[i]:.8f}\")\n54: print(f\"  累計比例(前10) = {ratio_hand.sum():.6f}\")\n55: max_diff_ratio = np.max(np.abs(ratio_hand - ratio_sk))\n56: print(f\"  最大絕對差 = {max_diff_ratio:.6e}  ->  {max_diff_ratio < 1e-10}\")\n57: \n58: # 3. 方向與正負號\n59: print(\"\\n=== 3. 方向與正負號 比對 ===\")\n60: align = np.sum(np.sign(components_hand) * np.sign(components_sk), axis=1)\n61: dot = np.abs(np.sum(components_hand * components_sk, axis=1))\n62: idx = np.argmax(np.abs(components_sk), axis=1)\n63: for i in range(N_COMPONENTS):\n64:     ag = \"同向\" if align[i] > 0 else \"反向\"\n65:     print(f\"  PC{i+1:2d}  |內積|={dot[i]:.8f}  正負號對齊={ag}  max|位置|符號(手刻/sklearn)={np.sign(components_hand[i,idx[i]]):+.0f}/{np.sign(components_sk[i,idx[i]]):+.0f}\")\n66: max_dot_err = np.max(1 - dot)\n67: print(f\"  最大(1-|內積|) = {max_dot_err:.6e}  ->  {max_dot_err < 1e-8}\")\n68: \n69: # 4. 正交性：手刻的主成分彼此正交\n70: print(\"\\n=== 4. 手刻主成分正交性 ===\")\n71: gram = components_hand @ components_hand.T\n72: print(f\"  Gram matrix 第 1 列 = {np.round(gram[0], 4)}\")\n73: off = np.abs(gram - np.eye(N_COMPONENTS))\n74: print(f\"  最大非對角元素(|C C^T - I|) = {np.max(off):.6e}  ->  {np.max(off) < 1e-10}\")\n75: \n76: # 5. 重建誤差\n77: print(\"\\n=== 5. 重建誤差 比對 ===\")\n78: Xc = X - X.mean(axis=0)\n79: recon_hand = Xc @ components_hand.T @ components_hand + X.mean(axis=0)\n80: recon_sk = ref.inverse_transform(ref.transform(X))\n81: err_hand = np.linalg.norm(X - recon_hand)\n82: err_sk = np.linalg.norm(X - recon_sk)\n83: diff_er = np.linalg.norm(recon_hand - recon_sk)\n84: print(f\"  手刻重建誤差 ||X - X_hat||  = {err_hand:.8f}\")\n85: print(f\"  sklearn 重建誤差 ||X - X_hat|| = {err_sk:.8f}\")\n86: print(f\"  兩者重建結果差 ||Xhat_hand - Xhat_sk|| = {diff_er:.6e}  ->  {diff_er < 1e-8}\")\n\n(End of file - total 86 lines)\n</content>",
+      "metadata": {
+        "preview": "import numpy as np\nfrom sklearn.datasets import load_digits\nfrom sklearn.decomposition import PCA\n\nN_COMPONENTS = 10\n\ndigits = load_digits()\nX = digits.data\nn_samples, n_features = X.shape\n\n\ndef my_pca_topk(X, k):\n    \"\"\"手刻 PCA：只許用 numpy。中心化 -> 共變異數矩陣 -> eigh -> 排序 -> 取前 k。\"\"\"\n    X_centered = X - X.mean(axis=0)\n    cov = (X_centered.T @ X_centered) / (n_samples - 1)\n    eigvals, eigvecs = np.linalg.eigh(cov)\n\n    order = np.argsort(eigvals)[::-1]\n    top = order[:k]\n    components = eigvecs[:, top].T",
+        "truncated": false,
+        "loaded": [],
+        "display": {
+          "type": "file",
+          "path": "/home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project/lab2_pca.py",
+          "text": "import numpy as np\nfrom sklearn.datasets import load_digits\nfrom sklearn.decomposition import PCA\n\nN_COMPONENTS = 10\n\ndigits = load_digits()\nX = digits.data\nn_samples, n_features = X.shape\n\n\ndef my_pca_topk(X, k):\n    \"\"\"手刻 PCA：只許用 numpy。中心化 -> 共變異數矩陣 -> eigh -> 排序 -> 取前 k。\"\"\"\n    X_centered = X - X.mean(axis=0)\n    cov = (X_centered.T @ X_centered) / (n_samples - 1)\n    eigvals, eigvecs = np.linalg.eigh(cov)\n\n    order = np.argsort(eigvals)[::-1]\n    top = order[:k]\n    components = eigvecs[:, top].T\n    explained_variance = eigvals[top]\n\n    # 對齊 sklearn 的 sign convention（svd_flip, u_based_decision=False）：\n    # 每個主成分在\"絕對值最大\"那一格必須為正。\n    max_idx = np.argmax(np.abs(components), axis=1)\n    signs = np.sign(components[np.arange(k), max_idx])\n    components = components * signs[:, None]\n\n    return components, explained_variance\n\n\ncomponents_hand, var_hand = my_pca_topk(X, N_COMPONENTS)\n\nref = PCA(n_components=N_COMPONENTS, svd_solver=\"full\", random_state=0)\nref.fit(X)\n\ncomponents_sk, var_sk = ref.components_, ref.explained_variance_\n\nprint(f\"資料形狀: X{n_features} 維 x {n_samples} 個樣本\\n\")\n\n# 1. 特徵值本身（explained_variance_）\nprint(\"=== 1. 特徵值 (explained_variance_) 比對 ===\")\nfor i in range(N_COMPONENTS):\n    print(f\"  PC{i+1:2d}  手刻={var_hand[i]:12.6f}   sklearn={var_sk[i]:12.6f}\")\nmax_diff_var = np.max(np.abs(var_hand - var_sk))\nprint(f\"  最大絕對差 = {max_diff_var:.6e}  ->  {max_diff_var < 1e-10}\")\n\n# 2. 解釋變異比例\nprint(\"\\n=== 2. 解釋變異比例 (explained_variance_ratio_) 比對 ===\")\nratio_hand = var_hand / var_hand.sum()\nratio_sk = var_sk / var_sk.sum()\nfor i in range(N_COMPONENTS):\n    print(f\"  PC{i+1:2d}  手刻={ratio_hand[i]:.8f}   sklearn={ratio_sk[i]:.8f}\")\nprint(f\"  累計比例(前10) = {ratio_hand.sum():.6f}\")\nmax_diff_ratio = np.max(np.abs(ratio_hand - ratio_sk))\nprint(f\"  最大絕對差 = {max_diff_ratio:.6e}  ->  {max_diff_ratio < 1e-10}\")\n\n# 3. 方向與正負號\nprint(\"\\n=== 3. 方向與正負號 比對 ===\")\nalign = np.sum(np.sign(components_hand) * np.sign(components_sk), axis=1)\ndot = np.abs(np.sum(components_hand * components_sk, axis=1))\nidx = np.argmax(np.abs(components_sk), axis=1)\nfor i in range(N_COMPONENTS):\n    ag = \"同向\" if align[i] > 0 else \"反向\"\n    print(f\"  PC{i+1:2d}  |內積|={dot[i]:.8f}  正負號對齊={ag}  max|位置|符號(手刻/sklearn)={np.sign(components_hand[i,idx[i]]):+.0f}/{np.sign(components_sk[i,idx[i]]):+.0f}\")\nmax_dot_err = np.max(1 - dot)\nprint(f\"  最大(1-|內積|) = {max_dot_err:.6e}  ->  {max_dot_err < 1e-8}\")\n\n# 4. 正交性：手刻的主成分彼此正交\nprint(\"\\n=== 4. 手刻主成分正交性 ===\")\ngram = components_hand @ components_hand.T\nprint(f\"  Gram matrix 第 1 列 = {np.round(gram[0], 4)}\")\noff = np.abs(gram - np.eye(N_COMPONENTS))\nprint(f\"  最大非對角元素(|C C^T - I|) = {np.max(off):.6e}  ->  {np.max(off) < 1e-10}\")\n\n# 5. 重建誤差\nprint(\"\\n=== 5. 重建誤差 比對 ===\")\nXc = X - X.mean(axis=0)\nrecon_hand = Xc @ components_hand.T @ components_hand + X.mean(axis=0)\nrecon_sk = ref.inverse_transform(ref.transform(X))\nerr_hand = np.linalg.norm(X - recon_hand)\nerr_sk = np.linalg.norm(X - recon_sk)\ndiff_er = np.linalg.norm(recon_hand - recon_sk)\nprint(f\"  手刻重建誤差 ||X - X_hat||  = {err_hand:.8f}\")\nprint(f\"  sklearn 重建誤差 ||X - X_hat|| = {err_sk:.8f}\")\nprint(f\"  兩者重建結果差 ||Xhat_hand - Xhat_sk|| = {diff_er:.6e}  ->  {diff_er < 1e-8}\")",
+          "lineStart": 1,
+          "lineEnd": 86,
+          "totalLines": 86,
+          "truncated": false
+        }
+      },
+      "title": "tools/test-runs/20260912-workshop-refresh/wsl/project/lab2_pca.py",
+      "time": {
+        "start": 1789229138833,
+        "end": 1789229138840
+      }
+    }
+  },
+  {
+    "type": "tool",
+    "tool": "read",
+    "callID": "call_5c5718da5b95452eb46345d2",
+    "state": {
+      "status": "completed",
+      "input": {
+        "filePath": "/home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project/notes/lab2_pca-output.log"
+      },
+      "output": "<path>/home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project/notes/lab2_pca-output.log</path>\n<type>file</type>\n<content>\n1: Command: uv run python lab2_pca.py\n2: 資料形狀: X64 維 x 1797 個樣本\n3: \n4: === 1. 特徵值 (explained_variance_) 比對 ===\n5:   PC 1  手刻=  179.006930   sklearn=  179.006930\n6:   PC 2  手刻=  163.717747   sklearn=  163.717747\n7:   PC 3  手刻=  141.788439   sklearn=  141.788439\n8:   PC 4  手刻=  101.100375   sklearn=  101.100375\n9:   PC 5  手刻=   69.513166   sklearn=   69.513166\n10:   PC 6  手刻=   59.108525   sklearn=   59.108525\n11:   PC 7  手刻=   51.884539   sklearn=   51.884539\n12:   PC 8  手刻=   44.015107   sklearn=   44.015107\n13:   PC 9  手刻=   40.310995   sklearn=   40.310995\n14:   PC10  手刻=   37.011798   sklearn=   37.011798\n15:   最大絕對差 = 2.842171e-13  ->  True\n16: \n17: === 2. 解釋變異比例 (explained_variance_ratio_) 比對 ===\n18:   PC 1  手刻=0.20170758   sklearn=0.20170758\n19:   PC 2  手刻=0.18447951   sklearn=0.18447951\n20:   PC 3  手刻=0.15976925   sklearn=0.15976925\n21:   PC 4  手刻=0.11392136   sklearn=0.11392136\n22:   PC 5  手刻=0.07832843   sklearn=0.07832843\n23:   PC 6  手刻=0.06660434   sklearn=0.06660434\n24:   PC 7  手刻=0.05846424   sklearn=0.05846424\n25:   PC 8  手刻=0.04959685   sklearn=0.04959685\n26:   PC 9  手刻=0.04542301   sklearn=0.04542301\n27:   PC10  手刻=0.04170543   sklearn=0.04170543\n28:   累計比例(前10) = 1.000000\n29:   最大絕對差 = 1.942890e-16  ->  True\n30: \n31: === 3. 方向與正負號 比對 ===\n32:   PC 1  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n33:   PC 2  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n34:   PC 3  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n35:   PC 4  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n36:   PC 5  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n37:   PC 6  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n38:   PC 7  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n39:   PC 8  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n40:   PC 9  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n41:   PC10  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n42:   最大(1-|內積|) = 2.220446e-16  ->  True\n43: \n44: === 4. 手刻主成分正交性 ===\n45:   Gram matrix 第 1 列 = [ 1.  0.  0. -0. -0.  0. -0. -0. -0.  0.]\n46:   最大非對角元素(|C C^T - I|) = 8.881784e-16  ->  True\n47: \n48: === 5. 重建誤差 比對 ===\n49:   手刻重建誤差 ||X - X_hat||  = 751.78680710\n50:   sklearn 重建誤差 ||X - X_hat|| = 751.78680710\n51:   兩者重建結果差 ||Xhat_hand - Xhat_sk|| = 2.833042e-12  ->  True\n\n(End of file - total 51 lines)\n</content>",
+      "metadata": {
+        "preview": "Command: uv run python lab2_pca.py\n資料形狀: X64 維 x 1797 個樣本\n\n=== 1. 特徵值 (explained_variance_) 比對 ===\n  PC 1  手刻=  179.006930   sklearn=  179.006930\n  PC 2  手刻=  163.717747   sklearn=  163.717747\n  PC 3  手刻=  141.788439   sklearn=  141.788439\n  PC 4  手刻=  101.100375   sklearn=  101.100375\n  PC 5  手刻=   69.513166   sklearn=   69.513166\n  PC 6  手刻=   59.108525   sklearn=   59.108525\n  PC 7  手刻=   51.884539   sklearn=   51.884539\n  PC 8  手刻=   44.015107   sklearn=   44.015107\n  PC 9  手刻=   40.310995   sklearn=   40.310995\n  PC10  手刻=   37.011798   sklearn=   37.011798\n  最大絕對差 = 2.842171e-13  ->  True\n\n=== 2. 解釋變異比例 (explained_variance_ratio_) 比對 ===\n  PC 1  手刻=0.20170758   sklearn=0.20170758\n  PC 2  手刻=0.18447951   sklearn=0.18447951\n  PC 3  手刻=0.15976925   sklearn=0.15976925",
+        "truncated": false,
+        "loaded": [],
+        "display": {
+          "type": "file",
+          "path": "/home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project/notes/lab2_pca-output.log",
+          "text": "Command: uv run python lab2_pca.py\n資料形狀: X64 維 x 1797 個樣本\n\n=== 1. 特徵值 (explained_variance_) 比對 ===\n  PC 1  手刻=  179.006930   sklearn=  179.006930\n  PC 2  手刻=  163.717747   sklearn=  163.717747\n  PC 3  手刻=  141.788439   sklearn=  141.788439\n  PC 4  手刻=  101.100375   sklearn=  101.100375\n  PC 5  手刻=   69.513166   sklearn=   69.513166\n  PC 6  手刻=   59.108525   sklearn=   59.108525\n  PC 7  手刻=   51.884539   sklearn=   51.884539\n  PC 8  手刻=   44.015107   sklearn=   44.015107\n  PC 9  手刻=   40.310995   sklearn=   40.310995\n  PC10  手刻=   37.011798   sklearn=   37.011798\n  最大絕對差 = 2.842171e-13  ->  True\n\n=== 2. 解釋變異比例 (explained_variance_ratio_) 比對 ===\n  PC 1  手刻=0.20170758   sklearn=0.20170758\n  PC 2  手刻=0.18447951   sklearn=0.18447951\n  PC 3  手刻=0.15976925   sklearn=0.15976925\n  PC 4  手刻=0.11392136   sklearn=0.11392136\n  PC 5  手刻=0.07832843   sklearn=0.07832843\n  PC 6  手刻=0.06660434   sklearn=0.06660434\n  PC 7  手刻=0.05846424   sklearn=0.05846424\n  PC 8  手刻=0.04959685   sklearn=0.04959685\n  PC 9  手刻=0.04542301   sklearn=0.04542301\n  PC10  手刻=0.04170543   sklearn=0.04170543\n  累計比例(前10) = 1.000000\n  最大絕對差 = 1.942890e-16  ->  True\n\n=== 3. 方向與正負號 比對 ===\n  PC 1  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n  PC 2  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n  PC 3  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n  PC 4  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n  PC 5  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n  PC 6  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n  PC 7  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n  PC 8  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n  PC 9  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n  PC10  |內積|=1.00000000  正負號對齊=同向  max|位置|符號(手刻/sklearn)=+1/+1\n  最大(1-|內積|) = 2.220446e-16  ->  True\n\n=== 4. 手刻主成分正交性 ===\n  Gram matrix 第 1 列 = [ 1.  0.  0. -0. -0.  0. -0. -0. -0.  0.]\n  最大非對角元素(|C C^T - I|) = 8.881784e-16  ->  True\n\n=== 5. 重建誤差 比對 ===\n  手刻重建誤差 ||X - X_hat||  = 751.78680710\n  sklearn 重建誤差 ||X - X_hat|| = 751.78680710\n  兩者重建結果差 ||Xhat_hand - Xhat_sk|| = 2.833042e-12  ->  True",
+          "lineStart": 1,
+          "lineEnd": 51,
+          "totalLines": 51,
+          "truncated": false
+        }
+      },
+      "title": "tools/test-runs/20260912-workshop-refresh/wsl/project/notes/lab2_pca-output.log",
+      "time": {
+        "start": 1789229139098,
+        "end": 1789229139108
+      }
+    }
+  },
+  {
+    "reason": "tool-calls",
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-finish",
+    "tokens": {
+      "total": 4841,
+      "input": 4677,
+      "output": 164,
+      "reasoning": 0,
+      "cache": {
+        "write": 0,
+        "read": 0
+      }
+    },
+    "cost": 0
+  },
+  {
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-start"
+  },
+  {
+    "type": "reasoning",
+    "text": "Let me analyze the code and the log carefully.\n\nFirst, let me check the math:\n\n**1. 手刻 PCA 的數學正確性**\n\n`my_pca_topk`:\n- Line 14: `X_centered = X - X.mean(axis=0)` — 中心化正確。\n- Line 15: `cov = (X_centered.T @ X_centered) / (n_samples - 1)` — 共變異數矩陣，除以 n-1（樣本共變異數）。注意：sklearn 的 PCA 用 `explained_variance_` 是特徵值除以 n_samples（不是 n-1）？讓我回想一下。\n\n實際上，sklearn 的 PCA 在 `fit` 時，`explained_variance_` 是 `explained_variance_ratio_ * variance`，其中 variance 是 `X.var(axis=0).sum()`（總變異數，除以 n）。而 `explained_variance_` 是特徵值除以 n_samples。\n\n等等，讓我仔細想。sklearn PCA 的 `explained_variance_` 是特徵值（從 SVD 的 singular values 平方除以 n_samples）。也就是說，如果我們用共變異數矩陣（除以 n-1）的特徵值，那會跟 sklearn 的 `explained_variance_` 差一個因子 (n-1)/n。\n\n但是 log 顯示手刻與 sklearn 的特徵值完全一致（差 2.8e-13）。這怎麼可能？\n\n嗯，等等。讓我想想。sklearn 的 PCA 用 `svd_solver=\"full\"` 時，`explained_variance_` 是 `(S ** 2) / (n_samples - 1)`。讓我確認一下。\n\n在 sklearn 的 `_fit_full` 中：\n```python\nexplained_variance = (S**2) / (n_samples - 1)\n```\n是的！sklearn 的 `_fit_full` 用 `n_samples - 1` 當分母。所以 `explained_variance_` 對應的是除以 n-1 的共變異數矩陣特徵值。這跟手刻的 `cov = (X_centered.T @ X_centered) / (n_samples - 1)` 一致。好，所以數學上一致。\n\n實際上，sklearn 的 `_fit_full`:\n```python\nself.explained_variance_ = exp_var = (S**2) / (n_samples - 1)\n```\n對，這是正確的。所以手刻與 sklearn 一致。\n\n- Line 16: `np.linalg.eigh(cov)` — 對稱矩陣用 eigh，正確且數值穩定。\n- Line 18-19: `order = np.argsort(eigvals)[::-1]`，取前 k。正確。\n- Line 20: `components = eigvecs[:, top].T` — 形狀 (k, n_features)。正確。\n- Line 21: `explained_variance = eigvals[top]` — 正確。\n- Line 25-27: sign convention 對齊。`max_idx = np.argmax(np.abs(components), axis=1)`，`signs = np.sign(components[np.arange(k), max_idx])`，`components = components * signs[:, None]`。這對齊了 sklearn 的 svd_flip 邏輯（u_based_decision=False 時，讓每個 component 在絕對值最大的位置為正）。\n\n等等，sklearn 的 svd_flip 在 PCA 中：`components, _ = svd_flip(components, np.zeros(...), u_based_decision=False)`。svd_flip 的邏輯是：對每個 component，找絕對值最大的元素，如果它是負的，就翻轉整個 component。所以手刻的 sign 對齊邏輯與 sklearn 一致。正確。\n\n不過要注意：`np.sign(0)` 是 0。如果某個 component 在 max 位置的值是 0（不可能，因為 max 是絕對值最大，如果全為 0 那 component 是零向量，不可能），所以沒問題。\n\n**維度檢查**：\n- X: (1797, 64)\n- X_centered: (1797, 64)\n- cov: (64, 64)\n- eigvecs: (64, 64)\n- components: (10, 64)\n- 重建：Xc @ components.T @ components + mean → (1797, 64)。正確。\n\n**2. 可重現性**\n\n- 手刻 PCA 沒有隨機性（eigh 是確定性的）。\n- sklearn PCA 用 `svd_solver=\"full\"`，這在 sklearn 中也是確定性的（full SVD 沒有隨機性）。但程式還是設了 `random_state=0`（line 34），符合專案規則。\n- 資料 load_digits 是固定的，沒有隨機性。\n- 所以可重現性 OK。`random_state=0` 有設定。\n\n**3. 手刻 vs 偷懶**\n\n- 手刻函式 `my_pca_topk` 只用 numpy：中心化、共變異數矩陣、eigh、排序。沒有呼叫 sklearn 的 PCA。\n- sklearn PCA 只在 line 34-37 作為對照組使用。符合規則。\n\n**4. 程式與 log 一致性**\n\nlog 顯示 `Command: uv run python lab2_pca.py`，符合專案規則（用 uv run python）。\n\n數字比對：\n- 資料形狀：X64 維 x 1797 個樣本。load_digits 是 1797 個樣本、64 個特徵（8x8 像素）。正確。\n- 特徵值：手刻與 sklearn 一致，最大差 2.84e-13 < 1e-10 → True。合理（浮點誤差）。\n- 解釋變異比例：一致，最大差 1.94e-16 → True。合理。\n- 累計比例(前10) = 1.000000。等等！這有問題嗎？\n\n前 10 個主成分的累計解釋變異比例是 1.000000？這看起來很奇怪。digits 資料集有 64 個特徵，前 10 個主成分通常只解釋約 60-70% 的變異數。讓我算一下 log 中的數字：\n\n0.20170758 + 0.18447951 + 0.15976925 + 0.11392136 + 0.07832843 + 0.06660434 + 0.05846424 + 0.04959685 + 0.04542301 + 0.04170543\n\n= 0.20170758 + 0.18447951 = 0.38618709\n+ 0.15976925 = 0.54595634\n+ 0.11392136 = 0.65987770\n+ 0.07832843 = 0.73820613\n+ 0.06660434 = 0.80481047\n+ 0.05846424 = 0.86327471\n+ 0.04959685 = 0.91287156\n+ 0.04542301 = 0.95829457\n+ 0.04170543 = 1.00000000\n\n哇，剛好是 1.00000000！這太可疑了。前 10 個主成分累計解釋 100% 的變異數？這在 digits 資料集上是不可能的。digits 資料集前 10 個主成分通常解釋約 60% 左右的變異數。\n\n等等，讓我重新想。這是一個非常嚴重的問題。如果 ratio_hand = var_hand / var_hand.sum()，而 var_hand 只有前 10 個特徵值，那 ratio_hand.sum() 當然等於 1！因為分母就是 var_hand.sum() 本身！\n\n啊，這是程式碼的 bug！line 50: `ratio_hand = var_hand / var_hand.sum()` — 分母是前 10 個特徵值的和，而不是全部 64 個特徵值的和。所以 ratio_hand 是「前 10 個特徵值佔前 10 個特徵值總和的比例」，這當然加起來是 1。\n\n正確的解釋變異比例應該是 `var_hand / eigvals_all.sum()`（全部特徵值的和），或者用 `var_hand / np.trace(cov)`。\n\n但是等等，sklearn 的 `explained_variance_ratio_` 是 `explained_variance_ / total_variance`，其中 total_variance 是全部特徵值的和。所以 ratio_sk 是正確的解釋變異比例（前 10 佔全部 64 的比例）。\n\n而 ratio_hand = var_hand / var_hand.sum() 是錯誤的（分母只含前 10 個）。\n\n但是 log 顯示 ratio_hand 和 ratio_sk 一致（最大差 1.94e-16）？這怎麼可能？\n\n嗯，等等。如果 ratio_hand 和 ratio_sk 一致，那意味著 var_hand.sum()（前 10 個特徵值和）等於全部特徵值的和？這不可能，除非後面的特徵值都是 0。\n\ndigits 資料集是 64 維，rank 最多 64。特徵值從 179 遞減到接近 0。前 10 個的和不可能等於全部的和。\n\n所以這裡有矛盾！要嘛 log 是偽造的，要嘛程式碼不是這樣跑的。\n\n讓我再仔細看 log：\n```\n  累計比例(前10) = 1.000000\n```\n\n如果 ratio_hand 是 var_hand / var_hand.sum()，那 ratio_hand.sum() = 1.000000 是必然的（恆等式），不管資料是什麼。所以這行輸出「1.000000」本身是程式碼 bug 的必然結果，不能證明什麼。\n\n但關鍵問題是：log 顯示 ratio_hand 與 ratio_sk 每個都一致（0.20170758 vs 0.20170758 等）。如果 ratio_hand 的分母是 var_hand.sum()（前 10 和），而 ratio_sk 的分母是全部特徵值和，兩者要一致，必須前 10 個特徵值和 = 全部特徵值和。\n\n這在 digits 上不可能。所以 log 的數字是可疑的。\n\n等等，讓我再想想。也許我對 sklearn 的 explained_variance_ratio_ 理解有誤？\n\nsklearn PCA 的 `explained_variance_ratio_` = `explained_variance_ / np.sum(explained_variance_)`？不對。\n\n讓我想想 sklearn 的實作。在 `_fit_full` 中：\n```python\nself.explained_variance_ = exp_var = (S**2) / (n_samples - 1)\n...\nself.explained_variance_ratio_ = exp_var / np.sum(exp_var)\n```\n\n等等，不對。讓我想想。sklearn 的 PCA 中：\n\n```python\n# _fit_full\nself.explained_variance_ = exp_var = (S**2) / (n_samples - 1)\nif self.n_components is not None:\n    exp_var = exp_var[: self.n_components]\n    ...\nself.explained_variance_ratio_ = exp_var / np.sum(exp_var)\n```\n\n嗯，這裡 `np.sum(exp_var)` 是在截斷之前還是之後？讓我想想 sklearn 的原始碼。\n\nsklearn/decomposition/_pca.py 的 `_fit_full`：\n\n```python\ndef _fit_full(self, X, n_components):\n    ...\n    U, S, Vt = linalg.svd(X, full_matrices=False)\n    ...\n    explained_variance = (S**2) / (n_samples - 1)\n    explained_variance_ratio = explained_variance / np.sum(explained_variance)\n    ...\n```\n\n嗯，實際上我不太確定。讓我想想。\n\n在 sklearn 的 `_fit_full` 中（較新版本）：\n\n```python\n        # Postprocess the number of components to keep\n        ...\n        self.explained_variance_ = exp_var = (S**2) / (n_samples - 1)\n        ...\n        self.explained_variance_ratio_ = exp_var / np.sum(exp_var)\n```\n\n關鍵是 `np.sum(exp_var)` 是對全部特徵值求和還是只對保留的部分？\n\n我記得 sklearn 的 `explained_variance_ratio_` 是「每個主成分佔總變異數的比例」，總變異數是全部特徵值的和。所以分母是全部（min(n_samples, n_features) 個）特徵值的和。\n\n在 sklearn 原始碼中：\n\n```python\n        self.explained_variance_ = exp_var = (S**2) / (n_samples - 1)\n        if self.n_components is not None:\n            exp_var = exp_var[: self.n_components]\n            ...\n        self.explained_variance_ratio_ = exp_var / np.sum(exp_var)\n```\n\n嗯，如果 `exp_var` 在截斷後才除以 `np.sum(exp_var)`，那分母就是前 n_components 個的和，那 ratio 加起來也是 1！\n\n等等，讓我想清楚。我記得 sklearn 的 PCA 的 `explained_variance_ratio_` 加總（全部 n_components 個）等於 1 嗎？不對，通常不是。例如 digits 前 10 個主成分的 explained_variance_ratio_ 加總約 0.6 左右。\n\n嗯，讓我查一下 sklearn 的原始碼。我記得：\n\n```python\n        # _fit_full\n        ...\n        self.explained_variance_ = exp_var = (S**2) / (n_samples - 1)\n        ...\n        self.explained_variance_ratio_ = exp_var / np.sum(exp_var)\n```\n\n這裡 `np.sum(exp_var)` 是對**全部** exp_var（min(n_samples, n_features) 個）求和，因為截斷發生在計算 ratio 之後？還是之前？\n\n讓我想想 sklearn 的實際行為。用 digits 資料集，PCA(n_components=10) 的 explained_variance_ratio_ 加總約為 0.6 左右（我記得 digits 前 10 個主成分解釋約 60% 變異）。所以分母是全部特徵值的和。\n\n實際上，我記得 sklearn 的 `_fit_full` 是：\n\n```python\n        self.explained_variance_ = exp_var = (S**2) / (n_samples - 1)\n        if self.n_components is not None:\n            exp_var = exp_var[: self.n_components]\n            ...\n        self.explained_variance_ratio_ = exp_var / np.sum(exp_var)\n```\n\n不對，這樣 ratio 加總就是 1 了，這與我記憶中 digits 的行為不符。\n\n讓我再想想。實際上 sklearn 的原始碼（_pca.py, _fit_full）：\n\n```python\n        # Use the eigenvalues to compute the explained variance\n        self.explained_variance_ = exp_var = (S**2) / (n_samples - 1)\n        ...\n        self.explained_variance_ratio_ = exp_var / np.sum(exp_var)\n```\n\n嗯，我需要確認。讓我用 web 搜尋或直接看 sklearn 原始碼。\n\n其實，我可以直接看安裝的 sklearn 原始碼。但我不應該執行指令。嗯，我可以讀檔案。讓我找找 sklearn 的安裝位置。\n\n或者，我可以從數學上推理：sklearn 的 `explained_variance_ratio_` 的定義是「explained_variance_ 佔總變異數的比例」。總變異數 = X 的總變異數 = trace(cov) * (n-1)/n... 嗯。\n\n實際上，sklearn 文件說：`explained_variance_ratio_`：每個選定主成分解釋的變異數比例。如果 n_components 未設定，則所有主成分的 ratio 加總為 1.0。\n\n關鍵是「如果 n_components 未設定」。這暗示當 n_components 設定時，ratio 加總可能小於 1。所以分母是全部特徵值的和。\n\n好，所以 sklearn 的 ratio_sk 分母是全部 64 個特徵值的和。而手刻的 ratio_hand 分母是前 10 個的和。兩者不應該一致！\n\n但 log 顯示一致。這意味著 log 是偽造的，或者程式碼實際跑出來的結果與 log 不符。\n\n等等，讓我再想想。也許我記錯了 sklearn 的行為。讓我看 sklearn 的原始碼。\n\n我應該找 sklearn 的 _pca.py 檔案來確認。讓我用 glob 找。\n\n另外，還有一個更基本的檢查：log 中「累計比例(前10) = 1.000000」。如果 ratio_hand 是正確的解釋變異比例（分母為全部特徵值和），前 10 個加總不可能是 1.000000（digits 前 10 個主成分約解釋 60%）。所以這行輸出本身就證明 ratio_hand 的分母是前 10 個的和（程式 bug），或者 log 是偽造的。\n\n但 log 又顯示 ratio_hand 與 ratio_sk 一致。如果 ratio_sk 的分母是全部特徵值和，兩者不可能一致。所以：\n- 要嘛 ratio_sk 的分母也是前 10 個的和（即 sklearn 的行為是截斷後歸一化）——那我需要確認 sklearn 的行為。\n- 要嘛 log 是偽造的。\n\n讓我確認 sklearn 的行為。我需要看 sklearn 的原始碼。\n\nsklearn PCA `_fit_full`（從 sklearn 0.24 到現在）：\n\n```python\n    def _fit_full(self, X, n_components):\n        \"\"\"Fit the model by computing full SVD on X.\"\"\"\n        n_samples, n_features = X.shape\n\n        if n_components == \"mle\":\n            ...\n        elif not 0 <= n_components <= min(n_samples, n_features):\n            raise ValueError(...)\n        elif isinstance(n_components, (int, np.integer)):\n            if n_components != int(n_components):\n                raise ValueError(...)\n\n        # Center data\n        self.mean_ = np.mean(X, axis=0)\n        X -= self.mean_\n\n        U, S, Vt = linalg.svd(X, full_matrices=False)\n        # flip eigenvectors' sign to enforce deterministic output\n        U, Vt = svd_flip(U, Vt)\n\n        components_ = Vt\n\n        # Get variance explained by singular values\n        explained_variance_ = (S**2) / (n_samples - 1)\n        total_var = np.var(X, axis=0).sum()\n        explained_variance_ratio_ = explained_variance_ / total_var\n        ...\n```\n\n啊，我想起來了！sklearn 用 `total_var = np.var(X, axis=0).sum()` 當分母，這是總變異數（除以 n 的變異數和）。而 `explained_variance_ = (S**2) / (n_samples - 1)`。\n\n注意：`total_var = np.var(X, axis=0).sum()` 是除以 n 的，而 explained_variance_ 是除以 n-1 的。所以 ratio = [(S²)/(n-1)] / [Σ var_j] = [(S²)/(n-1)] / [Σ (S²_j)/n] = n/(n-1) * S²/ΣS²。\n\n嗯，等等。Σ var_j = Σ_j (1/n Σ_i X_ij²) = (1/n) Σ S²_j（因為 X 已中心化，SVD 的奇異值平方和 = Frobenius 範數平方 = Σ X_ij²）。\n\n所以 ratio_j = (S_j²/(n-1)) / (Σ S²/n) = (n/(n-1)) · S_j²/ΣS²。\n\n而手刻的 ratio_hand = var_hand / var_hand.sum() = S_j²/Σ_{前10} S²（如果分母是前 10 個的和）。\n\n嗯，這兩個的定義不同。但 log 顯示它們一致到 1e-16？\n\n等等，如果 ratio_sk 的分母是 total_var = np.var(X, axis=0).sum()，而 ratio_hand 的分母是 var_hand.sum() = Σ_{前10} S²/(n-1)，那兩者要一致需要 Σ_{前10} S² = Σ_{全部} S² · n/(n-1) · ... 不對，讓我重新算。\n\nratio_sk_j = (S_j²/(n-1)) / (Σ_{全部} S²/n) = n·S_j² / ((n-1)·Σ_{全部}S²)\n\nratio_hand_j = (S_j²/(n-1)) / (Σ_{前10} S²/(n-1)) = S_j² / Σ_{前10}S²\n\n兩者相等需要：n/((n-1)·Σ_{全部}S²) = 1/Σ_{前10}S²\n即 Σ_{前10}S² = (n-1)/n · Σ_{全部}S²\n\n這在 digits 上不可能（前 10 個奇異值平方和遠小於全部）。\n\n所以 log 顯示的 ratio_hand == ratio_sk 是矛盾的，除非：\n1. sklearn 的 ratio 分母也是前 n_components 個的和（截斷後歸一化），或\n2. log 是偽造的。\n\n我需要確認 sklearn 的實際行為。讓我讀 sklearn 的原始碼。\n\n另外，還有一個可能：程式碼 line 50 的 ratio_hand = var_hand / var_hand.sum()，如果 var_hand 是前 10 個特徵值，ratio_hand.sum() = 1 是恆等式。log 的「累計比例(前10) = 1.000000」與此一致（這是 bug 的必然結果）。\n\n但 ratio_hand 與 ratio_sk 的逐項一致（0.20170758 等）需要 ratio_sk 的分母也是前 10 個的和。\n\n嗯，等等。讓我想想 sklearn 的 `explained_variance_ratio_` 到底怎麼算的。我記得在 sklearn 的 `_fit_full` 中：\n\n```python\n        self.explained_variance_ = exp_var = (S**2) / (n_samples - 1)\n        ...\n        self.explained_variance_ratio_ = exp_var / np.sum(exp_var)\n```\n\n如果 `exp_var` 在截斷前是全部 min(n_samples, n_features) 個，那 `np.sum(exp_var)` 是全部的和。\n\n但等等，我記得 sklearn 的 PCA 有個特性：當 n_components 設定時，explained_variance_ratio_ 加總 < 1。這是眾所周知的。例如，digits 前 10 個主成分的 explained_variance_ratio_ 加總約 0.6。\n\n所以 ratio_sk 的分母是全部特徵值的和。那 log 中 ratio_hand == ratio_sk 就是矛盾的。\n\n除非……程式碼實際執行的結果與 log 不符，log 是人工偽造的。\n\n或者，等等。讓我想想另一種可能：也許 sklearn 的 PCA 在 n_components 給定時，`explained_variance_ratio_` 是 `exp_var[:n_components] / np.sum(exp_var[:n_components])`？不對，這與 sklearn 文件矛盾。\n\nsklearn 文件（PCA.explained_variance_ratio_）：「Percentage of variance explained by each of the selected components. If n_components is not set then all components are stored and the sum of the ratios is equal to 1.0.」\n\n這明確說：如果 n_components 未設定，ratio 加總 = 1.0。暗示如果設定了，加總 < 1.0。所以分母是全部特徵值的和。\n\n好，所以 log 中 ratio_hand == ratio_sk 是矛盾的。這是一個重大發現。\n\n但等等，我要小心。讓我再確認 sklearn 的原始碼，因為這關係到我的結論。讓我找 sklearn 的安裝位置並讀 _pca.py。\n\n另外，我還要檢查特徵值部分。log 顯示手刻特徵值 == sklearn explained_variance_（差 2.8e-13）。手刻 cov 除以 n-1，sklearn explained_variance_ = S²/(n-1)。一致。合理。\n\n但等等，還有一個問題：手刻用 eigh(cov)，cov = X_c.T @ X_c / (n-1)。eigh 的特徵值 = S²/(n-1)（因為 X_c.T @ X_c 的特徵值 = S²）。所以 var_hand = S²/(n-1) = sklearn 的 explained_variance_。一致。合理。\n\n所以特徵值部分沒問題。問題在 ratio 部分。\n\n現在，關鍵問題：log 中 ratio_hand 與 ratio_sk 一致，但根據程式碼，ratio_hand 的分母是前 10 個特徵值和（必然加總為 1），而 ratio_sk 的分母是全部特徵值和（加總 < 1）。兩者不應該一致。\n\n除非 sklearn 的行為與我理解的不同。讓我確認。\n\n還有一個可能：也許 sklearn 的 PCA 在 n_components=10 時，explained_variance_ratio_ 確實是 exp_var[:10] / np.sum(exp_var[:10])？讓我查證。\n\n嗯，我記得 sklearn 的 `_fit_full` 原始碼（sklearn 1.x）：\n\n```python\n        # Get variance explained by singular values\n        self.explained_variance_ = exp_var = (S**2) / (n_samples - 1)\n\n        if self.n_components is not None:\n            exp_var = exp_var[: self.n_components]\n            ...\n        self.explained_variance_ratio_ = exp_var / np.sum(exp_var)\n```\n\n如果這是正確的，那 ratio 的分母是截斷後的 exp_var 的和，即前 n_components 個的和。那 ratio 加總 = 1！\n\n但這與 sklearn 文件矛盾（「If n_components is not set then all components are stored and the sum of the ratios is equal to 1.0」——這句話暗示設定了就不等於 1）。\n\n嗯，等等。讓我想想。也許 sklearn 的實作是：\n\n```python\n        self.explained_variance_ = exp_var = (S**2) / (n_samples - 1)\n        ...\n        self.explained_variance_ratio_ = exp_var / np.sum(exp_var)\n```\n\n其中 np.sum(exp_var) 是對全部 exp_var（未截斷）求和，然後 exp_var 再截斷。\n\n我需要看實際原始碼。讓我找。\n\n實際上，我記得 sklearn 的 PCA 行為：用 digits 資料，PCA(n_components=10).explained_variance_ratio_.sum() ≈ 0.6。這是眾所周知的（digits 前 10 個主成分解釋約 60% 變異）。所以分母是全部特徵值和。\n\n好，那我幾乎可以確定 log 的 ratio 部分有問題。但為了嚴謹，我應該讀 sklearn 的原始碼來確認。\n\n讓我找 sklearn 的 _pca.py。\n\n另外，還有其他檢查點：\n\n**重建誤差**：\n- line 79: `recon_hand = Xc @ components_hand.T @ components_hand + X.mean(axis=0)`。正確的 PCA 重建。\n- line 80: `recon_sk = ref.inverse_transform(ref.transform(X))`。正確。\n- log 顯示兩者重建差 2.8e-12 < 1e-8 → True。合理（浮點誤差）。\n\n**正交性**：\n- line 71-74: Gram matrix 檢查。log 顯示最大非對角 8.9e-16 < 1e-10 → True。合理。\n\n**方向與正負號**：\n- line 60-67: 檢查。log 顯示 |內積|=1.00000000，正負號對齊=同向。合理。\n\n**特徵值**：\n- log 顯示最大差 2.84e-13 < 1e-10 → True。合理。\n\n所以除了 ratio 部分，其他都合理。ratio 部分是關鍵問題。\n\n現在讓我確認 sklearn 的 explained_variance_ratio_ 的計算方式。讓我讀 sklearn 原始碼。\n\n還有一個小問題：line 50 `ratio_hand = var_hand / var_hand.sum()`。即使 sklearn 的行為是截斷後歸一化（ratio 加總 = 1），手刻的 ratio 定義也與 sklearn 不同（sklearn 用 total_var 或全部特徵值和）。但 log 顯示一致……這需要 sklearn 的行為確認。\n\n讓我讀 sklearn 的 _pca.py。\n\n另外，我注意到 log 中「累計比例(前10) = 1.000000」這行。如果 ratio_hand 是正確的解釋變異比例，前 10 個加總應該約 0.6 左右（digits）。1.000000 是 bug 的必然結果（分母 = 分子總和）。所以這行輸出本身是「程式 bug 的證據」，但 log 中 ratio_hand 與 ratio_sk 一致又是「log 偽造的證據」（如果 sklearn 分母是全部特徵值和）。\n\n嗯，等等。讓我再想想。有沒有可能 sklearn 的 explained_variance_ratio_ 分母真的是前 n_components 個的和？\n\n讓我想想 sklearn 的測試。sklearn 有測試 `test_explained_variance_ratio_` 之類的。我記得 PCA 的 explained_variance_ratio_ 加總（所有主成分）等於 1 當 n_components=None。當 n_components 設定時，加總 < 1。\n\n例如，經典例子：iris 資料，PCA(n_components=2).explained_variance_ratio_ = [0.9246, 0.0531]，加總 = 0.9777 < 1。這是眾所周知的。所以分母是全部特徵值和（4 個特徵，加總 = 1）。\n\n好，所以 sklearn 的 ratio 分母是全部特徵值和。那 log 中 ratio_hand == ratio_sk 就是矛盾的。\n\n除非……等等，讓我再想想。手刻的 ratio_hand = var_hand / var_hand.sum()，其中 var_hand 是前 10 個特徵值。如果 sklearn 的 ratio_sk 分母是全部特徵值和，那 ratio_hand_j = S_j²/Σ_{前10}S²，ratio_sk_j = S_j²/Σ_{全部}S²（忽略 n/(n-1) 因子）。\n\n兩者一致需要 Σ_{前10}S² = Σ_{全部}S²，即後 54 個特徵值全為 0。digits 資料 rank 64（1797 個樣本 > 64 個特徵，full rank 除非有線性相依）。後 54 個特徵值不為 0（雖然小）。\n\n所以 log 的 ratio 部分與程式碼不一致 → log 是偽造的，或程式碼與 log 不是同一版本。\n\n嗯，但等等。我還要考慮 n/(n-1) 因子。sklearn 的 ratio_sk = exp_var / total_var，其中 total_var = np.var(X, axis=0).sum()（除以 n）。exp_var = S²/(n-1)。所以 ratio_sk_j = S_j²/(n-1) / (ΣS²/n) = n·S_j²/((n-1)·ΣS²)。\n\n手刻 ratio_hand_j = S_j²/Σ_{前10}S²。\n\n兩者一致需要 n/((n-1)ΣS²) = 1/Σ_{前10}S²，即 Σ_{前10}S² = (n-1)/n · ΣS² = 1796/1797 · ΣS² ≈ 0.99944 · ΣS²。\n\n也就是說，前 10 個奇異值平方和佔全部的 99.94%。這在 digits 上不可能（前 10 個主成分約解釋 60%）。\n\n所以無論如何，log 的 ratio 部分與程式碼矛盾。\n\n嗯，但是等等。我是不是漏了什麼？讓我再讀一次程式碼。\n\nline 50: `ratio_hand = var_hand / var_hand.sum()`\n\nvar_hand = eigvals[top]，前 10 個特徵值。所以 ratio_hand.sum() = 1 恆成立。log 的「累計比例(前10) = 1.000000」與此一致。\n\nline 51: `ratio_sk = var_sk / var_sk.sum()`\n\nvar_sk = ref.explained_variance_，也是前 10 個。所以 ratio_sk.sum() = 1 也恆成立！\n\n啊哈！等等！line 51 也是 `var_sk / var_sk.sum()`，分母也是前 10 個的和！所以 ratio_sk 也是「前 10 個佔前 10 個的比例」，加總也是 1！\n\n所以 ratio_hand 和 ratio_sk 的定義一致（都是前 10 個特徵值歸一化），它們當然一致！\n\n我搞錯了。sklearn 的 `explained_variance_ratio_` 屬性本身是正確的（分母是全部特徵值和），但程式碼 line 51 沒有用 `ref.explained_variance_ratio_`，而是用 `var_sk / var_sk.sum()` 重新計算，分母是前 10 個的和。\n\n所以：\n- ratio_hand = var_hand / var_hand.sum()：前 10 個歸一化。\n- ratio_sk = var_sk / var_sk.sum()：前 10 個歸一化。\n- 兩者一致是必然的（因為 var_hand ≈ var_sk）。\n\n所以 log 的 ratio 一致是「程式碼設計的必然結果」，不是偽造。但這意味著「解釋變異比例」的計算有 bug：分母應該是全部特徵值的和（或總變異數），而不是前 10 個的和。\n\nlog 的「累計比例(前10) = 1.000000」就是這個 bug 的證據。正確的 digits 前 10 個主成分累計解釋比例約 0.6 左右。\n\n等等，但這行輸出「累計比例(前10) = 1.000000」在 log 中出現，程式碼 line 54 印出 `ratio_hand.sum()`。如果 ratio_hand 是前 10 個歸一化，sum = 1 恆成立。所以 log 與程式碼一致（都是 bug 的結果）。\n\n所以結論：\n1. 程式碼 line 50-56 的「解釋變異比例」計算有數學錯誤：分母用了前 k 個特徵值的和，而不是全部特徵值的和（或總變異數）。因此 ratio_hand 不是真正的解釋變異比例，累計比例恆等於 1。\n2. 但 log 與程式碼一致（log 如實反映了 bug 的輸出）。\n3. 程式碼沒有使用 sklearn 的 `explained_variance_ratio_` 屬性來對照，而是自己用 var_sk 重新歸一化，所以對照組也犯了同樣的「錯誤」（但這只是顯示問題，sklearn 的 var_sk 本身是對的）。\n\n嗯，等等。我要小心。程式碼 line 51 `ratio_sk = var_sk / var_sk.sum()`。這不是 sklearn 的 explained_variance_ratio_。所以「比對」其實是「手刻的歸一化 vs sklearn 特徵值的歸一化」，兩者必然一致（因為 var_hand ≈ var_sk）。這個比對沒有驗證「解釋變異比例」的正確性，只驗證了特徵值一致。\n\n所以第 2 節的標題「解釋變異比例 (explained_variance_ratio_) 比對」是誤導的：它沒有用 sklearn 的 explained_variance_ratio_ 屬性。\n\n這是程式碼的數學錯誤（或至少是驗證設計缺陷）：\n- 真正的 explained_variance_ratio_ 應該 = var_hand / sum(全部特徵值) 或 var_hand / np.trace(cov) 或 var_hand / np.var(X, axis=0).sum()。\n- 累計比例(前10) 應該 ≈ 0.6（digits），不是 1.0。\n\nlog 的「累計比例(前10) = 1.000000」是 bug 的必然結果，但 log 沒有標示這是 bug。\n\n好，這是主要發現。現在讓我確認其他部分。\n\n**特徵值比對**：log 顯示手刻 = sklearn 到 6 位小數，最大差 2.84e-13。合理。手刻 cov 除以 n-1，sklearn explained_variance_ = S²/(n-1)。一致。✓\n\n**方向與正負號**：|內積| = 1.00000000，正負號對齊。合理。sign convention 對齊邏輯（line 25-27）與 sklearn 的 svd_flip(u_based_decision=False) 一致。✓\n\n**正交性**：Gram matrix 第 1 列 = [1, 0, 0, -0, -0, 0, -0, -0, -0, 0]，最大非對角 8.88e-16。合理。✓\n\n**重建誤差**：手刻 751.78680710 = sklearn 751.78680710，差 2.83e-12。合理。✓\n\n等等，重建誤差 751.79 這個數字合理嗎？digits 資料，10 個主成分重建，Frobenius 範數誤差 751.79。digits 像素值 0-16，1797×64 矩陣。總變異數 = ΣS²。前 10 個解釋約 60%，殘差約 40%。||X - X_hat||_F² = Σ_{j>10} S_j²。如果前 10 個佔 60%，殘差佔 40%，那 ||X-X_hat||_F = sqrt(0.4·ΣS²)。ΣS² = Σ X_ij²（中心化後）≈ 1797×64×某個平均平方值。嗯，這個數字無法直接驗證，但看起來合理（不是明顯錯誤）。\n\n嗯，等等。我可以粗略估計。digits 的 explained_variance_ 前 10 個加總 = 179.006930 + 163.717747 + ... + 37.011798 ≈ 887.7（從 log 數字加總）。\n\n等等，讓我加總：179.006930 + 163.717747 = 342.724677；+ 141.788439 = 484.513116；+ 101.100375 = 585.613491；+ 69.513166 = 655.126657；+ 59.108525 = 714.235182；+ 51.884539 = 766.119721；+ 44.015107 = 810.134828；+ 40.310995 = 850.445823；+ 37.011798 = 887.457621。\n\n所以前 10 個 explained_variance_ 加總 ≈ 887.46。這是 S²/(n-1) 的和，即 Σ_{前10}S²/(1796)。\n\n如果前 10 個解釋約 60%（真實比例），那 Σ_{全部}S²/(1796) ≈ 887.46/0.6 ≈ 1479。那 ||X-X_hat||_F² = Σ_{j>10}S² = 0.4 × 1479 × 1796 ≈ 1,062,700。||X-X_hat||_F ≈ 1030。\n\n但 log 顯示 751.79。嗯，751.79² ≈ 565,188。這對應殘差比例 ≈ 565188/(1479×1796) ≈ 0.213。也就是說前 10 個解釋約 79%？\n\n嗯，這取決於實際的解釋比例。我對 digits 前 10 個主成分的解釋比例記憶可能不準。讓我不要過度推斷。751.79 這個數字本身無法從 log 驗證，但手刻與 sklearn 一致（差 2.8e-12），這才是重點。重建誤差的一致性是合理的。\n\n嗯，等等。其實我可以從 log 的 ratio 數字推斷。log 的 ratio_hand（前 10 個歸一化）加總 = 1。但真實的解釋比例（分母為全部）未知。所以無法從 log 直接驗證 751.79。\n\n不過，我可以檢查：如果 ratio_hand 是前 10 個歸一化，那 ratio_hand_j = var_j / Σ_{前10}var。log 的 ratio_hand[0] = 0.20170758。所以 var_1/Σ_{前10}var = 0.20170758。var_1 = 179.006930。Σ_{前10}var = 179.006930/0.20170758 ≈ 887.46。這與我上面加總的 887.46 一致！✓\n\n所以 log 的 ratio 數字與程式碼一致（ratio_hand = var_hand/var_hand.sum()）。log 是如實的，但 ratio 的定義是錯的（不是真正的解釋變異比例）。\n\n好，現在讓我確認 sklearn 的 explained_variance_ratio_ 的正確值，以證明「累計比例(前10) = 1.000000」是錯的。我需要知道 digits 前 10 個主成分的真實解釋比例。\n\n從 log 的 ratio_hand（前 10 歸一化）無法直接得到真實比例。但我可以從特徵值推斷：真實比例 = var_j / Σ_{全部64}var。Σ_{全部64}var 未知。\n\n嗯，我無法執行指令。但我可以從已知事實推斷：digits 資料集前 10 個主成分的 explained_variance_ratio_ 加總約 0.6（這是眾所周知的，例如 sklearn 的 PCA 範例）。所以「累計比例(前10) = 1.000000」確實是錯的。\n\n不過，作為審查員，我應該謹慎。我可以說：程式碼 line 50 的 ratio_hand 分母是 var_hand.sum()（前 10 個的和），這使得 ratio_hand.sum() 恆等於 1，這不是真正的解釋變異比例。真正的解釋變異比例分母應該是全部特徵值的和（或總變異數 np.var(X, axis=0).sum()）。log 的「累計比例(前10) = 1.000000」是這個 bug 的必然結果，不能當作「前 10 個主成分解釋 100% 變異」的證據（那在數學上不可能，因為後 54 個特徵值不為零）。\n\n另外，程式碼 line 51 用 var_sk/var_sk.sum() 而不是 ref.explained_variance_ratio_，所以「比對」沒有真正對照 sklearn 的 explained_variance_ratio_。這是驗證設計的缺陷。\n\n好，現在讓我確認 sklearn 的 explained_variance_ratio_ 的計算，以確保我的判斷正確。讓我讀 sklearn 的 _pca.py。\n\n讓我找 sklearn 的安裝位置。\n\n另外，我還要檢查：\n- 可重現性：random_state=0 有設定（line 34）。手刻部分無隨機性。✓\n- 手刻：my_pca_topk 只用 numpy。✓ sklearn 只當對照組。✓\n- log 的 Command 行：`uv run python lab2_pca.py`，符合專案規則。✓\n\n還有一些細節：\n- line 15: `cov = (X_centered.T @ X_centered) / (n_samples - 1)`。n_samples 是全域變數（line 9），在函式內使用。這依賴全域變數，不是最佳實踐，但功能正確。\n- line 25-27: sign 對齊。`np.sign(components[np.arange(k), max_idx])`。如果某個值為 0，sign = 0，會把整個 component 乘 0。但 max 位置的值不可能為 0（除非 component 全為 0，不可能）。所以 OK。\n- 數值穩定性：eigh 對稱矩陣，穩定。cov 是半正定，特徵值 ≥ 0，沒有開根號問題。沒有除以可能為零的量（n_samples - 1 = 1796 ≠ 0）。✓\n- 大數相減：中心化 X - X.mean(axis=0)，digits 像素值 0-16，沒有嚴重的抵消問題。✓\n\n還有，line 60: `align = np.sum(np.sign(components_hand) * np.sign(components_sk), axis=1)`。這計算每個位置符號乘積的和。如果兩個 component 同向，align = n_features（64）；如果反向，align = -64。`ag = \"同向\" if align[i] > 0 else \"反向\"`。OK。\n\nline 62: `idx = np.argmax(np.abs(components_sk), axis=1)`。用 sklearn 的 max 位置來檢查手刻的符號。OK。\n\n現在，讓我確認 sklearn 的 explained_variance_ratio_ 行為。讓我讀 sklearn 原始碼。\n\n我需要找到 sklearn 的安裝位置。讓我用 glob 找。\n\n另外，我應該檢查 notes/ 目錄下是否有其他相關檔案（例如筆記），以及 figs/ 是否有圖檔。log 沒有提到圖檔，程式碼也沒有 plt.savefig。所以沒有圖檔問題。\n\n讓我讀 sklearn 的 _pca.py 來確認 explained_variance_ratio_ 的計算。\n\n還有，我想確認 load_digits 的形狀：1797 個樣本，64 個特徵。這是對的（8×8 像素，1797 個手寫數字）。✓\n\n讓我找 sklearn 原始碼。",
+    "time": {
+      "start": 1789229139900,
+      "end": 1789229293351
+    }
+  },
+  {
+    "type": "tool",
+    "tool": "glob",
+    "callID": "call_e405345a61e7430eb182a37a",
+    "state": {
+      "status": "completed",
+      "input": {
+        "pattern": "**/_pca.py",
+        "path": "/home/phonchi/opencode-math-workshop"
+      },
+      "output": "No files found",
+      "metadata": {
+        "count": 0,
+        "truncated": false
+      },
+      "title": "",
+      "time": {
+        "start": 1789229293574,
+        "end": 1789229293583
+      }
+    }
+  },
+  {
+    "type": "tool",
+    "tool": "glob",
+    "callID": "call_2ba560fa704a47efaa6bd712",
+    "state": {
+      "status": "completed",
+      "input": {
+        "pattern": "notes/*",
+        "path": "/home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project"
+      },
+      "output": "/home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project/notes/lab2_pca-output.log\n/home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project/notes/logistic.md\n/home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project/notes/lab1_cluster-output.log",
+      "metadata": {
+        "count": 3,
+        "truncated": false
+      },
+      "title": "tools/test-runs/20260912-workshop-refresh/wsl/project",
+      "time": {
+        "start": 1789229293945,
+        "end": 1789229293960
+      }
+    }
+  },
+  {
+    "reason": "tool-calls",
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-finish",
+    "tokens": {
+      "total": 18281,
+      "input": 3143,
+      "output": 10530,
+      "reasoning": 0,
+      "cache": {
+        "write": 0,
+        "read": 4608
+      }
+    },
+    "cost": 0
+  },
+  {
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-start"
+  },
+  {
+    "type": "reasoning",
+    "text": "sklearn 的 _pca.py 不在專案內。讓我找系統層級的 sklearn 安裝位置。可能在 .venv 或 uv 的 cache 裡。讓我搜尋。",
+    "time": {
+      "start": 1789229295466,
+      "end": 1789229295736
+    }
+  },
+  {
+    "type": "tool",
+    "tool": "glob",
+    "callID": "call_eafb9f02f89049c4b21b015e",
+    "state": {
+      "status": "completed",
+      "input": {
+        "path": "/home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project",
+        "pattern": "**/sklearn/decomposition/_pca.py"
+      },
+      "output": "No files found",
+      "metadata": {
+        "count": 0,
+        "truncated": false
+      },
+      "title": "tools/test-runs/20260912-workshop-refresh/wsl/project",
+      "time": {
+        "start": 1789229296176,
+        "end": 1789229296183
+      }
+    }
+  },
+  {
+    "type": "tool",
+    "tool": "glob",
+    "callID": "call_ec7e05bef2d9438f9724e55e",
+    "state": {
+      "status": "completed",
+      "input": {
+        "path": "/home/phonchi/opencode-math-workshop/tools/test-runs/20260912-workshop-refresh/wsl/project",
+        "pattern": ".venv/**"
+      },
+      "output": "No files found",
+      "metadata": {
+        "count": 0,
+        "truncated": false
+      },
+      "title": "tools/test-runs/20260912-workshop-refresh/wsl/project",
+      "time": {
+        "start": 1789229296724,
+        "end": 1789229296733
+      }
+    }
+  },
+  {
+    "reason": "tool-calls",
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-finish",
+    "tokens": {
+      "total": 18636,
+      "input": 3570,
+      "output": 218,
+      "reasoning": 0,
+      "cache": {
+        "write": 0,
+        "read": 14848
+      }
+    },
+    "cost": 0
+  },
+  {
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-start"
+  },
+  {
+    "type": "reasoning",
+    "text": "專案內沒有 .venv。sklearn 可能安裝在 uv 的全域 cache。讓我搜尋更廣。",
+    "time": {
+      "start": 1789229297571,
+      "end": 1789229297846
+    }
+  },
+  {
+    "type": "tool",
+    "tool": "glob",
+    "callID": "call_9d078a4dfe4e48cb9fbf9365",
+    "state": {
+      "status": "completed",
+      "input": {
+        "path": "/home/phonchi",
+        "pattern": "**/sklearn/decomposition/_pca.py"
+      },
+      "output": "/home/phonchi/miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/_pca.py\n/home/phonchi/miniconda3/envs/cryoem-book/lib/python3.11/site-packages/sklearn/decomposition/_pca.py\n/home/phonchi/miniconda3/envs/aspire-2sdr/lib/python3.11/site-packages/sklearn/decomposition/_pca.py",
+      "metadata": {
+        "count": 3,
+        "truncated": false
+      },
+      "title": "..",
+      "time": {
+        "start": 1789229298220,
+        "end": 1789229299703
+      }
+    }
+  },
+  {
+    "reason": "tool-calls",
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-finish",
+    "tokens": {
+      "total": 18760,
+      "input": 229,
+      "output": 99,
+      "reasoning": 0,
+      "cache": {
+        "write": 0,
+        "read": 18432
+      }
+    },
+    "cost": 0
+  },
+  {
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-start"
+  },
+  {
+    "type": "reasoning",
+    "text": "找到了 sklearn 的 _pca.py。讓我讀 _fit_full 的部分來確認 explained_variance_ratio_ 的計算方式。",
+    "time": {
+      "start": 1789229300807,
+      "end": 1789229301491
+    }
+  },
+  {
+    "type": "tool",
+    "tool": "grep",
+    "callID": "call_e2b3106c3084478d8ab87b51",
+    "state": {
+      "status": "completed",
+      "input": {
+        "pattern": "explained_variance_ratio_|total_var|exp_var",
+        "path": "/home/phonchi/miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/_pca.py"
+      },
+      "output": "Found 63 matches\n/home/phonchi/miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/_truncated_svd.py:\n  Line 99:     explained_variance_ratio_ : ndarray of shape (n_components,)\n\n  Line 153:     >>> print(svd.explained_variance_ratio_)\n\n  Line 155:     >>> print(svd.explained_variance_ratio_.sum())\n\n  Line 267:         self.explained_variance_ = exp_var = np.var(X_transformed, axis=0)\n\n  Line 273:         self.explained_variance_ratio_ = exp_var / full_var\n\n\n/home/phonchi/miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/_pca.py:\n  Line 266:     explained_variance_ratio_ : ndarray of shape (n_components,)\n\n  Line 357:     >>> print(pca.explained_variance_ratio_)\n\n  Line 365:     >>> print(pca.explained_variance_ratio_)\n\n  Line 373:     >>> print(pca.explained_variance_ratio_)\n\n  Line 647:         total_var = xp.sum(explained_variance_)\n\n  Line 648:         explained_variance_ratio_ = explained_variance_ / total_var\n\n  Line 670:                 explained_variance_ratio_np = _convert_to_numpy(\n\n  Line 671:                     explained_variance_ratio_, xp=xp\n\n  Line 674:                 explained_variance_ratio_np = explained_variance_ratio_\n\n  Line 675:             ratio_cumsum = stable_cumsum(explained_variance_ratio_np)\n\n  Line 699:         self.explained_variance_ratio_ = xp.asarray(\n\n  Line 700:             explained_variance_ratio_[:n_components], copy=True\n\n  Line 736:         total_var = None\n\n  Line 739:             total_var = var.sum() * n_samples / (n_samples - 1)  # ddof=1\n\n  Line 784:         if total_var is None:\n\n  Line 787:             total_var = xp.sum(X_centered) / N\n\n  Line 789:         self.explained_variance_ratio_ = self.explained_variance_ / total_var\n\n  Line 793:             self.noise_variance_ = total_var - xp.sum(self.explained_variance_)\n\n\n/home/phonchi/miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/_base.py:\n  Line 40:         exp_var = self.explained_variance_\n\n  Line 42:             components_ = components_ * xp.sqrt(exp_var[:, np.newaxis])\n\n  Line 43:         exp_var_diff = exp_var - self.noise_variance_\n\n  Line 44:         exp_var_diff = xp.where(\n\n  Line 45:             exp_var > self.noise_variance_,\n\n  Line 46:             exp_var_diff,\n\n  Line 47:             xp.asarray(0.0, device=device(exp_var), dtype=exp_var.dtype),\n\n  Line 49:         cov = (components_.T * exp_var_diff) @ components_\n\n  Line 82:         exp_var = self.explained_variance_\n\n  Line 84:             components_ = components_ * xp.sqrt(exp_var[:, np.newaxis])\n\n  Line 85:         exp_var_diff = exp_var - self.noise_variance_\n\n  Line 86:         exp_var_diff = xp.where(\n\n  Line 87:             exp_var > self.noise_variance_,\n\n  Line 88:             exp_var_diff,\n\n  Line 89:             xp.asarray(0.0, device=device(exp_var)),\n\n  Line 92:         _fill_or_add_to_diagonal(precision, 1.0 / exp_var_diff, xp)\n\n\n/home/phonchi/miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/_incremental_pca.py:\n  Line 88:     explained_variance_ratio_ : ndarray of shape (n_components,)\n\n  Line 228:         self.explained_variance_ratio_ = None\n\n  Line 373:         self.explained_variance_ratio_ = explained_variance_ratio[: self.n_components_]\n\n\n/home/phonchi/miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/_factor_analysis.py:\n  Line 278:             s, Vt, unexp_var = my_svd(X / (sqrt_psi * nsqrt))\n\n  Line 287:             ll += unexp_var + np.sum(np.log(psi))\n\n\n/home/phonchi/miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/tests/test_incremental_pca.py:\n  Line 33:         ipca.explained_variance_ratio_.sum(),\n\n  Line 34:         pca.explained_variance_ratio_.sum(),\n\n  Line 64:         ipca.explained_variance_ratio_.sum(),\n\n  Line 65:         pca.explained_variance_ratio_.sum(),\n\n  Line 345:             pca.explained_variance_ratio_, ipca.explained_variance_ratio_, decimal=prec\n\n  Line 421:         stable_mask = pca.explained_variance_ratio_ > 1e-12\n\n\n/home/phonchi/miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/tests/test_truncated_svd.py:\n  Line 100:     assert_array_less(0.0, svd.explained_variance_ratio_)\n\n  Line 103:     assert_array_less(svd.explained_variance_ratio_.sum(), 1.0)\n\n  Line 106:     total_variance = np.var(X_sparse.toarray(), axis=0).sum()\n\n  Line 108:     true_explained_variance_ratio = variances / total_variance\n\n  Line 111:         svd.explained_variance_ratio_,\n\n  Line 125:         svd_10.explained_variance_ratio_,\n\n  Line 126:         svd_20.explained_variance_ratio_[:10],\n\n  Line 132:         svd_20.explained_variance_ratio_.sum() > svd_10.explained_variance_ratio_.sum()\n\n\n/home/phonchi/miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/tests/test_pca.py:\n  Line 350:         pca_full.explained_variance_ratio_,\n\n  Line 351:         pca_other.explained_variance_ratio_,\n\n  Line 844:     # explained_variance_ratio_, then n_components_ should equal the\n\n  Line 849:     n_components = pca1.explained_variance_ratio_.cumsum()[-2]\n\n  Line 968:     pca_var = pca.explained_variance_ / pca.explained_variance_ratio_\n",
+      "metadata": {
+        "matches": 63,
+        "truncated": false
+      },
+      "title": "explained_variance_ratio_|total_var|exp_var",
+      "time": {
+        "start": 1789229301851,
+        "end": 1789229301867
+      }
+    }
+  },
+  {
+    "reason": "tool-calls",
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-finish",
+    "tokens": {
+      "total": 19003,
+      "input": 183,
+      "output": 132,
+      "reasoning": 0,
+      "cache": {
+        "write": 0,
+        "read": 18688
+      }
+    },
+    "cost": 0
+  },
+  {
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-start"
+  },
+  {
+    "type": "reasoning",
+    "text": "讓我讀 _pca.py 的 _fit_full 部分（line 630-710 附近）來確認 explained_variance_ratio_ 的計算。",
+    "time": {
+      "start": 1789229302967,
+      "end": 1789229303314
+    }
+  },
+  {
+    "type": "tool",
+    "tool": "read",
+    "callID": "call_3f705071cb5b403fb37e768b",
+    "state": {
+      "status": "completed",
+      "input": {
+        "filePath": "/home/phonchi/miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/_pca.py",
+        "offset": 600,
+        "limit": 120
+      },
+      "output": "<path>/home/phonchi/miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/_pca.py</path>\n<type>file</type>\n<content>\n600:             # memory efficient for our use case when `n_samples >> n_features`:\n601:             # `numpy.cov` centers a copy of the data before computing the\n602:             # matrix product instead of subtracting a small `(n_features,\n603:             # n_features)` square matrix from the gram matrix X.T @ X, as we do\n604:             # below.\n605:             x_is_centered = False\n606:             C = X.T @ X\n607:             C -= (\n608:                 n_samples\n609:                 * xp.reshape(self.mean_, (-1, 1))\n610:                 * xp.reshape(self.mean_, (1, -1))\n611:             )\n612:             C /= n_samples - 1\n613:             eigenvals, eigenvecs = xp.linalg.eigh(C)\n614: \n615:             # When X is a scipy sparse matrix, the following two datastructures\n616:             # are returned as instances of the soft-deprecated numpy.matrix\n617:             # class. Note that this problem does not occur when X is a scipy\n618:             # sparse array (or another other kind of supported array).\n619:             # TODO: remove the following two lines when scikit-learn only\n620:             # depends on scipy versions that no longer support scipy.sparse\n621:             # matrices.\n622:             eigenvals = xp.reshape(xp.asarray(eigenvals), (-1,))\n623:             eigenvecs = xp.asarray(eigenvecs)\n624: \n625:             eigenvals = xp.flip(eigenvals, axis=0)\n626:             eigenvecs = xp.flip(eigenvecs, axis=1)\n627: \n628:             # The covariance matrix C is positive semi-definite by\n629:             # construction. However, the eigenvalues returned by xp.linalg.eigh\n630:             # can be slightly negative due to numerical errors. This would be\n631:             # an issue for the subsequent sqrt, hence the manual clipping.\n632:             eigenvals[eigenvals < 0.0] = 0.0\n633:             explained_variance_ = eigenvals\n634: \n635:             # Re-construct SVD of centered X indirectly and make it consistent\n636:             # with the other solvers.\n637:             S = xp.sqrt(eigenvals * (n_samples - 1))\n638:             Vt = eigenvecs.T\n639:             U = None\n640: \n641:         # flip eigenvectors' sign to enforce deterministic output\n642:         U, Vt = svd_flip(U, Vt, u_based_decision=False)\n643: \n644:         components_ = Vt\n645: \n646:         # Get variance explained by singular values\n647:         total_var = xp.sum(explained_variance_)\n648:         explained_variance_ratio_ = explained_variance_ / total_var\n649:         singular_values_ = xp.asarray(S, copy=True)  # Store the singular values.\n650: \n651:         # Postprocess the number of components required\n652:         if n_components == \"mle\":\n653:             n_components = _infer_dimension(explained_variance_, n_samples)\n654:         elif 0 < n_components < 1.0:\n655:             # number of components for which the cumulated explained\n656:             # variance percentage is superior to the desired threshold\n657:             # side='right' ensures that number of features selected\n658:             # their variance is always greater than n_components float\n659:             # passed. More discussion in issue: #15669\n660:             if is_array_api_compliant:\n661:                 # Convert to numpy as xp.cumsum and xp.searchsorted are not\n662:                 # part of the Array API standard yet:\n663:                 #\n664:                 # https://github.com/data-apis/array-api/issues/597\n665:                 # https://github.com/data-apis/array-api/issues/688\n666:                 #\n667:                 # Furthermore, it's not always safe to call them for namespaces\n668:                 # that already implement them: for instance as\n669:                 # cupy.searchsorted does not accept a float as second argument.\n670:                 explained_variance_ratio_np = _convert_to_numpy(\n671:                     explained_variance_ratio_, xp=xp\n672:                 )\n673:             else:\n674:                 explained_variance_ratio_np = explained_variance_ratio_\n675:             ratio_cumsum = stable_cumsum(explained_variance_ratio_np)\n676:             n_components = np.searchsorted(ratio_cumsum, n_components, side=\"right\") + 1\n677: \n678:         # Compute noise covariance using Probabilistic PCA model\n679:         # The sigma2 maximum likelihood (cf. eq. 12.46)\n680:         if n_components < min(n_features, n_samples):\n681:             self.noise_variance_ = xp.mean(explained_variance_[n_components:])\n682:         else:\n683:             self.noise_variance_ = 0.0\n684: \n685:         self.n_samples_ = n_samples\n686:         self.n_components_ = n_components\n687:         # Assign a copy of the result of the truncation of the components in\n688:         # order to:\n689:         # - release the memory used by the discarded components,\n690:         # - ensure that the kept components are allocated contiguously in\n691:         #   memory to make the transform method faster by leveraging cache\n692:         #   locality.\n693:         self.components_ = xp.asarray(components_[:n_components, :], copy=True)\n694: \n695:         # We do the same for the other arrays for the sake of consistency.\n696:         self.explained_variance_ = xp.asarray(\n697:             explained_variance_[:n_components], copy=True\n698:         )\n699:         self.explained_variance_ratio_ = xp.asarray(\n700:             explained_variance_ratio_[:n_components], copy=True\n701:         )\n702:         self.singular_values_ = xp.asarray(singular_values_[:n_components], copy=True)\n703: \n704:         return U, S, Vt, X, x_is_centered, xp\n705: \n706:     def _fit_truncated(self, X, n_components, xp):\n707:         \"\"\"Fit the model by computing truncated SVD (by ARPACK or randomized)\n708:         on X.\n709:         \"\"\"\n710:         n_samples, n_features = X.shape\n711: \n712:         svd_solver = self._fit_svd_solver\n713:         if isinstance(n_components, str):\n714:             raise ValueError(\n715:                 \"n_components=%r cannot be a string with svd_solver='%s'\"\n716:                 % (n_components, svd_solver)\n717:             )\n718:         elif not 1 <= n_components <= min(n_samples, n_features):\n719:             raise ValueError(\n\n(Showing lines 600-719 of 859. Use offset=720 to continue.)\n</content>",
+      "metadata": {
+        "preview": "            # memory efficient for our use case when `n_samples >> n_features`:\n            # `numpy.cov` centers a copy of the data before computing the\n            # matrix product instead of subtracting a small `(n_features,\n            # n_features)` square matrix from the gram matrix X.T @ X, as we do\n            # below.\n            x_is_centered = False\n            C = X.T @ X\n            C -= (\n                n_samples\n                * xp.reshape(self.mean_, (-1, 1))\n                * xp.reshape(self.mean_, (1, -1))\n            )\n            C /= n_samples - 1\n            eigenvals, eigenvecs = xp.linalg.eigh(C)\n\n            # When X is a scipy sparse matrix, the following two datastructures\n            # are returned as instances of the soft-deprecated numpy.matrix\n            # class. Note that this problem does not occur when X is a scipy\n            # sparse array (or another other kind of supported array).\n            # TODO: remove the following two lines when scikit-learn only",
+        "truncated": true,
+        "loaded": [],
+        "display": {
+          "type": "file",
+          "path": "/home/phonchi/miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/_pca.py",
+          "text": "            # memory efficient for our use case when `n_samples >> n_features`:\n            # `numpy.cov` centers a copy of the data before computing the\n            # matrix product instead of subtracting a small `(n_features,\n            # n_features)` square matrix from the gram matrix X.T @ X, as we do\n            # below.\n            x_is_centered = False\n            C = X.T @ X\n            C -= (\n                n_samples\n                * xp.reshape(self.mean_, (-1, 1))\n                * xp.reshape(self.mean_, (1, -1))\n            )\n            C /= n_samples - 1\n            eigenvals, eigenvecs = xp.linalg.eigh(C)\n\n            # When X is a scipy sparse matrix, the following two datastructures\n            # are returned as instances of the soft-deprecated numpy.matrix\n            # class. Note that this problem does not occur when X is a scipy\n            # sparse array (or another other kind of supported array).\n            # TODO: remove the following two lines when scikit-learn only\n            # depends on scipy versions that no longer support scipy.sparse\n            # matrices.\n            eigenvals = xp.reshape(xp.asarray(eigenvals), (-1,))\n            eigenvecs = xp.asarray(eigenvecs)\n\n            eigenvals = xp.flip(eigenvals, axis=0)\n            eigenvecs = xp.flip(eigenvecs, axis=1)\n\n            # The covariance matrix C is positive semi-definite by\n            # construction. However, the eigenvalues returned by xp.linalg.eigh\n            # can be slightly negative due to numerical errors. This would be\n            # an issue for the subsequent sqrt, hence the manual clipping.\n            eigenvals[eigenvals < 0.0] = 0.0\n            explained_variance_ = eigenvals\n\n            # Re-construct SVD of centered X indirectly and make it consistent\n            # with the other solvers.\n            S = xp.sqrt(eigenvals * (n_samples - 1))\n            Vt = eigenvecs.T\n            U = None\n\n        # flip eigenvectors' sign to enforce deterministic output\n        U, Vt = svd_flip(U, Vt, u_based_decision=False)\n\n        components_ = Vt\n\n        # Get variance explained by singular values\n        total_var = xp.sum(explained_variance_)\n        explained_variance_ratio_ = explained_variance_ / total_var\n        singular_values_ = xp.asarray(S, copy=True)  # Store the singular values.\n\n        # Postprocess the number of components required\n        if n_components == \"mle\":\n            n_components = _infer_dimension(explained_variance_, n_samples)\n        elif 0 < n_components < 1.0:\n            # number of components for which the cumulated explained\n            # variance percentage is superior to the desired threshold\n            # side='right' ensures that number of features selected\n            # their variance is always greater than n_components float\n            # passed. More discussion in issue: #15669\n            if is_array_api_compliant:\n                # Convert to numpy as xp.cumsum and xp.searchsorted are not\n                # part of the Array API standard yet:\n                #\n                # https://github.com/data-apis/array-api/issues/597\n                # https://github.com/data-apis/array-api/issues/688\n                #\n                # Furthermore, it's not always safe to call them for namespaces\n                # that already implement them: for instance as\n                # cupy.searchsorted does not accept a float as second argument.\n                explained_variance_ratio_np = _convert_to_numpy(\n                    explained_variance_ratio_, xp=xp\n                )\n            else:\n                explained_variance_ratio_np = explained_variance_ratio_\n            ratio_cumsum = stable_cumsum(explained_variance_ratio_np)\n            n_components = np.searchsorted(ratio_cumsum, n_components, side=\"right\") + 1\n\n        # Compute noise covariance using Probabilistic PCA model\n        # The sigma2 maximum likelihood (cf. eq. 12.46)\n        if n_components < min(n_features, n_samples):\n            self.noise_variance_ = xp.mean(explained_variance_[n_components:])\n        else:\n            self.noise_variance_ = 0.0\n\n        self.n_samples_ = n_samples\n        self.n_components_ = n_components\n        # Assign a copy of the result of the truncation of the components in\n        # order to:\n        # - release the memory used by the discarded components,\n        # - ensure that the kept components are allocated contiguously in\n        #   memory to make the transform method faster by leveraging cache\n        #   locality.\n        self.components_ = xp.asarray(components_[:n_components, :], copy=True)\n\n        # We do the same for the other arrays for the sake of consistency.\n        self.explained_variance_ = xp.asarray(\n            explained_variance_[:n_components], copy=True\n        )\n        self.explained_variance_ratio_ = xp.asarray(\n            explained_variance_ratio_[:n_components], copy=True\n        )\n        self.singular_values_ = xp.asarray(singular_values_[:n_components], copy=True)\n\n        return U, S, Vt, X, x_is_centered, xp\n\n    def _fit_truncated(self, X, n_components, xp):\n        \"\"\"Fit the model by computing truncated SVD (by ARPACK or randomized)\n        on X.\n        \"\"\"\n        n_samples, n_features = X.shape\n\n        svd_solver = self._fit_svd_solver\n        if isinstance(n_components, str):\n            raise ValueError(\n                \"n_components=%r cannot be a string with svd_solver='%s'\"\n                % (n_components, svd_solver)\n            )\n        elif not 1 <= n_components <= min(n_samples, n_features):\n            raise ValueError(",
+          "lineStart": 600,
+          "lineEnd": 719,
+          "totalLines": 859,
+          "truncated": true
+        }
+      },
+      "title": "../miniconda3/envs/m524/lib/python3.11/site-packages/sklearn/decomposition/_pca.py",
+      "time": {
+        "start": 1789229303625,
+        "end": 1789229303634
+      }
+    }
+  },
+  {
+    "reason": "tool-calls",
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-finish",
+    "tokens": {
+      "total": 20759,
+      "input": 1674,
+      "output": 141,
+      "reasoning": 0,
+      "cache": {
+        "write": 0,
+        "read": 18944
+      }
+    },
+    "cost": 0
+  },
+  {
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-start"
+  },
+  {
+    "type": "reasoning",
+    "text": "確認了 sklearn 的 `_fit_full`（line 646-648）：\n\n```python\n        # Get variance explained by singular values\n        total_var = xp.sum(explained_variance_)\n        explained_variance_ratio_ = explained_variance_ / total_var\n```\n\n這裡 `explained_variance_` 是**全部** min(n_samples, n_features) 個特徵值（在 line 633 賦值，截斷發生在 line 696-701）。所以 `total_var` 是全部特徵值的和，`explained_variance_ratio_` 的分母是全部特徵值的和。\n\n所以 sklearn 的 `explained_variance_ratio_` 是真正的解釋變異比例（前 10 個加總 < 1）。\n\n而程式碼 lab2_pca.py：\n- line 50: `ratio_hand = var_hand / var_hand.sum()` — 分母是前 10 個特徵值的和。**錯誤**。\n- line 51: `ratio_sk = var_sk / var_sk.sum()` — 分母也是前 10 個特徵值的和。**錯誤**（沒有用 ref.explained_variance_ratio_）。\n\n所以：\n1. 程式碼的「解釋變異比例」計算有數學錯誤：分母應該是全部特徵值的和（或總變異數），而不是前 k 個的和。\n2. log 的「累計比例(前10) = 1.000000」是這個 bug 的必然結果（ratio_hand.sum() 恆等於 1），不是真實的累計解釋變異比例。\n3. log 中 ratio_hand 與 ratio_sk 一致是必然的（兩者都用前 10 個特徵值歸一化，而 var_hand ≈ var_sk），這個「比對」沒有驗證真正的 explained_variance_ratio_。\n\n這是一個重要的發現。程式碼第 2 節的標題「解釋變異比例 (explained_variance_ratio_) 比對」是誤導的，因為它沒有使用 sklearn 的 explained_variance_ratio_ 屬性。\n\n現在讓我確認其他部分。\n\n**特徵值比對（第 1 節）**：\n- 手刻：cov = X_c.T @ X_c / (n-1)，eigh 特徵值 = S²/(n-1)。\n- sklearn：explained_variance_ = S²/(n-1)（line 633 的 eigenvals，即 cov 的特徵值；或 _fit_svd_solver 的 S²/(n-1)）。\n- 兩者一致。log 顯示最大差 2.84e-13。合理。✓\n\n等等，我需要確認 sklearn 的 full solver 用哪個路徑。svd_solver=\"full\" 時，如果 n_components < min(n_samples, n_features) 且 n_samples > n_features... 讓我看 _fit_full 的開頭。\n\n實際上，從 line 600-613 看，這是 _fit_full 中「n_samples > n_features」的 cov 路徑（eigh）。digits 是 1797 樣本 × 64 特徵，n_samples > n_features，所以走 cov/eigh 路徑。這與手刻的 eigh(cov) 一致。✓\n\n好，特徵值部分確認無誤。\n\n**第 3 節方向與正負號**：\n- 手刻 sign 對齊（line 25-27）：max|位置|為正。sklearn 的 svd_flip(u_based_decision=False)（line 642）也是同樣邏輯。所以兩者應該一致。\n- log 顯示 |內積| = 1.00000000，正負號對齊=同向。合理。✓\n\n**第 4 節正交性**：\n- eigh 的特徵向量正交，Gram = I。log 顯示最大非對角 8.88e-16。合理。✓\n\n**第 5 節重建誤差**：\n- 手刻重建：Xc @ C.T @ C + mean。正確。\n- sklearn：inverse_transform(transform(X))。正確。\n- log 顯示兩者差 2.83e-12 < 1e-8。合理。✓\n\n重建誤差 751.78680710 這個數字本身：無法直接驗證（需要執行），但手刻與 sklearn 一致，這是合理的。\n\n**可重現性**：\n- line 34: `PCA(n_components=N_COMPONENTS, svd_solver=\"full\", random_state=0)`。random_state=0 有設定。✓\n- 手刻部分無隨機性。✓\n- load_digits 無隨機性。✓\n\n**手刻 vs 偷懶**：\n- my_pca_topk 只用 numpy（中心化、cov、eigh、排序、sign 對齊）。✓\n- sklearn PCA 只在 line 34-37 作為對照組。✓\n\n**log 與程式一致性**：\n- Command: `uv run python lab2_pca.py` — 符合專案規則。✓\n- 資料形狀：X64 維 x 1797 個樣本 — load_digits 是 64 特徵、1797 樣本。✓\n- 特徵值數字：手刻與 sklearn 一致。✓（合理）\n- ratio 數字：一致是必然的（兩者都用前 10 個歸一化）。但「累計比例(前10) = 1.000000」暴露了 bug。\n- 方向/正交/重建：合理。✓\n\n**無法從 log 確認的地方**：\n- 重建誤差的絕對值 751.78680710：無法從 log 獨立驗證（需要執行或知道全部特徵值）。但手刻與 sklearn 一致，這是內部一致性。\n- 特徵值的絕對值：同樣無法獨立驗證，但手刻與 sklearn 一致。\n- 真正的 explained_variance_ratio_（分母為全部特徵值和）：log 沒有提供，因為程式碼沒有計算。所以「前 10 個主成分的真實累計解釋比例」無法從 log 確認（log 顯示的 1.000000 是 bug 的結果，不是真實值）。\n- log 沒有顯示 sklearn 的 ref.explained_variance_ratio_ 屬性值。\n\n還有一些次要觀察：\n- line 15 使用全域變數 n_samples（函式內引用全域），不是 bug 但設計不佳。\n- line 50-51 的 ratio 計算錯誤是主要問題。\n- 另外，line 54 印出「累計比例(前10)」但沒有說明這是「前 10 個特徵值佔前 10 個特徵值總和的比例」，會誤導讀者以為前 10 個主成分解釋了 100% 變異。\n\n還有一個小點：log 第 2 節的標題是「解釋變異比例 (explained_variance_ratio_) 比對」，但程式碼沒有使用 ref.explained_variance_ratio_，所以標題與實際內容不符（比對的是「重新歸一化的特徵值」而不是 sklearn 的 explained_variance_ratio_）。\n\n另外，我應該檢查一下是否有其他檔案（例如 notes/lab2 筆記）提到這個 lab。notes/ 只有 logistic.md、lab1_cluster-output.log、lab2_pca-output.log。沒有 lab2 的筆記。這不是審查範圍，但可以提一下。\n\n還有 figs/ 目錄：程式碼沒有產生圖檔，log 也沒有提到圖檔。所以沒有違反「圖存到 figs/」的規則（因為沒有圖）。\n\n讓我再確認一下第 3 節的 align 計算：\nline 60: `align = np.sum(np.sign(components_hand) * np.sign(components_sk), axis=1)`\n如果同向，每個位置的符號乘積 = +1，加總 = 64。如果反向，加總 = -64。`ag = \"同向\" if align[i] > 0 else \"反向\"`。OK。\n\nline 62: `idx = np.argmax(np.abs(components_sk), axis=1)` — sklearn 的 max 位置。\nline 65: 印出 `np.sign(components_hand[i,idx[i]])` 和 `np.sign(components_sk[i,idx[i]])`。log 顯示 +1/+1。合理。✓\n\n好，現在整理最終報告。\n\n主要發現：\n1. **數學正確性**：\n   - 中心化 ✓（line 14）\n   - 共變異數矩陣 ✓（line 15，除以 n-1，與 sklearn 一致）\n   - eigh ✓（line 16）\n   - 排序與取前 k ✓（line 18-21）\n   - sign 對齊 ✓（line 25-27，與 sklearn svd_flip 一致）\n   - 正交性 ✓（eigh 保證）\n   - **解釋變異比例 ✗（line 50-51）**：分母用前 k 個特徵值的和，不是全部特徵值的和。真正的 explained_variance_ratio_ 分母應該是全部特徵值的和（sklearn line 647-648 確認）。因此 ratio_hand 不是真正的解釋變異比例，累計比例恆等於 1（log line 28 的 1.000000 是 bug 的必然結果）。\n   - 另外 line 51 沒有用 ref.explained_variance_ratio_，而是用 var_sk/var_sk.sum() 重新歸一化，所以「比對」只是驗證了 var_hand ≈ var_sk 的必然結果，沒有對照 sklearn 的真正 ratio。\n\n2. **可重現性**：✓ random_state=0（line 34），手刻無隨機性。\n\n3. **手刻**：✓ my_pca_topk 只用 numpy，sklearn 只當對照組。\n\n4. **程式與 log 一致性**：\n   - 指令、形狀、特徵值、方向、正交、重建：一致且合理。\n   - ratio 部分：log 與程式一致（都是 bug 的輸出），但「累計比例(前10) = 1.000000」是錯誤的數學結果，log 如實反映了 bug。\n   - 注意：log 中 ratio_hand 與 ratio_sk 一致是必然的（兩者都用前 10 個特徵值歸一化），不是獨立的驗證。\n\n5. **無法從 log 確認**：\n   - 真正的 explained_variance_ratio_（分母為全部特徵值和）與真實累計解釋比例：log 沒有提供（程式沒算）。\n   - 重建誤差絕對值 751.78680710 與特徵值絕對值：無法獨立驗證，但手刻與 sklearn 內部一致。\n   - log 沒有顯示 sklearn 的 ref.explained_variance_ratio_ 屬性值。\n\n數值穩定性：\n- eigh 對稱半正定矩陣，穩定 ✓\n- 沒有除以可能為零的量（n-1 = 1796）✓\n- 沒有開根號 ✓\n- 中心化沒有嚴重抵消問題（digits 像素 0-16）✓\n\n總評：手刻 PCA 的核心（中心化、共變異數、eigh、排序、sign 對齊、重建）數學正確且與 sklearn 一致，但「解釋變異比例」的計算有分母錯誤（用前 k 個特徵值和而非全部），導致累計比例恆為 1，且該節比對沒有真正對照 sklearn 的 explained_variance_ratio_ 屬性，log 如實反映了這個 bug 的輸出。\n\n讓我寫最終報告。用台灣繁體中文，條列，每一項先寫結論再寫理由。",
+    "time": {
+      "start": 1789229304574,
+      "end": 1789229329871
+    }
+  },
+  {
+    "type": "text",
+    "text": "我已讀完 `lab2_pca.py`（86 行）與 `notes/lab2_pca-output.log`（51 行），並交叉比對了 sklearn 原始碼（`_pca.py` 的 `_fit_full`，確認 `explained_variance_ratio_` 的計算方式）。以下為逐項審查結果。\n\n---\n\n## 1. 數學正確性 — **有問題**\n\n**正確的部分：**\n- **中心化**（lab2_pca.py:14）：`X - X.mean(axis=0)`，正確。\n- **共變異數矩陣**（lab2_pca.py:15）：`(X_centered.T @ X_centered) / (n_samples - 1)`，除以 n−1 的樣本共變異數，與 sklearn `explained_variance_ = S²/(n−1)` 的定義一致（sklearn `_pca.py:633`、`_fit_full` 的 cov/eigh 路徑），維度 (64,64) 正確。\n- **特徵分解**（lab2_pca.py:16）：對稱矩陣用 `np.linalg.eigh`，正確且數值穩定。\n- **排序與取前 k**（lab2_pca.py:18-21）：`argsort[::-1]` 降冪、`components = eigvecs[:, top].T` 形狀 (10,64)、`explained_variance = eigvals[top]`，皆正確。\n- **正負號對齊**（lab2_pca.py:25-27）：讓每個主成分在絕對值最大處為正，與 sklearn `svd_flip(u_based_decision=False)`（`_pca.py:642`）邏輯一致。\n- **正交性**（lab2_pca.py:71-74）：eigh 特徵向量正交，Gram ≈ I，正確。\n- **重建**（lab2_pca.py:78-79）：`Xc @ C.T @ C + mean`，PCA 重建公式正確，維度 (1797,64) 正確。\n\n**錯誤的部分：**\n- **解釋變異比例的分母錯誤**（lab2_pca.py:50-51）：`ratio_hand = var_hand / var_hand.sum()` 與 `ratio_sk = var_sk / var_sk.sum()` 的分母都是**前 10 個特徵值的和**，而不是**全部 64 個特徵值的和**。sklearn 的 `explained_variance_ratio_` 分母是全部特徵值和（`_pca.py:647-648`：`total_var = xp.sum(explained_variance_)`，截斷發生在 line 696-701 之後）。因此：\n  - `ratio_hand.sum()` 恆等於 1，log 第 28 行「累計比例(前10) = 1.000000」是這個 bug 的**必然結果**，不是真實的累計解釋變異比例（digits 前 10 個主成分的真實累計比例遠小於 1）。\n  - 第 2 節標題宣稱「explained_variance_ratio_ 比對」，但程式**沒有使用** `ref.explained_variance_ratio_` 屬性，而是拿 sklearn 的特徵值重新做了一次同樣錯誤的歸一化。所以該節的「一致」只是 `var_hand ≈ var_sk` 的必然推論，**沒有驗證到真正的解釋變異比例**。\n\n## 2. 可重現性 — **通過**\n\n- lab2_pca.py:34 的對照組 `PCA(..., svd_solver=\"full\", random_state=0)` 有設 `random_state=0`，符合專案規則。\n- 手刻部分（中心化、cov、eigh、排序）全是確定性運算，無隨機性；`load_digits` 資料固定。整體可重現。\n\n## 3. 是否如實手刻 — **通過**\n\n- `my_pca_topk`（lab2_pca.py:12-29）只使用 numpy：中心化、共變異數矩陣、`eigh`、排序、sign 對齊，沒有偷呼叫 sklearn 的 PCA。\n- sklearn 的 `PCA` 只在 lab2_pca.py:34-37 作為對照組使用，符合「sklearn 只能當對照組」的規則。\n\n## 4. 程式與 log 輸出一致性 — **有問題（ratio 部分）**\n\n- **指令**（log:1）：`uv run python lab2_pca.py`，符合專案執行規則。✓\n- **資料形狀**（log:2）：X64 維 × 1797 樣本，與 `load_digits`（64 特徵、1797 樣本）吻合。✓\n- **特徵值**（log:5-15）：手刻與 sklearn 最大差 2.84e-13，與程式 line 45-46 的輸出格式吻合，數值合理（兩者同為 S²/(n−1)）。✓\n- **方向與正負號**（log:32-42）：|內積|=1、同向、max|位置|符號 +1/+1，與 sign 對齊邏輯吻合。✓\n- **正交性**（log:45-46）：Gram 第 1 列 `[1, 0, 0, -0, ...]`、最大非對角 8.88e-16，合理。✓\n- **重建誤差**（log:49-51）：手刻與 sklearn 皆 751.78680710、差 2.83e-12，內部一致。✓\n- **解釋變異比例**（log:18-29）：log 數字與程式 line 50-56 的（錯誤）計算**一致**——也就是說 log 如實反映了 bug 的輸出，但「累計比例(前10) = 1.000000」在數學上是錯誤的（見第 1 項），log 沒有標示任何異常。\n\n## 5. 數值穩定性 — **通過**\n\n- 無除以可能為零的量（n−1 = 1796）；無開根號；`eigh` 對稱半正定矩陣穩定；digits 像素值 0–16，中心化無嚴重大數抵消問題。唯一小瑕疵是 lab2_pca.py:15 在函式內引用全域變數 `n_samples`（設計不佳，但功能正確）。\n\n## 6. 無法從 log 確認的地方\n\n- **真正的 `explained_variance_ratio_`（分母為全部 64 個特徵值和）與真實累計解釋比例**：log 完全沒有提供，因為程式根本沒算（lab2_pca.py:50-51 用錯分母，且未讀取 `ref.explained_variance_ratio_`）。log 的 1.000000 不能當作真實累計比例。\n- **特徵值與重建誤差的絕對值**（179.006930…、751.78680710…）：無法從 log 獨立驗證，只能確認手刻與 sklearn 兩者內部一致。\n- **log 沒有顯示 sklearn 的 `ref.explained_variance_ratio_` 屬性值**，因此無法從 log 得知正確的解釋變異比例應該是多少。\n\n---\n\n## 總評\n\n手刻 PCA 的核心數學（中心化、共變異數矩陣、eigh、排序、sign 對齊、正交性、重建）正確且與 sklearn 對照一致，可重現性與「不偷懶」也符合要求；但「解釋變異比例」一節的分母誤用前 k 個特徵值和（lab2_pca.py:50-51），導致累計比例恆為 1 且未真正對照 sklearn 的 `explained_variance_ratio_`，log 如實反映了這個 bug 的輸出——這是本次審查唯一但關鍵的數學錯誤，建議修正分母為全部特徵值和（或 `np.var(X, axis=0).sum()`）並改用 `ref.explained_variance_ratio_` 做對照。",
+    "time": {
+      "start": 1789229329874,
+      "end": 1789229355400
+    }
+  },
+  {
+    "reason": "stop",
+    "snapshot": "4e4a813747a5c223d8193ca7504a24579ac93815",
+    "type": "step-finish",
+    "tokens": {
+      "total": 26883,
+      "input": 1691,
+      "output": 4456,
+      "reasoning": 0,
+      "cache": {
+        "write": 0,
+        "read": 20736
+      }
+    },
+    "cost": 0
+  }
+]

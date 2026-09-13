@@ -502,36 +502,225 @@ footer .stamp{
   .topnav,.pager,pre .copy{display:none;}
   body{background:#fff;}
 }
+/* 共用教材骨架：由 build_site.py 內嵌至每個頁面，離線複製仍保留版面。 */
+:root{--shell-width:1440px;--sidebar-width:232px;--column-gap:32px;--prose-width:46em;}
+.topnav .inner{max-width:var(--shell-width);min-height:60px;}
+.topnav .brand{font-size:.82rem;}
+.topnav nav a{font-size:.82rem;color:var(--ink-2);}
+.site-shell{
+  display:grid;grid-template-columns:var(--sidebar-width) minmax(0,1fr);
+  gap:var(--column-gap);max-width:var(--shell-width);margin:0 auto;padding:0 32px;
+}
+.lesson-sidebar{
+  position:sticky;top:80px;align-self:start;max-height:calc(100dvh - 100px);
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  padding:24px 16px 24px 0;margin-top:16px;border-right:1px solid var(--rule);
+}
+.course-menu{display:none;}
+.course-nav ul{list-style:none;margin:0;padding:0;}
+.course-nav li{margin:0;}
+.nav-group{margin-bottom:22px;}
+.nav-group:last-child{margin-bottom:0;}
+.nav-group-title{font-size:.72rem;font-weight:700;color:var(--ink-3);letter-spacing:.08em;margin:0 0 8px 10px;}
+.chapter-link{
+  display:block;font-size:.86rem;color:var(--ink-2);line-height:1.6;
+  padding:7px 10px;border-radius:var(--r-sm);text-decoration:none;
+}
+.chapter-link:hover{background:var(--paper-2);color:var(--ink);}
+.chapter-link[aria-current="page"]{color:var(--live);font-weight:700;background:rgba(184,80,60,.075);}
+.course-nav .section-nav{border-left:1px solid var(--rule);margin:8px 0 12px 14px;padding-left:8px;}
+.section-nav a{display:block;font-size:.76rem;line-height:1.6;padding:5px 8px;text-decoration:none;color:var(--ink-3);}
+.section-nav a:hover,.section-nav a[aria-current="location"]{color:var(--link);background:rgba(42,60,120,.05);border-radius:4px;}
+.section-nav a[aria-current="location"]{font-weight:700;}
+.lesson-main{min-width:0;padding:16px 0 0;}
+.lesson-main > .container{width:100%;max-width:none;padding:24px 0 0;}
+.lesson-main .pagehead{padding-top:24px;}
+.lesson-main .pagehead h1{max-width:20em;}
+.lesson-main .pagehead .lead{max-width:var(--prose-width);}
+.lesson-main p,.lesson-main ul:not(.ckl),.lesson-main ol{max-width:var(--prose-width);}
+.lesson-main .term-body p,.lesson-main .term-body ul{max-width:none;}
+.lesson-main h2{scroll-margin-top:88px;margin-top:3rem;}
+.lesson-main h3,.lesson-main h4{scroll-margin-top:88px;}
+.lesson-main .hero{border-radius:var(--r-lg);padding:48px 36px 40px;margin-top:24px;}
+.lesson-main .hero .kicker{letter-spacing:.09em;}
+.lesson-main .hero-glyph{right:24px;bottom:24px;opacity:.6;}
+.lesson-main .hero h1{font-size:clamp(2.1rem,3.8vw,3.15rem);}
+.lesson-main .hero .inner{max-width:none;}
+.lesson-main .hero .meta{gap:24px;}
+.lesson-main .ch-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));}
+.lesson-main .step{padding-left:3.2rem;}
+/* 原始輸出保留等寬對齊；寬表格與輸出可在自己的容器捲動。 */
+.lesson-main pre.out{font-size:.875rem!important;}
+.lesson-main pre,.lesson-main .tw{max-width:100%;}
+.lesson-main pre:focus-visible,.lesson-main .tw:focus-visible{outline-offset:4px;}
+.lesson-diagram{margin:28px 0 36px;max-width:100%;}
+.lesson-diagram > svg{display:block;width:100%;height:auto;max-width:100%;}
+.lesson-diagram figcaption{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:.78rem;color:var(--ink-2);margin-top:12px;}
+.lesson-diagram figcaption a{margin-left:auto;white-space:nowrap;}
+.pager{margin-top:40px;}
+.pager a{min-width:min(230px,100%);}
+footer{max-width:var(--shell-width);margin:56px auto 0;}
+.skip-link{position:fixed;left:16px;top:8px;transform:translateY(-160%);padding:8px 16px;background:var(--paper-2);z-index:100;border:2px solid var(--link);border-radius:var(--r-sm);}
+.skip-link:focus{transform:none;}
+:focus-visible{outline:2px solid var(--link);outline-offset:3px;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
+@media(max-width:1100px){
+  .site-shell{display:block;padding:0 24px;}
+  .lesson-sidebar{position:static;margin:20px 0 0;padding:0;border:0;max-height:none;overflow:visible;}
+  .desktop-course-menu{display:none;}
+  .course-menu{display:block;border:1px solid var(--rule);border-radius:var(--r-md);background:var(--paper-2);}
+  .course-menu > summary{padding:12px 16px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--link);}
+  .course-menu .course-nav{padding:16px;border-top:1px solid var(--rule);}
+  .course-menu[open] .course-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;}
+  .lesson-main{padding-top:0;}
+  .lesson-main > .container{padding-top:12px;}
+  .lesson-main .hero{margin-top:24px;}
+}
+@media(max-width:720px){
+  .site-shell{padding:0 20px;}
+  .topnav .inner{padding:8px 20px;min-height:56px;flex-wrap:nowrap;gap:12px;}
+  .topnav .brand{font-size:.72rem;letter-spacing:.02em;}
+  .topnav nav{width:auto;margin-left:auto;overflow:visible;mask-image:none;-webkit-mask-image:none;gap:4px;}
+  .topnav nav a{padding:4px;font-size:.72rem;}
+  .lesson-main .hero{padding:32px 24px;}
+  .lesson-main .pagehead{padding-top:20px;}
+  .lesson-main .hero h1{font-size:2.05rem;}
+  .lesson-main .hero .kicker{font-size:.66rem;}
+  .course-menu[open] .course-nav{display:block;}
+  .lesson-main .step{padding-left:2.6rem;}
+  .lesson-main pre.out{font-size:.8125rem!important;}
+  .lesson-diagram figcaption a{margin-left:0;}
+  .pager{display:block;}
+  .pager a{display:block;margin-bottom:12px;}
+}
+@media print{
+  .lesson-sidebar,.skip-link{display:none;}
+  .site-shell{display:block;max-width:none;padding:0;}
+  .lesson-main{padding:0;}
+  .lesson-main .hero{color:var(--ink);background:none;padding:0;}
+  .lesson-main .hero h1,.lesson-main .hero .sub,.lesson-main .hero .kicker{color:var(--ink);}
+  .lesson-main pre{white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:none;}
+  .lesson-diagram{break-inside:avoid;}
+}
+
 </style>
 </head>
 <body>
-
+<a class="skip-link" href="#main-content">跳到本章內容</a>
 <div class="topnav"><div class="inner">
 <a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
-<nav>
+<nav aria-label="常用入口">
 <a href="prep.html">課前準備</a>
-<a href="first-run.html">第一次對話</a>
-<a href="lab1-cluster.html">Lab 1</a>
-<a href="lab2-pca.html">Lab 2</a>
-<a href="lab3-notes.html">Lab 3</a>
-<a href="local-models.html">本地模型</a>
-<a href="agents-md.html">AGENTS.md</a>
-<a href="git-safety.html">git</a>
-<a href="mcp-skills.html">MCP</a>
-<a href="cheatsheet.html">速查</a>
+<a href="cheatsheet.html">速查表</a>
 </nav>
 </div></div>
 
-<div class="container narrow">
+<div class="site-shell"><aside class="lesson-sidebar" aria-label="教材導覽"><div class="desktop-course-menu"><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html" aria-current="page">速查表</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-最常用的五件事">最常用的五件事</a></li>
+<li><a href="#section-opencode-cli">opencode CLI</a></li>
+<li><a href="#section-tui-斜線指令">TUI 斜線指令</a></li>
+<li><a href="#section-常用快捷鍵">常用快捷鍵</a></li>
+<li><a href="#section-uv">uv</a></li>
+<li><a href="#section-git-最小組合">git 最小組合</a></li>
+<li><a href="#section-常見錯誤與解法">常見錯誤與解法</a></li>
+<li><a href="#section-下指令的四個習慣">下指令的四個習慣</a></li>
+<li><a href="#section-三個實作怎麼判讀結果">三個實作怎麼判讀結果</a></li>
+</ul>
+</li>
+</ul></div>
+</nav></div><details class="course-menu"><summary>課程與本章目錄</summary><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html" aria-current="page">速查表</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-最常用的五件事">最常用的五件事</a></li>
+<li><a href="#section-opencode-cli">opencode CLI</a></li>
+<li><a href="#section-tui-斜線指令">TUI 斜線指令</a></li>
+<li><a href="#section-常用快捷鍵">常用快捷鍵</a></li>
+<li><a href="#section-uv">uv</a></li>
+<li><a href="#section-git-最小組合">git 最小組合</a></li>
+<li><a href="#section-常見錯誤與解法">常見錯誤與解法</a></li>
+<li><a href="#section-下指令的四個習慣">下指令的四個習慣</a></li>
+<li><a href="#section-三個實作怎麼判讀結果">三個實作怎麼判讀結果</a></li>
+</ul>
+</li>
+</ul></div>
+</nav></details></aside><main id="main-content" class="lesson-main" tabindex="-1"><div class="container narrow">
 
 <div class="pagehead">
   <div class="kicker"><span>09</span><span>·</span><span class="badge after">隨時查</span></div>
   <h1>速查表</h1>
-  <p class="lead">現場卡住先翻這頁。所有指令都在 opencode 1.18.30 上實測過。</p>
+  <p class="lead">現場卡住先翻這頁。找不到對應操作時，按 ctrl+p 開啟指令面板。</p>
 </div>
 
 <section>
-<h2>最常用的五件事</h2>
+<h2 id="section-最常用的五件事">最常用的五件事</h2>
 <div class="tw"><table>
 <tr><th>你想做什麼</th><th>怎麼做</th></tr>
 <tr><td>開始工作</td><td><code>cd &lt;專案資料夾&gt;</code> 然後 <code>opencode</code></td></tr>
@@ -543,7 +732,7 @@ footer .stamp{
 </section>
 
 <section>
-<h2>opencode CLI</h2>
+<h2 id="section-opencode-cli">opencode CLI</h2>
 <div class="tw"><table>
 <tr><th>指令</th><th>作用</th></tr>
 <tr><td><code>opencode</code></td><td>在目前資料夾啟動 TUI 互動模式</td></tr>
@@ -567,8 +756,8 @@ footer .stamp{
 </section>
 
 <section>
-<h2>TUI 斜線指令</h2>
-<p>在 opencode 互動畫面裡打 <code>/</code> 會跳出清單。以下是 1.18.30 <strong>實測存在</strong>的全部 17 個。</p>
+<h2 id="section-tui-斜線指令">TUI 斜線指令</h2>
+<p>在 opencode 互動畫面裡打 <code>/</code> 會跳出清單。下面列出課程會用到及可以再探索的指令，實際清單以你的畫面為準。</p>
 <div class="tw"><table>
 <tr><th>指令</th><th>作用</th><th>工作坊會不會用到</th></tr>
 <tr><td><code>/new</code></td><td>開新 session（別名 <code>/clear</code>）</td><td class="ok">會　換題目就用</td></tr>
@@ -587,15 +776,13 @@ footer .stamp{
 </table></div>
 
 <div class="box warn">
-<div class="bt">官方文件列了、但實測不存在的</div>
+<div class="bt">在自己的介面裡找功能</div>
 <p style="margin-bottom:0">
-<code>/compact</code>、<code>/undo</code>、<code>/redo</code>、<code>/share</code>、<code>/export</code>
-在 opencode.ai/docs 與坊間教學都還列著，但 <strong>1.18.30 的 <code>/</code> 清單裡沒有</strong>。
-這些功能移到了指令面板：按 <code>ctrl+p</code> 搜尋，或用下面的快捷鍵。
+找不到斜線指令時，按 <code>ctrl+p</code> 搜尋功能名稱。壓縮、還原等操作也可以用下面的快捷鍵。
 </p>
 </div>
 
-<h2>常用快捷鍵</h2>
+<h2 id="section-常用快捷鍵">常用快捷鍵</h2>
 <div class="tw"><table>
 <tr><th>按鍵</th><th>作用</th></tr>
 <tr><td><code>ctrl+p</code></td><td>開指令面板（找不到斜線指令時來這裡）</td></tr>
@@ -615,7 +802,7 @@ footer .stamp{
 </section>
 
 <section>
-<h2>uv</h2>
+<h2 id="section-uv">uv</h2>
 <div class="tw"><table>
 <tr><th>指令</th><th>作用</th></tr>
 <tr><td><code>uv sync</code></td><td>依 <code>pyproject.toml</code> 建立／更新環境</td></tr>
@@ -628,29 +815,29 @@ footer .stamp{
 <div class="box warn">
 <div class="bt">不要用的指令</div>
 <p style="margin-bottom:0">
-<code>pip install</code>、<code>python xxx.py</code>、<code>conda activate</code>　在這個專案裡都會出問題，因為套件裝在 uv 管理的 <code>.venv</code> 裡。
+<code>pip install</code>、<code>python xxx.py</code>、<code>conda activate</code>　可能用到不同的 Python 環境；本教材統一用 <code>uv run python</code>，讓套件與程式都來自 uv 管理的 <code>.venv</code> 裡。
 </p>
 </div>
 </section>
 
 <section>
-<h2>git 最小組合</h2>
+<h2 id="section-git-最小組合">git 最小組合</h2>
 <div class="tw"><table>
 <tr><th>指令</th><th>作用</th></tr>
 <tr><td><code>git init</code></td><td>開始追蹤這個資料夾（只做一次）</td></tr>
 <tr><td><code>git add -A</code></td><td>把所有變動納入這次存檔</td></tr>
 <tr><td><code>git commit -m "說明"</code></td><td>存檔</td></tr>
-<tr><td><code>git diff</code></td><td>看從上次存檔到現在改了什麼</td></tr>
+<tr><td><code>git diff</code></td><td>看工作目錄相對暫存區，尚未 git add 的修改</td></tr>
 <tr><td><code>git status</code></td><td>現在有哪些檔案被動過</td></tr>
-<tr><td><code>git restore .</code></td><td><strong>丟掉所有未存檔的修改</strong>，回到上次 commit</td></tr>
+<tr><td><code>git restore .</code></td><td>從暫存區還原目前目錄下的已追蹤檔案，<strong>丟棄未暫存修改</strong>；不刪未追蹤檔案</td></tr>
 <tr><td><code>git log --oneline</code></td><td>看存檔歷史</td></tr>
 </table></div>
 <p>核心工作流只有三步：<strong>動手前 <code>git commit</code> → 讓 agent 改 → <code>git diff</code> 檢查</strong>。
-不滿意就 <code>git restore .</code>。詳見<a href="git-safety.html">第 07 章</a>。</p>
+檢查前先不要 <code>git add</code>；確認不要未暫存修改時才用 <code>git restore .</code>。已暫存的變更用 <code>git diff --cached</code> 查看。詳見<a href="git-safety.html">第 07 章</a>。</p>
 </section>
 
 <section>
-<h2>常見錯誤與解法</h2>
+<h2 id="section-常見錯誤與解法">常見錯誤與解法</h2>
 <div class="tw"><table>
 <tr><th>訊息／症狀</th><th>怎麼辦</th></tr>
 <tr><td><code>command not found: opencode</code><br><code>無法辨識 'opencode'</code></td>
@@ -672,7 +859,7 @@ footer .stamp{
 <tr><td>回答愈來愈短、開始忘記前面講過的事</td>
     <td>context 快滿了。換題目就 <code>/new</code>；同一題按 <code>ctrl+x c</code> 壓縮（<strong>不是 <code>/compact</code></strong>，1.18.30 沒有那個斜線指令）。壓縮前先把結論寫進 <code>notes/</code>。</td></tr>
 <tr><td><code>/compact</code>、<code>/undo</code>、<code>/share</code>、<code>/export</code> 打了沒反應</td>
-    <td>1.18.30 <strong>沒有</strong>這幾個斜線指令（官方文件與坊間教學都還列著，但實測不存在）。改用 <code>ctrl+x c</code>／<code>ctrl+x u</code>／<code>ctrl+x x</code>，或 <code>ctrl+p</code> 開指令面板搜尋。</td></tr>
+    <td>1.18.30 <strong>沒有</strong>這幾個斜線指令。改用 <code>ctrl+x c</code>／<code>ctrl+x u</code>／<code>ctrl+x x</code>，或 <code>ctrl+p</code> 開指令面板搜尋。</td></tr>
 <tr><td>按 <code>Esc</code> 停不下來</td>
     <td>要按<strong>兩次以上</strong>。第一次只會顯示 <code>esc again to interrupt</code>。</td></tr>
 <tr><td>opencode 突然關掉了</td>
@@ -685,7 +872,8 @@ footer .stamp{
 </section>
 
 <section>
-<h2>下指令的四個習慣</h2>
+<h2 id="section-下指令的四個習慣">下指令的四個習慣</h2>
+<p>想自己寫一份完整任務，或讓中斷的工作繼續，請看<a href="agent-workflows.html">需求與續作練習</a>。</p>
 <div class="tw"><table>
 <tr><th>習慣</th><th>差別</th></tr>
 <tr><td><strong>說清楚存到哪</strong></td>
@@ -700,8 +888,8 @@ footer .stamp{
 </section>
 
 <section>
-<h2>三個實作的關鍵數字</h2>
-<p>用來對答案。你的數值應該跟這些一致（都固定了隨機種子）。</p>
+<h2 id="section-三個實作怎麼判讀結果">三個實作怎麼判讀結果</h2>
+<p>下面是課程設定下的參考結果。先核對資料、參數與比較方式；浮點數用容差比對，不要求每一位都相同。</p>
 <div class="tw"><table>
 <tr><th>Lab</th><th>項目</th><th>參考值</th></tr>
 <tr><td rowspan="2">1</td><td>silhouette 最高的 k</td><td>9（分數 0.1893）</td></tr>
@@ -716,54 +904,121 @@ footer .stamp{
 </table></div>
 </section>
 
-<div class="pager">
-  <a href="mcp-skills.html"><div class="d">上一章</div><div class="t2">← 08 · MCP 與 subagent</div></a>
-  <a href="index.html" class="next"><div class="d">回到</div><div class="t2">總覽 →</div></a>
-</div>
+
 
 </div>
+</main></div>
 
 <footer>
 <div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
-<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+<div class="stamp">讓 agent 動手，讓數學說明結果。</div>
 </footer>
 
 <script>
-// 導覽列高亮目前頁面
+/* Progressive enhancement: navigation and disclosure work without JavaScript. */
 (function(){
-  var f=(location.pathname.split('/').pop()||'index.html');
+  'use strict';
+  var pageName=location.pathname.split('/').pop()||'index.html';
   document.querySelectorAll('.topnav nav a').forEach(function(a){
-    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+    if(a.getAttribute('href')===pageName) a.setAttribute('aria-current','page');
   });
-})();
 
-// 指令複製鈕
-document.querySelectorAll('pre.cmd').forEach(function(pre){
-  var b=document.createElement('button');
-  b.className='copy'; b.type='button'; b.textContent='複製';
-  b.addEventListener('click',function(){
-    var t=pre.querySelector('code');
-    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
-      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
-    },function(){ b.textContent='複製失敗'; });
-  });
-  pre.appendChild(b);
-});
-
-// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
-(function(){
-  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
-  var saved={};
-  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
-  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
-    var id=cb.id||('ck'+i); cb.id=id;
-    if(saved[id]) cb.checked=true;
-    cb.addEventListener('change',function(){
-      saved[id]=cb.checked;
-      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+  var sections=Array.from(document.querySelectorAll('.lesson-main h2[id]'));
+  var sectionLinks=Array.from(document.querySelectorAll('.section-nav a'));
+  var scheduled=false;
+  function markSection(){
+    scheduled=false;
+    var current=sections[0];
+    sections.forEach(function(section){if(section.getBoundingClientRect().top<=145) current=section;});
+    sectionLinks.forEach(function(link){
+      if(current&&link.getAttribute('href')==='#'+current.id) link.setAttribute('aria-current','location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  function scheduleSection(){
+    if(!scheduled){scheduled=true;requestAnimationFrame(markSection);}
+  }
+  window.addEventListener('scroll',scheduleSection,{passive:true});
+  window.addEventListener('resize',scheduleSection);
+  window.addEventListener('hashchange',scheduleSection);
+  markSection();
+  document.querySelectorAll('.course-menu .section-nav a').forEach(function(link){
+    link.addEventListener('click',function(){
+      link.closest('details').open=false;
+      // Closing the menu moves the heading; resolve the anchor after that reflow.
+      var id=link.getAttribute('href').slice(1),target=document.getElementById(id);
+      if(target){
+        requestAnimationFrame(function(){
+          var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({top:window.scrollY+target.getBoundingClientRect().top-88,behavior:reduced?'auto':'smooth'});
+        });
+      }
     });
   });
+
+  var status=document.createElement('span');
+  status.className='sr-only';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+  document.body.appendChild(status);
+  function fallbackCopy(text){
+    var active=document.activeElement,selection=window.getSelection();
+    var ranges=[];
+    if(selection) for(var i=0;i<selection.rangeCount;i++) ranges.push(selection.getRangeAt(i).cloneRange());
+    var area=document.createElement('textarea');
+    area.value=text;area.setAttribute('readonly','');
+    area.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(area);area.select();
+    var copied=false;
+    try{copied=document.execCommand('copy');}catch(error){}
+    area.remove();
+    if(active&&active.focus) active.focus({preventScroll:true});
+    if(selection){selection.removeAllRanges();ranges.forEach(function(range){selection.addRange(range);});}
+    return copied;
+  }
+  async function copyText(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      try{await navigator.clipboard.writeText(text);return true;}catch(error){}
+    }
+    return fallbackCopy(text);
+  }
+  document.querySelectorAll('pre.cmd').forEach(function(pre){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='複製';
+    button.addEventListener('click',async function(){
+      var code=pre.querySelector('code')||pre;
+      var text=(code===pre?Array.from(pre.childNodes).filter(function(node){return node!==button;}).map(function(node){return node.textContent;}).join(''):code.textContent).trim();
+      if(await copyText(text)){
+        button.textContent='已複製';status.textContent='指令已複製。';
+      }else{
+        var range=document.createRange();range.selectNodeContents(code);
+        var selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);
+        button.textContent='請按 Ctrl+C';status.textContent='已選取指令，請按 Ctrl+C 複製。';
+      }
+      setTimeout(function(){button.textContent='複製';status.textContent='';},2200);
+    });
+    pre.appendChild(button);
+  });
+
+  // Keep the existing storage key and checkbox IDs so prior progress survives.
+  var key='ocmw:'+pageName,saved={};
+  try{
+    var parsed=JSON.parse(localStorage.getItem(key)||'{}');
+    if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)) saved=parsed;
+  }catch(error){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(checkbox,index){
+    var id=checkbox.id||('ck'+index);checkbox.id=id;
+    if(saved[id]) checkbox.checked=true;
+    checkbox.addEventListener('change',function(){
+      saved[id]=checkbox.checked;
+      try{localStorage.setItem(key,JSON.stringify(saved));}catch(error){}
+    });
+  });
+  // Wide output stays readable and can be scrolled from the keyboard.
+  document.querySelectorAll('pre.out,.tw').forEach(function(block){
+    block.tabIndex=0;
+    block.setAttribute('aria-label',block.matches('.tw')?'表格；較寬時可左右捲動':'程式輸出；較寬時可左右捲動');
+  });
 })();
+
 </script>
 
 <script>

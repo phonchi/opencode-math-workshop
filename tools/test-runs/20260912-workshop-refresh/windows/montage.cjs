@@ -1,0 +1,2 @@
+const fs=require('fs'),path=require('path'),pup=require('/home/phonchi/.cache/selfstudy-node/node_modules/puppeteer-core');
+(async()=>{const b=await pup.launch({executablePath:'/home/phonchi/.cache/puppeteer/chrome/linux-151.0.7922.71/chrome-linux64/chrome',args:['--no-sandbox']});const p=await b.newPage();await p.setViewport({width:1440,height:1000});await p.goto('file://'+path.join(__dirname,'montage.html'),{waitUntil:'networkidle0'});await p.screenshot({path:path.join(__dirname,'montage.png'),fullPage:true});await b.close();})();

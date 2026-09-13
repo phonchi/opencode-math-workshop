@@ -1,0 +1,82 @@
+<section class="pca-explorer" aria-labelledby="projection-title">
+<h2 id="projection-title">先轉一轉：把平面上的點投影到一條線</h2>
+<p>假設每個點代表一筆只有兩個特徵的資料。現在只准用一個數字描述它：把點垂直投影到藍線，記下沿線的位置。<strong>你會把線轉向哪裡，讓投影後的點盡量分散？</strong></p>
+<div class="projection-panel">
+  <div class="projection-controls">
+    <label for="projection-angle">投影方向 <output id="projection-angle-value" for="projection-angle">0.0°</output></label>
+    <input id="projection-angle" type="range" min="0" max="180" step="any" value="0" aria-describedby="projection-help">
+    <div class="projection-actions"><button type="button" id="projection-principal">轉到主成分方向</button><button type="button" id="projection-reset">重設</button></div>
+  </div>
+  <figure>
+    <svg id="projection-plot" viewBox="0 0 680 390" role="img" aria-labelledby="projection-svg-title projection-svg-desc">
+      <title id="projection-svg-title">二維資料與一維投影</title>
+      <desc id="projection-svg-desc">圓點是原始資料，方框是垂直投影到藍線後的位置。轉動藍線，比較投影後的分散程度與點到線的距離。</desc>
+      <g id="projection-grid" stroke="#ded6c6" stroke-width="1"></g>
+      <line x1="36" y1="195" x2="644" y2="195" stroke="#7d7a72"/>
+      <line x1="340" y1="28" x2="340" y2="362" stroke="#7d7a72"/>
+      <line id="projection-axis" stroke="#2a3c78" stroke-width="3"/>
+      <g id="projection-drops" stroke="#7d7a72" stroke-dasharray="4 5" stroke-width="1.5"></g>
+      <g id="projection-originals" fill="#1b1b2b"></g>
+      <g id="projection-projected" fill="#fffdf8" stroke="#b8503c" stroke-width="2"></g>
+    </svg>
+    <figcaption>實心圓：原始資料　空心方框：投影與重建的位置　虛線：重建的偏差</figcaption>
+  </figure>
+  <dl class="projection-readouts">
+    <div><dt>投影變異</dt><dd><output id="projection-variance">—</output></dd></div>
+    <div><dt>平均重建平方距離</dt><dd><output id="projection-error">—</output></dd></div>
+  </dl>
+  <p id="projection-help">拖曳滑桿，也可用鍵盤方向鍵調整。先找出你認為最好的方向，再按「轉到主成分方向」比較。</p>
+</div>
+<p>主成分方向保留最多變異，也讓重建的平方距離總和最小。這裡的「重建」是把線上的位置放回平面：它仍在投影線上，通常不會回到原來的點。</p>
+<details class="bg"><summary>把剛才看到的圖寫成公式</summary><div class="bg-body">
+<p>這組固定點雲的平均為零。令單位方向 $u=(\cos\theta,\sin\theta)^\top$，第 $i$ 點投影的位置是 $z_i=x_i^\top u$，重建為 $\hat x_i=z_i u$。</p>
+<p>上方分別顯示樣本變異 $\sum_i z_i^2/(n-1)$ 與平均平方距離 $\sum_i\|x_i-\hat x_i\|^2/n$。兩者分母不同，不能直接相加；方向最佳化的結論不受這兩個固定分母影響。</p>
+<p>把方向反過來，$u$ 換成 $-u$，投影座標會變號，但重建位置與這兩個指標都不變。稍後比對兩種 PCA 實作時，這點很有用。</p>
+</div></details>
+<noscript><p>此互動需要 JavaScript。也可以用下方公式：沿點雲較長的方向投影，保留的變異較大；垂直偏差較小。</p></noscript>
+</section>
+<style>
+.projection-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
+.projection-controls{display:grid;grid-template-columns:1fr auto;gap:.6rem 1.5rem;align-items:center}
+.projection-controls label{font-weight:600}.projection-controls label output{color:var(--link);font-variant-numeric:tabular-nums;margin-left:.6rem}
+.projection-controls input{grid-column:1;min-width:0;width:100%;accent-color:var(--link);min-height:44px}
+.projection-actions{grid-column:2;grid-row:1 / 3;display:flex;gap:.5rem;flex-wrap:wrap}
+.projection-actions button{font:inherit;font-size:.86rem;min-height:44px;padding:.4rem .8rem;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
+.projection-actions button:hover{border-color:var(--link);color:var(--link)}.projection-actions button:focus-visible,.projection-controls input:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+.projection-panel figure{margin:1rem 0}.projection-panel svg{display:block;width:100%;height:auto}.projection-panel figcaption{font-size:.82rem;color:var(--ink-2);text-align:center}
+.projection-readouts{display:flex;gap:2.5rem;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:1rem}.projection-readouts dt{font-size:.86rem;color:var(--ink-2)}.projection-readouts dd{margin:0;font-size:1.65rem;color:var(--link);font-variant-numeric:tabular-nums}.projection-panel #projection-help{font-size:.86rem;color:var(--ink-2);margin:.8rem 0 0}
+@media(max-width:600px){.projection-controls{display:block}.projection-actions{margin-top:.5rem}.projection-readouts{gap:1.2rem}.projection-panel figcaption{text-align:left}}
+@media print{.projection-controls input,.projection-actions{display:none}}
+</style>
+<script>
+(function(){
+  'use strict';
+  const points=[[-3,-1],[-2.5,-1.6],[-2,-.6],[-1.5,-1.2],[-1,-.2],[-.5,-.8],[.5,.8],[1,.2],[1.5,1.2],[2,.6],[2.5,1.6],[3,1]];
+  const root=document.querySelector('.pca-explorer');
+  const ns='http://www.w3.org/2000/svg';
+  const el=id=>document.getElementById('projection-'+id);
+  const xy=(x,y)=>[340+x*70,195-y*70];
+  function shape(tag,attrs,parent){const node=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))node.setAttribute(k,v);parent.appendChild(node);return node;}
+  for(let x=-4;x<=4;x++){const [px]=xy(x,0);shape('line',{x1:px,y1:30,x2:px,y2:360},el('grid'));}
+  for(let y=-2;y<=2;y++){const [,py]=xy(0,y);shape('line',{x1:40,y1:py,x2:640,y2:py},el('grid'));}
+  const originals=points.map(([x,y])=>{const [cx,cy]=xy(x,y);return shape('circle',{cx,cy,r:5},el('originals'));});
+  const drops=points.map(()=>shape('line',{},el('drops')));
+  const projected=points.map(()=>shape('rect',{width:8,height:8},el('projected')));
+  function draw(){
+    const degrees=Number(el('angle').value),t=degrees*Math.PI/180,ux=Math.cos(t),uy=Math.sin(t);
+    // Intersect the direction with the drawing bounds, preserving the data scale.
+    const length=Math.min(300/Math.max(Math.abs(ux),1e-12),160/Math.max(Math.abs(uy),1e-12));
+    for(const [k,v] of Object.entries({x1:340-length*ux,y1:195+length*uy,x2:340+length*ux,y2:195-length*uy}))el('axis').setAttribute(k,v);
+    let ss=0,error=0;
+    points.forEach(([x,y],i)=>{const z=x*ux+y*uy,rx=z*ux,ry=z*uy;ss+=z*z;error+=(x-rx)**2+(y-ry)**2;const [px,py]=xy(rx,ry),[ox,oy]=xy(x,y);for(const [k,v] of Object.entries({x1:ox,y1:oy,x2:px,y2:py}))drops[i].setAttribute(k,v);projected[i].setAttribute('x',px-4);projected[i].setAttribute('y',py-4);});
+    const variance=ss/(points.length-1),mse=error/points.length;
+    el('angle-value').value=degrees.toFixed(1)+'°';el('variance').value=variance.toFixed(4);el('error').value=mse.toFixed(4);
+    root.dataset.angle=String(degrees);root.dataset.variance=String(variance);root.dataset.error=String(mse);
+    el('angle').setAttribute('aria-valuetext',degrees.toFixed(1)+' 度');
+  }
+  el('angle').addEventListener('input',draw);
+  el('principal').addEventListener('click',()=>{let xx=0,yy=0,xy=0;for(const [x,y]of points){xx+=x*x;yy+=y*y;xy+=x*y;}let angle=Math.atan2(2*xy,xx-yy)*90/Math.PI;if(angle<0)angle+=180;el('angle').value=String(angle);draw();});
+  el('reset').addEventListener('click',()=>{el('angle').value='0';draw();});
+  draw();
+})();
+</script>

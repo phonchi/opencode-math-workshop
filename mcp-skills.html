@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MCP 與 subagent｜OpenCode × AI-Math 工作坊</title>
-<meta name="description" content="MCP、自訂 agent、subagent 各解決什麼問題。加分項，不是必修。">
+<title>MCP、skills 與 subagent｜OpenCode × AI-Math 工作坊</title>
+<meta name="description" content="認識工具擴充、工作流程與子任務，選擇合適的協作方式。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2213%22%20fill%3D%22%23191922%22%2F%3E%3Cpath%20d%3D%22M16%2020l12%2012-12%2012%22%20fill%3D%22none%22%20stroke%3D%22%23e3c273%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Crect%20x%3D%2233%22%20y%3D%2240%22%20width%3D%2217%22%20height%3D%226%22%20rx%3D%223%22%20fill%3D%22%23b8503c%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -502,66 +502,246 @@ footer .stamp{
   .topnav,.pager,pre .copy{display:none;}
   body{background:#fff;}
 }
+/* 共用教材骨架：由 build_site.py 內嵌至每個頁面，離線複製仍保留版面。 */
+:root{--shell-width:1440px;--sidebar-width:232px;--column-gap:32px;--prose-width:46em;}
+.topnav .inner{max-width:var(--shell-width);min-height:60px;}
+.topnav .brand{font-size:.82rem;}
+.topnav nav a{font-size:.82rem;color:var(--ink-2);}
+.site-shell{
+  display:grid;grid-template-columns:var(--sidebar-width) minmax(0,1fr);
+  gap:var(--column-gap);max-width:var(--shell-width);margin:0 auto;padding:0 32px;
+}
+.lesson-sidebar{
+  position:sticky;top:80px;align-self:start;max-height:calc(100dvh - 100px);
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  padding:24px 16px 24px 0;margin-top:16px;border-right:1px solid var(--rule);
+}
+.course-menu{display:none;}
+.course-nav ul{list-style:none;margin:0;padding:0;}
+.course-nav li{margin:0;}
+.nav-group{margin-bottom:22px;}
+.nav-group:last-child{margin-bottom:0;}
+.nav-group-title{font-size:.72rem;font-weight:700;color:var(--ink-3);letter-spacing:.08em;margin:0 0 8px 10px;}
+.chapter-link{
+  display:block;font-size:.86rem;color:var(--ink-2);line-height:1.6;
+  padding:7px 10px;border-radius:var(--r-sm);text-decoration:none;
+}
+.chapter-link:hover{background:var(--paper-2);color:var(--ink);}
+.chapter-link[aria-current="page"]{color:var(--live);font-weight:700;background:rgba(184,80,60,.075);}
+.course-nav .section-nav{border-left:1px solid var(--rule);margin:8px 0 12px 14px;padding-left:8px;}
+.section-nav a{display:block;font-size:.76rem;line-height:1.6;padding:5px 8px;text-decoration:none;color:var(--ink-3);}
+.section-nav a:hover,.section-nav a[aria-current="location"]{color:var(--link);background:rgba(42,60,120,.05);border-radius:4px;}
+.section-nav a[aria-current="location"]{font-weight:700;}
+.lesson-main{min-width:0;padding:16px 0 0;}
+.lesson-main > .container{width:100%;max-width:none;padding:24px 0 0;}
+.lesson-main .pagehead{padding-top:24px;}
+.lesson-main .pagehead h1{max-width:20em;}
+.lesson-main .pagehead .lead{max-width:var(--prose-width);}
+.lesson-main p,.lesson-main ul:not(.ckl),.lesson-main ol{max-width:var(--prose-width);}
+.lesson-main .term-body p,.lesson-main .term-body ul{max-width:none;}
+.lesson-main h2{scroll-margin-top:88px;margin-top:3rem;}
+.lesson-main h3,.lesson-main h4{scroll-margin-top:88px;}
+.lesson-main .hero{border-radius:var(--r-lg);padding:48px 36px 40px;margin-top:24px;}
+.lesson-main .hero .kicker{letter-spacing:.09em;}
+.lesson-main .hero-glyph{right:24px;bottom:24px;opacity:.6;}
+.lesson-main .hero h1{font-size:clamp(2.1rem,3.8vw,3.15rem);}
+.lesson-main .hero .inner{max-width:none;}
+.lesson-main .hero .meta{gap:24px;}
+.lesson-main .ch-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));}
+.lesson-main .step{padding-left:3.2rem;}
+/* 原始輸出保留等寬對齊；寬表格與輸出可在自己的容器捲動。 */
+.lesson-main pre.out{font-size:.875rem!important;}
+.lesson-main pre,.lesson-main .tw{max-width:100%;}
+.lesson-main pre:focus-visible,.lesson-main .tw:focus-visible{outline-offset:4px;}
+.lesson-diagram{margin:28px 0 36px;max-width:100%;}
+.lesson-diagram > svg{display:block;width:100%;height:auto;max-width:100%;}
+.lesson-diagram figcaption{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:.78rem;color:var(--ink-2);margin-top:12px;}
+.lesson-diagram figcaption a{margin-left:auto;white-space:nowrap;}
+.pager{margin-top:40px;}
+.pager a{min-width:min(230px,100%);}
+footer{max-width:var(--shell-width);margin:56px auto 0;}
+.skip-link{position:fixed;left:16px;top:8px;transform:translateY(-160%);padding:8px 16px;background:var(--paper-2);z-index:100;border:2px solid var(--link);border-radius:var(--r-sm);}
+.skip-link:focus{transform:none;}
+:focus-visible{outline:2px solid var(--link);outline-offset:3px;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
+@media(max-width:1100px){
+  .site-shell{display:block;padding:0 24px;}
+  .lesson-sidebar{position:static;margin:20px 0 0;padding:0;border:0;max-height:none;overflow:visible;}
+  .desktop-course-menu{display:none;}
+  .course-menu{display:block;border:1px solid var(--rule);border-radius:var(--r-md);background:var(--paper-2);}
+  .course-menu > summary{padding:12px 16px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--link);}
+  .course-menu .course-nav{padding:16px;border-top:1px solid var(--rule);}
+  .course-menu[open] .course-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;}
+  .lesson-main{padding-top:0;}
+  .lesson-main > .container{padding-top:12px;}
+  .lesson-main .hero{margin-top:24px;}
+}
+@media(max-width:720px){
+  .site-shell{padding:0 20px;}
+  .topnav .inner{padding:8px 20px;min-height:56px;flex-wrap:nowrap;gap:12px;}
+  .topnav .brand{font-size:.72rem;letter-spacing:.02em;}
+  .topnav nav{width:auto;margin-left:auto;overflow:visible;mask-image:none;-webkit-mask-image:none;gap:4px;}
+  .topnav nav a{padding:4px;font-size:.72rem;}
+  .lesson-main .hero{padding:32px 24px;}
+  .lesson-main .pagehead{padding-top:20px;}
+  .lesson-main .hero h1{font-size:2.05rem;}
+  .lesson-main .hero .kicker{font-size:.66rem;}
+  .course-menu[open] .course-nav{display:block;}
+  .lesson-main .step{padding-left:2.6rem;}
+  .lesson-main pre.out{font-size:.8125rem!important;}
+  .lesson-diagram figcaption a{margin-left:0;}
+  .pager{display:block;}
+  .pager a{display:block;margin-bottom:12px;}
+}
+@media print{
+  .lesson-sidebar,.skip-link{display:none;}
+  .site-shell{display:block;max-width:none;padding:0;}
+  .lesson-main{padding:0;}
+  .lesson-main .hero{color:var(--ink);background:none;padding:0;}
+  .lesson-main .hero h1,.lesson-main .hero .sub,.lesson-main .hero .kicker{color:var(--ink);}
+  .lesson-main pre{white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:none;}
+  .lesson-diagram{break-inside:avoid;}
+}
+
 </style>
 </head>
 <body>
-
+<a class="skip-link" href="#main-content">跳到本章內容</a>
 <div class="topnav"><div class="inner">
 <a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
-<nav>
+<nav aria-label="常用入口">
 <a href="prep.html">課前準備</a>
-<a href="first-run.html">第一次對話</a>
-<a href="lab1-cluster.html">Lab 1</a>
-<a href="lab2-pca.html">Lab 2</a>
-<a href="lab3-notes.html">Lab 3</a>
-<a href="local-models.html">本地模型</a>
-<a href="agents-md.html">AGENTS.md</a>
-<a href="git-safety.html">git</a>
-<a href="mcp-skills.html">MCP</a>
-<a href="cheatsheet.html">速查</a>
+<a href="cheatsheet.html">速查表</a>
 </nav>
 </div></div>
 
-<div class="container narrow">
+<div class="site-shell"><aside class="lesson-sidebar" aria-label="教材導覽"><div class="desktop-course-menu"><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html" aria-current="page">MCP、skills 與 subagent</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-這章怎麼選著讀">這章怎麼選著讀</a></li>
+<li><a href="#section-這些工具各解決什麼問題">1. 這些工具各解決什麼問題</a></li>
+<li><a href="#section-mcp-給-agent-新的工具">2. MCP：給 agent 新的工具</a></li>
+<li><a href="#section-自訂-agent-換一個專家來">3. 自訂 agent：換一個專家來</a></li>
+<li><a href="#section-subagent-task-什麼時候該拆子任務">4. subagent / task：什麼時候該拆子任務</a></li>
+<li><a href="#section-自己做一個數學筆記-skill">5. 自己做一個數學筆記 skill</a></li>
+<li><a href="#section-一張表做決定">6. 一張表做決定</a></li>
+<li><a href="#section-本章重點">7. 本章重點</a></li>
+<li><a href="#section-練習">練習</a></li>
+<li><a href="#section-資料來源">資料來源</a></li>
+</ul>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></div><details class="course-menu"><summary>課程與本章目錄</summary><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html" aria-current="page">MCP、skills 與 subagent</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-這章怎麼選著讀">這章怎麼選著讀</a></li>
+<li><a href="#section-這些工具各解決什麼問題">1. 這些工具各解決什麼問題</a></li>
+<li><a href="#section-mcp-給-agent-新的工具">2. MCP：給 agent 新的工具</a></li>
+<li><a href="#section-自訂-agent-換一個專家來">3. 自訂 agent：換一個專家來</a></li>
+<li><a href="#section-subagent-task-什麼時候該拆子任務">4. subagent / task：什麼時候該拆子任務</a></li>
+<li><a href="#section-自己做一個數學筆記-skill">5. 自己做一個數學筆記 skill</a></li>
+<li><a href="#section-一張表做決定">6. 一張表做決定</a></li>
+<li><a href="#section-本章重點">7. 本章重點</a></li>
+<li><a href="#section-練習">練習</a></li>
+<li><a href="#section-資料來源">資料來源</a></li>
+</ul>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></details></aside><main id="main-content" class="lesson-main" tabindex="-1"><div class="container narrow">
 
 <div class="pagehead">
-  <div class="kicker"><span>08</span><span>·</span><span class="badge after">課後延伸</span></div>
-  <h1>再往前一步：MCP、自訂 agent、subagent</h1>
+  <div class="kicker"><span class="badge after">課後延伸</span></div>
+  <h1>MCP、skills 與 subagent</h1>
 </div>
 
-<div class="box tip"><p>適用版本：opencode 1.18.30</p></div>
-<h2>先講清楚：這章你可以先跳過</h2>
-<p>前兩章（<code>AGENTS.md</code>、git）是<strong>地基</strong>。這一章是<strong>裝潢</strong>。</p>
-<p>如果你目前還在這些狀況裡，請先回去把前兩章練熟，這章留到之後再看：</p>
-<ul>
-<li>還不太確定 <code>git diff</code> 的輸出在講什麼</li>
-<li>還沒養成「叫 agent 動手前先 commit」的習慣</li>
-<li>AGENTS.md 寫了但沒驗證過有沒有生效</li>
-<li>用 opencode 寫數學程式還不太順</li>
-</ul>
-<p>理由很實際：<strong>這章的東西都是在「你已經能順利用 agent 做事」之後，才會感覺到價值的優化。</strong> 在地基還不穩的時候加裝潢，只會讓你要 debug 的東西變多。結果不如預期時，你會分不清是模型的問題、提示的問題，還是你多加的那個 MCP 的問題。</p>
-<p>而且老實說：<strong>這門課的作業，只用前兩章的內容就能完整做完。</strong> 這章是給已經吃飽、還想多學一點的人。</p>
-<p>準備好的話，我們開始。</p>
-<hr>
-<h2>1. 三個東西各解決什麼問題</h2>
-<p>初學者最容易混淆這三個名詞。一句話講清楚差別：</p>
-<div class="tw"><table><tr><th></th><th>一句話</th><th>解決的問題</th></tr><tr><td><strong>MCP</strong></td><td>給 agent <strong>新的工具</strong>（外部能力）</td><td>它<strong>做不到</strong>某件事</td></tr><tr><td><strong>自訂 agent</strong></td><td>給 agent <strong>新的人格</strong>（專屬指令與權限）</td><td>它<strong>做得到，但做事方式</strong>不對</td></tr><tr><td><strong>subagent</strong></td><td>把工作<strong>拆給另一個對話</strong>去做</td><td>它<strong>能做，但一次做太多</strong>會亂</td></tr></table></div>
+<h2 id="section-這章怎麼選著讀">這章怎麼選著讀</h2>
+<p>已經完成一個 Lab，就可以從第 5 節做自己的數學筆記 skill。想找另一個角色檢查程式，讀第 3、4 節；需要查外部套件文件，再讀第 2 節的 MCP。</p>
+<p>所有練習都沿用課前建立的同一份專案；先在該資料夾開啟終端機，用 <code>pwd</code>、<code>ls</code> 確認位置與檔案。先查看要建立的檔案與權限，逐項增加需要的能力；不必一次完成全部設定。</p>
+<h2 id="section-這些工具各解決什麼問題">1. 這些工具各解決什麼問題</h2>
+<p>先從你想解決的問題來選：</p>
+<div class="tw"><table><tr><th></th><th>一句話</th><th>解決的問題</th></tr><tr><td><strong>skill</strong></td><td>保存某一類任務的流程</td><td>整理筆記時，每次都要重講同一套要求</td></tr><tr><td><strong>MCP</strong></td><td>給 agent <strong>新的工具</strong>（外部能力）</td><td>它<strong>做不到</strong>某件事</td></tr><tr><td><strong>自訂 agent</strong></td><td>給 agent <strong>新的人格</strong>（專屬指令與權限）</td><td>它<strong>做得到，但做事方式</strong>不對</td></tr><tr><td><strong>subagent</strong></td><td>把工作<strong>拆給另一個對話</strong>去做</td><td>它<strong>能做，但一次做太多</strong>會亂</td></tr></table></div>
 <p>用一個具體場景串起來：</p>
 <div class="box tip"><p>你在寫 PCA 的作業。</p>
 <ul>
 <li>agent 不知道 scikit-learn 新版的 API 怎麼用，它的知識停在舊版 → <strong>MCP</strong>（接一個能查即時套件文件的工具）</li>
 <li>你想要一個「只檢查數學對不對、絕對不准改你程式」的審查員 → <strong>自訂 agent</strong>（定義一個唯讀的 reviewer）</li>
-<li>主線在寫 PCA，但你想順便查一下三份參考程式裡哪裡用到隨機性 → <strong>subagent</strong>（丟給子任務去翻，不要用這些細節污染主對話）</li>
+<li>主線在寫 PCA，但你想順便查一下你完成的 Lab 程式裡哪裡用到隨機性 → <strong>subagent</strong>（丟給子任務去翻，不要用這些細節污染主對話）</li>
 </ul></div>
 <p>再換個比喻：MCP 是<strong>多給它一隻手</strong>，自訂 agent 是<strong>換一個專家來</strong>，subagent 是<strong>找人分頭辦事</strong>。</p>
 <hr>
-<h2>2. MCP：給 agent 新的工具</h2>
+<h2 id="section-mcp-給-agent-新的工具">2. MCP：給 agent 新的工具</h2>
 <h3>這是什麼</h3>
 <p>MCP（Model Context Protocol）是一套標準協定，讓 agent 能連上外部服務取得能力。opencode 本身只有讀檔、寫檔、執行指令、抓網頁這些內建工具。接上 MCP server 之後，agent 就多了那個 server 提供的工具。</p>
 <h3>對數學/研究最有用的例子：查套件文件</h3>
-<p>這是我實際測試過、確認能用的例子。</p>
+<p>下面是一個選修的外部工具例子。先完成本機的 skill 與 reviewer 練習也可以，不必先設定 MCP。</p>
 <p><strong>問題</strong>：<code>opencode/big-pickle</code> 和所有模型一樣，知識有時間截止點。你問它 scikit-learn 某個參數怎麼用，它可能給你一個兩年前的 API，跑起來噴 <code>TypeError</code>。你也可以叫它用 <code>webfetch</code> 去抓文件，但那是抓整頁 HTML，又慢又雜。</p>
-<p><strong>解法</strong>：接上 Context7，它專門提供<strong>套件的即時文件查詢</strong>，agent 可以直接查 numpy、scipy、scikit-learn、matplotlib 的當前 API。</p>
+<p>Context7 可以替 agent 提供套件文件查詢；查到後仍要確認文件版本與本專案相符。官方安裝與使用條件見 <a class="ext" href="https://github.com/upstash/context7" target="_blank" rel="noopener">Context7 官方說明</a>。</p>
 <p>在專案根目錄的 <code>opencode.json</code> 加上 <code>mcp</code> 區塊：</p>
 <pre class="cmd" data-lang="json"><code>{
   "$schema": "https://opencode.ai/config.json",
@@ -577,18 +757,23 @@ footer .stamp{
   }
 }</code></pre>
 <p>存檔後驗證：</p>
-<pre class="cmd" data-lang="bash"><code>cd ~/ai-math-lab
-opencode mcp list</code></pre>
-<p>實測輸出：</p>
+<pre class="cmd" data-lang="bash"><code>opencode mcp list</code></pre>
+<p>連線成功時的輸出例子：</p>
 <pre class="out"><code>┌  MCP Servers
 │
 ●  ✓ context7 connected
 │      https://mcp.context7.com/mcp
 │
 └  1 server(s)</code></pre>
-<p>看到 <code>connected</code> 就成功了。<strong>這個 server 不需要註冊、不需要 API key、不需要付費</strong>，和 <code>opencode/big-pickle</code> 一樣可以直接用。</p>
+<p>看到 <code>connected</code> 表示連線成功，還要實際查一次文件才知道服務能否使用。Context7 官方目前建議使用金鑰取得較高額度；本教材只示範不帶金鑰的連線，服務可用性與配額會變動。遇到認證、額度或付費要求就停止，改用下方的官方文件路線，不必申請帳號或啟用付費設定。</p>
 <p>接上之後可以這樣問：</p>
 <pre class="cmd" data-lang="text"><code>scikit-learn 最新版的 PCA，取得解釋變異比例的屬性叫什麼？查文件確認再回答。</code></pre>
+<h3>不接 MCP 也能查官方文件</h3>
+<p>把這段貼進 OpenCode，允許它讀取指定的公開文件：</p>
+<pre class="cmd" data-lang="text"><code>請讀 https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html，
+說明 n_init 的用途，並和 lab1_cluster.py 的設定比較。
+請附上來源連結；如果讀不到網頁，直接說明，不要靠猜測補上 API 行為。</code></pre>
+<p>網頁讀不到時，你也可以自己在瀏覽器開啟官方文件，把需要的短段落貼進對話。</p>
 <h3>兩種 MCP：remote 與 local</h3>
 <p><strong>remote</strong>：連到別人架好的網路服務。你不用安裝任何東西。</p>
 <pre class="cmd" data-lang="json"><code>{
@@ -631,7 +816,7 @@ opencode mcp list</code></pre>
 <p>上面那個 <code>server-everything</code> 是官方的測試用 server，拿來確認 MCP 機制有沒有通就好，本身沒有實用功能。</p>
 <p><strong>這門課建議只用 remote</strong>，因為 local 需要 Node.js 環境、要下載套件，多一層可能出錯的地方。</p>
 <h3><code>opencode mcp</code> 這個 CLI</h3>
-<p>實測 1.18.30 有這些子指令：</p>
+<p>可以先查看有哪些管理指令：</p>
 <pre class="cmd" data-lang="bash"><code>opencode mcp add [name]      # 新增 MCP server
 opencode mcp list            # 列出所有 server 與連線狀態（別名 ls）
 opencode mcp auth [name]     # 對支援 OAuth 的 server 進行認證
@@ -644,16 +829,16 @@ opencode mcp debug &lt;name&gt;    # 偵錯 OAuth 連線問題</code></pre>
 <p><strong>每個 MCP 都會把它的工具清單塞進 context</strong>，工具一多，模型挑錯工具的機率就上升，也會排擠掉你真正的問題內容。</p>
 <p><strong>原則：只加你這禮拜真的會用到的。</strong> 不要因為看起來很酷就接五個。這門課接一個 Context7 就夠了，甚至不接也完全能完成作業。</p>
 <hr>
-<h2>3. 自訂 agent：換一個專家來</h2>
+<h2 id="section-自訂-agent-換一個專家來">3. 自訂 agent：換一個專家來</h2>
 <h3>這是什麼</h3>
-<p>opencode 內建了幾個 agent。實測 1.18.30 用 <code>opencode agent list</code> 可以看到：</p>
+<p>用 <code>opencode agent list</code> 可查看目前的角色，常用的是：</p>
 <pre class="out"><code>build (primary)
 plan (primary)
 explore (subagent)
 general (subagent)</code></pre>
 <p>（另外還有 <code>compaction</code>、<code>summary</code>、<code>title</code> 等內部用的，不用管。）</p>
 <ul>
-<li><strong>primary agent</strong> 是你直接對話的對象，在介面裡按 <strong>Tab</strong> 切換。<code>build</code> 是預設，權限全開；<code>plan</code> 只規劃不動手（檔案編輯與 bash 預設是 <code>ask</code>）。</li>
+<li><strong>primary agent</strong> 是你直接對話的對象，在介面裡按 <strong>Tab</strong> 切換。本課程用 <code>build</code> 執行任務，改檔與執行依專案的 <code>ask</code> 設定詢問；<code>plan</code> 適合先分析步驟。實際限制會受版本與專案設定影響，請查看權限要求。</li>
 <li><strong>subagent</strong> 是被主 agent 呼叫去做特定工作的。<code>explore</code> 唯讀探索程式碼，<code>general</code> 通用。</li>
 </ul>
 <p><strong>自訂 agent 就是自己定義一個</strong>，給它專屬的系統提示、溫度和權限。</p>
@@ -661,13 +846,15 @@ general (subagent)</code></pre>
 <pre class="out"><code>專案層：&lt;專案根目錄&gt;/.opencode/agents/&lt;名字&gt;.md
 全域：  ~/.config/opencode/agents/&lt;名字&gt;.md</code></pre>
 <p><strong>檔名就是 agent 的名字。</strong> <code>math-reviewer.md</code> 會產生一個叫 <code>math-reviewer</code> 的 agent。專案層優先於全域。</p>
-<div class="box tip"><p>實測補充：1.18.30 底下 <code>.opencode/agent/</code>（單數）和 <code>.opencode/agents/</code>（複數）<strong>兩種目錄名都能被載入</strong>。文件寫的是複數，<strong>建議統一用 <code>agents/</code></strong>，不要混用，免得以後找不到自己的檔案放哪。</p></div>
+<p>本課程統一用專案內的 <code>.opencode/agents/</code>，讓設定跟著練習檔案一起保存。</p>
 <h3>什麼情況值得做</h3>
 <p>老實說，<strong>大部分情況不值得</strong>。你在 AGENTS.md 裡多寫一條規則，通常就解決了。</p>
 <p>值得做的是這種情形：<strong>你需要一個權限跟主 agent 不同的角色。</strong> 這是 AGENTS.md 做不到的。AGENTS.md 是全專案共用的提示，而 agent 可以有自己的權限設定。</p>
-<p>最典型的例子就是「<strong>只做數學驗證的 reviewer</strong>」：你想要一個看得到你的程式、但<strong>在機制上不可能改你的程式</strong>的審查員。</p>
+<p>最典型的例子就是「<strong>只做數學驗證的 reviewer</strong>」：你想要一個看得到你的程式、並關閉本練習會用到的編輯、執行指令與再委派入口的審查員。</p>
 <h3>完整範例：數學驗證 reviewer</h3>
-<p>建立 <code>.opencode/agents/math-reviewer.md</code>：</p>
+<p>先在專案終端機建立資料夾：</p>
+<pre class="cmd" data-lang="bash"><code>uv run python -c "from pathlib import Path; Path('.opencode/agents').mkdir(parents=True, exist_ok=True)"</code></pre>
+<p>再用文字編輯器建立 <code>.opencode/agents/math-reviewer.md</code>，貼上以下內容。檔名結尾是 <code>.md</code>，不要多出 <code>.txt</code>：</p>
 <pre class="cmd" data-lang="markdown"><code>---
 description: 檢查數學程式的正確性與可重現性，只讀不改
 mode: subagent
@@ -675,9 +862,11 @@ temperature: 0.1
 permission:
   edit: deny
   bash: deny
+  task: deny
+  external_directory: deny
 ---
 
-你是數學驗證審查員。你的工作是**檢查**，不是修改。
+你是數學驗證審查員。只讀取本專案內的程式與已有輸出，不讀其他資料夾或其他 Python 環境的套件。若本專案沒有對應證據，明確說明缺少。你的工作是**檢查**，不是修改。
 
 檢查以下項目，逐項回報「通過」或「有問題」，有問題要指出行號：
 
@@ -688,16 +877,15 @@ permission:
    sklearn 的對應函式來充數。
 4. **數值穩定性**：有沒有除以可能為零的量？有沒有對可能為負的數開根號？
    大數相減造成的抵消誤差？
-5. **驗證段落**：有沒有附上驗證程式碼，並且是真的執行過、印出比對結果，
-   而不只是宣稱「應該正確」？
+5. **驗證段落**：有沒有附上驗證程式碼？若提供了執行輸出，核對輸出與結論是否相符。
+   本角色不能執行指令；沒有現成紀錄時必須寫「尚無執行證據」，不能宣稱已通過測試。
 
 回報格式：用台灣繁體中文，條列，每一項先寫結論再寫理由。
 不要修改任何檔案。不要執行任何指令。</code></pre>
-<p><strong>驗證它有沒有被正確載入</strong>（實測可用）：</p>
-<pre class="cmd" data-lang="bash"><code>cd ~/ai-math-lab
-opencode agent list                    # 看 math-reviewer 有沒有出現
+<p><strong>確認設定被載入</strong>：</p>
+<pre class="cmd" data-lang="bash"><code>opencode agent list                    # 看 math-reviewer 有沒有出現
 opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre>
-<p><code>opencode debug agent math-reviewer</code> 的實測輸出裡可以確認這些欄位都正確生效：</p>
+<p>檢查 <code>opencode debug agent math-reviewer</code> 中的模式、提示與權限。輸出中應有對應欄位：</p>
 <pre class="cmd" data-lang="json"><code>{
   "name": "math-reviewer",
   "mode": "subagent",
@@ -707,15 +895,17 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 }</code></pre>
 <p>而且權限規則裡確實出現了：</p>
 <pre class="cmd" data-lang="json"><code>{ "permission": "edit", "action": "deny", "pattern": "*" }
-{ "permission": "bash", "action": "deny", "pattern": "*" }</code></pre>
-<p><strong>這就是自訂 agent 相對於 AGENTS.md 的關鍵優勢</strong>：<code>edit: deny</code> 是機制上的封鎖，不是口頭請求。這個 reviewer 在技術上就是不可能改到你的程式。</p>
+{ "permission": "bash", "action": "deny", "pattern": "*" }
+{ "permission": "task", "action": "deny", "pattern": "*" }
+{ "permission": "external_directory", "action": "deny", "pattern": "*" }</code></pre>
+<p><strong>這就是自訂 agent 相對於 AGENTS.md 的關鍵優勢</strong>：<code>edit: deny</code> 是機制上的封鎖，不是口頭請求。這份設定拒絕本練習的編輯、執行指令與再委派入口；若日後加入其他工具，也要檢查那些工具的權限。</p>
 <h3>怎麼用它</h3>
 <p>在 opencode 對話裡用 <code>@</code> 呼叫：</p>
 <pre class="out"><code>@math-reviewer 檢查 lab2_pca.py 的手刻 PCA 有沒有問題</code></pre>
 <p>主 agent 也可能根據 <code>description</code> 自動判斷要不要叫它，所以 <code>description</code> 要寫清楚這個 agent 適合做什麼。</p>
 <h3>frontmatter 可用的欄位</h3>
 <div class="tw"><table><tr><th>欄位</th><th>說明</th></tr><tr><td><code>description</code></td><td>這個 agent 做什麼。<strong>主 agent 靠它判斷要不要呼叫</strong>，要寫清楚</td></tr><tr><td><code>mode</code></td><td><code>subagent</code>（被呼叫）或 <code>primary</code>（Tab 切換）</td></tr><tr><td><code>model</code></td><td>指定模型。<strong>這門課請省略</strong>，省略就沿用 <code>opencode/big-pickle</code></td></tr><tr><td><code>temperature</code></td><td>0 到 1。驗證、審查類的工作用低值（0.1），創意類用高值</td></tr><tr><td><code>prompt</code></td><td>用 <code>{file:./prompts/xxx.txt}</code> 從外部檔案讀系統提示</td></tr><tr><td><code>permission</code></td><td>權限覆寫，會蓋過全域設定</td></tr><tr><td><code>disable</code></td><td>設 <code>true</code> 暫時停用</td></tr></table></div>
-<div class="box tip"><p><strong>關於 <code>model</code> 欄位的提醒</strong>：官方文件和中文教學站的範例幾乎都寫 <code>model: anthropic/claude-sonnet-4-...</code>。<strong>照抄會壞掉</strong>，因為這門課只用 <code>opencode/big-pickle</code>（唯一免登入免付費的）。<strong>直接把 <code>model</code> 那行刪掉</strong>，agent 就會沿用你在 <code>opencode.json</code> 設的模型。上面的範例就是這樣寫的。</p></div>
+<div class="box tip"><p><strong>關於 <code>model</code> 欄位的提醒</strong>：官方文件和中文教學站的範例幾乎都寫 <code>model: anthropic/claude-sonnet-4-...</code>。<strong>照抄會壞掉</strong>，因為這門課只用 <code>opencode/big-pickle</code>（本工作坊選用的免費模型）。<strong>直接把 <code>model</code> 那行刪掉</strong>，agent 就會沿用你在 <code>opencode.json</code> 設的模型。上面的範例就是這樣寫的。</p></div>
 <h3>也可以寫在 opencode.json 裡</h3>
 <p>不想開新檔案的話，也可以定義在 <code>opencode.json</code> 的 <code>agent</code> 區塊：</p>
 <pre class="cmd" data-lang="json"><code>{
@@ -723,18 +913,436 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
     "math-reviewer": {
       "description": "檢查數學程式的正確性與可重現性，只讀不改",
       "mode": "subagent",
-      "permission": { "edit": "deny", "bash": "deny" }
+      "prompt": "只讀本專案內的程式與已有輸出，不讀其他資料夾或Python環境。唯讀檢查數學公式、矩陣維度、隨機種子與驗證段落。指出實際檔案與行號。不修改、不執行、不再委派；沒有現成輸出時寫尚無執行證據，不可宣稱測試通過。",
+      "permission": { "edit": "deny", "bash": "deny", "task": "deny", "external_directory": "deny" }
     }
   }
 }</code></pre>
 <p><strong>但建議用 <code>.md</code> 檔</strong>，因為系統提示會很長，寫在 JSON 裡要處理跳脫字元，很痛苦。</p>
 <h3><code>opencode agent create</code></h3>
-<p>實測 1.18.30 確實有這個指令：</p>
+<p>也可以用互動方式建立：</p>
 <pre class="cmd" data-lang="bash"><code>opencode agent create</code></pre>
 <p>它會用互動問答引導你設定位置、描述、系統提示和權限。</p>
-<p>（注意：中文教學站 5.2a 那章沒提到這個指令，只教手寫 <code>.md</code> 檔。但<strong>實測 1.18.30 確實有 <code>opencode agent create</code></strong>，以實測為準。不過它是互動式問答，還是建議直接手寫 <code>.md</code> 檔，你會更清楚每個欄位在幹嘛，也比較好改。）</p>
+<p>本章採直接建立 <code>.md</code> 檔的做法，方便閱讀每個欄位並修改。</p>
 <hr>
-<h2>4. subagent / task：什麼時候該拆子任務</h2>
+<figure class="lesson-diagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 938 404" role="img" lang="zh-Hant" aria-labelledby="diagram-agent-delegation-1-title diagram-agent-delegation-1-desc" data-preset="classic" data-quality-profile="showcase" style=";display:block;width:100%;height:auto;" width="938" height="404" id="diagram-agent-delegation-1-svg"><title id="diagram-agent-delegation-1-title">分工查證，由主 agent 整合</title>
+        <style>@font-face{ font-family: 'diagram-agent-delegation-1-JetBrains Mono'; font-weight: 400; src: local('JetBrains Mono'), local('JetBrainsMono-Regular'); }
+@font-face{ font-family: 'diagram-agent-delegation-1-JetBrains Mono'; font-weight: 500; src: local('JetBrains Mono'), local('JetBrainsMono-Regular'); }
+@font-face{ font-family: 'diagram-agent-delegation-1-JetBrains Mono'; font-weight: 600; src: local('JetBrains Mono'), local('JetBrainsMono-Regular'); }
+@font-face{ font-family: 'diagram-agent-delegation-1-JetBrains Mono'; font-weight: 700; src: local('JetBrains Mono'), local('JetBrainsMono-Regular'); }
+#diagram-agent-delegation-1-svg{ font-family: 'diagram-agent-delegation-1-JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', 'Liberation Mono', 'Noto Sans Mono CJK SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', monospace; }
+#diagram-agent-delegation-1-svg, #diagram-agent-delegation-1-svg[data-theme="dark"]{ --bg: #020617; --grid: #1e293b; --text: #ffffff; --text-muted: #94a3b8; --text-dim: #475569; --text-faint: #7d8da1; --panel: rgba(15, 23, 42, 0.5); --panel-border: #1e293b; --lane-fill: rgba(15, 23, 42, 0.22); --lane-stroke: #334155; --arrow: #64748b; --arrow-emphasis: #34d399; --mask: #0f172a; --frontend-fill: rgba(8, 51, 68, 0.4); --frontend-stroke: #22d3ee; --backend-fill: rgba(6, 78, 59, 0.4); --backend-stroke: #34d399; --database-fill: rgba(76, 29, 149, 0.4); --database-stroke: #a78bfa; --cloud-fill: rgba(120, 53, 15, 0.3); --cloud-stroke: #fbbf24; --security-fill: rgba(136, 19, 55, 0.4); --security-stroke: #fb7185; --messagebus-fill: rgba(251, 146, 60, 0.3); --messagebus-stroke: #fb923c; --external-fill: rgba(30, 41, 59, 0.5); --external-stroke: #94a3b8; --toolbar-bg: rgba(15, 23, 42, 0.8); --toolbar-border: #334155; --toolbar-text: #e2e8f0; --toolbar-hover: rgba(15, 23, 42, 0.95); --toolbar-menu-bg: #0f172a; }
+#diagram-agent-delegation-1-svg[data-theme="light"]{ --bg: #f8fafc; --grid: #e2e8f0; --text: #0f172a; --text-muted: #64748b; --text-dim: #94a3b8; --text-faint: #64748b; --panel: #ffffff; --panel-border: #e2e8f0; --lane-fill: rgba(248, 250, 252, 0.65); --lane-stroke: #cbd5e1; --arrow: #94a3b8; --arrow-emphasis: #059669; --mask: #ffffff; --frontend-fill: rgba(34, 211, 238, 0.15); --frontend-stroke: #0891b2; --backend-fill: rgba(52, 211, 153, 0.18); --backend-stroke: #059669; --database-fill: rgba(167, 139, 250, 0.2); --database-stroke: #7c3aed; --cloud-fill: rgba(251, 191, 36, 0.18); --cloud-stroke: #d97706; --security-fill: rgba(251, 113, 133, 0.15); --security-stroke: #e11d48; --messagebus-fill: rgba(251, 146, 60, 0.15); --messagebus-stroke: #ea580c; --external-fill: rgba(148, 163, 184, 0.18); --external-stroke: #64748b; --toolbar-bg: rgba(255, 255, 255, 0.92); --toolbar-border: #cbd5e1; --toolbar-text: #334155; --toolbar-hover: #ffffff; --toolbar-menu-bg: #ffffff; }
+#diagram-agent-delegation-1-svg[data-preset="signal-flow"][data-theme="dark"]{ --bg: #030711; --grid: #15233a; --panel: rgba(6, 14, 28, 0.78); --panel-border: #1d3350; --lane-fill: rgba(9, 22, 40, 0.5); --lane-stroke: #2c4564; --text: #f5fbff; --text-muted: #9eb0c7; --text-dim: #52667f; --text-faint: #7890ad; --mask: #07101e; --frontend-fill: rgba(6, 182, 212, 0.14); --frontend-stroke: #67e8f9; --backend-fill: rgba(16, 185, 129, 0.14); --backend-stroke: #5eead4; --database-fill: rgba(139, 92, 246, 0.16); --database-stroke: #c4b5fd; --cloud-fill: rgba(245, 158, 11, 0.13); --cloud-stroke: #fcd34d; --security-fill: rgba(244, 63, 94, 0.13); --security-stroke: #fda4af; --messagebus-fill: rgba(249, 115, 22, 0.13); --messagebus-stroke: #fdba74; --external-fill: rgba(71, 85, 105, 0.24); --external-stroke: #a5b4c7; --arrow: #7890ad; --arrow-emphasis: #2dd4bf; --toolbar-bg: rgba(7, 16, 30, 0.86); --toolbar-border: #29415f; --toolbar-menu-bg: #07101e; }
+#diagram-agent-delegation-1-svg[data-preset="signal-flow"][data-theme="light"]{ --bg: #f4f9fc; --grid: #d4e5ee; --panel: rgba(255, 255, 255, 0.82); --panel-border: #bfd5e2; --lane-fill: rgba(232, 243, 248, 0.62); --lane-stroke: #a9c5d5; --text: #102638; --text-muted: #587287; --text-dim: #8aa2b4; --text-faint: #668397; --mask: #ffffff; --frontend-fill: rgba(6, 182, 212, 0.09); --frontend-stroke: #0789a1; --backend-fill: rgba(5, 150, 105, 0.09); --backend-stroke: #087f69; --database-fill: rgba(124, 58, 237, 0.09); --database-stroke: #7254c7; --cloud-fill: rgba(217, 119, 6, 0.08); --cloud-stroke: #b9670b; --security-fill: rgba(225, 29, 72, 0.08); --security-stroke: #c53a59; --messagebus-fill: rgba(234, 88, 12, 0.08); --messagebus-stroke: #c65f27; --external-fill: rgba(100, 116, 139, 0.1); --external-stroke: #607a8c; --arrow: #7b97aa; --arrow-emphasis: #0d9488; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"][data-theme="dark"]{ --bg: #06131f; --grid: #17425a; --panel: rgba(7, 27, 43, 0.9); --panel-border: #27627f; --lane-fill: rgba(10, 43, 66, 0.36); --lane-stroke: #34799a; --text: #e3f6ff; --text-muted: #91b8ca; --text-dim: #557e92; --text-faint: #739caf; --mask: #0a2031; --frontend-fill: rgba(26, 157, 193, 0.14); --frontend-stroke: #66d9ef; --backend-fill: rgba(31, 155, 124, 0.13); --backend-stroke: #69dfbd; --database-fill: rgba(120, 105, 196, 0.14); --database-stroke: #b4a8ff; --cloud-fill: rgba(197, 145, 43, 0.13); --cloud-stroke: #ffd166; --security-fill: rgba(199, 76, 104, 0.13); --security-stroke: #ff8da1; --messagebus-fill: rgba(207, 112, 49, 0.13); --messagebus-stroke: #ffad66; --external-fill: rgba(84, 119, 139, 0.18); --external-stroke: #a7cad9; --arrow: #78a3b7; --arrow-emphasis: #64dfc1; --toolbar-bg: rgba(7, 28, 45, 0.92); --toolbar-border: #34799a; --toolbar-text: #d8f3ff; --toolbar-hover: rgba(18, 58, 83, 0.95); --toolbar-menu-bg: #0a2031; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"][data-theme="light"]{ --bg: #edf7fa; --grid: #b5d5e1; --panel: rgba(249, 253, 255, 0.94); --panel-border: #78aabd; --lane-fill: rgba(210, 232, 240, 0.42); --lane-stroke: #83b2c4; --text: #123344; --text-muted: #4e7486; --text-dim: #86a6b4; --text-faint: #668c9d; --mask: #f9fdff; --frontend-fill: rgba(8, 145, 178, 0.08); --frontend-stroke: #087f9c; --backend-fill: rgba(5, 128, 101, 0.08); --backend-stroke: #08755f; --database-fill: rgba(100, 75, 180, 0.08); --database-stroke: #6757a8; --cloud-fill: rgba(181, 120, 15, 0.08); --cloud-stroke: #a86609; --security-fill: rgba(190, 48, 80, 0.07); --security-stroke: #b32f50; --messagebus-fill: rgba(196, 81, 22, 0.07); --messagebus-stroke: #b65120; --external-fill: rgba(79, 112, 128, 0.08); --external-stroke: #506f7e; --arrow: #6d93a5; --arrow-emphasis: #087f69; --toolbar-bg: rgba(247, 252, 254, 0.94); --toolbar-border: #8ab5c5; --toolbar-text: #294f61; --toolbar-hover: #ffffff; --toolbar-menu-bg: #f9fdff; }
+#diagram-agent-delegation-1-svg[data-preset="editorial"][data-theme="dark"]{ --bg: #181611; --grid: #39342a; --panel: rgba(35, 31, 24, 0.96); --panel-border: #625a4a; --lane-fill: rgba(52, 46, 35, 0.46); --lane-stroke: #726957; --text: #f4eddf; --text-muted: #b9ae9b; --text-dim: #776e60; --text-faint: #9d917e; --mask: #231f18; --frontend-fill: rgba(43, 133, 142, 0.16); --frontend-stroke: #7fc6c7; --backend-fill: rgba(63, 132, 92, 0.16); --backend-stroke: #8fc29e; --database-fill: rgba(117, 91, 141, 0.17); --database-stroke: #c0a4d0; --cloud-fill: rgba(170, 119, 49, 0.16); --cloud-stroke: #d8ad68; --security-fill: rgba(157, 69, 65, 0.17); --security-stroke: #df9085; --messagebus-fill: rgba(174, 79, 42, 0.16); --messagebus-stroke: #df946f; --external-fill: rgba(126, 115, 96, 0.18); --external-stroke: #b8ad99; --arrow: #948978; --arrow-emphasis: #dd6b3d; --toolbar-bg: rgba(35, 31, 24, 0.92); --toolbar-border: #625a4a; --toolbar-text: #eee5d5; --toolbar-hover: #302a20; --toolbar-menu-bg: #231f18; }
+#diagram-agent-delegation-1-svg[data-preset="editorial"][data-theme="light"]{ --bg: #f2eee5; --grid: #d8d0c2; --panel: rgba(251, 248, 241, 0.97); --panel-border: #c4b9a6; --lane-fill: rgba(229, 221, 207, 0.42); --lane-stroke: #b8aa94; --text: #242018; --text-muted: #6f6658; --text-dim: #a09788; --text-faint: #817767; --mask: #fbf8f1; --frontend-fill: rgba(31, 117, 126, 0.09); --frontend-stroke: #287e84; --backend-fill: rgba(42, 119, 75, 0.09); --backend-stroke: #397b53; --database-fill: rgba(105, 75, 130, 0.09); --database-stroke: #765d86; --cloud-fill: rgba(157, 103, 31, 0.1); --cloud-stroke: #9a671f; --security-fill: rgba(153, 58, 52, 0.09); --security-stroke: #9e463f; --messagebus-fill: rgba(182, 70, 27, 0.09); --messagebus-stroke: #ad4b25; --external-fill: rgba(101, 91, 75, 0.09); --external-stroke: #746b5e; --arrow: #8a806f; --arrow-emphasis: #bb4c23; --toolbar-bg: rgba(251, 248, 241, 0.94); --toolbar-border: #c4b9a6; --toolbar-text: #40392f; --toolbar-hover: #fffdf8; --toolbar-menu-bg: #fbf8f1; }
+#diagram-agent-delegation-1-svg{ width: 100%; min-width: min(900px, 100%); display: block; transform-origin: 0px 0px; transition: transform 0.18s; }
+@keyframes diagram-agent-delegation-1-archify-lens-in{
+  0% { opacity: 0; transform: translateY(5px) scale(0.985); }
+  100% { opacity: 1; transform: translateY(0px) scale(1); }
+}
+@keyframes diagram-agent-delegation-1-archify-guide-in{
+  0% { opacity: 0; transform: translateY(-5px) scale(0.985); }
+  100% { opacity: 1; transform: translateY(0px) scale(1); }
+}
+#diagram-agent-delegation-1-svg[data-chapter-handoff] [data-node-id][data-chapter-role="stay"]{ opacity: 1; }
+#diagram-agent-delegation-1-svg[data-chapter-handoff] [data-node-id][data-chapter-role="enter"]{ opacity: 0.78; }
+#diagram-agent-delegation-1-svg[data-chapter-handoff] [data-node-id][data-chapter-role="leave"]{ opacity: 0.26; }
+@keyframes diagram-agent-delegation-1-archify-chapter-anchor{
+  0% { opacity: 0.35; stroke-dashoffset: 8; }
+  45% { opacity: 1; }
+  100% { opacity: 0.72; stroke-dashoffset: 0; }
+}
+@keyframes diagram-agent-delegation-1-archify-story-caption-in{
+  0% { opacity: 0; transform: translateY(3px); }
+  100% { opacity: 1; transform: translateY(0px); }
+}
+#diagram-agent-delegation-1-svg[data-theme="light"] #theme-icon{ mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cg fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round'%3E%3Ccircle cx='10' cy='10' r='3.1'/%3E%3Cpath d='M10 2.2v1.4M10 16.4v1.4M2.2 10h1.4M16.4 10h1.4M4.5 4.5l1 1M14.5 14.5l1 1M15.5 4.5l-1 1M5.5 14.5l-1 1'/%3E%3C/g%3E%3C/svg%3E"); }
+#diagram-agent-delegation-1-svg[data-theme="dark"] #theme-icon{ mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M15.2 12.7A6.3 6.3 0 017.3 4.8a6.3 6.3 0 107.9 7.9Z' fill='none' stroke='black' stroke-width='1.7' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+#diagram-agent-delegation-1-svg .c-grid{ stroke: var(--grid); fill: none; }
+#diagram-agent-delegation-1-svg .c-mask{ fill: var(--mask); stroke: none; }
+#diagram-agent-delegation-1-svg .c-frontend{ fill: var(--frontend-fill); stroke: var(--frontend-stroke); }
+#diagram-agent-delegation-1-svg .c-backend{ fill: var(--backend-fill); stroke: var(--backend-stroke); }
+#diagram-agent-delegation-1-svg .c-database{ fill: var(--database-fill); stroke: var(--database-stroke); }
+#diagram-agent-delegation-1-svg .c-cloud{ fill: var(--cloud-fill); stroke: var(--cloud-stroke); }
+#diagram-agent-delegation-1-svg .c-security{ fill: var(--security-fill); stroke: var(--security-stroke); }
+#diagram-agent-delegation-1-svg .c-messagebus{ fill: var(--messagebus-fill); stroke: var(--messagebus-stroke); }
+#diagram-agent-delegation-1-svg .c-external{ fill: var(--external-fill); stroke: var(--external-stroke); }
+#diagram-agent-delegation-1-svg .t-primary{ fill: var(--text); }
+#diagram-agent-delegation-1-svg .t-muted{ fill: var(--text-muted); }
+#diagram-agent-delegation-1-svg .t-dim{ fill: var(--text-dim); }
+#diagram-agent-delegation-1-svg .t-frontend{ fill: var(--frontend-stroke); }
+#diagram-agent-delegation-1-svg .t-backend{ fill: var(--backend-stroke); }
+#diagram-agent-delegation-1-svg .t-database{ fill: var(--database-stroke); }
+#diagram-agent-delegation-1-svg .t-cloud{ fill: var(--cloud-stroke); }
+#diagram-agent-delegation-1-svg .t-security{ fill: var(--security-stroke); }
+#diagram-agent-delegation-1-svg .t-messagebus{ fill: var(--messagebus-stroke); }
+#diagram-agent-delegation-1-svg .t-external{ fill: var(--external-stroke); }
+#diagram-agent-delegation-1-svg .semantic-sigil{ fill: none; stroke: currentcolor; stroke-width: 1.35; stroke-linecap: round; stroke-linejoin: round; opacity: 0.76; pointer-events: none; }
+#diagram-agent-delegation-1-svg .semantic-sigil &gt; *{ vector-effect: non-scaling-stroke; }
+#diagram-agent-delegation-1-svg .semantic-sigil .sigil-fill{ fill: currentcolor; stroke: none; }
+#diagram-agent-delegation-1-svg .s-frontend{ color: var(--frontend-stroke); }
+#diagram-agent-delegation-1-svg .s-backend{ color: var(--backend-stroke); }
+#diagram-agent-delegation-1-svg .s-database{ color: var(--database-stroke); }
+#diagram-agent-delegation-1-svg .s-cloud{ color: var(--cloud-stroke); }
+#diagram-agent-delegation-1-svg .s-security{ color: var(--security-stroke); }
+#diagram-agent-delegation-1-svg .s-messagebus{ color: var(--messagebus-stroke); }
+#diagram-agent-delegation-1-svg .s-external{ color: var(--external-stroke); }
+#diagram-agent-delegation-1-svg .brand-mark{ pointer-events: none; }
+#diagram-agent-delegation-1-svg .brand-mark-badge{ fill: rgb(255, 255, 255); stroke: none; }
+#diagram-agent-delegation-1-svg .brand-mark-frame{ fill: none; stroke: rgb(203, 213, 225); stroke-width: 0.8; vector-effect: non-scaling-stroke; }
+#diagram-agent-delegation-1-svg .brand-mark-fallback{ fill: none; stroke: rgb(71, 85, 105); stroke-width: 1.15; stroke-linecap: round; stroke-linejoin: round; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] .brand-mark-badge, #diagram-agent-delegation-1-svg[data-preset="blueprint"] .brand-mark-frame{ rx: 1px; }
+#diagram-agent-delegation-1-svg [data-detail]{ transition: opacity 160ms; }
+#diagram-agent-delegation-1-svg [data-detail-anchor]{ transform-box: fill-box; transform-origin: center center; transition: transform 160ms; }
+#diagram-agent-delegation-1-svg[data-focus-active] [data-focus-match][data-detail], #diagram-agent-delegation-1-svg[data-focus-active] [data-focus-match] [data-detail], #diagram-agent-delegation-1-svg[data-reach-active] [data-reach-match][data-detail], #diagram-agent-delegation-1-svg[data-reach-active] [data-reach-match] [data-detail], #diagram-agent-delegation-1-svg[data-lens-active] [data-lens-match][data-detail], #diagram-agent-delegation-1-svg[data-lens-active] [data-lens-match] [data-detail], #diagram-agent-delegation-1-svg[data-legend-preview-active] [data-legend-preview-match][data-detail], #diagram-agent-delegation-1-svg[data-legend-preview-active] [data-legend-preview-match] [data-detail], #diagram-agent-delegation-1-svg[data-intent-trace-active] [data-intent-trace-match][data-detail], #diagram-agent-delegation-1-svg[data-intent-trace-active] [data-intent-trace-match] [data-detail], #diagram-agent-delegation-1-svg[data-route-active] [data-route-match][data-detail], #diagram-agent-delegation-1-svg[data-route-active] [data-route-match] [data-detail], #diagram-agent-delegation-1-svg[data-story-active] [data-story-step][data-detail], #diagram-agent-delegation-1-svg[data-story-active] [data-story-step] [data-detail], #diagram-agent-delegation-1-svg[data-relationship-preview-active] [data-relationship-preview][data-detail], #diagram-agent-delegation-1-svg[data-relationship-preview-active] [data-relationship-preview] [data-detail], #diagram-agent-delegation-1-svg [data-node-id]:hover [data-detail], #diagram-agent-delegation-1-svg [data-node-id]:focus-visible [data-detail]{ opacity: 1; pointer-events: auto; }
+#diagram-agent-delegation-1-svg[data-focus-active] [data-focus-match] [data-detail-anchor], #diagram-agent-delegation-1-svg[data-reach-active] [data-reach-match] [data-detail-anchor], #diagram-agent-delegation-1-svg[data-lens-active] [data-lens-match] [data-detail-anchor], #diagram-agent-delegation-1-svg[data-legend-preview-active] [data-legend-preview-match] [data-detail-anchor], #diagram-agent-delegation-1-svg[data-intent-trace-active] [data-intent-trace-match] [data-detail-anchor], #diagram-agent-delegation-1-svg[data-route-active] [data-route-match] [data-detail-anchor], #diagram-agent-delegation-1-svg[data-story-active] [data-story-step] [data-detail-anchor], #diagram-agent-delegation-1-svg [data-node-id]:hover [data-detail-anchor], #diagram-agent-delegation-1-svg [data-node-id]:focus-visible [data-detail-anchor]{ transform: none; }
+#diagram-agent-delegation-1-svg .a-default{ stroke: var(--arrow); fill: none; }
+#diagram-agent-delegation-1-svg .a-emphasis{ stroke: var(--arrow-emphasis); fill: none; }
+#diagram-agent-delegation-1-svg .a-security{ stroke: var(--security-stroke); fill: none; stroke-dasharray: 5, 5; }
+#diagram-agent-delegation-1-svg .a-dashed{ stroke: var(--database-stroke); fill: none; stroke-dasharray: 4, 4; }
+#diagram-agent-delegation-1-svg .m-default{ fill: var(--arrow); }
+#diagram-agent-delegation-1-svg .m-emphasis{ fill: var(--arrow-emphasis); }
+#diagram-agent-delegation-1-svg .m-security{ fill: var(--security-stroke); }
+#diagram-agent-delegation-1-svg .m-dashed{ fill: var(--database-stroke); }
+#diagram-agent-delegation-1-svg [data-node-id]{ cursor: pointer; transition: opacity 0.18s, filter 0.18s; }
+#diagram-agent-delegation-1-svg [data-edge-from]{ transition: opacity 0.18s, filter 0.18s; }
+#diagram-agent-delegation-1-svg [data-node-id]:hover, #diagram-agent-delegation-1-svg [data-node-id]:focus-visible{ filter: drop-shadow(0 0 7px var(--frontend-stroke)); outline: none; }
+#diagram-agent-delegation-1-svg [data-node-id]:hover .source-evidence-beacon, #diagram-agent-delegation-1-svg [data-node-id]:focus-visible .source-evidence-beacon, #diagram-agent-delegation-1-svg [data-node-id][data-focus-selected] .source-evidence-beacon{ opacity: 1; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--backend-stroke) 72%, transparent)); }
+#diagram-agent-delegation-1-svg[data-preset="signal-flow"] .source-evidence-beacon{ opacity: 0.9; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] .source-evidence-beacon rect{ rx: 0.8px; filter: none; }
+#diagram-agent-delegation-1-svg [data-legend-kind][role="button"]{ cursor: pointer; }
+#diagram-agent-delegation-1-svg [data-legend-kind]:focus{ outline: none; }
+#diagram-agent-delegation-1-svg [data-legend-hit]{ fill: transparent; stroke: transparent; stroke-width: 1.4; pointer-events: all; vector-effect: non-scaling-stroke; transition: stroke 150ms, stroke-width 150ms, filter 150ms; }
+#diagram-agent-delegation-1-svg [data-legend-count-badge]{ pointer-events: none; }
+#diagram-agent-delegation-1-svg [data-legend-count-badge] rect{ fill: var(--mask); stroke: var(--panel-border); stroke-width: 1; vector-effect: non-scaling-stroke; }
+#diagram-agent-delegation-1-svg [data-legend-count-badge] text{ fill: var(--text-muted); font-size: 8px; font-weight: 700; text-anchor: middle; }
+#diagram-agent-delegation-1-svg [data-legend-kind][role="button"]:hover [data-legend-hit]{ stroke: color-mix(in srgb, var(--database-stroke) 58%, transparent); }
+#diagram-agent-delegation-1-svg [data-legend-kind][role="button"]:focus-visible [data-legend-hit]{ stroke: var(--frontend-stroke); stroke-width: 1.8; filter: drop-shadow(0 0 3px var(--frontend-stroke)); }
+#diagram-agent-delegation-1-svg [data-legend-kind][data-legend-selected] [data-legend-hit]{ stroke: var(--database-stroke); stroke-width: 2.2; stroke-dasharray: 3, 2; }
+#diagram-agent-delegation-1-svg [data-legend-kind][data-legend-selected] [data-legend-count-badge] rect{ stroke: var(--database-stroke); stroke-width: 1.8; }
+#diagram-agent-delegation-1-svg [data-legend-kind][data-legend-zero]{ opacity: 0.44; }
+#diagram-agent-delegation-1-svg[data-preset="signal-flow"] [data-legend-kind][data-legend-selected] [data-legend-hit]{ filter: drop-shadow(0 0 4px var(--database-stroke)); }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] [data-legend-hit], #diagram-agent-delegation-1-svg[data-preset="blueprint"] [data-legend-count-badge] rect{ rx: 0; filter: none; }
+#diagram-agent-delegation-1-svg[data-legend-preview-active] [data-node-id], #diagram-agent-delegation-1-svg[data-legend-preview-active] [data-edge-from]{ opacity: 0.11; }
+#diagram-agent-delegation-1-svg[data-legend-preview-active] [data-legend-preview-match]{ opacity: 1; }
+#diagram-agent-delegation-1-svg[data-legend-preview-active] [data-legend-preview-peer]{ opacity: 0.62; }
+#diagram-agent-delegation-1-svg[data-legend-preview-active] [data-legend-preview-selected]{ filter: drop-shadow(0 0 8px var(--database-stroke)); }
+#diagram-agent-delegation-1-svg[data-lens-active] [data-node-id], #diagram-agent-delegation-1-svg[data-lens-active] [data-edge-from]{ opacity: 0.11; }
+#diagram-agent-delegation-1-svg[data-lens-active] [data-lens-match]{ opacity: 1; }
+#diagram-agent-delegation-1-svg[data-lens-active] [data-lens-peer]{ opacity: 0.62; }
+#diagram-agent-delegation-1-svg[data-lens-active] [data-lens-selected]{ filter: drop-shadow(0 0 10px var(--database-stroke)); }
+#diagram-agent-delegation-1-svg[data-preset="signal-flow"] .semantic-lens-flow{ stroke-width: 3.7; opacity: 1; }
+#diagram-agent-delegation-1-svg[data-preset="signal-flow"] .semantic-lens-flow[data-direction="out"], #diagram-agent-delegation-1-svg[data-preset="signal-flow"] .semantic-lens-flow[data-direction="forward"]{ filter: drop-shadow(0 0 6px var(--frontend-stroke)); }
+#diagram-agent-delegation-1-svg[data-preset="signal-flow"] .semantic-lens-flow[data-direction="in"], #diagram-agent-delegation-1-svg[data-preset="signal-flow"] .semantic-lens-flow[data-direction="reverse"]{ filter: drop-shadow(0 0 6px var(--database-stroke)); }
+#diagram-agent-delegation-1-svg[data-preset="signal-flow"] .semantic-lens-flow[data-direction="within"]{ filter: drop-shadow(0 0 6px var(--messagebus-stroke)); }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] .semantic-lens-flow{ stroke-width: 2.45; stroke-linecap: square; filter: none; opacity: 0.78; }
+#diagram-agent-delegation-1-svg[data-focus-active] [data-node-id], #diagram-agent-delegation-1-svg[data-focus-active] [data-edge-from]{ opacity: 0.13; }
+#diagram-agent-delegation-1-svg[data-focus-active] [data-focus-match]{ opacity: 1; }
+#diagram-agent-delegation-1-svg[data-focus-active] [data-focus-selected]{ filter: drop-shadow(0 0 10px var(--frontend-stroke)); }
+#diagram-agent-delegation-1-svg[data-reach-active] [data-node-id], #diagram-agent-delegation-1-svg[data-reach-active] [data-edge-from]{ opacity: 0.09; }
+#diagram-agent-delegation-1-svg[data-reach-active] [data-reach-match]{ opacity: 1; }
+#diagram-agent-delegation-1-svg[data-reach-active="upstream"] [data-reach-origin]{ filter: drop-shadow(0 0 11px var(--database-stroke)); }
+#diagram-agent-delegation-1-svg[data-reach-active="downstream"] [data-reach-origin]{ filter: drop-shadow(0 0 11px var(--backend-stroke)); }
+#diagram-agent-delegation-1-svg[data-reach-active="upstream"] [data-edge-from][data-reach-match]{ filter: drop-shadow(0 0 4px color-mix(in srgb, var(--database-stroke) 72%, transparent)); }
+#diagram-agent-delegation-1-svg[data-reach-active="downstream"] [data-edge-from][data-reach-match]{ filter: drop-shadow(0 0 4px color-mix(in srgb, var(--backend-stroke) 72%, transparent)); }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"][data-reach-active] [data-reach-origin], #diagram-agent-delegation-1-svg[data-preset="blueprint"][data-reach-active] [data-edge-from][data-reach-match]{ filter: none; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] .relationship-hit-target:focus-visible .relationship-focus-rail{ stroke-linecap: square; filter: none; }
+#diagram-agent-delegation-1-svg[data-relationship-direct-active] [data-node-id], #diagram-agent-delegation-1-svg[data-relationship-direct-active] [data-edge-from]{ opacity: 0.16; }
+#diagram-agent-delegation-1-svg[data-relationship-direct-active] [data-relationship-preview], #diagram-agent-delegation-1-svg[data-relationship-direct-active] [data-relationship-preview-node]{ opacity: 1; }
+#diagram-agent-delegation-1-svg[data-focus-active]:not([data-relationship-pin-active]) .relationship-hit-rail, #diagram-agent-delegation-1-svg[data-story-active] .relationship-hit-rail, #diagram-agent-delegation-1-svg[data-route-picking] .relationship-hit-rail, #diagram-agent-delegation-1-svg[data-route-active] .relationship-hit-rail, #diagram-agent-delegation-1-svg[data-lens-active] .relationship-hit-rail, #diagram-agent-delegation-1-svg[data-chapter-preview] .relationship-hit-rail{ pointer-events: none; }
+#diagram-agent-delegation-1-svg[data-relationship-preview-active] [data-focus-match]{ opacity: 0.18; }
+#diagram-agent-delegation-1-svg[data-relationship-preview-active] [data-relationship-preview], #diagram-agent-delegation-1-svg[data-relationship-preview-active] [data-relationship-preview-node]{ opacity: 1; }
+#diagram-agent-delegation-1-svg[data-relationship-preview-active] [data-relationship-preview]{ filter: drop-shadow(0 0 5px var(--arrow-emphasis)); }
+#diagram-agent-delegation-1-svg[data-relationship-preview-active] [data-relationship-preview] path, #diagram-agent-delegation-1-svg[data-relationship-preview-active] path[data-relationship-preview], #diagram-agent-delegation-1-svg[data-relationship-preview-active] [data-relationship-preview] line, #diagram-agent-delegation-1-svg[data-relationship-preview-active] line[data-relationship-preview], #diagram-agent-delegation-1-svg[data-relationship-preview-active] [data-relationship-preview] polyline, #diagram-agent-delegation-1-svg[data-relationship-preview-active] polyline[data-relationship-preview]{ stroke-width: 2.75; }
+#diagram-agent-delegation-1-svg[data-relationship-preview-active] [data-relationship-preview-source]{ filter: drop-shadow(0 0 7px var(--frontend-stroke)); }
+#diagram-agent-delegation-1-svg[data-relationship-preview-active] [data-relationship-preview-target]{ filter: drop-shadow(0 0 7px var(--database-stroke)); }
+#diagram-agent-delegation-1-svg[data-preset="signal-flow"] .relationship-flow-pulse{ stroke: var(--frontend-stroke); stroke-width: 3.85; filter: drop-shadow(0 0 7px var(--frontend-stroke)); }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] .relationship-flow-pulse{ stroke-width: 2.5; stroke-linecap: square; filter: none; }
+#diagram-agent-delegation-1-svg[data-preset="editorial"] .relationship-flow-pulse{ stroke: var(--arrow-emphasis); stroke-width: 2.75; filter: none; }
+#diagram-agent-delegation-1-svg[data-preset="signal-flow"] .semantic-flow-token{ filter: drop-shadow(currentcolor 0px 0px 5px); }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] .semantic-flow-token{ filter: none; }
+#diagram-agent-delegation-1-svg[data-preset="editorial"] .semantic-flow-token{ filter: none; }
+#diagram-agent-delegation-1-svg[data-intent-trace-active] [data-node-id], #diagram-agent-delegation-1-svg[data-intent-trace-active] [data-edge-from]{ opacity: 0.2; }
+#diagram-agent-delegation-1-svg[data-intent-trace-active] [data-intent-trace-match]{ opacity: 1; }
+#diagram-agent-delegation-1-svg[data-intent-trace-active] [data-intent-trace-selected]{ filter: drop-shadow(0 0 10px var(--frontend-stroke)); }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] [data-intent-trace-selected], #diagram-agent-delegation-1-svg[data-preset="blueprint"] .intent-trace-flow{ filter: none; stroke-linecap: square; }
+#diagram-agent-delegation-1-svg[data-preset="editorial"] [data-intent-trace-selected], #diagram-agent-delegation-1-svg[data-preset="editorial"] .intent-trace-flow{ filter: none; }
+#diagram-agent-delegation-1-svg[data-route-picking="target"] [data-node-id]{ opacity: 0.24; }
+#diagram-agent-delegation-1-svg[data-route-picking="target"] [data-route-candidate], #diagram-agent-delegation-1-svg[data-route-picking="target"] [data-route-start]{ opacity: 1; }
+#diagram-agent-delegation-1-svg[data-route-picking] [data-node-id]{ cursor: crosshair; }
+#diagram-agent-delegation-1-svg[data-route-picking] [data-route-start]{ filter: drop-shadow(0 0 10px var(--frontend-stroke)); }
+#diagram-agent-delegation-1-svg[data-route-active] [data-node-id], #diagram-agent-delegation-1-svg[data-route-active] [data-edge-from]{ opacity: 0.11; }
+#diagram-agent-delegation-1-svg[data-route-active] [data-route-match]{ opacity: 1; }
+#diagram-agent-delegation-1-svg[data-route-active] [data-route-start]{ filter: drop-shadow(0 0 11px var(--frontend-stroke)); }
+#diagram-agent-delegation-1-svg[data-route-active] [data-route-end]{ filter: drop-shadow(0 0 11px var(--security-stroke)); }
+#diagram-agent-delegation-1-svg[data-route-active] [data-route-step]:not([data-route-start]):not([data-route-end]){ filter: drop-shadow(0 0 7px var(--backend-stroke)); }
+#diagram-agent-delegation-1-svg[data-route-journey] [data-route-match][data-route-journey-state="past"]{ opacity: 0.62; }
+#diagram-agent-delegation-1-svg[data-route-journey] [data-route-match][data-route-journey-state="future"]{ opacity: 0.34; }
+#diagram-agent-delegation-1-svg[data-route-journey] [data-route-match][data-route-journey-state="current"]{ opacity: 1; }
+#diagram-agent-delegation-1-svg[data-route-journey] [data-node-id][data-route-journey-current]{ filter: drop-shadow(0 0 10px var(--backend-stroke)); }
+#diagram-agent-delegation-1-svg[data-route-journey] [data-edge-from][data-route-journey-current]{ opacity: 1; filter: drop-shadow(0 0 6px var(--backend-stroke)); }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] [data-route-start], #diagram-agent-delegation-1-svg[data-preset="blueprint"] [data-route-end], #diagram-agent-delegation-1-svg[data-preset="blueprint"] [data-route-step], #diagram-agent-delegation-1-svg[data-preset="blueprint"] .route-probe-flow{ filter: none; stroke-linecap: square; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] .route-journey-flow{ filter: none; stroke-linecap: square; }
+#diagram-agent-delegation-1-svg[data-preset="editorial"] [data-route-start], #diagram-agent-delegation-1-svg[data-preset="editorial"] [data-route-end], #diagram-agent-delegation-1-svg[data-preset="editorial"] [data-route-step], #diagram-agent-delegation-1-svg[data-preset="editorial"] .route-probe-flow, #diagram-agent-delegation-1-svg[data-preset="editorial"] .route-journey-flow{ filter: none; }
+#diagram-agent-delegation-1-svg[data-preset="editorial"] .c-grid{ stroke-dasharray: 1, 4; opacity: 0.48; }
+#diagram-agent-delegation-1-svg[data-preset="editorial"] .c-region{ fill: color-mix(in srgb, var(--cloud-fill) 48%, transparent); stroke-dasharray: 9, 4; }
+#diagram-agent-delegation-1-svg[data-preset="editorial"] [data-node-id]:hover, #diagram-agent-delegation-1-svg[data-preset="editorial"] [data-node-id]:focus-visible, #diagram-agent-delegation-1-svg[data-preset="editorial"][data-focus-active] [data-focus-selected]{ filter: drop-shadow(0 2px 2px color-mix(in srgb, var(--text) 18%, transparent)); }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] .c-grid{ stroke-dasharray: 1, 3; opacity: 0.78; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] .c-region{ fill: color-mix(in srgb, var(--cloud-fill) 58%, transparent); stroke-dasharray: 12, 4, 2, 4; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] .c-security-group, #diagram-agent-delegation-1-svg[data-preset="blueprint"] .c-lane{ stroke-dasharray: 7, 3; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] [data-node-id]:hover, #diagram-agent-delegation-1-svg[data-preset="blueprint"] [data-node-id]:focus-visible{ filter: drop-shadow(0 0 3px var(--frontend-stroke)); }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"][data-focus-active] [data-focus-selected]{ filter: drop-shadow(0 0 3px var(--frontend-stroke)); }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"][data-focus-active][data-reach-active] [data-focus-selected][data-reach-origin]{ filter: none; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"][data-relationship-preview-active] [data-relationship-preview], #diagram-agent-delegation-1-svg[data-preset="blueprint"][data-relationship-preview-active] [data-relationship-preview-source], #diagram-agent-delegation-1-svg[data-preset="blueprint"][data-relationship-preview-active] [data-relationship-preview-target]{ filter: drop-shadow(0 0 3px var(--frontend-stroke)); }
+#diagram-agent-delegation-1-svg[data-story-beat] [data-story-step]{ opacity: 0.22; filter: saturate(0.42); transition: opacity 180ms, filter 180ms; }
+#diagram-agent-delegation-1-svg[data-story-beat] [data-story-step][data-story-beat-state="past"]{ opacity: 0.72; filter: saturate(0.82); }
+#diagram-agent-delegation-1-svg[data-story-beat] [data-story-step][data-story-beat-state="next"]{ opacity: 0.5; filter: saturate(0.66); }
+#diagram-agent-delegation-1-svg[data-story-beat] [data-story-step][data-story-beat-state="active"]{ opacity: 1; filter: drop-shadow(0 0 7px var(--frontend-stroke)); animation: 360ms cubic-bezier(0.22, 1, 0.36, 1) 0s 1 normal both running diagram-agent-delegation-1-archify-story-beat-node; }
+#diagram-agent-delegation-1-svg[data-story-beat] [data-edge-from][data-story-beat-step]{ opacity: 0.16; transition: opacity 160ms; }
+#diagram-agent-delegation-1-svg[data-story-beat] [data-edge-from][data-story-beat-step][data-story-beat-state="past"]{ opacity: 0.58; }
+#diagram-agent-delegation-1-svg[data-story-beat] [data-edge-from][data-story-beat-step][data-story-beat-state="next"]{ opacity: 0.34; }
+#diagram-agent-delegation-1-svg[data-story-beat] [data-edge-from][data-story-beat-step][data-story-beat-state="active"]{ opacity: 1; }
+#diagram-agent-delegation-1-svg[data-story-beat] .story-trail-flow{ opacity: 0; transition: opacity 160ms; }
+#diagram-agent-delegation-1-svg[data-story-beat] .story-trail-flow[data-story-beat-state="past"]{ opacity: 0.34; }
+#diagram-agent-delegation-1-svg[data-story-beat] .story-trail-flow[data-story-beat-state="next"]{ opacity: 0.2; }
+#diagram-agent-delegation-1-svg[data-story-beat] .story-trail-flow[data-story-beat-state="active"]{ opacity: 0.92; }
+#diagram-agent-delegation-1-svg[data-story-beat] .story-trail-flow[data-story-pulse="true"]{ stroke-dasharray: 2, 13; stroke-dashoffset: 30; opacity: 0.92; animation: 0.78s linear 0s 1 normal both running diagram-agent-delegation-1-archify-story-flow; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"] .story-trail-flow{ stroke-linecap: square; filter: none; opacity: 0.5; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"][data-story-beat] [data-story-step][data-story-beat-state="active"]{ filter: none; animation: auto ease 0s 1 normal none running none; }
+#diagram-agent-delegation-1-svg[data-preset="editorial"] .story-trail-flow{ filter: none; }
+#diagram-agent-delegation-1-svg[data-preset="editorial"][data-story-beat] [data-story-step][data-story-beat-state="active"]{ filter: drop-shadow(0 2px 2px color-mix(in srgb, var(--text) 16%, transparent)); }
+#diagram-agent-delegation-1-svg[data-chapter-preview] [data-node-id], #diagram-agent-delegation-1-svg[data-chapter-preview] [data-edge-from]{ opacity: 0.1 !important; filter: none !important; transition: none !important; }
+#diagram-agent-delegation-1-svg[data-chapter-preview] .story-trail-overlay{ opacity: 0.08 !important; }
+#diagram-agent-delegation-1-svg[data-chapter-preview] [data-node-id][data-chapter-preview-role="stay"]{ opacity: 0.76 !important; filter: saturate(0.7) !important; }
+#diagram-agent-delegation-1-svg[data-chapter-preview] [data-node-id][data-chapter-preview-role="enter"]{ opacity: 1 !important; filter: saturate(1.2) !important; }
+#diagram-agent-delegation-1-svg[data-chapter-preview] [data-node-id][data-chapter-preview-role="leave"]{ opacity: 0.28 !important; filter: grayscale(0.72) !important; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"][data-chapter-preview] [data-node-id]{ filter: none !important; }
+#diagram-agent-delegation-1-svg .c-security-group{ fill: transparent; stroke: var(--security-stroke); stroke-dasharray: 4, 4; }
+#diagram-agent-delegation-1-svg .c-region{ fill: rgba(251, 191, 36, 0.05); stroke: var(--cloud-stroke); stroke-dasharray: 8, 4; }
+#diagram-agent-delegation-1-svg .c-lane{ fill: var(--lane-fill); stroke: var(--lane-stroke); stroke-dasharray: 6, 6; }
+#diagram-agent-delegation-1-svg[data-preset="signal-flow"][data-animation="trace"] [data-animate="edge"]{ stroke-linecap: round; filter: drop-shadow(0 0 3px var(--arrow-emphasis)); animation-duration: 1.75s; }
+#diagram-agent-delegation-1-svg[data-preset="signal-flow"][data-animation="trace"] [data-animate="node"]{ animation-duration: 3.1s; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"][data-animation="trace"] [data-animate="edge"]{ stroke-linecap: square; filter: none; animation-duration: 2.15s; }
+#diagram-agent-delegation-1-svg[data-preset="blueprint"][data-animation="trace"] [data-animate="node"]{ animation-name: diagram-agent-delegation-1-archify-blueprint-node-pulse; animation-duration: 3.8s; }
+#diagram-agent-delegation-1-svg[data-preset="editorial"][data-animation="trace"] [data-animate="edge"]{ filter: none; animation-duration: 2.2s; }
+#diagram-agent-delegation-1-svg[data-preset="editorial"][data-animation="trace"] [data-animate="node"]{ animation-name: diagram-agent-delegation-1-archify-editorial-node-pulse; animation-duration: 3.5s; }
+@keyframes diagram-agent-delegation-1-archify-edge-flow{
+  0% { stroke-dasharray: 10, 8; stroke-dashoffset: 54; opacity: 0.42; }
+  88% { stroke-dasharray: 10, 8; stroke-dashoffset: 0; opacity: 1; }
+  99.9% { stroke-dasharray: 10, 8; stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes diagram-agent-delegation-1-archify-node-pulse{
+  0%, 72%, 100% { filter: none; stroke-width: 1.5; }
+  18%, 36% { filter: drop-shadow(0 0 8px var(--arrow-emphasis)); stroke-width: 2.4; }
+}
+@keyframes diagram-agent-delegation-1-archify-blueprint-node-pulse{
+  0%, 72%, 100% { opacity: 1; filter: none; }
+  18%, 36% { opacity: 0.72; filter: drop-shadow(0 0 2px var(--frontend-stroke)); }
+}
+@keyframes diagram-agent-delegation-1-archify-editorial-node-pulse{
+  0%, 72%, 100% { opacity: 1; filter: none; }
+  18%, 36% { opacity: 0.78; filter: drop-shadow(0 2px 2px color-mix(in srgb, var(--text) 18%, transparent)); }
+}
+@keyframes diagram-agent-delegation-1-archify-signal-scan{
+  0%, 18% { opacity: 1; transform: translateX(-70%); }
+  70% { opacity: 1; transform: translateX(70%); }
+  100% { opacity: 0; transform: translateX(70%); }
+}
+@keyframes diagram-agent-delegation-1-archify-radar-live{
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--backend-stroke) 52%, transparent); }
+  55%, 100% { box-shadow: transparent 0px 0px 0px 0.32rem; }
+}
+@keyframes diagram-agent-delegation-1-archify-guided-progress{
+  0% { transform: scaleX(var(--guided-progress-start, 0)); }
+  100% { transform: scaleX(1); }
+}
+@keyframes diagram-agent-delegation-1-archify-story-flow{
+  100% { stroke-dashoffset: 0; }
+}
+@keyframes diagram-agent-delegation-1-archify-intent-trace-flow{
+  0% { opacity: 0.28; stroke-dashoffset: 0; }
+  12%, 78% { opacity: 0.94; }
+  100% { opacity: 0; stroke-dashoffset: -1; }
+}
+@keyframes diagram-agent-delegation-1-archify-route-probe-flow{
+  0% { stroke-dashoffset: 0; opacity: 0.96; }
+  78% { stroke-dashoffset: -1; opacity: 0.96; }
+  100% { stroke-dasharray: none; stroke-dashoffset: 0; opacity: 0.58; }
+}
+@keyframes diagram-agent-delegation-1-archify-route-journey-flow{
+  0% { opacity: 0.16; stroke-dashoffset: 0; }
+  14%, 76% { opacity: 1; }
+  100% { opacity: 0; stroke-dashoffset: -1; }
+}
+@keyframes diagram-agent-delegation-1-archify-semantic-lens-flow{
+  0% { opacity: 0.2; stroke-dashoffset: 0; }
+  12%, 78% { opacity: 0.9; }
+  100% { opacity: 0; stroke-dashoffset: -1; }
+}
+@keyframes diagram-agent-delegation-1-archify-relationship-pulse{
+  0% { opacity: 0.18; stroke-dashoffset: 0; }
+  10%, 76% { opacity: 0.98; }
+  100% { opacity: 0; stroke-dashoffset: -1; }
+}
+@keyframes diagram-agent-delegation-1-archify-relationship-token-life{
+  0%, 7% { opacity: 0; }
+  13%, 82% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes diagram-agent-delegation-1-archify-story-beat-node{
+  0% { opacity: 0.48; filter: saturate(0.6); }
+  58% { opacity: 1; filter: drop-shadow(0 0 10px var(--frontend-stroke)); }
+  100% { opacity: 1; filter: drop-shadow(0 0 7px var(--frontend-stroke)); }
+}
+@keyframes diagram-agent-delegation-1-archify-share-cue-enter{
+  0% { opacity: 0; transform: translate(-50%, -0.45rem); }
+  100% { opacity: 1; transform: translate(-50%, 0px); }
+}
+@keyframes diagram-agent-delegation-1-archify-share-cue-pulse{
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.48; transform: scale(0.78); }
+}
+#diagram-agent-delegation-1-svg, #diagram-agent-delegation-1-svg{ --bg: #020617; --grid: #1e293b; --text: #ffffff; --text-muted: #94a3b8; --text-dim: #475569; --text-faint: #7d8da1; --panel: rgba(15, 23, 42, 0.5); --panel-border: #1e293b; --lane-fill: rgba(15, 23, 42, 0.22); --lane-stroke: #334155; --arrow: #64748b; --arrow-emphasis: #34d399; --mask: #0f172a; --frontend-fill: rgba(8, 51, 68, 0.4); --frontend-stroke: #22d3ee; --backend-fill: rgba(6, 78, 59, 0.4); --backend-stroke: #34d399; --database-fill: rgba(76, 29, 149, 0.4); --database-stroke: #a78bfa; --cloud-fill: rgba(120, 53, 15, 0.3); --cloud-stroke: #fbbf24; --security-fill: rgba(136, 19, 55, 0.4); --security-stroke: #fb7185; --messagebus-fill: rgba(251, 146, 60, 0.3); --messagebus-stroke: #fb923c; --external-fill: rgba(30, 41, 59, 0.5); --external-stroke: #94a3b8; --toolbar-bg: rgba(15, 23, 42, 0.8); --toolbar-border: #334155; --toolbar-text: #e2e8f0; --toolbar-hover: rgba(15, 23, 42, 0.95); --toolbar-menu-bg: #0f172a; }
+@media (prefers-color-scheme: light){#diagram-agent-delegation-1-svg, #diagram-agent-delegation-1-svg{ --bg: #f8fafc; --grid: #e2e8f0; --text: #0f172a; --text-muted: #64748b; --text-dim: #94a3b8; --text-faint: #64748b; --panel: #ffffff; --panel-border: #e2e8f0; --lane-fill: rgba(248, 250, 252, 0.65); --lane-stroke: #cbd5e1; --arrow: #94a3b8; --arrow-emphasis: #059669; --mask: #ffffff; --frontend-fill: rgba(34, 211, 238, 0.15); --frontend-stroke: #0891b2; --backend-fill: rgba(52, 211, 153, 0.18); --backend-stroke: #059669; --database-fill: rgba(167, 139, 250, 0.2); --database-stroke: #7c3aed; --cloud-fill: rgba(251, 191, 36, 0.18); --cloud-stroke: #d97706; --security-fill: rgba(251, 113, 133, 0.15); --security-stroke: #e11d48; --messagebus-fill: rgba(251, 146, 60, 0.15); --messagebus-stroke: #ea580c; --external-fill: rgba(148, 163, 184, 0.18); --external-stroke: #64748b; --toolbar-bg: rgba(255, 255, 255, 0.92); --toolbar-border: #cbd5e1; --toolbar-text: #334155; --toolbar-hover: #ffffff; --toolbar-menu-bg: #ffffff; }}
+#diagram-agent-delegation-1-svg[data-theme="light"]{ --bg: #f8fafc; --grid: #e2e8f0; --text: #0f172a; --text-muted: #64748b; --text-dim: #94a3b8; --text-faint: #64748b; --panel: #ffffff; --panel-border: #e2e8f0; --lane-fill: rgba(248, 250, 252, 0.65); --lane-stroke: #cbd5e1; --arrow: #94a3b8; --arrow-emphasis: #059669; --mask: #ffffff; --frontend-fill: rgba(34, 211, 238, 0.15); --frontend-stroke: #0891b2; --backend-fill: rgba(52, 211, 153, 0.18); --backend-stroke: #059669; --database-fill: rgba(167, 139, 250, 0.2); --database-stroke: #7c3aed; --cloud-fill: rgba(251, 191, 36, 0.18); --cloud-stroke: #d97706; --security-fill: rgba(251, 113, 133, 0.15); --security-stroke: #e11d48; --messagebus-fill: rgba(251, 146, 60, 0.15); --messagebus-stroke: #ea580c; --external-fill: rgba(148, 163, 184, 0.18); --external-stroke: #64748b; --toolbar-bg: rgba(255, 255, 255, 0.92); --toolbar-border: #cbd5e1; --toolbar-text: #334155; --toolbar-hover: #ffffff; --toolbar-menu-bg: #ffffff; }
+#diagram-agent-delegation-1-svg[data-theme="dark"]{ --bg: #020617; --grid: #1e293b; --text: #ffffff; --text-muted: #94a3b8; --text-dim: #475569; --text-faint: #7d8da1; --panel: rgba(15, 23, 42, 0.5); --panel-border: #1e293b; --lane-fill: rgba(15, 23, 42, 0.22); --lane-stroke: #334155; --arrow: #64748b; --arrow-emphasis: #34d399; --mask: #0f172a; --frontend-fill: rgba(8, 51, 68, 0.4); --frontend-stroke: #22d3ee; --backend-fill: rgba(6, 78, 59, 0.4); --backend-stroke: #34d399; --database-fill: rgba(76, 29, 149, 0.4); --database-stroke: #a78bfa; --cloud-fill: rgba(120, 53, 15, 0.3); --cloud-stroke: #fbbf24; --security-fill: rgba(136, 19, 55, 0.4); --security-stroke: #fb7185; --messagebus-fill: rgba(251, 146, 60, 0.3); --messagebus-stroke: #fb923c; --external-fill: rgba(30, 41, 59, 0.5); --external-stroke: #94a3b8; --toolbar-bg: rgba(15, 23, 42, 0.8); --toolbar-border: #334155; --toolbar-text: #e2e8f0; --toolbar-hover: rgba(15, 23, 42, 0.95); --toolbar-menu-bg: #0f172a; }
+#diagram-agent-delegation-1-svg rect.c-bg-rect{ fill: var(--bg); }</style><rect width="100%" height="100%" class="c-bg-rect" />
+        <desc id="diagram-agent-delegation-1-desc">主 agent 委派唯讀查找與核對工作，子任務回報摘要與證據，由主 agent 核實後整合。</desc>
+
+        <defs>
+          <marker id="diagram-agent-delegation-1-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
+          </marker>
+          <marker id="diagram-agent-delegation-1-arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
+          </marker>
+          <marker id="diagram-agent-delegation-1-arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
+          </marker>
+          <marker id="diagram-agent-delegation-1-arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
+          </marker>
+          <pattern id="diagram-agent-delegation-1-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" class="c-grid" stroke-width="0.5" />
+          </pattern>
+        </defs>
+
+
+        <rect width="100%" height="100%" fill="url(#diagram-agent-delegation-1-grid)" />
+
+
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-0" x="40" y="52" width="882" height="104" rx="10" class="c-lane" stroke-width="1" />
+        <text x="54" y="74" class="t-dim" font-size="10" font-weight="600">01 / 主 agent</text>
+
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-1" x="40" y="176" width="882" height="104" rx="10" class="c-lane" stroke-width="1" />
+        <text x="54" y="198" class="t-dim" font-size="10" font-weight="600">02 / 唯讀子任務</text>
+
+
+
+
+
+
+
+
+        <path data-edge-from="task" data-edge-to="search" data-edge-label="委派" data-edge-key="0" data-edge-id="e0" data-composition-points="208,119;248,119;248,217" d="M 208 119 L 248 119 L 248 217" class="a-default" stroke-width="1.4" marker-end="url(#diagram-agent-delegation-1-arrowhead)" />
+        <path data-edge-from="search" data-edge-to="verify" data-edge-key="1" data-edge-id="e1" data-composition-points="328,243;356,243" d="M 328 243 L 356 243" class="a-default" stroke-width="1.4" marker-end="url(#diagram-agent-delegation-1-arrowhead)" />
+        <path data-edge-from="verify" data-edge-to="report" data-edge-label="回報" data-edge-key="2" data-edge-id="e2" data-composition-points="436,217;436,119;476,119" d="M 436 217 L 436 119 L 476 119" class="a-default" stroke-width="1.4" marker-end="url(#diagram-agent-delegation-1-arrowhead)" />
+        <path data-edge-from="report" data-edge-to="join" data-edge-key="3" data-edge-id="e3" data-composition-points="636,119;664,119" d="M 636 119 L 664 119" class="a-default" stroke-width="1.4" marker-end="url(#diagram-agent-delegation-1-arrowhead)" />
+
+
+        <g id="diagram-agent-delegation-1-node-task" data-node-id="task" data-node-label="交代任務與限制" tabindex="0" role="button" aria-label="Focus 交代任務與限制, 主 agent" aria-pressed="false" data-node-kind="frontend" data-node-context="主 agent">
+          <title>交代任務與限制 · 主 agent</title>
+          <rect x="48" y="93" width="160" height="52" rx="6" class="c-mask" />
+          <rect x="48" y="93" width="160" height="52" rx="6" class="c-frontend" stroke-width="1.5" />
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(54 99) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2" />
+            <path d="M2 6.5h12" />
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill" />
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill" />
+          </g>
+          <text data-node-label="" x="128" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">交代任務與限制</text>
+        </g>
+
+        <g id="diagram-agent-delegation-1-node-report" data-node-id="report" data-node-label="回報摘要與證據" tabindex="0" role="button" aria-label="Focus 回報摘要與證據, 主 agent" aria-pressed="false" data-node-kind="messagebus" data-node-context="主 agent">
+          <title>回報摘要與證據 · 主 agent</title>
+          <rect x="476" y="93" width="160" height="52" rx="6" class="c-mask" />
+          <rect x="476" y="93" width="160" height="52" rx="6" class="c-messagebus" stroke-width="1.5" />
+          <g aria-hidden="true" data-semantic-sigil="messagebus" class="semantic-sigil s-messagebus" transform="translate(482 99) scale(0.6875)">
+            <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11" />
+            <circle cx="5" cy="4.5" r="1" class="sigil-fill" />
+            <circle cx="10.5" cy="8" r="1" class="sigil-fill" />
+            <circle cx="7" cy="11.5" r="1" class="sigil-fill" />
+          </g>
+          <text data-node-label="" x="556" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">回報摘要與證據</text>
+        </g>
+
+        <g id="diagram-agent-delegation-1-node-join" data-node-id="join" data-node-label="核實後整合" tabindex="0" role="button" aria-label="Focus 核實後整合, 主 agent" aria-pressed="false" data-node-kind="frontend" data-node-context="主 agent">
+          <title>核實後整合 · 主 agent</title>
+          <rect x="664" y="93" width="160" height="52" rx="6" class="c-mask" />
+          <rect x="664" y="93" width="160" height="52" rx="6" class="c-frontend" stroke-width="1.5" />
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(670 99) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2" />
+            <path d="M2 6.5h12" />
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill" />
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill" />
+          </g>
+          <text data-node-label="" x="744" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">核實後整合</text>
+        </g>
+
+        <g id="diagram-agent-delegation-1-node-search" data-node-id="search" data-node-label="查找相關檔案" tabindex="0" role="button" aria-label="Focus 查找相關檔案, 唯讀子任務" aria-pressed="false" data-node-kind="backend" data-node-context="唯讀子任務">
+          <title>查找相關檔案 · 唯讀子任務</title>
+          <rect x="168" y="217" width="160" height="52" rx="6" class="c-mask" />
+          <rect x="168" y="217" width="160" height="52" rx="6" class="c-backend" stroke-width="1.5" />
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(174 223) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5" />
+          </g>
+          <text data-node-label="" x="248" y="238" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">查找相關檔案</text>
+        </g>
+
+        <g id="diagram-agent-delegation-1-node-verify" data-node-id="verify" data-node-label="獨立核對結果" tabindex="0" role="button" aria-label="Focus 獨立核對結果, 唯讀子任務" aria-pressed="false" data-node-kind="backend" data-node-context="唯讀子任務">
+          <title>獨立核對結果 · 唯讀子任務</title>
+          <rect x="356" y="217" width="160" height="52" rx="6" class="c-mask" />
+          <rect x="356" y="217" width="160" height="52" rx="6" class="c-backend" stroke-width="1.5" />
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(362 223) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5" />
+          </g>
+          <text data-node-label="" x="436" y="238" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">獨立核對結果</text>
+        </g>
+
+
+        <g data-edge-from="task" data-edge-to="search" data-edge-label="委派" data-edge-key="0" data-edge-id="e0">
+          <rect x="213" y="99" width="30" height="14" rx="3" class="c-mask" />
+          <text x="228" y="109" class="t-muted" font-size="8" text-anchor="middle">委派</text>
+        </g>
+
+        <g data-edge-from="verify" data-edge-to="report" data-edge-label="回報" data-edge-key="2" data-edge-id="e2">
+          <rect x="441" y="99" width="30" height="14" rx="3" class="c-mask" />
+          <text x="456" y="109" class="t-muted" font-size="8" text-anchor="middle">回報</text>
+        </g>
+
+
+
+
+      <style>#diagram-agent-delegation-1-svg{ --bg:#f6f2e9 !important; --grid:#e1dbcf !important; --text:#2a3c78 !important; --text-muted:#555e73 !important; --text-dim:#555e73 !important; --text-faint:#555e73 !important; --panel:#f6f2e9 !important; --panel-border:#d8d1c4 !important; --lane-fill:#f6f2e9 !important; --lane-stroke:#c7c0b5 !important; --arrow:#555e73 !important; --arrow-emphasis:#b8503c !important; --mask:#f6f2e9 !important; }
+#diagram-agent-delegation-1-svg, #diagram-agent-delegation-1-svg text{ font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif !important; }
+#diagram-agent-delegation-1-svg{ --frontend-fill:#fffdf8 !important; --frontend-stroke:#2a3c78 !important; }
+#diagram-agent-delegation-1-svg{ --backend-fill:#fffdf8 !important; --backend-stroke:#2a3c78 !important; }
+#diagram-agent-delegation-1-svg{ --database-fill:#fffdf8 !important; --database-stroke:#2a3c78 !important; }
+#diagram-agent-delegation-1-svg{ --cloud-fill:#fffdf8 !important; --cloud-stroke:#2a3c78 !important; }
+#diagram-agent-delegation-1-svg{ --messagebus-fill:#fffdf8 !important; --messagebus-stroke:#2a3c78 !important; }
+#diagram-agent-delegation-1-svg{ --external-fill:#fffdf8 !important; --external-stroke:#2a3c78 !important; }
+#diagram-agent-delegation-1-svg{ --security-fill:#f5e4dc !important; --security-stroke:#b8503c !important; }
+#diagram-agent-delegation-1-svg text[data-node-label]{font-size:18px}
+#diagram-agent-delegation-1-svg .t-muted{font-size:14px}
+#diagram-agent-delegation-1-svg .c-grid{opacity:0}
+#diagram-agent-delegation-1-svg .semantic-sigil{display:none}
+#diagram-agent-delegation-1-svg text[data-node-label]{transform:translateY(10px)}</style></svg><figcaption>分工查證，由主 agent 整合 <a href="assets/diagrams/agent-delegation.svg" target="_blank" rel="noopener">開啟大圖 ↗</a></figcaption></figure>
+<h2 id="section-subagent-task-什麼時候該拆子任務">4. subagent / task：什麼時候該拆子任務</h2>
 <h3>這是什麼</h3>
 <p>主 agent 可以把一件工作丟給 subagent，subagent 在<strong>自己獨立的對話脈絡</strong>裡完成，只把結果回報給主 agent。</p>
 <p>關鍵在於<strong>脈絡隔離</strong>：subagent 翻了二十個檔案，那二十個檔案的內容<strong>不會</strong>塞進你的主對話。回到主對話的只有結論。</p>
@@ -744,7 +1352,7 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 <h3>什麼時候該拆</h3>
 <p><strong>該拆的情況：</strong></p>
 <ol>
-<li><strong>大範圍搜尋</strong>：「三份 reference 程式裡，哪些地方用到隨機性？」需要翻很多檔案，但你只要一個清單。</li>
+<li><strong>大範圍搜尋</strong>：「我完成的 Lab 程式裡，哪些地方用到隨機性？」需要翻很多檔案，但你只要一個清單。</li>
 <li><strong>獨立的檢查工作</strong>：「檢查我的 PCA 實作對不對」，用上面那個 <code>math-reviewer</code>，不要讓審查的往返污染你寫程式的主線。</li>
 <li><strong>主線做到一半的岔題</strong>：正在寫程式，突然想查個東西。拆出去，主線保持乾淨。</li>
 <li><strong>需要不同權限的工作</strong>：主線需要能改檔案，審查工作<strong>不該</strong>能改檔案。</li>
@@ -758,32 +1366,54 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 <p><strong>判斷原則：這件事需要翻很多東西，但結論只有幾句話？→ 拆。</strong></p>
 <h3>怎麼用</h3>
 <p>最簡單的方式就是直接 <code>@</code> 呼叫：</p>
-<pre class="cmd" data-lang="text"><code>@explore 找出 reference/ 底下三支程式裡所有用到隨機性的地方</code></pre>
+<pre class="cmd" data-lang="text"><code>@explore 請唯讀檢查 lab1_cluster.py、lab2_pca.py、lab3_logistic.py 裡用到隨機性的地方。只看實際存在的檔案，回報檔名、行號與用途，不要修改或執行。</code></pre>
 <p><code>explore</code> 是內建的唯讀探索 subagent，很適合這種「翻檔案找東西」的工作，而且它唯讀，不可能改壞你的東西。</p>
 <p>或者直接描述工作，讓主 agent 自己決定要不要拆：</p>
-<pre class="cmd" data-lang="text"><code>先用子任務調查 reference/ 裡三支程式的隨機性用法，整理成清單，
+<pre class="cmd" data-lang="text"><code>先用子任務調查我已完成的 Lab 程式的隨機性用法，整理成清單，
 然後我們再討論要怎麼統一設定種子。</code></pre>
 <h3>相關設定</h3>
 <ul>
-<li><code>subagent_depth</code>：控制 subagent 能不能再呼叫 subagent，預設值 <code>1</code>。（未實測：我沒有實際測試改這個值的效果。預設值對這門課完全夠用，不用動它。）</li>
+<li>保留目前的子任務深度設定；練習先由主 agent 分派一層子任務即可。</li>
 <li><code>permission</code> 裡的 <code>task</code> 鍵可以控制能不能啟動 subagent。</li>
 </ul>
 <hr>
-<h2>5. 還有一個：skills</h2>
-<p>順帶一提，opencode 也支援 skills，可以把一組重複用到的工作流程打包成檔案。</p>
-<p>檔案位置（依序搜尋）：</p>
-<pre class="out"><code>.opencode/skills/&lt;名字&gt;/SKILL.md
-~/.config/opencode/skills/&lt;名字&gt;/SKILL.md
-.claude/skills/&lt;名字&gt;/SKILL.md
-~/.claude/skills/&lt;名字&gt;/SKILL.md
-.agents/skills/&lt;名字&gt;/SKILL.md
-~/.agents/skills/&lt;名字&gt;/SKILL.md</code></pre>
-<p><code>SKILL.md</code> 的 frontmatter 必填 <code>name</code>（小寫英數與連字號，1–64 字元）和 <code>description</code>（1–1024 字元）。</p>
-<p>查看目前有哪些 skills：</p>
+<h2 id="section-自己做一個數學筆記-skill">5. 自己做一個數學筆記 skill</h2>
+<p><code>AGENTS.md</code> 放整個專案一直適用的規則；<strong>skill</strong> 放某一類任務才需要的流程。下面把「根據實際結果整理數學筆記」做成一個 skill，之後換一個 Lab 也能沿用。</p>
+<h3>建立資料夾與 SKILL.md</h3>
+<p>回到專案資料夾的終端機。下列指令在 PowerShell 與 WSL 都能使用：</p>
+<pre class="cmd" data-lang="bash"><code>uv run python -c "from pathlib import Path; Path('.opencode/skills/math-notes').mkdir(parents=True, exist_ok=True)"</code></pre>
+<p>用文字編輯器建立 <code>.opencode/skills/math-notes/SKILL.md</code>，貼上以下完整內容。Windows 請確認副檔名是 <code>.md</code>，沒有多出 <code>.txt</code>。</p>
+<pre class="cmd" data-lang="markdown"><code>---
+name: math-notes
+description: 根據本專案已完成的數學實驗與輸出整理學習筆記；當使用者要求把 Lab 結果寫成可複習的筆記時使用。
+---
+
+# 數學實驗筆記
+
+先讀使用者指定的程式、結果與既有筆記，再整理這次任務。
+
+- 筆記寫清楚研究問題、符號與必要假設，再說明做了什麼、看到什麼。
+- 公式使用 Markdown 的 $...$ 與 $$...$$。沒有解釋過的符號要先定義。
+- 結果註明來源檔案與實際執行指令；沒有執行輸出時，標明只有程式可讀。
+- 保留原始數字與結論的適用範圍。分開寫已觀察結果、推論與尚未確認的事。
+- 以學生可以自己回答的一個檢查問題收尾，答案另列。
+- 依使用者指定路徑存檔；若檔案已存在，先讀內容再更新。不要為了寫筆記另做實驗。</code></pre>
+<p>資料夾名稱與 frontmatter 的 <code>name</code> 都是 <code>math-notes</code>。<code>description</code> 說明何時使用；下面的正文才是實際流程。這份練習只需一個檔案，沒有額外安裝或網路服務。<a class="ext" href="https://opencode.ai/docs/skills/" target="_blank" rel="noopener">OpenCode 官方 skills 說明</a> 列出了命名、載入與權限規則。</p>
+<h3>先確認發現，再確認真的載入</h3>
+<p>在同一個專案資料夾執行：</p>
 <pre class="cmd" data-lang="bash"><code>opencode debug skill</code></pre>
-<p><strong>這門課不會用到 skills。</strong> 列在這裡只是讓你知道有這個東西，之後看到別人的專案裡有 <code>SKILL.md</code> 不會一頭霧水。先把 AGENTS.md 寫好，那個的投資報酬率高得多。</p>
+<p>清單應出現 <code>math-notes</code> 和你剛建立的路徑。這只確認 <strong>skill 被發現</strong>，還不代表某次任務已經使用它。</p>
+<p>重新啟動 OpenCode，貼上：</p>
+<pre class="cmd" data-lang="text"><code>請用 skill 工具載入 math-notes。
+讀取 lab1_cluster.py 與 figs/lab1_k_selection.png；若目前模型不能讀圖，
+請明說，改以程式與這段對話裡實際提供的執行輸出為依據，不要猜圖上數值。
+將這次分群實驗整理成 notes/lab1-review.md。
+沒有的輸出請標示缺少，不要重新執行實驗。</code></pre>
+<p>觀察工具紀錄有沒有載入 <code>math-notes</code>，再打開產出的筆記。它應說明資料、參數與結論的範圍；只看到模型說「我用了 skill」還不夠。若沒載入，先檢查檔名、frontmatter 與 <code>opencode debug skill</code> 的清單，再要求它使用 skill 工具。</p>
+<h3>換一個任務，看看流程能否沿用</h3>
+<p>用自己已完成的 PCA 或 logistic 程式再做一次，指定不同筆記檔名。比較兩份筆記：流程可以一致，內容、數字和結論必須來自各自的實驗。最後刪掉或縮短你發現沒有幫助的規則，讓 skill 保持容易閱讀。</p>
 <hr>
-<h2>6. 一張表做決定</h2>
+<h2 id="section-一張表做決定">6. 一張表做決定</h2>
 <p>遇到問題時，先問自己這個問題：</p>
 <pre class="out"><code>   agent 做不到這件事？
         ↓ 是
@@ -802,37 +1432,34 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
         ↓
       → 那就是提示要寫清楚一點。這是最常見的答案。</code></pre>
 <p><strong>最後這一條請認真看待。</strong> 初學者最常見的狀況是：結果不如預期 → 以為要加工具 → 裝了一堆 MCP 和自訂 agent → 結果更亂。</p>
-<p><strong>實際上八成的問題，是把需求講清楚就解決了。</strong> 先改你的提示，再改你的 AGENTS.md，都沒用了才考慮這章的東西。</p>
+<p>先把需求、輸出與完成判準講清楚。 先改你的提示，再改你的 AGENTS.md，都沒用了才考慮這章的東西。</p>
 <hr>
-<h2>7. 本章重點</h2>
+<h2 id="section-本章重點">7. 本章重點</h2>
 <ol>
 <li><strong>這章是加分項，不是必修。</strong> 前兩章沒練熟就先回去練。</li>
 <li>MCP 給<strong>新工具</strong>，自訂 agent 給<strong>新人格</strong>，subagent 做<strong>工作拆分</strong>。</li>
 <li>MCP 寫在 <code>opencode.json</code> 的 <code>mcp</code> 區塊，分 <code>remote</code>（只要 <code>url</code>）和 <code>local</code>（<code>command</code> 要是<strong>陣列</strong>）。</li>
-<li>Context7（<code>https://mcp.context7.com/mcp</code>）是實測可用、免金鑰的套件文件查詢 server。</li>
-<li>用 <code>opencode mcp list</code> 確認連線，看到 <code>connected</code> 才算成功。</li>
+<li>外部 MCP 是選修；遇到認證或配額限制就改讀官方文件，不開啟付費設定。</li>
+<li><code>opencode mcp list</code> 確認連線後，還要實際查一次文件。</li>
 <li>自訂 agent 放 <code>.opencode/agents/&lt;名字&gt;.md</code>，用 <code>opencode debug agent &lt;名字&gt;</code> 驗證。</li>
 <li>自訂 agent 的關鍵價值是<strong>權限隔離</strong>（<code>edit: deny</code> 是機制封鎖，不是口頭請求），這是 AGENTS.md 做不到的。</li>
 <li><strong>範例裡的 <code>model</code> 欄位要刪掉</strong>，這門課只用 <code>opencode/big-pickle</code>。</li>
-<li>subagent 用在「翻很多東西、結論很短」的工作，保持主對話乾淨。</li>
+<li>skill 保存重複流程；subagent 用在「翻很多東西、結論很短」的工作，保持主對話乾淨。</li>
 <li>加東西之前先問：<strong>是不是我的提示沒講清楚？</strong> 通常是。</li>
 </ol>
 <hr>
-<h2>練習</h2>
+<h2 id="section-練習">練習</h2>
 <p>（做不完很正常，這章本來就是額外的。）</p>
 <ol>
-<li>把 Context7 加進 <code>opencode.json</code>，用 <code>opencode mcp list</code> 確認 <code>connected</code>。</li>
-<li>問它一個 scikit-learn 的 API 問題，要求它查文件確認再回答。</li>
+<li>先建立本章的 <code>math-notes</code> skill，用 <code>opencode debug skill</code> 確認能找到它。</li>
+<li>要求 agent 載入 skill，整理你已完成的一個 Lab；開啟筆記核對來源與結論。</li>
 <li>建立 <code>.opencode/agents/math-reviewer.md</code>，用 <code>opencode debug agent math-reviewer</code> 確認 <code>edit</code> 是 <code>deny</code>。</li>
 <li>用 <code>@math-reviewer</code> 檢查你寫過的一支程式，看它抓不抓得到問題。</li>
-<li>用 <code>@explore</code> 找出 <code>reference/</code> 裡所有用到隨機性的地方。</li>
+<li>用 <code>@explore</code> 檢查自己已完成的 Lab 檔案，找出用到隨機性的地方。</li>
 <li>想一想：第 3 題那個 reviewer，哪些規則其實寫在 AGENTS.md 就夠了？哪些<strong>非得</strong>是獨立 agent 不可？</li>
 </ol>
 <hr>
-<h2>查得到但這裡略過的東西</h2>
-<p>這章只寫我實際驗證過、而且對這門課有用的部分。以下這些 opencode 有，但初學階段用不到，所以略過：plugins（<code>plugin</code> 設定與 <code>@opencode-ai/plugin</code>）、custom tools、LSP 設定、formatters、<code>command</code> 自訂指令、themes 與 keybinds、session 分享、GitHub/GitLab 整合、SDK 與 remote server、context compaction、git worktree。有興趣的話，資料來源第二項的中文教學站第 5 階段都有中文說明。</p>
-<hr>
-<h2>資料來源</h2>
+<h2 id="section-資料來源">資料來源</h2>
 <ul>
 <li><a class="ext" href="https://opencode.ai/docs/mcp-servers/" target="_blank" rel="noopener">https://opencode.ai/docs/mcp-servers/</a> — <code>mcp</code> 設定區塊、local 與 remote 的鍵、<code>opencode mcp</code> 子指令</li>
 <li><a class="ext" href="https://opencode.ai/docs/agents/" target="_blank" rel="noopener">https://opencode.ai/docs/agents/</a> — primary 與 subagent、agent 檔案位置、frontmatter 欄位、<code>agent</code> JSON 區塊</li>
@@ -843,63 +1470,120 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 <li><a class="ext" href="https://learnopencode.com/5-advanced/02a-agent-quickstart.html" target="_blank" rel="noopener">https://learnopencode.com/5-advanced/02a-agent-quickstart.html</a> — 自訂 agent 快速上手（中文教學站，簡體）</li>
 <li><a class="ext" href="https://learnopencode.com/4-scenarios/coder-agents.html" target="_blank" rel="noopener">https://learnopencode.com/4-scenarios/coder-agents.html</a> — reviewer 類 agent 的 frontmatter 範例（中文教學站，簡體；其範例用 <code>~/.config/opencode/agent/</code> 單數路徑）</li>
 </ul>
-<p>本機實測（opencode 1.18.30，Linux/WSL2）：</p>
-<ul>
-<li><code>opencode mcp list</code> 連線 Context7 顯示 <code>connected</code> 的實際輸出（無需金鑰）</li>
-<li><code>opencode agent list</code> 的內建 agent 清單（<code>build</code> / <code>plan</code> / <code>explore</code> / <code>general</code>；<strong>文件提到的 <code>scout</code> 在 1.18.30 並未出現</strong>）</li>
-<li><code>opencode debug agent math-reviewer</code> 解析後的 <code>description</code> / <code>mode</code> / <code>temperature</code> / <code>prompt</code>，以及 <code>edit: deny</code>、<code>bash: deny</code> 兩條權限規則</li>
-<li><code>.opencode/agent/</code>（單數）與 <code>.opencode/agents/</code>（複數）兩種目錄名皆可被載入</li>
-<li><code>opencode agent --help</code>、<code>opencode mcp --help</code> 的子指令清單</li>
-</ul>
-
-<div class="pager">
-  <a href="git-safety.html"><div class="d">上一章</div><div class="t2">← 07 · git</div></a>
-  <a href="cheatsheet.html" class="next"><div class="d">下一章</div><div class="t2">09 · 速查表 →</div></a>
-</div>
 
 </div>
+<nav class="pager" aria-label="章節順序"><a href="git-safety.html" class="prev"><div class="d">上一章</div><div class="t2">← git 安全網</div></a><a href="local-models.html" class="next"><div class="d">下一章</div><div class="t2">本地模型 →</div></a></nav></main></div>
 
 <footer>
 <div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
-<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+<div class="stamp">讓 agent 動手，讓數學說明結果。</div>
 </footer>
 
 <script>
-// 導覽列高亮目前頁面
+/* Progressive enhancement: navigation and disclosure work without JavaScript. */
 (function(){
-  var f=(location.pathname.split('/').pop()||'index.html');
+  'use strict';
+  var pageName=location.pathname.split('/').pop()||'index.html';
   document.querySelectorAll('.topnav nav a').forEach(function(a){
-    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+    if(a.getAttribute('href')===pageName) a.setAttribute('aria-current','page');
   });
-})();
 
-// 指令複製鈕
-document.querySelectorAll('pre.cmd').forEach(function(pre){
-  var b=document.createElement('button');
-  b.className='copy'; b.type='button'; b.textContent='複製';
-  b.addEventListener('click',function(){
-    var t=pre.querySelector('code');
-    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
-      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
-    },function(){ b.textContent='複製失敗'; });
-  });
-  pre.appendChild(b);
-});
-
-// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
-(function(){
-  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
-  var saved={};
-  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
-  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
-    var id=cb.id||('ck'+i); cb.id=id;
-    if(saved[id]) cb.checked=true;
-    cb.addEventListener('change',function(){
-      saved[id]=cb.checked;
-      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+  var sections=Array.from(document.querySelectorAll('.lesson-main h2[id]'));
+  var sectionLinks=Array.from(document.querySelectorAll('.section-nav a'));
+  var scheduled=false;
+  function markSection(){
+    scheduled=false;
+    var current=sections[0];
+    sections.forEach(function(section){if(section.getBoundingClientRect().top<=145) current=section;});
+    sectionLinks.forEach(function(link){
+      if(current&&link.getAttribute('href')==='#'+current.id) link.setAttribute('aria-current','location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  function scheduleSection(){
+    if(!scheduled){scheduled=true;requestAnimationFrame(markSection);}
+  }
+  window.addEventListener('scroll',scheduleSection,{passive:true});
+  window.addEventListener('resize',scheduleSection);
+  window.addEventListener('hashchange',scheduleSection);
+  markSection();
+  document.querySelectorAll('.course-menu .section-nav a').forEach(function(link){
+    link.addEventListener('click',function(){
+      link.closest('details').open=false;
+      // Closing the menu moves the heading; resolve the anchor after that reflow.
+      var id=link.getAttribute('href').slice(1),target=document.getElementById(id);
+      if(target){
+        requestAnimationFrame(function(){
+          var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({top:window.scrollY+target.getBoundingClientRect().top-88,behavior:reduced?'auto':'smooth'});
+        });
+      }
     });
   });
+
+  var status=document.createElement('span');
+  status.className='sr-only';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+  document.body.appendChild(status);
+  function fallbackCopy(text){
+    var active=document.activeElement,selection=window.getSelection();
+    var ranges=[];
+    if(selection) for(var i=0;i<selection.rangeCount;i++) ranges.push(selection.getRangeAt(i).cloneRange());
+    var area=document.createElement('textarea');
+    area.value=text;area.setAttribute('readonly','');
+    area.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(area);area.select();
+    var copied=false;
+    try{copied=document.execCommand('copy');}catch(error){}
+    area.remove();
+    if(active&&active.focus) active.focus({preventScroll:true});
+    if(selection){selection.removeAllRanges();ranges.forEach(function(range){selection.addRange(range);});}
+    return copied;
+  }
+  async function copyText(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      try{await navigator.clipboard.writeText(text);return true;}catch(error){}
+    }
+    return fallbackCopy(text);
+  }
+  document.querySelectorAll('pre.cmd').forEach(function(pre){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='複製';
+    button.addEventListener('click',async function(){
+      var code=pre.querySelector('code')||pre;
+      var text=(code===pre?Array.from(pre.childNodes).filter(function(node){return node!==button;}).map(function(node){return node.textContent;}).join(''):code.textContent).trim();
+      if(await copyText(text)){
+        button.textContent='已複製';status.textContent='指令已複製。';
+      }else{
+        var range=document.createRange();range.selectNodeContents(code);
+        var selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);
+        button.textContent='請按 Ctrl+C';status.textContent='已選取指令，請按 Ctrl+C 複製。';
+      }
+      setTimeout(function(){button.textContent='複製';status.textContent='';},2200);
+    });
+    pre.appendChild(button);
+  });
+
+  // Keep the existing storage key and checkbox IDs so prior progress survives.
+  var key='ocmw:'+pageName,saved={};
+  try{
+    var parsed=JSON.parse(localStorage.getItem(key)||'{}');
+    if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)) saved=parsed;
+  }catch(error){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(checkbox,index){
+    var id=checkbox.id||('ck'+index);checkbox.id=id;
+    if(saved[id]) checkbox.checked=true;
+    checkbox.addEventListener('change',function(){
+      saved[id]=checkbox.checked;
+      try{localStorage.setItem(key,JSON.stringify(saved));}catch(error){}
+    });
+  });
+  // Wide output stays readable and can be scrolled from the keyboard.
+  document.querySelectorAll('pre.out,.tw').forEach(function(block){
+    block.tabIndex=0;
+    block.setAttribute('aria-label',block.matches('.tw')?'表格；較寬時可左右捲動':'程式輸出；較寬時可左右捲動');
+  });
 })();
+
 </script>
 
 <script>

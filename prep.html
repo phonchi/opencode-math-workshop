@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>課前準備｜OpenCode × AI-Math 工作坊</title>
-<meta name="description" content="工作坊前請務必完成：安裝 opencode 與 uv、建立 Python 環境、跑一次自測。實測建環境要下載 287 MB、花六分半鐘，現場做會來不及。">
+<meta name="description" content="課前完成 OpenCode、uv 與 Python 環境準備，確認 agent 能回話、產生檔案並執行程式。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2213%22%20fill%3D%22%23191922%22%2F%3E%3Cpath%20d%3D%22M16%2020l12%2012-12%2012%22%20fill%3D%22none%22%20stroke%3D%22%23e3c273%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Crect%20x%3D%2233%22%20y%3D%2240%22%20width%3D%2217%22%20height%3D%226%22%20rx%3D%223%22%20fill%3D%22%23b8503c%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -502,58 +502,229 @@ footer .stamp{
   .topnav,.pager,pre .copy{display:none;}
   body{background:#fff;}
 }
+/* 共用教材骨架：由 build_site.py 內嵌至每個頁面，離線複製仍保留版面。 */
+:root{--shell-width:1440px;--sidebar-width:232px;--column-gap:32px;--prose-width:46em;}
+.topnav .inner{max-width:var(--shell-width);min-height:60px;}
+.topnav .brand{font-size:.82rem;}
+.topnav nav a{font-size:.82rem;color:var(--ink-2);}
+.site-shell{
+  display:grid;grid-template-columns:var(--sidebar-width) minmax(0,1fr);
+  gap:var(--column-gap);max-width:var(--shell-width);margin:0 auto;padding:0 32px;
+}
+.lesson-sidebar{
+  position:sticky;top:80px;align-self:start;max-height:calc(100dvh - 100px);
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  padding:24px 16px 24px 0;margin-top:16px;border-right:1px solid var(--rule);
+}
+.course-menu{display:none;}
+.course-nav ul{list-style:none;margin:0;padding:0;}
+.course-nav li{margin:0;}
+.nav-group{margin-bottom:22px;}
+.nav-group:last-child{margin-bottom:0;}
+.nav-group-title{font-size:.72rem;font-weight:700;color:var(--ink-3);letter-spacing:.08em;margin:0 0 8px 10px;}
+.chapter-link{
+  display:block;font-size:.86rem;color:var(--ink-2);line-height:1.6;
+  padding:7px 10px;border-radius:var(--r-sm);text-decoration:none;
+}
+.chapter-link:hover{background:var(--paper-2);color:var(--ink);}
+.chapter-link[aria-current="page"]{color:var(--live);font-weight:700;background:rgba(184,80,60,.075);}
+.course-nav .section-nav{border-left:1px solid var(--rule);margin:8px 0 12px 14px;padding-left:8px;}
+.section-nav a{display:block;font-size:.76rem;line-height:1.6;padding:5px 8px;text-decoration:none;color:var(--ink-3);}
+.section-nav a:hover,.section-nav a[aria-current="location"]{color:var(--link);background:rgba(42,60,120,.05);border-radius:4px;}
+.section-nav a[aria-current="location"]{font-weight:700;}
+.lesson-main{min-width:0;padding:16px 0 0;}
+.lesson-main > .container{width:100%;max-width:none;padding:24px 0 0;}
+.lesson-main .pagehead{padding-top:24px;}
+.lesson-main .pagehead h1{max-width:20em;}
+.lesson-main .pagehead .lead{max-width:var(--prose-width);}
+.lesson-main p,.lesson-main ul:not(.ckl),.lesson-main ol{max-width:var(--prose-width);}
+.lesson-main .term-body p,.lesson-main .term-body ul{max-width:none;}
+.lesson-main h2{scroll-margin-top:88px;margin-top:3rem;}
+.lesson-main h3,.lesson-main h4{scroll-margin-top:88px;}
+.lesson-main .hero{border-radius:var(--r-lg);padding:48px 36px 40px;margin-top:24px;}
+.lesson-main .hero .kicker{letter-spacing:.09em;}
+.lesson-main .hero-glyph{right:24px;bottom:24px;opacity:.6;}
+.lesson-main .hero h1{font-size:clamp(2.1rem,3.8vw,3.15rem);}
+.lesson-main .hero .inner{max-width:none;}
+.lesson-main .hero .meta{gap:24px;}
+.lesson-main .ch-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));}
+.lesson-main .step{padding-left:3.2rem;}
+/* 原始輸出保留等寬對齊；寬表格與輸出可在自己的容器捲動。 */
+.lesson-main pre.out{font-size:.875rem!important;}
+.lesson-main pre,.lesson-main .tw{max-width:100%;}
+.lesson-main pre:focus-visible,.lesson-main .tw:focus-visible{outline-offset:4px;}
+.lesson-diagram{margin:28px 0 36px;max-width:100%;}
+.lesson-diagram > svg{display:block;width:100%;height:auto;max-width:100%;}
+.lesson-diagram figcaption{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:.78rem;color:var(--ink-2);margin-top:12px;}
+.lesson-diagram figcaption a{margin-left:auto;white-space:nowrap;}
+.pager{margin-top:40px;}
+.pager a{min-width:min(230px,100%);}
+footer{max-width:var(--shell-width);margin:56px auto 0;}
+.skip-link{position:fixed;left:16px;top:8px;transform:translateY(-160%);padding:8px 16px;background:var(--paper-2);z-index:100;border:2px solid var(--link);border-radius:var(--r-sm);}
+.skip-link:focus{transform:none;}
+:focus-visible{outline:2px solid var(--link);outline-offset:3px;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
+@media(max-width:1100px){
+  .site-shell{display:block;padding:0 24px;}
+  .lesson-sidebar{position:static;margin:20px 0 0;padding:0;border:0;max-height:none;overflow:visible;}
+  .desktop-course-menu{display:none;}
+  .course-menu{display:block;border:1px solid var(--rule);border-radius:var(--r-md);background:var(--paper-2);}
+  .course-menu > summary{padding:12px 16px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--link);}
+  .course-menu .course-nav{padding:16px;border-top:1px solid var(--rule);}
+  .course-menu[open] .course-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;}
+  .lesson-main{padding-top:0;}
+  .lesson-main > .container{padding-top:12px;}
+  .lesson-main .hero{margin-top:24px;}
+}
+@media(max-width:720px){
+  .site-shell{padding:0 20px;}
+  .topnav .inner{padding:8px 20px;min-height:56px;flex-wrap:nowrap;gap:12px;}
+  .topnav .brand{font-size:.72rem;letter-spacing:.02em;}
+  .topnav nav{width:auto;margin-left:auto;overflow:visible;mask-image:none;-webkit-mask-image:none;gap:4px;}
+  .topnav nav a{padding:4px;font-size:.72rem;}
+  .lesson-main .hero{padding:32px 24px;}
+  .lesson-main .pagehead{padding-top:20px;}
+  .lesson-main .hero h1{font-size:2.05rem;}
+  .lesson-main .hero .kicker{font-size:.66rem;}
+  .course-menu[open] .course-nav{display:block;}
+  .lesson-main .step{padding-left:2.6rem;}
+  .lesson-main pre.out{font-size:.8125rem!important;}
+  .lesson-diagram figcaption a{margin-left:0;}
+  .pager{display:block;}
+  .pager a{display:block;margin-bottom:12px;}
+}
+@media print{
+  .lesson-sidebar,.skip-link{display:none;}
+  .site-shell{display:block;max-width:none;padding:0;}
+  .lesson-main{padding:0;}
+  .lesson-main .hero{color:var(--ink);background:none;padding:0;}
+  .lesson-main .hero h1,.lesson-main .hero .sub,.lesson-main .hero .kicker{color:var(--ink);}
+  .lesson-main pre{white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:none;}
+  .lesson-diagram{break-inside:avoid;}
+}
+
 </style>
 </head>
 <body>
-
+<a class="skip-link" href="#main-content">跳到本章內容</a>
 <div class="topnav"><div class="inner">
 <a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
-<nav>
+<nav aria-label="常用入口">
 <a href="prep.html">課前準備</a>
-<a href="first-run.html">第一次對話</a>
-<a href="lab1-cluster.html">Lab 1</a>
-<a href="lab2-pca.html">Lab 2</a>
-<a href="lab3-notes.html">Lab 3</a>
-<a href="local-models.html">本地模型</a>
-<a href="agents-md.html">AGENTS.md</a>
-<a href="git-safety.html">git</a>
-<a href="mcp-skills.html">MCP</a>
-<a href="cheatsheet.html">速查</a>
+<a href="cheatsheet.html">速查表</a>
 </nav>
 </div></div>
 
-<div class="container narrow">
+<div class="site-shell"><aside class="lesson-sidebar" aria-label="教材導覽"><div class="desktop-course-menu"><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html" aria-current="page">課前準備</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-先確認一件事-你會用終端機嗎">先確認一件事：你會用終端機嗎</a></li>
+<li><a href="#section-你需要安裝兩個東西">你需要安裝兩個東西</a></li>
+<li><a href="#section-安裝">安裝</a></li>
+<li><a href="#section-確認裝好了">確認裝好了</a></li>
+<li><a href="#section-建立工作坊專案">建立工作坊專案</a></li>
+<li><a href="#section-綠燈自測">綠燈自測</a></li>
+<li><a href="#section-卡住了">卡住了？</a></li>
+<li><a href="#section-最後提醒">最後提醒</a></li>
+</ul>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></div><details class="course-menu"><summary>課程與本章目錄</summary><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html" aria-current="page">課前準備</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-先確認一件事-你會用終端機嗎">先確認一件事：你會用終端機嗎</a></li>
+<li><a href="#section-你需要安裝兩個東西">你需要安裝兩個東西</a></li>
+<li><a href="#section-安裝">安裝</a></li>
+<li><a href="#section-確認裝好了">確認裝好了</a></li>
+<li><a href="#section-建立工作坊專案">建立工作坊專案</a></li>
+<li><a href="#section-綠燈自測">綠燈自測</a></li>
+<li><a href="#section-卡住了">卡住了？</a></li>
+<li><a href="#section-最後提醒">最後提醒</a></li>
+</ul>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html">第一次對話</a>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></details></aside><main id="main-content" class="lesson-main" tabindex="-1"><div class="container narrow">
 
 <div class="pagehead">
   <div class="kicker"><span>00</span><span>·</span><span class="badge prep">請在工作坊前完成</span></div>
   <h1>課前準備</h1>
-  <p class="lead">
-    全部照做大約 <strong>10 到 20 分鐘</strong>，主要時間花在等下載。
-    請務必在家裡或宿舍做完。要下載的東西約 <strong>287 MB</strong>，
-    全班三十人同時在教室做，網路會塞住。
-  </p>
-</div>
-
-<div class="box danger">
-<div class="bt">為什麼不能現場做</div>
-<p>
-建立 Python 環境要下載約 <strong>287 MB</strong>（Python 直譯器加上所有套件）。
-本教材實測過三次，耗時從 <strong>2 秒到 6 分 38 秒</strong>都出現過，差異完全看當下的網路狀況。
-</p>
-<p style="margin-bottom:0">
-換句話說：<strong>你沒辦法預測自己會遇到哪一種</strong>。
-而三十個人同時在同一個 WiFi 上抓 287 MB，幾乎保證會遇到慢的那一種。
-</p>
+  <p class="lead">請在工作坊前完成安裝與下方自測。第一次建立環境需要下載套件，請找網路穩定的地方操作；最後看到程式產生檔案並印出結果，就準備好了。</p>
 </div>
 
 <section>
-<h2>先確認一件事：你會用終端機嗎</h2>
+<h2 id="section-先確認一件事-你會用終端機嗎">先確認一件事：你會用終端機嗎</h2>
 <p>
 這場工作坊全程在<strong>終端機</strong>裡進行。如果你平常只在 VS Code 按執行鍵、
-或只用過 Google Colab，下面這個展開來看一分鐘就夠了。
+或只用過 Google Colab，先跟著下面的操作認識它。
 </p>
 
-<details class="bg"><summary>終端機 60 秒入門：打開它、走到資料夾、確認位置</summary>
+<details class="bg" open><summary>終端機入門：打開它、走到資料夾、確認位置</summary>
 <div class="bg-body">
 <p>
 終端機就是一個「用打字下指令」的視窗。它永遠<strong>站在某一個資料夾裡面</strong>，
@@ -564,7 +735,7 @@ footer .stamp{
 <tr><th>系統</th><th>怎麼開</th></tr>
 <tr><td>Windows</td><td>開始選單搜尋 <strong>PowerShell</strong></td></tr>
 <tr><td>macOS</td><td>Launchpad 搜尋<strong>終端機</strong>（Terminal）</td></tr>
-<tr><td>Linux / WSL</td><td>你已經在用了</td></tr>
+<tr><td>Linux / WSL</td><td>Linux 開啟 Terminal；WSL 從 Windows 開始選單開啟已安裝的 Ubuntu</td></tr>
 </table></div>
 <h4>三個你會用到的指令</h4>
 <div class="tw"><table>
@@ -573,19 +744,17 @@ footer .stamp{
 <tr><td><code>ls</code>　（Windows 也能用）</td><td>列出這個資料夾裡有什麼</td></tr>
 <tr><td><code>cd 資料夾名稱</code></td><td>走進某個資料夾。<code>cd ..</code> 是回上一層</td></tr>
 </table></div>
-<h4>最省事的做法：不要用打的</h4>
-<p>
-路徑打字很容易出錯。直接用檔案總管／Finder 走到你要的資料夾，
-然後把資料夾<strong>拖進終端機視窗</strong>，路徑就會自動填好。
-先打 <code>cd </code>（注意後面有空格）再拖，然後按 Enter。
-</p>
+<h4>路徑是資料夾的位置</h4>
+<p>Windows PowerShell 的路徑通常像 <code>C:\Users\你的名字\Documents\ai-math-lab</code>；WSL 像 <code>/home/你的名字/ai-math-lab</code>。請選一個環境完成本教材，同一份虛擬環境不要在兩邊交替使用。路徑含空格時，把整段路徑放在雙引號裡。</p>
+<p>例如在 PowerShell 輸入 <code>cd "C:\Users\你的名字\Documents\ai-math-lab"</code>，請先換成自己的實際位置。接著依序輸入 <code>pwd</code> 和 <code>ls</code>，確認位置與檔案。</p>
+<h4>每一種文字該貼在哪裡</h4>
+<p>看到 <code>uv sync</code>、<code>opencode</code> 這類指令，貼到 PowerShell 或 Ubuntu 終端機，按 Enter 執行。進入 OpenCode 後，才貼「請幫我……」的任務。程式的預期輸出用來比對，不用貼回終端機。多個步驟請逐步執行，確認上一個步驟完成再繼續。</p>
 <div class="box warn">
 <div class="bt">整場工作坊最常見的錯誤</div>
 <p style="margin-bottom:0">
-在<strong>錯的資料夾</strong>裡啟動 opencode。這樣它讀不到你的
-<code>AGENTS.md</code> 與 <code>opencode.json</code>，於是會用簡體中文回答、
-用 <code>python</code> 而不是 <code>uv run python</code>、行為完全不對。
-每次啟動前先 <code>pwd</code> 跟 <code>ls</code> 確認一下，兩秒的事。
+在<strong>錯的資料夾</strong>裡啟動 opencode。這樣它可能找不到你的
+<code>AGENTS.md</code> 與 <code>opencode.json</code>，無法沿用本課程的模型與執行規則。
+每次啟動前先用 <code>pwd</code> 跟 <code>ls</code> 確認位置。
 </p>
 </div>
 <h4>幾個小技巧</h4>
@@ -603,11 +772,11 @@ footer .stamp{
 </section>
 
 <section>
-<h2>你需要安裝兩個東西</h2>
+<h2 id="section-你需要安裝兩個東西">你需要安裝兩個東西</h2>
 <div class="tw"><table>
-<tr><th>工具</th><th>作用</th><th>大小</th></tr>
-<tr><td><strong>opencode</strong></td><td>AI agent 本體，在終端機裡跑</td><td>約 100 MB</td></tr>
-<tr><td><strong>uv</strong></td><td>Python 環境管理，比 conda 快很多，而且不需要先裝 Python</td><td>約 40 MB</td></tr>
+<tr><th>工具</th><th>作用</th></tr>
+<tr><td><strong>opencode</strong></td><td>在終端機裡接受你的任務，讀檔、寫程式並執行</td></tr>
+<tr><td><strong>uv</strong></td><td>建立本專案的 Python 環境並管理套件，不需要先另裝 Python</td></tr>
 </table></div>
 <div class="box tip">
 <div class="bt">好消息</div>
@@ -619,7 +788,7 @@ footer .stamp{
 </section>
 
 <section>
-<h2>安裝</h2>
+<h2 id="section-安裝">安裝</h2>
 
 <h3>Windows</h3>
 <p>
@@ -652,7 +821,7 @@ winget 第一次執行會跳出一個要你按 Y 的條款同意，但那個提�
 <pre class="cmd"><code>curl -fsSL https://opencode.ai/install | bash
 curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 <p class="lead" style="font-size:.92rem;color:var(--ink-3)">
-（macOS 步驟依官方文件撰寫，本教材未在 Mac 上實測。若遇到問題請在工作坊開始前告訴助教。）
+（macOS 請依官方安裝說明操作，課前完成同一份自測；需要協助時提早聯絡講師。）
 </p>
 
 <h3>Linux / WSL</h3>
@@ -671,33 +840,29 @@ curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 </section>
 
 <section>
-<h2>確認裝好了</h2>
+<h2 id="section-確認裝好了">確認裝好了</h2>
 <pre class="cmd"><code>opencode --version
 uv --version</code></pre>
-<p>應該各自印出一個版本號。本教材實測的版本：</p>
-<div class="tw"><table>
-<tr><th></th><th>WSL (Ubuntu 24.04)</th><th>Windows 11</th></tr>
-<tr><td>opencode</td><td><code>1.18.30</code></td><td><code>1.18.30</code></td></tr>
-<tr><td>uv</td><td><code>0.12.x</code></td><td><code>0.12.13</code></td></tr>
-</table></div>
+<p>兩個指令都應印出版本號；記下來，之後求助時可以一起提供。</p>
 <div class="box warn">
 <div class="bt">如果出現「找不到指令」</div>
 <p style="margin-bottom:0">
-九成是 PATH 沒重新載入。<strong>把終端機完全關掉、重新開一個</strong>再試。
+先確認終端機能讀到安裝後的新路徑。<strong>把終端機完全關掉、重新開一個</strong>再試。
 還是不行的話，Windows 請確認是用 PowerShell 而不是舊版的 cmd。
 </p>
 </div>
 </section>
 
 <section>
-<h2>建立工作坊專案</h2>
+<h2 id="section-建立工作坊專案">建立工作坊專案</h2>
 
 <div class="step" data-n="1">
 <h3>建資料夾與檔案</h3>
 <p>找一個你記得住的位置（例如 <code>Documents</code>），建立資料夾：</p>
 <pre class="cmd"><code>mkdir ai-math-lab
 cd ai-math-lab
-mkdir notes figs</code></pre>
+mkdir notes
+mkdir figs</code></pre>
 </div>
 
 <div class="step" data-n="2">
@@ -774,10 +939,7 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 <h3>建立 Python 環境（這步會等比較久）</h3>
 <pre class="cmd"><code>uv sync</code></pre>
 <p>
-第一次執行會下載 Python 直譯器與所有套件，共約 <strong>287 MB</strong>。
-實測耗時在 <strong>2 秒到 6 分半</strong>之間，取決於網路。
-之後在同一台機器上再跑就只要幾秒，因為東西都進快取了。
-</p>
+第一次執行會下載 Python 與套件，請等指令完成，回到可輸入下一個指令的提示字元。</p>
 <p>如果超過一分鐘還在跑，去泡杯茶。看到類似這樣就對了：</p>
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">uv sync</span></div>
@@ -793,7 +955,7 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 </section>
 
 <section>
-<h2>綠燈自測</h2>
+<h2 id="section-綠燈自測">綠燈自測</h2>
 <p>下面三個測試全部通過，你就準備好了。</p>
 
 <h3>測試一：Python 環境</h3>
@@ -802,7 +964,7 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 
 <h3>測試二：agent 會回話</h3>
 <pre class="cmd"><code>opencode run "用一句話說明什麼是主成分分析"</code></pre>
-<p>應該在幾秒內得到一段繁體中文的回答。</p>
+<p>應該得到一段繁體中文的回答。</p>
 
 <h3>測試三：agent 真的會動手（最重要的一關）</h3>
 <pre class="cmd"><code>opencode run --auto "建立一個 hello.py，內容是印出 1 到 10 的平方，然後執行它"</code></pre>
@@ -844,7 +1006,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 </p>
 
 <ul class="ckl">
-<li><input type="checkbox" id="p1"><label for="p1"><code>opencode --version</code> 印出 1.18.x</label></li>
+<li><input type="checkbox" id="p1"><label for="p1"><code>opencode --version</code> 印出版本號</label></li>
 <li><input type="checkbox" id="p2"><label for="p2"><code>uv --version</code> 印出版本號</label></li>
 <li><input type="checkbox" id="p3"><label for="p3">專案資料夾裡有 <code>pyproject.toml</code>、<code>opencode.json</code>、<code>AGENTS.md</code></label></li>
 <li><input type="checkbox" id="p4"><label for="p4"><code>uv sync</code> 跑完，沒有紅色錯誤</label></li>
@@ -855,7 +1017,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 </section>
 
 <section>
-<h2>卡住了？</h2>
+<h2 id="section-卡住了">卡住了？</h2>
 <div class="tw"><table>
 <tr><th>症狀</th><th>原因</th><th>怎麼辦</th></tr>
 <tr><td><code>opencode: command not found</code><br><code>無法辨識 'opencode'</code></td>
@@ -875,7 +1037,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
     <td>加旗標重跑：<code>opencode run "..." --print-logs --log-level ERROR</code></td></tr>
 <tr><td><code>Unrecognized request argument supplied: prompt_cache_key</code></td>
     <td>opencode 的已知上游問題，偶發</td>
-    <td><strong>重試一次</strong>通常就好。實測會自己恢復。</td></tr>
+    <td><strong>重試一次</strong>通常就好。仍然失敗就保留錯誤訊息，請講師協助。</td></tr>
 <tr><td>換成其他模型後回 <code>UnknownError</code></td>
     <td>那些模型需要 API key</td>
     <td>本工作坊<strong>只用 <code>opencode/big-pickle</code></strong>。不要改 <code>opencode.json</code> 裡的 model。</td></tr>
@@ -900,7 +1062,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 </section>
 
 <section>
-<h2>最後提醒</h2>
+<h2 id="section-最後提醒">最後提醒</h2>
 <div class="box warn">
 <div class="bt">免費模型會看你送過去的內容</div>
 <p style="margin-bottom:0">
@@ -911,54 +1073,121 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 </div>
 </section>
 
-<div class="pager">
-  <a href="index.html"><div class="d">回到</div><div class="t2">← 總覽</div></a>
-  <a href="first-run.html" class="next"><div class="d">下一章</div><div class="t2">01 · 第一次對話 →</div></a>
-</div>
+
 
 </div>
+<nav class="pager" aria-label="章節順序"><a href="index.html" class="prev"><div class="d">上一章</div><div class="t2">← 工作坊總覽</div></a><a href="first-run.html" class="next"><div class="d">下一章</div><div class="t2">第一次對話 →</div></a></nav></main></div>
 
 <footer>
 <div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
-<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+<div class="stamp">讓 agent 動手，讓數學說明結果。</div>
 </footer>
 
 <script>
-// 導覽列高亮目前頁面
+/* Progressive enhancement: navigation and disclosure work without JavaScript. */
 (function(){
-  var f=(location.pathname.split('/').pop()||'index.html');
+  'use strict';
+  var pageName=location.pathname.split('/').pop()||'index.html';
   document.querySelectorAll('.topnav nav a').forEach(function(a){
-    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+    if(a.getAttribute('href')===pageName) a.setAttribute('aria-current','page');
   });
-})();
 
-// 指令複製鈕
-document.querySelectorAll('pre.cmd').forEach(function(pre){
-  var b=document.createElement('button');
-  b.className='copy'; b.type='button'; b.textContent='複製';
-  b.addEventListener('click',function(){
-    var t=pre.querySelector('code');
-    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
-      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
-    },function(){ b.textContent='複製失敗'; });
-  });
-  pre.appendChild(b);
-});
-
-// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
-(function(){
-  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
-  var saved={};
-  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
-  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
-    var id=cb.id||('ck'+i); cb.id=id;
-    if(saved[id]) cb.checked=true;
-    cb.addEventListener('change',function(){
-      saved[id]=cb.checked;
-      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+  var sections=Array.from(document.querySelectorAll('.lesson-main h2[id]'));
+  var sectionLinks=Array.from(document.querySelectorAll('.section-nav a'));
+  var scheduled=false;
+  function markSection(){
+    scheduled=false;
+    var current=sections[0];
+    sections.forEach(function(section){if(section.getBoundingClientRect().top<=145) current=section;});
+    sectionLinks.forEach(function(link){
+      if(current&&link.getAttribute('href')==='#'+current.id) link.setAttribute('aria-current','location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  function scheduleSection(){
+    if(!scheduled){scheduled=true;requestAnimationFrame(markSection);}
+  }
+  window.addEventListener('scroll',scheduleSection,{passive:true});
+  window.addEventListener('resize',scheduleSection);
+  window.addEventListener('hashchange',scheduleSection);
+  markSection();
+  document.querySelectorAll('.course-menu .section-nav a').forEach(function(link){
+    link.addEventListener('click',function(){
+      link.closest('details').open=false;
+      // Closing the menu moves the heading; resolve the anchor after that reflow.
+      var id=link.getAttribute('href').slice(1),target=document.getElementById(id);
+      if(target){
+        requestAnimationFrame(function(){
+          var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({top:window.scrollY+target.getBoundingClientRect().top-88,behavior:reduced?'auto':'smooth'});
+        });
+      }
     });
   });
+
+  var status=document.createElement('span');
+  status.className='sr-only';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+  document.body.appendChild(status);
+  function fallbackCopy(text){
+    var active=document.activeElement,selection=window.getSelection();
+    var ranges=[];
+    if(selection) for(var i=0;i<selection.rangeCount;i++) ranges.push(selection.getRangeAt(i).cloneRange());
+    var area=document.createElement('textarea');
+    area.value=text;area.setAttribute('readonly','');
+    area.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(area);area.select();
+    var copied=false;
+    try{copied=document.execCommand('copy');}catch(error){}
+    area.remove();
+    if(active&&active.focus) active.focus({preventScroll:true});
+    if(selection){selection.removeAllRanges();ranges.forEach(function(range){selection.addRange(range);});}
+    return copied;
+  }
+  async function copyText(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      try{await navigator.clipboard.writeText(text);return true;}catch(error){}
+    }
+    return fallbackCopy(text);
+  }
+  document.querySelectorAll('pre.cmd').forEach(function(pre){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='複製';
+    button.addEventListener('click',async function(){
+      var code=pre.querySelector('code')||pre;
+      var text=(code===pre?Array.from(pre.childNodes).filter(function(node){return node!==button;}).map(function(node){return node.textContent;}).join(''):code.textContent).trim();
+      if(await copyText(text)){
+        button.textContent='已複製';status.textContent='指令已複製。';
+      }else{
+        var range=document.createRange();range.selectNodeContents(code);
+        var selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);
+        button.textContent='請按 Ctrl+C';status.textContent='已選取指令，請按 Ctrl+C 複製。';
+      }
+      setTimeout(function(){button.textContent='複製';status.textContent='';},2200);
+    });
+    pre.appendChild(button);
+  });
+
+  // Keep the existing storage key and checkbox IDs so prior progress survives.
+  var key='ocmw:'+pageName,saved={};
+  try{
+    var parsed=JSON.parse(localStorage.getItem(key)||'{}');
+    if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)) saved=parsed;
+  }catch(error){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(checkbox,index){
+    var id=checkbox.id||('ck'+index);checkbox.id=id;
+    if(saved[id]) checkbox.checked=true;
+    checkbox.addEventListener('change',function(){
+      saved[id]=checkbox.checked;
+      try{localStorage.setItem(key,JSON.stringify(saved));}catch(error){}
+    });
+  });
+  // Wide output stays readable and can be scrolled from the keyboard.
+  document.querySelectorAll('pre.out,.tw').forEach(function(block){
+    block.tabIndex=0;
+    block.setAttribute('aria-label',block.matches('.tw')?'表格；較寬時可左右捲動':'程式輸出；較寬時可左右捲動');
+  });
 })();
+
 </script>
 
 <script>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第一次對話｜OpenCode × AI-Math 工作坊</title>
-<meta name="description" content="TUI 操作、權限機制、session 的邊界。搞懂你在跟什麼東西說話。">
+<meta name="description" content="啟動 OpenCode、下達任務、檢查工具執行，認識權限與 session。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2213%22%20fill%3D%22%23191922%22%2F%3E%3Cpath%20d%3D%22M16%2020l12%2012-12%2012%22%20fill%3D%22none%22%20stroke%3D%22%23e3c273%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Crect%20x%3D%2233%22%20y%3D%2240%22%20width%3D%2217%22%20height%3D%226%22%20rx%3D%223%22%20fill%3D%22%23b8503c%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -502,34 +502,223 @@ footer .stamp{
   .topnav,.pager,pre .copy{display:none;}
   body{background:#fff;}
 }
+/* 共用教材骨架：由 build_site.py 內嵌至每個頁面，離線複製仍保留版面。 */
+:root{--shell-width:1440px;--sidebar-width:232px;--column-gap:32px;--prose-width:46em;}
+.topnav .inner{max-width:var(--shell-width);min-height:60px;}
+.topnav .brand{font-size:.82rem;}
+.topnav nav a{font-size:.82rem;color:var(--ink-2);}
+.site-shell{
+  display:grid;grid-template-columns:var(--sidebar-width) minmax(0,1fr);
+  gap:var(--column-gap);max-width:var(--shell-width);margin:0 auto;padding:0 32px;
+}
+.lesson-sidebar{
+  position:sticky;top:80px;align-self:start;max-height:calc(100dvh - 100px);
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  padding:24px 16px 24px 0;margin-top:16px;border-right:1px solid var(--rule);
+}
+.course-menu{display:none;}
+.course-nav ul{list-style:none;margin:0;padding:0;}
+.course-nav li{margin:0;}
+.nav-group{margin-bottom:22px;}
+.nav-group:last-child{margin-bottom:0;}
+.nav-group-title{font-size:.72rem;font-weight:700;color:var(--ink-3);letter-spacing:.08em;margin:0 0 8px 10px;}
+.chapter-link{
+  display:block;font-size:.86rem;color:var(--ink-2);line-height:1.6;
+  padding:7px 10px;border-radius:var(--r-sm);text-decoration:none;
+}
+.chapter-link:hover{background:var(--paper-2);color:var(--ink);}
+.chapter-link[aria-current="page"]{color:var(--live);font-weight:700;background:rgba(184,80,60,.075);}
+.course-nav .section-nav{border-left:1px solid var(--rule);margin:8px 0 12px 14px;padding-left:8px;}
+.section-nav a{display:block;font-size:.76rem;line-height:1.6;padding:5px 8px;text-decoration:none;color:var(--ink-3);}
+.section-nav a:hover,.section-nav a[aria-current="location"]{color:var(--link);background:rgba(42,60,120,.05);border-radius:4px;}
+.section-nav a[aria-current="location"]{font-weight:700;}
+.lesson-main{min-width:0;padding:16px 0 0;}
+.lesson-main > .container{width:100%;max-width:none;padding:24px 0 0;}
+.lesson-main .pagehead{padding-top:24px;}
+.lesson-main .pagehead h1{max-width:20em;}
+.lesson-main .pagehead .lead{max-width:var(--prose-width);}
+.lesson-main p,.lesson-main ul:not(.ckl),.lesson-main ol{max-width:var(--prose-width);}
+.lesson-main .term-body p,.lesson-main .term-body ul{max-width:none;}
+.lesson-main h2{scroll-margin-top:88px;margin-top:3rem;}
+.lesson-main h3,.lesson-main h4{scroll-margin-top:88px;}
+.lesson-main .hero{border-radius:var(--r-lg);padding:48px 36px 40px;margin-top:24px;}
+.lesson-main .hero .kicker{letter-spacing:.09em;}
+.lesson-main .hero-glyph{right:24px;bottom:24px;opacity:.6;}
+.lesson-main .hero h1{font-size:clamp(2.1rem,3.8vw,3.15rem);}
+.lesson-main .hero .inner{max-width:none;}
+.lesson-main .hero .meta{gap:24px;}
+.lesson-main .ch-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));}
+.lesson-main .step{padding-left:3.2rem;}
+/* 原始輸出保留等寬對齊；寬表格與輸出可在自己的容器捲動。 */
+.lesson-main pre.out{font-size:.875rem!important;}
+.lesson-main pre,.lesson-main .tw{max-width:100%;}
+.lesson-main pre:focus-visible,.lesson-main .tw:focus-visible{outline-offset:4px;}
+.lesson-diagram{margin:28px 0 36px;max-width:100%;}
+.lesson-diagram > svg{display:block;width:100%;height:auto;max-width:100%;}
+.lesson-diagram figcaption{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:.78rem;color:var(--ink-2);margin-top:12px;}
+.lesson-diagram figcaption a{margin-left:auto;white-space:nowrap;}
+.pager{margin-top:40px;}
+.pager a{min-width:min(230px,100%);}
+footer{max-width:var(--shell-width);margin:56px auto 0;}
+.skip-link{position:fixed;left:16px;top:8px;transform:translateY(-160%);padding:8px 16px;background:var(--paper-2);z-index:100;border:2px solid var(--link);border-radius:var(--r-sm);}
+.skip-link:focus{transform:none;}
+:focus-visible{outline:2px solid var(--link);outline-offset:3px;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
+@media(max-width:1100px){
+  .site-shell{display:block;padding:0 24px;}
+  .lesson-sidebar{position:static;margin:20px 0 0;padding:0;border:0;max-height:none;overflow:visible;}
+  .desktop-course-menu{display:none;}
+  .course-menu{display:block;border:1px solid var(--rule);border-radius:var(--r-md);background:var(--paper-2);}
+  .course-menu > summary{padding:12px 16px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--link);}
+  .course-menu .course-nav{padding:16px;border-top:1px solid var(--rule);}
+  .course-menu[open] .course-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px;}
+  .lesson-main{padding-top:0;}
+  .lesson-main > .container{padding-top:12px;}
+  .lesson-main .hero{margin-top:24px;}
+}
+@media(max-width:720px){
+  .site-shell{padding:0 20px;}
+  .topnav .inner{padding:8px 20px;min-height:56px;flex-wrap:nowrap;gap:12px;}
+  .topnav .brand{font-size:.72rem;letter-spacing:.02em;}
+  .topnav nav{width:auto;margin-left:auto;overflow:visible;mask-image:none;-webkit-mask-image:none;gap:4px;}
+  .topnav nav a{padding:4px;font-size:.72rem;}
+  .lesson-main .hero{padding:32px 24px;}
+  .lesson-main .pagehead{padding-top:20px;}
+  .lesson-main .hero h1{font-size:2.05rem;}
+  .lesson-main .hero .kicker{font-size:.66rem;}
+  .course-menu[open] .course-nav{display:block;}
+  .lesson-main .step{padding-left:2.6rem;}
+  .lesson-main pre.out{font-size:.8125rem!important;}
+  .lesson-diagram figcaption a{margin-left:0;}
+  .pager{display:block;}
+  .pager a{display:block;margin-bottom:12px;}
+}
+@media print{
+  .lesson-sidebar,.skip-link{display:none;}
+  .site-shell{display:block;max-width:none;padding:0;}
+  .lesson-main{padding:0;}
+  .lesson-main .hero{color:var(--ink);background:none;padding:0;}
+  .lesson-main .hero h1,.lesson-main .hero .sub,.lesson-main .hero .kicker{color:var(--ink);}
+  .lesson-main pre{white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:none;}
+  .lesson-diagram{break-inside:avoid;}
+}
+
 </style>
 </head>
 <body>
-
+<a class="skip-link" href="#main-content">跳到本章內容</a>
 <div class="topnav"><div class="inner">
 <a class="brand" href="index.html">opencode<i>×</i>AI-Math</a>
-<nav>
+<nav aria-label="常用入口">
 <a href="prep.html">課前準備</a>
-<a href="first-run.html">第一次對話</a>
-<a href="lab1-cluster.html">Lab 1</a>
-<a href="lab2-pca.html">Lab 2</a>
-<a href="lab3-notes.html">Lab 3</a>
-<a href="local-models.html">本地模型</a>
-<a href="agents-md.html">AGENTS.md</a>
-<a href="git-safety.html">git</a>
-<a href="mcp-skills.html">MCP</a>
-<a href="cheatsheet.html">速查</a>
+<a href="cheatsheet.html">速查表</a>
 </nav>
 </div></div>
 
-<div class="container narrow">
+<div class="site-shell"><aside class="lesson-sidebar" aria-label="教材導覽"><div class="desktop-course-menu"><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html" aria-current="page">第一次對話</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-這一章你會學到">這一章你會學到</a></li>
+<li><a href="#section-啟動">1. 啟動</a></li>
+<li><a href="#section-認識畫面">2. 認識畫面</a></li>
+<li><a href="#section-你的第一個指令">3. 你的第一個指令</a></li>
+<li><a href="#section-權限-agent-要動手之前會先問你">4. 權限：agent 要動手之前會先問你</a></li>
+<li><a href="#section-session-對話的記憶邊界">5. session：對話的記憶邊界</a></li>
+<li><a href="#section-先記住這些操作">6. 先記住這些操作</a></li>
+<li><a href="#section-卡住了">卡住了？</a></li>
+<li><a href="#section-參考資料">參考資料</a></li>
+</ul>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></div><details class="course-menu"><summary>課程與本章目錄</summary><nav class="course-nav" aria-label="課程與本章目錄">
+<div class="nav-group"><p class="nav-group-title">開始之前</p><ul>
+<li><a class="chapter-link" href="index.html">工作坊總覽</a>
+</li>
+<li><a class="chapter-link" href="prep.html">課前準備</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">現場一起做</p><ul>
+<li><a class="chapter-link" href="first-run.html" aria-current="page">第一次對話</a>
+<ul class="section-nav" aria-label="本章內容">
+<li><a href="#section-這一章你會學到">這一章你會學到</a></li>
+<li><a href="#section-啟動">1. 啟動</a></li>
+<li><a href="#section-認識畫面">2. 認識畫面</a></li>
+<li><a href="#section-你的第一個指令">3. 你的第一個指令</a></li>
+<li><a href="#section-權限-agent-要動手之前會先問你">4. 權限：agent 要動手之前會先問你</a></li>
+<li><a href="#section-session-對話的記憶邊界">5. session：對話的記憶邊界</a></li>
+<li><a href="#section-先記住這些操作">6. 先記住這些操作</a></li>
+<li><a href="#section-卡住了">卡住了？</a></li>
+<li><a href="#section-參考資料">參考資料</a></li>
+</ul>
+</li>
+<li><a class="chapter-link" href="lab1-cluster.html">Lab 1 · 分群</a>
+</li>
+<li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
+</li>
+<li><a class="chapter-link" href="lab3-notes.html">Lab 3 · 分類與筆記</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · OpenCode 操作</p><ul>
+<li><a class="chapter-link" href="agent-workflows.html">讓 agent 把工作做完整</a>
+</li>
+<li><a class="chapter-link" href="agents-md.html">AGENTS.md 專案規則</a>
+</li>
+<li><a class="chapter-link" href="git-safety.html">git 安全網</a>
+</li>
+<li><a class="chapter-link" href="mcp-skills.html">MCP、skills 與 subagent</a>
+</li>
+<li><a class="chapter-link" href="local-models.html">本地模型</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">課後 · 數學應用</p><ul>
+<li><a class="chapter-link" href="math-applications.html">數學應用練習</a>
+</li>
+</ul></div>
+<div class="nav-group"><p class="nav-group-title">隨時查閱</p><ul>
+<li><a class="chapter-link" href="cheatsheet.html">速查表</a>
+</li>
+</ul></div>
+</nav></details></aside><main id="main-content" class="lesson-main" tabindex="-1"><div class="container narrow">
 
 <div class="pagehead">
-  <div class="kicker"><span>01</span><span>·</span><span class="badge live">現場 30 分</span></div>
+  <div class="kicker"><span class="badge live">現場</span></div>
   <h1>第一次對話</h1>
 </div>
 
-<h2>這一章你會學到</h2>
+<h2 id="section-這一章你會學到">這一章你會學到</h2>
 <ul>
 <li>用一行指令啟動 opencode，看懂畫面上每一塊在說什麼</li>
 <li>送出你的第一個指令，並且看懂 agent 是「先想、再動手、再回報」</li>
@@ -537,30 +726,24 @@ footer .stamp{
 <li>知道 session 是什麼、什麼時候該開新的、context 快滿了怎麼辦</li>
 </ul>
 <hr>
-<h2>1. 啟動</h2>
-<h3>1.1 安裝（如果你還沒裝）</h3>
-<p><strong>Linux / WSL</strong>：<code>curl</code> 不一定裝在你的系統裡（Ubuntu 的基本安裝不含它）， 所以先用一定有的 <code>apt</code> 把它補上，再裝 opencode：</p>
-<pre class="cmd" data-lang="bash"><code>sudo apt update &amp;&amp; sudo apt install -y curl ca-certificates
-curl -fsSL https://opencode.ai/install | bash</code></pre>
-<p><strong>macOS</strong>：內建 <code>curl</code>，直接跑第二行就好。</p>
-<p><strong>Windows（PowerShell）</strong>：<code>winget</code> 是 Windows 11 內建的，不用先裝東西。</p>
-<pre class="cmd" data-lang="powershell"><code>winget install SST.opencode --accept-source-agreements --accept-package-agreements</code></pre>
-<p>確認裝好了：</p>
-<pre class="cmd" data-lang="bash"><code>opencode --version</code></pre>
-<p>本章所有內容都在 <code>1.18.30</code> 上實測。如果你的版本號不一樣，畫面可能會有差別。</p>
-<h3>1.2 建好 Python 環境</h3>
-<p>進到工作坊的專案資料夾（講師發的那個，例如 <code>ai-math-lab</code>），先把 Python 環境裝起來（第一次會跑幾分鐘）：</p>
-<pre class="cmd" data-lang="bash"><code>uv sync</code></pre>
+<h2 id="section-啟動">1. 啟動</h2>
+<h3>1.1 先完成課前準備</h3>
+<p>這一章從已準備好的專案開始。尚未安裝 OpenCode、uv 或建立設定檔時，先完成 <a href="prep.html">課前準備</a> 的自測，再回到這裡。</p>
+<h3>1.2 確認是同一個專案</h3>
+<p>開啟課前建立的 <code>ai-math-lab</code> 資料夾，在該處開啟終端機。它可能位於 Documents，也可能在你選的其他位置；請以自己的實際路徑為準。</p>
+<pre class="cmd" data-lang="bash"><code>pwd
+ls</code></pre>
+<p>清單裡應有 <code>pyproject.toml</code>、<code>opencode.json</code> 與 <code>AGENTS.md</code>。</p>
 <p>檢查環境：</p>
 <pre class="cmd" data-lang="bash"><code>uv run python -c "import numpy, sklearn, matplotlib, networkx; print('環境 OK')"</code></pre>
-<p>這個專案一律用 <code>uv run python 檔名.py</code> 執行程式，不要用 <code>python</code>、<code>python3</code>，也不要用 <code>pip install</code>。要加套件用 <code>uv add 套件名</code>。這條規則已經寫在專案的 <code>AGENTS.md</code> 裡，agent 自己會遵守。</p>
+<p>這個專案一律用 <code>uv run python 檔名.py</code> 執行程式，不要用 <code>python</code>、<code>python3</code>，也不要用 <code>pip install</code>。要加套件用 <code>uv add 套件名</code>。這條規則已經寫在專案的 <code>AGENTS.md</code> 裡；執行時仍請看一下它用的指令。</p>
 <h3>1.3 兩種啟動方式</h3>
 <p><strong>互動模式（本章都用這個）</strong>：</p>
 <pre class="cmd" data-lang="bash"><code>opencode</code></pre>
 <p>直接進入 TUI（終端機介面），可以一句一句對話，agent 要動手之前會停下來問你。</p>
 <p><strong>非互動模式（先知道有這個就好，這一章不要用）</strong>：</p>
 <pre class="cmd" data-lang="bash"><code>opencode run "讀 pyproject.toml，用一句話說明這個專案裝了哪些套件"</code></pre>
-<p><code>opencode run</code> 丟一句話進去、印出結果就結束。實測它<strong>不會問權限</strong>，會直接寫檔、直接執行指令。所以在你還不熟的階段，一律用 <code>opencode</code>（互動模式）。</p>
+<p><code>opencode run</code> 丟一句話進去、印出結果就結束。本專案將改檔與執行設為 <code>ask</code>，非互動模式遇到這些動作會自動拒絕。練習請用 <code>opencode</code>，逐次查看與回答權限要求。</p>
 <h3>1.4 模型不用設定</h3>
 <p>這個專案的 <code>opencode.json</code> 已經把模型指定成 <code>opencode/big-pickle</code>：</p>
 <pre class="cmd" data-lang="json"><code>{
@@ -568,8 +751,8 @@ curl -fsSL https://opencode.ai/install | bash</code></pre>
 }</code></pre>
 <p><code>big-pickle</code> 不用登入、不用 API key、不用信用卡。啟動後畫面上會有一行提示 <code>Run /connect to add an AI provider and start coding</code>，<strong>忽略它</strong>。那是給要接自己帳號的人看的，你不需要。</p>
 <hr>
-<h2>2. 認識畫面</h2>
-<p>啟動後還沒開始對話時，畫面大概長這樣（實測擷取，位置會隨終端機寬度調整）：</p>
+<h2 id="section-認識畫面">2. 認識畫面</h2>
+<p>啟動後還沒開始對話時，畫面大概長這樣（位置會隨終端機寬度調整）：</p>
 <pre class="out"><code>                              █▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█
                               █  █ █  █ █▀▀▀ █  █ █    █  █ █  █ █▀▀▀
                               ▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
@@ -587,7 +770,7 @@ curl -fsSL https://opencode.ai/install | bash</code></pre>
 <p>由上往下看：</p>
 <div class="tw"><table><tr><th>畫面上的東西</th><th>意思</th></tr><tr><td><code>Ask anything…</code></td><td>輸入框。游標在這裡，直接打字就行</td></tr><tr><td><code>Build · Big Pickle OpenCode Zen</code></td><td>現在用的 <strong>agent</strong>（Build）· <strong>模型</strong>（Big Pickle）· <strong>供應商</strong>（OpenCode Zen）</td></tr><tr><td><code>tab agents</code></td><td>按 <code>Tab</code> 可以換 agent</td></tr><tr><td><code>ctrl+p commands</code></td><td>按 <code>ctrl+p</code> 開指令面板</td></tr><tr><td>最底左邊</td><td>你現在在哪個資料夾。<strong>開始之前先確認這行是對的</strong></td></tr><tr><td>最底右邊</td><td>opencode 版本</td></tr></table></div>
 <p>開始對話之後，右邊會多出一欄側邊欄：</p>
-<pre class="out" style="font-size:0.791rem"><code>                                     列出資料夾內所有檔案     &lt;- session 名稱（自動命名）
+<pre class="out"><code>                                     列出資料夾內所有檔案     &lt;- session 名稱（自動命名）
 
                                      Context
                                      16,007 tokens
@@ -596,13 +779,417 @@ curl -fsSL https://opencode.ai/install | bash</code></pre>
 
                                      LSP
                                      LSPs are disabled</code></pre>
-<p><code>8% used</code> 是<strong>這一章最重要的一個數字</strong>：它是目前對話佔掉模型記憶上限的百分比。底部狀態列也會同步顯示成 <code>16.0K (8%)</code>。第 5 節會用到它。</p>
-<p><code>$0.00 spent</code> 因為 <code>big-pickle</code> 是免費的，所以永遠是 0。</p>
-<p>側邊欄在終端機太窄的時候會自動收起來，可以用 <code>ctrl+x b</code> 開關（未實測）。</p>
+<p><code>8% used</code> 表示目前使用了多少 context 空間。底部狀態列也會同步顯示成 <code>16.0K (8%)</code>。第 5 節會用到它。</p>
+<p><code>$0.00 spent</code> 表示這次對話目前沒有列出費用。課堂只選指定的免費模型；若服務要求付費或連接帳號，先停下來請講師確認。</p>
+<p>終端機太窄時，部分資訊會收起來。把視窗拉寬，或在 <code>ctrl+p</code> 指令面板尋找側邊欄選項。</p>
 <h3>輸入框的三個特殊開頭字元</h3>
 <div class="tw"><table><tr><th>打什麼</th><th>會發生什麼</th><th>例子</th></tr><tr><td><code>/</code></td><td>跳出斜線指令清單</td><td><code>/models</code></td></tr><tr><td><code>@</code></td><td>補檔名，也可以叫 subagent</td><td>打 <code>@AGENT</code> 會補成 <code>@AGENTS.md</code>；<code>@explore</code>、<code>@general</code> 是 subagent</td></tr><tr><td><code>!</code></td><td>進入 Shell 模式，直接在這裡跑 shell 指令，底部會顯示 <code>esc exit shell mode</code>，按 <code>Esc</code> 退出</td><td><code>!ls -la</code></td></tr></table></div>
 <hr>
-<h2>3. 你的第一個指令</h2>
+<figure class="lesson-diagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1074 280" role="img" lang="zh-Hant" aria-labelledby="diagram-agent-task-1-title diagram-agent-task-1-desc" data-preset="classic" data-quality-profile="showcase" style=";display:block;width:100%;height:auto;" width="1074" height="280" id="diagram-agent-task-1-svg"><title id="diagram-agent-task-1-title">從需求到可確認的成果</title>
+        <style>@font-face{ font-family: 'diagram-agent-task-1-JetBrains Mono'; font-weight: 400; src: local('JetBrains Mono'), local('JetBrainsMono-Regular'); }
+@font-face{ font-family: 'diagram-agent-task-1-JetBrains Mono'; font-weight: 500; src: local('JetBrains Mono'), local('JetBrainsMono-Regular'); }
+@font-face{ font-family: 'diagram-agent-task-1-JetBrains Mono'; font-weight: 600; src: local('JetBrains Mono'), local('JetBrainsMono-Regular'); }
+@font-face{ font-family: 'diagram-agent-task-1-JetBrains Mono'; font-weight: 700; src: local('JetBrains Mono'), local('JetBrainsMono-Regular'); }
+#diagram-agent-task-1-svg{ font-family: 'diagram-agent-task-1-JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', 'Liberation Mono', 'Noto Sans Mono CJK SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', monospace; }
+#diagram-agent-task-1-svg, #diagram-agent-task-1-svg[data-theme="dark"]{ --bg: #020617; --grid: #1e293b; --text: #ffffff; --text-muted: #94a3b8; --text-dim: #475569; --text-faint: #7d8da1; --panel: rgba(15, 23, 42, 0.5); --panel-border: #1e293b; --lane-fill: rgba(15, 23, 42, 0.22); --lane-stroke: #334155; --arrow: #64748b; --arrow-emphasis: #34d399; --mask: #0f172a; --frontend-fill: rgba(8, 51, 68, 0.4); --frontend-stroke: #22d3ee; --backend-fill: rgba(6, 78, 59, 0.4); --backend-stroke: #34d399; --database-fill: rgba(76, 29, 149, 0.4); --database-stroke: #a78bfa; --cloud-fill: rgba(120, 53, 15, 0.3); --cloud-stroke: #fbbf24; --security-fill: rgba(136, 19, 55, 0.4); --security-stroke: #fb7185; --messagebus-fill: rgba(251, 146, 60, 0.3); --messagebus-stroke: #fb923c; --external-fill: rgba(30, 41, 59, 0.5); --external-stroke: #94a3b8; --toolbar-bg: rgba(15, 23, 42, 0.8); --toolbar-border: #334155; --toolbar-text: #e2e8f0; --toolbar-hover: rgba(15, 23, 42, 0.95); --toolbar-menu-bg: #0f172a; }
+#diagram-agent-task-1-svg[data-theme="light"]{ --bg: #f8fafc; --grid: #e2e8f0; --text: #0f172a; --text-muted: #64748b; --text-dim: #94a3b8; --text-faint: #64748b; --panel: #ffffff; --panel-border: #e2e8f0; --lane-fill: rgba(248, 250, 252, 0.65); --lane-stroke: #cbd5e1; --arrow: #94a3b8; --arrow-emphasis: #059669; --mask: #ffffff; --frontend-fill: rgba(34, 211, 238, 0.15); --frontend-stroke: #0891b2; --backend-fill: rgba(52, 211, 153, 0.18); --backend-stroke: #059669; --database-fill: rgba(167, 139, 250, 0.2); --database-stroke: #7c3aed; --cloud-fill: rgba(251, 191, 36, 0.18); --cloud-stroke: #d97706; --security-fill: rgba(251, 113, 133, 0.15); --security-stroke: #e11d48; --messagebus-fill: rgba(251, 146, 60, 0.15); --messagebus-stroke: #ea580c; --external-fill: rgba(148, 163, 184, 0.18); --external-stroke: #64748b; --toolbar-bg: rgba(255, 255, 255, 0.92); --toolbar-border: #cbd5e1; --toolbar-text: #334155; --toolbar-hover: #ffffff; --toolbar-menu-bg: #ffffff; }
+#diagram-agent-task-1-svg[data-preset="signal-flow"][data-theme="dark"]{ --bg: #030711; --grid: #15233a; --panel: rgba(6, 14, 28, 0.78); --panel-border: #1d3350; --lane-fill: rgba(9, 22, 40, 0.5); --lane-stroke: #2c4564; --text: #f5fbff; --text-muted: #9eb0c7; --text-dim: #52667f; --text-faint: #7890ad; --mask: #07101e; --frontend-fill: rgba(6, 182, 212, 0.14); --frontend-stroke: #67e8f9; --backend-fill: rgba(16, 185, 129, 0.14); --backend-stroke: #5eead4; --database-fill: rgba(139, 92, 246, 0.16); --database-stroke: #c4b5fd; --cloud-fill: rgba(245, 158, 11, 0.13); --cloud-stroke: #fcd34d; --security-fill: rgba(244, 63, 94, 0.13); --security-stroke: #fda4af; --messagebus-fill: rgba(249, 115, 22, 0.13); --messagebus-stroke: #fdba74; --external-fill: rgba(71, 85, 105, 0.24); --external-stroke: #a5b4c7; --arrow: #7890ad; --arrow-emphasis: #2dd4bf; --toolbar-bg: rgba(7, 16, 30, 0.86); --toolbar-border: #29415f; --toolbar-menu-bg: #07101e; }
+#diagram-agent-task-1-svg[data-preset="signal-flow"][data-theme="light"]{ --bg: #f4f9fc; --grid: #d4e5ee; --panel: rgba(255, 255, 255, 0.82); --panel-border: #bfd5e2; --lane-fill: rgba(232, 243, 248, 0.62); --lane-stroke: #a9c5d5; --text: #102638; --text-muted: #587287; --text-dim: #8aa2b4; --text-faint: #668397; --mask: #ffffff; --frontend-fill: rgba(6, 182, 212, 0.09); --frontend-stroke: #0789a1; --backend-fill: rgba(5, 150, 105, 0.09); --backend-stroke: #087f69; --database-fill: rgba(124, 58, 237, 0.09); --database-stroke: #7254c7; --cloud-fill: rgba(217, 119, 6, 0.08); --cloud-stroke: #b9670b; --security-fill: rgba(225, 29, 72, 0.08); --security-stroke: #c53a59; --messagebus-fill: rgba(234, 88, 12, 0.08); --messagebus-stroke: #c65f27; --external-fill: rgba(100, 116, 139, 0.1); --external-stroke: #607a8c; --arrow: #7b97aa; --arrow-emphasis: #0d9488; }
+#diagram-agent-task-1-svg[data-preset="blueprint"][data-theme="dark"]{ --bg: #06131f; --grid: #17425a; --panel: rgba(7, 27, 43, 0.9); --panel-border: #27627f; --lane-fill: rgba(10, 43, 66, 0.36); --lane-stroke: #34799a; --text: #e3f6ff; --text-muted: #91b8ca; --text-dim: #557e92; --text-faint: #739caf; --mask: #0a2031; --frontend-fill: rgba(26, 157, 193, 0.14); --frontend-stroke: #66d9ef; --backend-fill: rgba(31, 155, 124, 0.13); --backend-stroke: #69dfbd; --database-fill: rgba(120, 105, 196, 0.14); --database-stroke: #b4a8ff; --cloud-fill: rgba(197, 145, 43, 0.13); --cloud-stroke: #ffd166; --security-fill: rgba(199, 76, 104, 0.13); --security-stroke: #ff8da1; --messagebus-fill: rgba(207, 112, 49, 0.13); --messagebus-stroke: #ffad66; --external-fill: rgba(84, 119, 139, 0.18); --external-stroke: #a7cad9; --arrow: #78a3b7; --arrow-emphasis: #64dfc1; --toolbar-bg: rgba(7, 28, 45, 0.92); --toolbar-border: #34799a; --toolbar-text: #d8f3ff; --toolbar-hover: rgba(18, 58, 83, 0.95); --toolbar-menu-bg: #0a2031; }
+#diagram-agent-task-1-svg[data-preset="blueprint"][data-theme="light"]{ --bg: #edf7fa; --grid: #b5d5e1; --panel: rgba(249, 253, 255, 0.94); --panel-border: #78aabd; --lane-fill: rgba(210, 232, 240, 0.42); --lane-stroke: #83b2c4; --text: #123344; --text-muted: #4e7486; --text-dim: #86a6b4; --text-faint: #668c9d; --mask: #f9fdff; --frontend-fill: rgba(8, 145, 178, 0.08); --frontend-stroke: #087f9c; --backend-fill: rgba(5, 128, 101, 0.08); --backend-stroke: #08755f; --database-fill: rgba(100, 75, 180, 0.08); --database-stroke: #6757a8; --cloud-fill: rgba(181, 120, 15, 0.08); --cloud-stroke: #a86609; --security-fill: rgba(190, 48, 80, 0.07); --security-stroke: #b32f50; --messagebus-fill: rgba(196, 81, 22, 0.07); --messagebus-stroke: #b65120; --external-fill: rgba(79, 112, 128, 0.08); --external-stroke: #506f7e; --arrow: #6d93a5; --arrow-emphasis: #087f69; --toolbar-bg: rgba(247, 252, 254, 0.94); --toolbar-border: #8ab5c5; --toolbar-text: #294f61; --toolbar-hover: #ffffff; --toolbar-menu-bg: #f9fdff; }
+#diagram-agent-task-1-svg[data-preset="editorial"][data-theme="dark"]{ --bg: #181611; --grid: #39342a; --panel: rgba(35, 31, 24, 0.96); --panel-border: #625a4a; --lane-fill: rgba(52, 46, 35, 0.46); --lane-stroke: #726957; --text: #f4eddf; --text-muted: #b9ae9b; --text-dim: #776e60; --text-faint: #9d917e; --mask: #231f18; --frontend-fill: rgba(43, 133, 142, 0.16); --frontend-stroke: #7fc6c7; --backend-fill: rgba(63, 132, 92, 0.16); --backend-stroke: #8fc29e; --database-fill: rgba(117, 91, 141, 0.17); --database-stroke: #c0a4d0; --cloud-fill: rgba(170, 119, 49, 0.16); --cloud-stroke: #d8ad68; --security-fill: rgba(157, 69, 65, 0.17); --security-stroke: #df9085; --messagebus-fill: rgba(174, 79, 42, 0.16); --messagebus-stroke: #df946f; --external-fill: rgba(126, 115, 96, 0.18); --external-stroke: #b8ad99; --arrow: #948978; --arrow-emphasis: #dd6b3d; --toolbar-bg: rgba(35, 31, 24, 0.92); --toolbar-border: #625a4a; --toolbar-text: #eee5d5; --toolbar-hover: #302a20; --toolbar-menu-bg: #231f18; }
+#diagram-agent-task-1-svg[data-preset="editorial"][data-theme="light"]{ --bg: #f2eee5; --grid: #d8d0c2; --panel: rgba(251, 248, 241, 0.97); --panel-border: #c4b9a6; --lane-fill: rgba(229, 221, 207, 0.42); --lane-stroke: #b8aa94; --text: #242018; --text-muted: #6f6658; --text-dim: #a09788; --text-faint: #817767; --mask: #fbf8f1; --frontend-fill: rgba(31, 117, 126, 0.09); --frontend-stroke: #287e84; --backend-fill: rgba(42, 119, 75, 0.09); --backend-stroke: #397b53; --database-fill: rgba(105, 75, 130, 0.09); --database-stroke: #765d86; --cloud-fill: rgba(157, 103, 31, 0.1); --cloud-stroke: #9a671f; --security-fill: rgba(153, 58, 52, 0.09); --security-stroke: #9e463f; --messagebus-fill: rgba(182, 70, 27, 0.09); --messagebus-stroke: #ad4b25; --external-fill: rgba(101, 91, 75, 0.09); --external-stroke: #746b5e; --arrow: #8a806f; --arrow-emphasis: #bb4c23; --toolbar-bg: rgba(251, 248, 241, 0.94); --toolbar-border: #c4b9a6; --toolbar-text: #40392f; --toolbar-hover: #fffdf8; --toolbar-menu-bg: #fbf8f1; }
+#diagram-agent-task-1-svg{ width: 100%; min-width: min(900px, 100%); display: block; transform-origin: 0px 0px; transition: transform 0.18s; }
+@keyframes diagram-agent-task-1-archify-lens-in{
+  0% { opacity: 0; transform: translateY(5px) scale(0.985); }
+  100% { opacity: 1; transform: translateY(0px) scale(1); }
+}
+@keyframes diagram-agent-task-1-archify-guide-in{
+  0% { opacity: 0; transform: translateY(-5px) scale(0.985); }
+  100% { opacity: 1; transform: translateY(0px) scale(1); }
+}
+#diagram-agent-task-1-svg[data-chapter-handoff] [data-node-id][data-chapter-role="stay"]{ opacity: 1; }
+#diagram-agent-task-1-svg[data-chapter-handoff] [data-node-id][data-chapter-role="enter"]{ opacity: 0.78; }
+#diagram-agent-task-1-svg[data-chapter-handoff] [data-node-id][data-chapter-role="leave"]{ opacity: 0.26; }
+@keyframes diagram-agent-task-1-archify-chapter-anchor{
+  0% { opacity: 0.35; stroke-dashoffset: 8; }
+  45% { opacity: 1; }
+  100% { opacity: 0.72; stroke-dashoffset: 0; }
+}
+@keyframes diagram-agent-task-1-archify-story-caption-in{
+  0% { opacity: 0; transform: translateY(3px); }
+  100% { opacity: 1; transform: translateY(0px); }
+}
+#diagram-agent-task-1-svg[data-theme="light"] #theme-icon{ mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cg fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round'%3E%3Ccircle cx='10' cy='10' r='3.1'/%3E%3Cpath d='M10 2.2v1.4M10 16.4v1.4M2.2 10h1.4M16.4 10h1.4M4.5 4.5l1 1M14.5 14.5l1 1M15.5 4.5l-1 1M5.5 14.5l-1 1'/%3E%3C/g%3E%3C/svg%3E"); }
+#diagram-agent-task-1-svg[data-theme="dark"] #theme-icon{ mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M15.2 12.7A6.3 6.3 0 017.3 4.8a6.3 6.3 0 107.9 7.9Z' fill='none' stroke='black' stroke-width='1.7' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+#diagram-agent-task-1-svg .c-grid{ stroke: var(--grid); fill: none; }
+#diagram-agent-task-1-svg .c-mask{ fill: var(--mask); stroke: none; }
+#diagram-agent-task-1-svg .c-frontend{ fill: var(--frontend-fill); stroke: var(--frontend-stroke); }
+#diagram-agent-task-1-svg .c-backend{ fill: var(--backend-fill); stroke: var(--backend-stroke); }
+#diagram-agent-task-1-svg .c-database{ fill: var(--database-fill); stroke: var(--database-stroke); }
+#diagram-agent-task-1-svg .c-cloud{ fill: var(--cloud-fill); stroke: var(--cloud-stroke); }
+#diagram-agent-task-1-svg .c-security{ fill: var(--security-fill); stroke: var(--security-stroke); }
+#diagram-agent-task-1-svg .c-messagebus{ fill: var(--messagebus-fill); stroke: var(--messagebus-stroke); }
+#diagram-agent-task-1-svg .c-external{ fill: var(--external-fill); stroke: var(--external-stroke); }
+#diagram-agent-task-1-svg .t-primary{ fill: var(--text); }
+#diagram-agent-task-1-svg .t-muted{ fill: var(--text-muted); }
+#diagram-agent-task-1-svg .t-dim{ fill: var(--text-dim); }
+#diagram-agent-task-1-svg .t-frontend{ fill: var(--frontend-stroke); }
+#diagram-agent-task-1-svg .t-backend{ fill: var(--backend-stroke); }
+#diagram-agent-task-1-svg .t-database{ fill: var(--database-stroke); }
+#diagram-agent-task-1-svg .t-cloud{ fill: var(--cloud-stroke); }
+#diagram-agent-task-1-svg .t-security{ fill: var(--security-stroke); }
+#diagram-agent-task-1-svg .t-messagebus{ fill: var(--messagebus-stroke); }
+#diagram-agent-task-1-svg .t-external{ fill: var(--external-stroke); }
+#diagram-agent-task-1-svg .semantic-sigil{ fill: none; stroke: currentcolor; stroke-width: 1.35; stroke-linecap: round; stroke-linejoin: round; opacity: 0.76; pointer-events: none; }
+#diagram-agent-task-1-svg .semantic-sigil &gt; *{ vector-effect: non-scaling-stroke; }
+#diagram-agent-task-1-svg .semantic-sigil .sigil-fill{ fill: currentcolor; stroke: none; }
+#diagram-agent-task-1-svg .s-frontend{ color: var(--frontend-stroke); }
+#diagram-agent-task-1-svg .s-backend{ color: var(--backend-stroke); }
+#diagram-agent-task-1-svg .s-database{ color: var(--database-stroke); }
+#diagram-agent-task-1-svg .s-cloud{ color: var(--cloud-stroke); }
+#diagram-agent-task-1-svg .s-security{ color: var(--security-stroke); }
+#diagram-agent-task-1-svg .s-messagebus{ color: var(--messagebus-stroke); }
+#diagram-agent-task-1-svg .s-external{ color: var(--external-stroke); }
+#diagram-agent-task-1-svg .brand-mark{ pointer-events: none; }
+#diagram-agent-task-1-svg .brand-mark-badge{ fill: rgb(255, 255, 255); stroke: none; }
+#diagram-agent-task-1-svg .brand-mark-frame{ fill: none; stroke: rgb(203, 213, 225); stroke-width: 0.8; vector-effect: non-scaling-stroke; }
+#diagram-agent-task-1-svg .brand-mark-fallback{ fill: none; stroke: rgb(71, 85, 105); stroke-width: 1.15; stroke-linecap: round; stroke-linejoin: round; }
+#diagram-agent-task-1-svg[data-preset="blueprint"] .brand-mark-badge, #diagram-agent-task-1-svg[data-preset="blueprint"] .brand-mark-frame{ rx: 1px; }
+#diagram-agent-task-1-svg [data-detail]{ transition: opacity 160ms; }
+#diagram-agent-task-1-svg [data-detail-anchor]{ transform-box: fill-box; transform-origin: center center; transition: transform 160ms; }
+#diagram-agent-task-1-svg[data-focus-active] [data-focus-match][data-detail], #diagram-agent-task-1-svg[data-focus-active] [data-focus-match] [data-detail], #diagram-agent-task-1-svg[data-reach-active] [data-reach-match][data-detail], #diagram-agent-task-1-svg[data-reach-active] [data-reach-match] [data-detail], #diagram-agent-task-1-svg[data-lens-active] [data-lens-match][data-detail], #diagram-agent-task-1-svg[data-lens-active] [data-lens-match] [data-detail], #diagram-agent-task-1-svg[data-legend-preview-active] [data-legend-preview-match][data-detail], #diagram-agent-task-1-svg[data-legend-preview-active] [data-legend-preview-match] [data-detail], #diagram-agent-task-1-svg[data-intent-trace-active] [data-intent-trace-match][data-detail], #diagram-agent-task-1-svg[data-intent-trace-active] [data-intent-trace-match] [data-detail], #diagram-agent-task-1-svg[data-route-active] [data-route-match][data-detail], #diagram-agent-task-1-svg[data-route-active] [data-route-match] [data-detail], #diagram-agent-task-1-svg[data-story-active] [data-story-step][data-detail], #diagram-agent-task-1-svg[data-story-active] [data-story-step] [data-detail], #diagram-agent-task-1-svg[data-relationship-preview-active] [data-relationship-preview][data-detail], #diagram-agent-task-1-svg[data-relationship-preview-active] [data-relationship-preview] [data-detail], #diagram-agent-task-1-svg [data-node-id]:hover [data-detail], #diagram-agent-task-1-svg [data-node-id]:focus-visible [data-detail]{ opacity: 1; pointer-events: auto; }
+#diagram-agent-task-1-svg[data-focus-active] [data-focus-match] [data-detail-anchor], #diagram-agent-task-1-svg[data-reach-active] [data-reach-match] [data-detail-anchor], #diagram-agent-task-1-svg[data-lens-active] [data-lens-match] [data-detail-anchor], #diagram-agent-task-1-svg[data-legend-preview-active] [data-legend-preview-match] [data-detail-anchor], #diagram-agent-task-1-svg[data-intent-trace-active] [data-intent-trace-match] [data-detail-anchor], #diagram-agent-task-1-svg[data-route-active] [data-route-match] [data-detail-anchor], #diagram-agent-task-1-svg[data-story-active] [data-story-step] [data-detail-anchor], #diagram-agent-task-1-svg [data-node-id]:hover [data-detail-anchor], #diagram-agent-task-1-svg [data-node-id]:focus-visible [data-detail-anchor]{ transform: none; }
+#diagram-agent-task-1-svg .a-default{ stroke: var(--arrow); fill: none; }
+#diagram-agent-task-1-svg .a-emphasis{ stroke: var(--arrow-emphasis); fill: none; }
+#diagram-agent-task-1-svg .a-security{ stroke: var(--security-stroke); fill: none; stroke-dasharray: 5, 5; }
+#diagram-agent-task-1-svg .a-dashed{ stroke: var(--database-stroke); fill: none; stroke-dasharray: 4, 4; }
+#diagram-agent-task-1-svg .m-default{ fill: var(--arrow); }
+#diagram-agent-task-1-svg .m-emphasis{ fill: var(--arrow-emphasis); }
+#diagram-agent-task-1-svg .m-security{ fill: var(--security-stroke); }
+#diagram-agent-task-1-svg .m-dashed{ fill: var(--database-stroke); }
+#diagram-agent-task-1-svg [data-node-id]{ cursor: pointer; transition: opacity 0.18s, filter 0.18s; }
+#diagram-agent-task-1-svg [data-edge-from]{ transition: opacity 0.18s, filter 0.18s; }
+#diagram-agent-task-1-svg [data-node-id]:hover, #diagram-agent-task-1-svg [data-node-id]:focus-visible{ filter: drop-shadow(0 0 7px var(--frontend-stroke)); outline: none; }
+#diagram-agent-task-1-svg [data-node-id]:hover .source-evidence-beacon, #diagram-agent-task-1-svg [data-node-id]:focus-visible .source-evidence-beacon, #diagram-agent-task-1-svg [data-node-id][data-focus-selected] .source-evidence-beacon{ opacity: 1; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--backend-stroke) 72%, transparent)); }
+#diagram-agent-task-1-svg[data-preset="signal-flow"] .source-evidence-beacon{ opacity: 0.9; }
+#diagram-agent-task-1-svg[data-preset="blueprint"] .source-evidence-beacon rect{ rx: 0.8px; filter: none; }
+#diagram-agent-task-1-svg [data-legend-kind][role="button"]{ cursor: pointer; }
+#diagram-agent-task-1-svg [data-legend-kind]:focus{ outline: none; }
+#diagram-agent-task-1-svg [data-legend-hit]{ fill: transparent; stroke: transparent; stroke-width: 1.4; pointer-events: all; vector-effect: non-scaling-stroke; transition: stroke 150ms, stroke-width 150ms, filter 150ms; }
+#diagram-agent-task-1-svg [data-legend-count-badge]{ pointer-events: none; }
+#diagram-agent-task-1-svg [data-legend-count-badge] rect{ fill: var(--mask); stroke: var(--panel-border); stroke-width: 1; vector-effect: non-scaling-stroke; }
+#diagram-agent-task-1-svg [data-legend-count-badge] text{ fill: var(--text-muted); font-size: 8px; font-weight: 700; text-anchor: middle; }
+#diagram-agent-task-1-svg [data-legend-kind][role="button"]:hover [data-legend-hit]{ stroke: color-mix(in srgb, var(--database-stroke) 58%, transparent); }
+#diagram-agent-task-1-svg [data-legend-kind][role="button"]:focus-visible [data-legend-hit]{ stroke: var(--frontend-stroke); stroke-width: 1.8; filter: drop-shadow(0 0 3px var(--frontend-stroke)); }
+#diagram-agent-task-1-svg [data-legend-kind][data-legend-selected] [data-legend-hit]{ stroke: var(--database-stroke); stroke-width: 2.2; stroke-dasharray: 3, 2; }
+#diagram-agent-task-1-svg [data-legend-kind][data-legend-selected] [data-legend-count-badge] rect{ stroke: var(--database-stroke); stroke-width: 1.8; }
+#diagram-agent-task-1-svg [data-legend-kind][data-legend-zero]{ opacity: 0.44; }
+#diagram-agent-task-1-svg[data-preset="signal-flow"] [data-legend-kind][data-legend-selected] [data-legend-hit]{ filter: drop-shadow(0 0 4px var(--database-stroke)); }
+#diagram-agent-task-1-svg[data-preset="blueprint"] [data-legend-hit], #diagram-agent-task-1-svg[data-preset="blueprint"] [data-legend-count-badge] rect{ rx: 0; filter: none; }
+#diagram-agent-task-1-svg[data-legend-preview-active] [data-node-id], #diagram-agent-task-1-svg[data-legend-preview-active] [data-edge-from]{ opacity: 0.11; }
+#diagram-agent-task-1-svg[data-legend-preview-active] [data-legend-preview-match]{ opacity: 1; }
+#diagram-agent-task-1-svg[data-legend-preview-active] [data-legend-preview-peer]{ opacity: 0.62; }
+#diagram-agent-task-1-svg[data-legend-preview-active] [data-legend-preview-selected]{ filter: drop-shadow(0 0 8px var(--database-stroke)); }
+#diagram-agent-task-1-svg[data-lens-active] [data-node-id], #diagram-agent-task-1-svg[data-lens-active] [data-edge-from]{ opacity: 0.11; }
+#diagram-agent-task-1-svg[data-lens-active] [data-lens-match]{ opacity: 1; }
+#diagram-agent-task-1-svg[data-lens-active] [data-lens-peer]{ opacity: 0.62; }
+#diagram-agent-task-1-svg[data-lens-active] [data-lens-selected]{ filter: drop-shadow(0 0 10px var(--database-stroke)); }
+#diagram-agent-task-1-svg[data-preset="signal-flow"] .semantic-lens-flow{ stroke-width: 3.7; opacity: 1; }
+#diagram-agent-task-1-svg[data-preset="signal-flow"] .semantic-lens-flow[data-direction="out"], #diagram-agent-task-1-svg[data-preset="signal-flow"] .semantic-lens-flow[data-direction="forward"]{ filter: drop-shadow(0 0 6px var(--frontend-stroke)); }
+#diagram-agent-task-1-svg[data-preset="signal-flow"] .semantic-lens-flow[data-direction="in"], #diagram-agent-task-1-svg[data-preset="signal-flow"] .semantic-lens-flow[data-direction="reverse"]{ filter: drop-shadow(0 0 6px var(--database-stroke)); }
+#diagram-agent-task-1-svg[data-preset="signal-flow"] .semantic-lens-flow[data-direction="within"]{ filter: drop-shadow(0 0 6px var(--messagebus-stroke)); }
+#diagram-agent-task-1-svg[data-preset="blueprint"] .semantic-lens-flow{ stroke-width: 2.45; stroke-linecap: square; filter: none; opacity: 0.78; }
+#diagram-agent-task-1-svg[data-focus-active] [data-node-id], #diagram-agent-task-1-svg[data-focus-active] [data-edge-from]{ opacity: 0.13; }
+#diagram-agent-task-1-svg[data-focus-active] [data-focus-match]{ opacity: 1; }
+#diagram-agent-task-1-svg[data-focus-active] [data-focus-selected]{ filter: drop-shadow(0 0 10px var(--frontend-stroke)); }
+#diagram-agent-task-1-svg[data-reach-active] [data-node-id], #diagram-agent-task-1-svg[data-reach-active] [data-edge-from]{ opacity: 0.09; }
+#diagram-agent-task-1-svg[data-reach-active] [data-reach-match]{ opacity: 1; }
+#diagram-agent-task-1-svg[data-reach-active="upstream"] [data-reach-origin]{ filter: drop-shadow(0 0 11px var(--database-stroke)); }
+#diagram-agent-task-1-svg[data-reach-active="downstream"] [data-reach-origin]{ filter: drop-shadow(0 0 11px var(--backend-stroke)); }
+#diagram-agent-task-1-svg[data-reach-active="upstream"] [data-edge-from][data-reach-match]{ filter: drop-shadow(0 0 4px color-mix(in srgb, var(--database-stroke) 72%, transparent)); }
+#diagram-agent-task-1-svg[data-reach-active="downstream"] [data-edge-from][data-reach-match]{ filter: drop-shadow(0 0 4px color-mix(in srgb, var(--backend-stroke) 72%, transparent)); }
+#diagram-agent-task-1-svg[data-preset="blueprint"][data-reach-active] [data-reach-origin], #diagram-agent-task-1-svg[data-preset="blueprint"][data-reach-active] [data-edge-from][data-reach-match]{ filter: none; }
+#diagram-agent-task-1-svg[data-preset="blueprint"] .relationship-hit-target:focus-visible .relationship-focus-rail{ stroke-linecap: square; filter: none; }
+#diagram-agent-task-1-svg[data-relationship-direct-active] [data-node-id], #diagram-agent-task-1-svg[data-relationship-direct-active] [data-edge-from]{ opacity: 0.16; }
+#diagram-agent-task-1-svg[data-relationship-direct-active] [data-relationship-preview], #diagram-agent-task-1-svg[data-relationship-direct-active] [data-relationship-preview-node]{ opacity: 1; }
+#diagram-agent-task-1-svg[data-focus-active]:not([data-relationship-pin-active]) .relationship-hit-rail, #diagram-agent-task-1-svg[data-story-active] .relationship-hit-rail, #diagram-agent-task-1-svg[data-route-picking] .relationship-hit-rail, #diagram-agent-task-1-svg[data-route-active] .relationship-hit-rail, #diagram-agent-task-1-svg[data-lens-active] .relationship-hit-rail, #diagram-agent-task-1-svg[data-chapter-preview] .relationship-hit-rail{ pointer-events: none; }
+#diagram-agent-task-1-svg[data-relationship-preview-active] [data-focus-match]{ opacity: 0.18; }
+#diagram-agent-task-1-svg[data-relationship-preview-active] [data-relationship-preview], #diagram-agent-task-1-svg[data-relationship-preview-active] [data-relationship-preview-node]{ opacity: 1; }
+#diagram-agent-task-1-svg[data-relationship-preview-active] [data-relationship-preview]{ filter: drop-shadow(0 0 5px var(--arrow-emphasis)); }
+#diagram-agent-task-1-svg[data-relationship-preview-active] [data-relationship-preview] path, #diagram-agent-task-1-svg[data-relationship-preview-active] path[data-relationship-preview], #diagram-agent-task-1-svg[data-relationship-preview-active] [data-relationship-preview] line, #diagram-agent-task-1-svg[data-relationship-preview-active] line[data-relationship-preview], #diagram-agent-task-1-svg[data-relationship-preview-active] [data-relationship-preview] polyline, #diagram-agent-task-1-svg[data-relationship-preview-active] polyline[data-relationship-preview]{ stroke-width: 2.75; }
+#diagram-agent-task-1-svg[data-relationship-preview-active] [data-relationship-preview-source]{ filter: drop-shadow(0 0 7px var(--frontend-stroke)); }
+#diagram-agent-task-1-svg[data-relationship-preview-active] [data-relationship-preview-target]{ filter: drop-shadow(0 0 7px var(--database-stroke)); }
+#diagram-agent-task-1-svg[data-preset="signal-flow"] .relationship-flow-pulse{ stroke: var(--frontend-stroke); stroke-width: 3.85; filter: drop-shadow(0 0 7px var(--frontend-stroke)); }
+#diagram-agent-task-1-svg[data-preset="blueprint"] .relationship-flow-pulse{ stroke-width: 2.5; stroke-linecap: square; filter: none; }
+#diagram-agent-task-1-svg[data-preset="editorial"] .relationship-flow-pulse{ stroke: var(--arrow-emphasis); stroke-width: 2.75; filter: none; }
+#diagram-agent-task-1-svg[data-preset="signal-flow"] .semantic-flow-token{ filter: drop-shadow(currentcolor 0px 0px 5px); }
+#diagram-agent-task-1-svg[data-preset="blueprint"] .semantic-flow-token{ filter: none; }
+#diagram-agent-task-1-svg[data-preset="editorial"] .semantic-flow-token{ filter: none; }
+#diagram-agent-task-1-svg[data-intent-trace-active] [data-node-id], #diagram-agent-task-1-svg[data-intent-trace-active] [data-edge-from]{ opacity: 0.2; }
+#diagram-agent-task-1-svg[data-intent-trace-active] [data-intent-trace-match]{ opacity: 1; }
+#diagram-agent-task-1-svg[data-intent-trace-active] [data-intent-trace-selected]{ filter: drop-shadow(0 0 10px var(--frontend-stroke)); }
+#diagram-agent-task-1-svg[data-preset="blueprint"] [data-intent-trace-selected], #diagram-agent-task-1-svg[data-preset="blueprint"] .intent-trace-flow{ filter: none; stroke-linecap: square; }
+#diagram-agent-task-1-svg[data-preset="editorial"] [data-intent-trace-selected], #diagram-agent-task-1-svg[data-preset="editorial"] .intent-trace-flow{ filter: none; }
+#diagram-agent-task-1-svg[data-route-picking="target"] [data-node-id]{ opacity: 0.24; }
+#diagram-agent-task-1-svg[data-route-picking="target"] [data-route-candidate], #diagram-agent-task-1-svg[data-route-picking="target"] [data-route-start]{ opacity: 1; }
+#diagram-agent-task-1-svg[data-route-picking] [data-node-id]{ cursor: crosshair; }
+#diagram-agent-task-1-svg[data-route-picking] [data-route-start]{ filter: drop-shadow(0 0 10px var(--frontend-stroke)); }
+#diagram-agent-task-1-svg[data-route-active] [data-node-id], #diagram-agent-task-1-svg[data-route-active] [data-edge-from]{ opacity: 0.11; }
+#diagram-agent-task-1-svg[data-route-active] [data-route-match]{ opacity: 1; }
+#diagram-agent-task-1-svg[data-route-active] [data-route-start]{ filter: drop-shadow(0 0 11px var(--frontend-stroke)); }
+#diagram-agent-task-1-svg[data-route-active] [data-route-end]{ filter: drop-shadow(0 0 11px var(--security-stroke)); }
+#diagram-agent-task-1-svg[data-route-active] [data-route-step]:not([data-route-start]):not([data-route-end]){ filter: drop-shadow(0 0 7px var(--backend-stroke)); }
+#diagram-agent-task-1-svg[data-route-journey] [data-route-match][data-route-journey-state="past"]{ opacity: 0.62; }
+#diagram-agent-task-1-svg[data-route-journey] [data-route-match][data-route-journey-state="future"]{ opacity: 0.34; }
+#diagram-agent-task-1-svg[data-route-journey] [data-route-match][data-route-journey-state="current"]{ opacity: 1; }
+#diagram-agent-task-1-svg[data-route-journey] [data-node-id][data-route-journey-current]{ filter: drop-shadow(0 0 10px var(--backend-stroke)); }
+#diagram-agent-task-1-svg[data-route-journey] [data-edge-from][data-route-journey-current]{ opacity: 1; filter: drop-shadow(0 0 6px var(--backend-stroke)); }
+#diagram-agent-task-1-svg[data-preset="blueprint"] [data-route-start], #diagram-agent-task-1-svg[data-preset="blueprint"] [data-route-end], #diagram-agent-task-1-svg[data-preset="blueprint"] [data-route-step], #diagram-agent-task-1-svg[data-preset="blueprint"] .route-probe-flow{ filter: none; stroke-linecap: square; }
+#diagram-agent-task-1-svg[data-preset="blueprint"] .route-journey-flow{ filter: none; stroke-linecap: square; }
+#diagram-agent-task-1-svg[data-preset="editorial"] [data-route-start], #diagram-agent-task-1-svg[data-preset="editorial"] [data-route-end], #diagram-agent-task-1-svg[data-preset="editorial"] [data-route-step], #diagram-agent-task-1-svg[data-preset="editorial"] .route-probe-flow, #diagram-agent-task-1-svg[data-preset="editorial"] .route-journey-flow{ filter: none; }
+#diagram-agent-task-1-svg[data-preset="editorial"] .c-grid{ stroke-dasharray: 1, 4; opacity: 0.48; }
+#diagram-agent-task-1-svg[data-preset="editorial"] .c-region{ fill: color-mix(in srgb, var(--cloud-fill) 48%, transparent); stroke-dasharray: 9, 4; }
+#diagram-agent-task-1-svg[data-preset="editorial"] [data-node-id]:hover, #diagram-agent-task-1-svg[data-preset="editorial"] [data-node-id]:focus-visible, #diagram-agent-task-1-svg[data-preset="editorial"][data-focus-active] [data-focus-selected]{ filter: drop-shadow(0 2px 2px color-mix(in srgb, var(--text) 18%, transparent)); }
+#diagram-agent-task-1-svg[data-preset="blueprint"] .c-grid{ stroke-dasharray: 1, 3; opacity: 0.78; }
+#diagram-agent-task-1-svg[data-preset="blueprint"] .c-region{ fill: color-mix(in srgb, var(--cloud-fill) 58%, transparent); stroke-dasharray: 12, 4, 2, 4; }
+#diagram-agent-task-1-svg[data-preset="blueprint"] .c-security-group, #diagram-agent-task-1-svg[data-preset="blueprint"] .c-lane{ stroke-dasharray: 7, 3; }
+#diagram-agent-task-1-svg[data-preset="blueprint"] [data-node-id]:hover, #diagram-agent-task-1-svg[data-preset="blueprint"] [data-node-id]:focus-visible{ filter: drop-shadow(0 0 3px var(--frontend-stroke)); }
+#diagram-agent-task-1-svg[data-preset="blueprint"][data-focus-active] [data-focus-selected]{ filter: drop-shadow(0 0 3px var(--frontend-stroke)); }
+#diagram-agent-task-1-svg[data-preset="blueprint"][data-focus-active][data-reach-active] [data-focus-selected][data-reach-origin]{ filter: none; }
+#diagram-agent-task-1-svg[data-preset="blueprint"][data-relationship-preview-active] [data-relationship-preview], #diagram-agent-task-1-svg[data-preset="blueprint"][data-relationship-preview-active] [data-relationship-preview-source], #diagram-agent-task-1-svg[data-preset="blueprint"][data-relationship-preview-active] [data-relationship-preview-target]{ filter: drop-shadow(0 0 3px var(--frontend-stroke)); }
+#diagram-agent-task-1-svg[data-story-beat] [data-story-step]{ opacity: 0.22; filter: saturate(0.42); transition: opacity 180ms, filter 180ms; }
+#diagram-agent-task-1-svg[data-story-beat] [data-story-step][data-story-beat-state="past"]{ opacity: 0.72; filter: saturate(0.82); }
+#diagram-agent-task-1-svg[data-story-beat] [data-story-step][data-story-beat-state="next"]{ opacity: 0.5; filter: saturate(0.66); }
+#diagram-agent-task-1-svg[data-story-beat] [data-story-step][data-story-beat-state="active"]{ opacity: 1; filter: drop-shadow(0 0 7px var(--frontend-stroke)); animation: 360ms cubic-bezier(0.22, 1, 0.36, 1) 0s 1 normal both running diagram-agent-task-1-archify-story-beat-node; }
+#diagram-agent-task-1-svg[data-story-beat] [data-edge-from][data-story-beat-step]{ opacity: 0.16; transition: opacity 160ms; }
+#diagram-agent-task-1-svg[data-story-beat] [data-edge-from][data-story-beat-step][data-story-beat-state="past"]{ opacity: 0.58; }
+#diagram-agent-task-1-svg[data-story-beat] [data-edge-from][data-story-beat-step][data-story-beat-state="next"]{ opacity: 0.34; }
+#diagram-agent-task-1-svg[data-story-beat] [data-edge-from][data-story-beat-step][data-story-beat-state="active"]{ opacity: 1; }
+#diagram-agent-task-1-svg[data-story-beat] .story-trail-flow{ opacity: 0; transition: opacity 160ms; }
+#diagram-agent-task-1-svg[data-story-beat] .story-trail-flow[data-story-beat-state="past"]{ opacity: 0.34; }
+#diagram-agent-task-1-svg[data-story-beat] .story-trail-flow[data-story-beat-state="next"]{ opacity: 0.2; }
+#diagram-agent-task-1-svg[data-story-beat] .story-trail-flow[data-story-beat-state="active"]{ opacity: 0.92; }
+#diagram-agent-task-1-svg[data-story-beat] .story-trail-flow[data-story-pulse="true"]{ stroke-dasharray: 2, 13; stroke-dashoffset: 30; opacity: 0.92; animation: 0.78s linear 0s 1 normal both running diagram-agent-task-1-archify-story-flow; }
+#diagram-agent-task-1-svg[data-preset="blueprint"] .story-trail-flow{ stroke-linecap: square; filter: none; opacity: 0.5; }
+#diagram-agent-task-1-svg[data-preset="blueprint"][data-story-beat] [data-story-step][data-story-beat-state="active"]{ filter: none; animation: auto ease 0s 1 normal none running none; }
+#diagram-agent-task-1-svg[data-preset="editorial"] .story-trail-flow{ filter: none; }
+#diagram-agent-task-1-svg[data-preset="editorial"][data-story-beat] [data-story-step][data-story-beat-state="active"]{ filter: drop-shadow(0 2px 2px color-mix(in srgb, var(--text) 16%, transparent)); }
+#diagram-agent-task-1-svg[data-chapter-preview] [data-node-id], #diagram-agent-task-1-svg[data-chapter-preview] [data-edge-from]{ opacity: 0.1 !important; filter: none !important; transition: none !important; }
+#diagram-agent-task-1-svg[data-chapter-preview] .story-trail-overlay{ opacity: 0.08 !important; }
+#diagram-agent-task-1-svg[data-chapter-preview] [data-node-id][data-chapter-preview-role="stay"]{ opacity: 0.76 !important; filter: saturate(0.7) !important; }
+#diagram-agent-task-1-svg[data-chapter-preview] [data-node-id][data-chapter-preview-role="enter"]{ opacity: 1 !important; filter: saturate(1.2) !important; }
+#diagram-agent-task-1-svg[data-chapter-preview] [data-node-id][data-chapter-preview-role="leave"]{ opacity: 0.28 !important; filter: grayscale(0.72) !important; }
+#diagram-agent-task-1-svg[data-preset="blueprint"][data-chapter-preview] [data-node-id]{ filter: none !important; }
+#diagram-agent-task-1-svg .c-security-group{ fill: transparent; stroke: var(--security-stroke); stroke-dasharray: 4, 4; }
+#diagram-agent-task-1-svg .c-region{ fill: rgba(251, 191, 36, 0.05); stroke: var(--cloud-stroke); stroke-dasharray: 8, 4; }
+#diagram-agent-task-1-svg .c-lane{ fill: var(--lane-fill); stroke: var(--lane-stroke); stroke-dasharray: 6, 6; }
+#diagram-agent-task-1-svg[data-preset="signal-flow"][data-animation="trace"] [data-animate="edge"]{ stroke-linecap: round; filter: drop-shadow(0 0 3px var(--arrow-emphasis)); animation-duration: 1.75s; }
+#diagram-agent-task-1-svg[data-preset="signal-flow"][data-animation="trace"] [data-animate="node"]{ animation-duration: 3.1s; }
+#diagram-agent-task-1-svg[data-preset="blueprint"][data-animation="trace"] [data-animate="edge"]{ stroke-linecap: square; filter: none; animation-duration: 2.15s; }
+#diagram-agent-task-1-svg[data-preset="blueprint"][data-animation="trace"] [data-animate="node"]{ animation-name: diagram-agent-task-1-archify-blueprint-node-pulse; animation-duration: 3.8s; }
+#diagram-agent-task-1-svg[data-preset="editorial"][data-animation="trace"] [data-animate="edge"]{ filter: none; animation-duration: 2.2s; }
+#diagram-agent-task-1-svg[data-preset="editorial"][data-animation="trace"] [data-animate="node"]{ animation-name: diagram-agent-task-1-archify-editorial-node-pulse; animation-duration: 3.5s; }
+@keyframes diagram-agent-task-1-archify-edge-flow{
+  0% { stroke-dasharray: 10, 8; stroke-dashoffset: 54; opacity: 0.42; }
+  88% { stroke-dasharray: 10, 8; stroke-dashoffset: 0; opacity: 1; }
+  99.9% { stroke-dasharray: 10, 8; stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes diagram-agent-task-1-archify-node-pulse{
+  0%, 72%, 100% { filter: none; stroke-width: 1.5; }
+  18%, 36% { filter: drop-shadow(0 0 8px var(--arrow-emphasis)); stroke-width: 2.4; }
+}
+@keyframes diagram-agent-task-1-archify-blueprint-node-pulse{
+  0%, 72%, 100% { opacity: 1; filter: none; }
+  18%, 36% { opacity: 0.72; filter: drop-shadow(0 0 2px var(--frontend-stroke)); }
+}
+@keyframes diagram-agent-task-1-archify-editorial-node-pulse{
+  0%, 72%, 100% { opacity: 1; filter: none; }
+  18%, 36% { opacity: 0.78; filter: drop-shadow(0 2px 2px color-mix(in srgb, var(--text) 18%, transparent)); }
+}
+@keyframes diagram-agent-task-1-archify-signal-scan{
+  0%, 18% { opacity: 1; transform: translateX(-70%); }
+  70% { opacity: 1; transform: translateX(70%); }
+  100% { opacity: 0; transform: translateX(70%); }
+}
+@keyframes diagram-agent-task-1-archify-radar-live{
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--backend-stroke) 52%, transparent); }
+  55%, 100% { box-shadow: transparent 0px 0px 0px 0.32rem; }
+}
+@keyframes diagram-agent-task-1-archify-guided-progress{
+  0% { transform: scaleX(var(--guided-progress-start, 0)); }
+  100% { transform: scaleX(1); }
+}
+@keyframes diagram-agent-task-1-archify-story-flow{
+  100% { stroke-dashoffset: 0; }
+}
+@keyframes diagram-agent-task-1-archify-intent-trace-flow{
+  0% { opacity: 0.28; stroke-dashoffset: 0; }
+  12%, 78% { opacity: 0.94; }
+  100% { opacity: 0; stroke-dashoffset: -1; }
+}
+@keyframes diagram-agent-task-1-archify-route-probe-flow{
+  0% { stroke-dashoffset: 0; opacity: 0.96; }
+  78% { stroke-dashoffset: -1; opacity: 0.96; }
+  100% { stroke-dasharray: none; stroke-dashoffset: 0; opacity: 0.58; }
+}
+@keyframes diagram-agent-task-1-archify-route-journey-flow{
+  0% { opacity: 0.16; stroke-dashoffset: 0; }
+  14%, 76% { opacity: 1; }
+  100% { opacity: 0; stroke-dashoffset: -1; }
+}
+@keyframes diagram-agent-task-1-archify-semantic-lens-flow{
+  0% { opacity: 0.2; stroke-dashoffset: 0; }
+  12%, 78% { opacity: 0.9; }
+  100% { opacity: 0; stroke-dashoffset: -1; }
+}
+@keyframes diagram-agent-task-1-archify-relationship-pulse{
+  0% { opacity: 0.18; stroke-dashoffset: 0; }
+  10%, 76% { opacity: 0.98; }
+  100% { opacity: 0; stroke-dashoffset: -1; }
+}
+@keyframes diagram-agent-task-1-archify-relationship-token-life{
+  0%, 7% { opacity: 0; }
+  13%, 82% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes diagram-agent-task-1-archify-story-beat-node{
+  0% { opacity: 0.48; filter: saturate(0.6); }
+  58% { opacity: 1; filter: drop-shadow(0 0 10px var(--frontend-stroke)); }
+  100% { opacity: 1; filter: drop-shadow(0 0 7px var(--frontend-stroke)); }
+}
+@keyframes diagram-agent-task-1-archify-share-cue-enter{
+  0% { opacity: 0; transform: translate(-50%, -0.45rem); }
+  100% { opacity: 1; transform: translate(-50%, 0px); }
+}
+@keyframes diagram-agent-task-1-archify-share-cue-pulse{
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.48; transform: scale(0.78); }
+}
+#diagram-agent-task-1-svg, #diagram-agent-task-1-svg{ --bg: #020617; --grid: #1e293b; --text: #ffffff; --text-muted: #94a3b8; --text-dim: #475569; --text-faint: #7d8da1; --panel: rgba(15, 23, 42, 0.5); --panel-border: #1e293b; --lane-fill: rgba(15, 23, 42, 0.22); --lane-stroke: #334155; --arrow: #64748b; --arrow-emphasis: #34d399; --mask: #0f172a; --frontend-fill: rgba(8, 51, 68, 0.4); --frontend-stroke: #22d3ee; --backend-fill: rgba(6, 78, 59, 0.4); --backend-stroke: #34d399; --database-fill: rgba(76, 29, 149, 0.4); --database-stroke: #a78bfa; --cloud-fill: rgba(120, 53, 15, 0.3); --cloud-stroke: #fbbf24; --security-fill: rgba(136, 19, 55, 0.4); --security-stroke: #fb7185; --messagebus-fill: rgba(251, 146, 60, 0.3); --messagebus-stroke: #fb923c; --external-fill: rgba(30, 41, 59, 0.5); --external-stroke: #94a3b8; --toolbar-bg: rgba(15, 23, 42, 0.8); --toolbar-border: #334155; --toolbar-text: #e2e8f0; --toolbar-hover: rgba(15, 23, 42, 0.95); --toolbar-menu-bg: #0f172a; }
+@media (prefers-color-scheme: light){#diagram-agent-task-1-svg, #diagram-agent-task-1-svg{ --bg: #f8fafc; --grid: #e2e8f0; --text: #0f172a; --text-muted: #64748b; --text-dim: #94a3b8; --text-faint: #64748b; --panel: #ffffff; --panel-border: #e2e8f0; --lane-fill: rgba(248, 250, 252, 0.65); --lane-stroke: #cbd5e1; --arrow: #94a3b8; --arrow-emphasis: #059669; --mask: #ffffff; --frontend-fill: rgba(34, 211, 238, 0.15); --frontend-stroke: #0891b2; --backend-fill: rgba(52, 211, 153, 0.18); --backend-stroke: #059669; --database-fill: rgba(167, 139, 250, 0.2); --database-stroke: #7c3aed; --cloud-fill: rgba(251, 191, 36, 0.18); --cloud-stroke: #d97706; --security-fill: rgba(251, 113, 133, 0.15); --security-stroke: #e11d48; --messagebus-fill: rgba(251, 146, 60, 0.15); --messagebus-stroke: #ea580c; --external-fill: rgba(148, 163, 184, 0.18); --external-stroke: #64748b; --toolbar-bg: rgba(255, 255, 255, 0.92); --toolbar-border: #cbd5e1; --toolbar-text: #334155; --toolbar-hover: #ffffff; --toolbar-menu-bg: #ffffff; }}
+#diagram-agent-task-1-svg[data-theme="light"]{ --bg: #f8fafc; --grid: #e2e8f0; --text: #0f172a; --text-muted: #64748b; --text-dim: #94a3b8; --text-faint: #64748b; --panel: #ffffff; --panel-border: #e2e8f0; --lane-fill: rgba(248, 250, 252, 0.65); --lane-stroke: #cbd5e1; --arrow: #94a3b8; --arrow-emphasis: #059669; --mask: #ffffff; --frontend-fill: rgba(34, 211, 238, 0.15); --frontend-stroke: #0891b2; --backend-fill: rgba(52, 211, 153, 0.18); --backend-stroke: #059669; --database-fill: rgba(167, 139, 250, 0.2); --database-stroke: #7c3aed; --cloud-fill: rgba(251, 191, 36, 0.18); --cloud-stroke: #d97706; --security-fill: rgba(251, 113, 133, 0.15); --security-stroke: #e11d48; --messagebus-fill: rgba(251, 146, 60, 0.15); --messagebus-stroke: #ea580c; --external-fill: rgba(148, 163, 184, 0.18); --external-stroke: #64748b; --toolbar-bg: rgba(255, 255, 255, 0.92); --toolbar-border: #cbd5e1; --toolbar-text: #334155; --toolbar-hover: #ffffff; --toolbar-menu-bg: #ffffff; }
+#diagram-agent-task-1-svg[data-theme="dark"]{ --bg: #020617; --grid: #1e293b; --text: #ffffff; --text-muted: #94a3b8; --text-dim: #475569; --text-faint: #7d8da1; --panel: rgba(15, 23, 42, 0.5); --panel-border: #1e293b; --lane-fill: rgba(15, 23, 42, 0.22); --lane-stroke: #334155; --arrow: #64748b; --arrow-emphasis: #34d399; --mask: #0f172a; --frontend-fill: rgba(8, 51, 68, 0.4); --frontend-stroke: #22d3ee; --backend-fill: rgba(6, 78, 59, 0.4); --backend-stroke: #34d399; --database-fill: rgba(76, 29, 149, 0.4); --database-stroke: #a78bfa; --cloud-fill: rgba(120, 53, 15, 0.3); --cloud-stroke: #fbbf24; --security-fill: rgba(136, 19, 55, 0.4); --security-stroke: #fb7185; --messagebus-fill: rgba(251, 146, 60, 0.3); --messagebus-stroke: #fb923c; --external-fill: rgba(30, 41, 59, 0.5); --external-stroke: #94a3b8; --toolbar-bg: rgba(15, 23, 42, 0.8); --toolbar-border: #334155; --toolbar-text: #e2e8f0; --toolbar-hover: rgba(15, 23, 42, 0.95); --toolbar-menu-bg: #0f172a; }
+#diagram-agent-task-1-svg rect.c-bg-rect{ fill: var(--bg); }</style><rect width="100%" height="100%" class="c-bg-rect" />
+        <desc id="diagram-agent-task-1-desc">先說明需求、讀取相關檔案、確認修改範圍，再執行並由學生驗證成果。</desc>
+
+        <defs>
+          <marker id="diagram-agent-task-1-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
+          </marker>
+          <marker id="diagram-agent-task-1-arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
+          </marker>
+          <marker id="diagram-agent-task-1-arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
+          </marker>
+          <marker id="diagram-agent-task-1-arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
+          </marker>
+          <pattern id="diagram-agent-task-1-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" class="c-grid" stroke-width="0.5" />
+          </pattern>
+        </defs>
+
+
+        <rect width="100%" height="100%" fill="url(#diagram-agent-task-1-grid)" />
+
+
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-0" x="40" y="52" width="1018" height="104" rx="10" class="c-lane" stroke-width="1" />
+        <text x="54" y="74" class="t-dim" font-size="10" font-weight="600">01 / 一起完成一個任務</text>
+
+
+
+
+
+
+
+
+        <path data-edge-from="ask" data-edge-to="read" data-edge-key="0" data-edge-id="e0" data-composition-points="208,119;236,119" d="M 208 119 L 236 119" class="a-default" stroke-width="1.4" marker-end="url(#diagram-agent-task-1-arrowhead)" />
+        <path data-edge-from="read" data-edge-to="allow" data-edge-key="1" data-edge-id="e1" data-composition-points="396,119;424,119" d="M 396 119 L 424 119" class="a-default" stroke-width="1.4" marker-end="url(#diagram-agent-task-1-arrowhead)" />
+        <path data-edge-from="allow" data-edge-to="run" data-edge-key="2" data-edge-id="e2" data-composition-points="584,119;612,119" d="M 584 119 L 612 119" class="a-default" stroke-width="1.4" marker-end="url(#diagram-agent-task-1-arrowhead)" />
+        <path data-edge-from="run" data-edge-to="check" data-edge-key="3" data-edge-id="e3" data-composition-points="772,119;800,119" d="M 772 119 L 800 119" class="a-default" stroke-width="1.4" marker-end="url(#diagram-agent-task-1-arrowhead)" />
+
+
+        <g id="diagram-agent-task-1-node-ask" data-node-id="ask" data-node-label="說明需求" tabindex="0" role="button" aria-label="Focus 說明需求, 一起完成一個任務" aria-pressed="false" data-node-kind="external" data-node-context="一起完成一個任務">
+          <title>說明需求 · 一起完成一個任務</title>
+          <rect x="48" y="93" width="160" height="52" rx="6" class="c-mask" />
+          <rect x="48" y="93" width="160" height="52" rx="6" class="c-external" stroke-width="1.5" />
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(54 99) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5" />
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5" />
+          </g>
+          <text data-node-label="" x="128" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">說明需求</text>
+        </g>
+
+        <g id="diagram-agent-task-1-node-read" data-node-id="read" data-node-label="讀取相關檔案" tabindex="0" role="button" aria-label="Focus 讀取相關檔案, 一起完成一個任務" aria-pressed="false" data-node-kind="backend" data-node-context="一起完成一個任務">
+          <title>讀取相關檔案 · 一起完成一個任務</title>
+          <rect x="236" y="93" width="160" height="52" rx="6" class="c-mask" />
+          <rect x="236" y="93" width="160" height="52" rx="6" class="c-backend" stroke-width="1.5" />
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(242 99) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5" />
+          </g>
+          <text data-node-label="" x="316" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">讀取相關檔案</text>
+        </g>
+
+        <g id="diagram-agent-task-1-node-allow" data-node-id="allow" data-node-label="確認修改範圍" tabindex="0" role="button" aria-label="Focus 確認修改範圍, 一起完成一個任務" aria-pressed="false" data-node-kind="security" data-node-context="一起完成一個任務">
+          <title>確認修改範圍 · 一起完成一個任務</title>
+          <rect x="424" y="93" width="160" height="52" rx="6" class="c-mask" />
+          <rect x="424" y="93" width="160" height="52" rx="6" class="c-security" stroke-width="1.5" />
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(430 99) scale(0.6875)">
+            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z" />
+            <path d="m5.8 8 1.5 1.5 3-3" />
+          </g>
+          <text data-node-label="" x="504" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">確認修改範圍</text>
+        </g>
+
+        <g id="diagram-agent-task-1-node-run" data-node-id="run" data-node-label="修改並執行" tabindex="0" role="button" aria-label="Focus 修改並執行, 一起完成一個任務" aria-pressed="false" data-node-kind="backend" data-node-context="一起完成一個任務">
+          <title>修改並執行 · 一起完成一個任務</title>
+          <rect x="612" y="93" width="160" height="52" rx="6" class="c-mask" />
+          <rect x="612" y="93" width="160" height="52" rx="6" class="c-backend" stroke-width="1.5" />
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(618 99) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5" />
+          </g>
+          <text data-node-label="" x="692" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">修改並執行</text>
+        </g>
+
+        <g id="diagram-agent-task-1-node-check" data-node-id="check" data-node-label="自己驗證成果" tabindex="0" role="button" aria-label="Focus 自己驗證成果, 一起完成一個任務" aria-pressed="false" data-node-kind="frontend" data-node-context="一起完成一個任務">
+          <title>自己驗證成果 · 一起完成一個任務</title>
+          <rect x="800" y="93" width="160" height="52" rx="6" class="c-mask" />
+          <rect x="800" y="93" width="160" height="52" rx="6" class="c-frontend" stroke-width="1.5" />
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(806 99) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2" />
+            <path d="M2 6.5h12" />
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill" />
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill" />
+          </g>
+          <text data-node-label="" x="880" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">自己驗證成果</text>
+        </g>
+
+
+
+
+
+
+
+
+
+      <style>#diagram-agent-task-1-svg{ --bg:#f6f2e9 !important; --grid:#e1dbcf !important; --text:#2a3c78 !important; --text-muted:#555e73 !important; --text-dim:#555e73 !important; --text-faint:#555e73 !important; --panel:#f6f2e9 !important; --panel-border:#d8d1c4 !important; --lane-fill:#f6f2e9 !important; --lane-stroke:#c7c0b5 !important; --arrow:#555e73 !important; --arrow-emphasis:#b8503c !important; --mask:#f6f2e9 !important; }
+#diagram-agent-task-1-svg, #diagram-agent-task-1-svg text{ font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif !important; }
+#diagram-agent-task-1-svg{ --frontend-fill:#fffdf8 !important; --frontend-stroke:#2a3c78 !important; }
+#diagram-agent-task-1-svg{ --backend-fill:#fffdf8 !important; --backend-stroke:#2a3c78 !important; }
+#diagram-agent-task-1-svg{ --database-fill:#fffdf8 !important; --database-stroke:#2a3c78 !important; }
+#diagram-agent-task-1-svg{ --cloud-fill:#fffdf8 !important; --cloud-stroke:#2a3c78 !important; }
+#diagram-agent-task-1-svg{ --messagebus-fill:#fffdf8 !important; --messagebus-stroke:#2a3c78 !important; }
+#diagram-agent-task-1-svg{ --external-fill:#fffdf8 !important; --external-stroke:#2a3c78 !important; }
+#diagram-agent-task-1-svg{ --security-fill:#f5e4dc !important; --security-stroke:#b8503c !important; }
+#diagram-agent-task-1-svg text[data-node-label]{font-size:18px}
+#diagram-agent-task-1-svg .t-muted{font-size:14px}
+#diagram-agent-task-1-svg .c-grid{opacity:0}
+#diagram-agent-task-1-svg .semantic-sigil{display:none}
+#diagram-agent-task-1-svg text[data-node-label]{transform:translateY(10px)}</style></svg><figcaption>從需求到可確認的成果 <a href="assets/diagrams/agent-task.svg" target="_blank" rel="noopener">開啟大圖 ↗</a></figcaption></figure>
+<h2 id="section-你的第一個指令">3. 你的第一個指令</h2>
 <h3>3.1 先問一個不用動手的問題</h3>
 <p>在輸入框打下面這句，按 <code>Enter</code>：</p>
 <pre class="cmd" data-lang="text"><code>請讀 AGENTS.md，用三句話說明這個專案的規矩</code></pre>
@@ -610,25 +1197,25 @@ curl -fsSL https://opencode.ai/install | bash</code></pre>
 <ol>
 <li><strong>agent 先「想」</strong>。畫面上會出現一段淺色的思考過程（Thought），說它打算怎麼做。</li>
 <li><strong>它用了工具</strong>。你會看到 <code>read</code> 之類的工具呼叫列出來。</li>
-<li><strong>它用繁體中文回答</strong>。這不是巧合：<code>AGENTS.md</code> 裡寫了「一律使用台灣繁體中文回答」，agent 啟動時就把這個檔讀進去了。實測確認有效。</li>
+<li><strong>它用繁體中文回答</strong>。這不是巧合：<code>AGENTS.md</code> 裡寫了「一律使用台灣繁體中文回答」，agent 啟動時就把這個檔讀進去了。請核對它是否照著規則回應。</li>
 </ol>
 <p>這一句只是讀檔，不會跳出權限對話框。</p>
 <h3>3.2 再下一個要動手的指令</h3>
 <pre class="out"><code>請用 uv run python 印出 numpy 的版本</code></pre>
 <p>這次不一樣：agent 要跑 shell 指令，所以會停下來問你。往下看第 4 節。</p>
 <h3>3.3 一個完整的三步任務</h3>
-<p>講師實測 <code>big-pickle</code> 跑一個「讀檔 → 寫檔 → 執行」的三步任務大約 <strong>7.4 秒</strong>。你可以試這個：</p>
+<p>接著試一個同時需要讀檔、寫檔與執行的任務：</p>
 <pre class="cmd" data-lang="text"><code>讀 pyproject.toml，在 notes/ 寫一個 環境說明.md，列出這個專案用到的套件。
 然後執行 uv run python -c "import numpy; print(numpy.__version__)"
 確認環境真的跑得起來。</code></pre>
-<p>跑的過程中如果你想停下來：按 <code>Esc</code>。<strong>注意按一次不夠</strong>。底部會從 <code>esc interrupt</code> 變成 <code>esc again to interrupt</code>，要再按一次才真的中斷（實測；如果它正在執行工具，可能要多按幾次）。</p>
+<p>跑的過程中如果你想停下來：按 <code>Esc</code>。<strong>注意按一次不夠</strong>。底部會從 <code>esc interrupt</code> 變成 <code>esc again to interrupt</code>，要再按一次才真的中斷（如果它正在執行工具，請等畫面確認中斷）。</p>
 <h3>3.4 打多行字</h3>
-<p>輸入框裡按 <code>Enter</code> 就送出了。要換行不送出，按 <strong><code>ctrl+j</code></strong>（實測可用）。<code>shift+Enter</code>、<code>alt+Enter</code>、<code>ctrl+Enter</code> 也綁著同樣的功能，但有些終端機吃不到這幾組，<code>ctrl+j</code> 最保險。</p>
+<p>輸入框裡按 <code>Enter</code> 就送出了。要換行不送出，按 <strong><code>ctrl+j</code></strong>。<code>shift+Enter</code>、<code>alt+Enter</code>、<code>ctrl+Enter</code> 也綁著同樣的功能，但有些終端機吃不到這幾組，<code>ctrl+j</code> 最保險。</p>
 <p>要打很長的一段（例如整段數學推導），用 <code>/editor</code> 或 <code>ctrl+x e</code> 開你平常用的編輯器來寫。</p>
 <h3>3.5 想重打上一句</h3>
-<p>輸入框空的時候按 <code>↑</code>，會把你上一句話叫回來（實測）。</p>
+<p>輸入框空的時候按 <code>↑</code>，會把你上一句話叫回來。</p>
 <hr>
-<h2>4. 權限：agent 要動手之前會先問你</h2>
+<h2 id="section-權限-agent-要動手之前會先問你">4. 權限：agent 要動手之前會先問你</h2>
 <h3>4.1 你會看到什麼</h3>
 <p>你的 <code>opencode.json</code> 裡有這段：</p>
 <pre class="cmd" data-lang="json"><code>{
@@ -639,8 +1226,8 @@ curl -fsSL https://opencode.ai/install | bash</code></pre>
   }
 }</code></pre>
 <p>意思是：agent 要<strong>跑指令</strong>（bash）、<strong>改檔案</strong>（edit）、<strong>上網抓資料</strong>（webfetch）之前，都要先問你。</p>
-<p>實測畫面（1.18.30）：</p>
-<pre class="out" style="font-size:0.8rem"><code>  ┃  △ Permission required
+<p>權限要求的畫面例子：</p>
+<pre class="out"><code>  ┃  △ Permission required
   ┃    # Shell command
   ┃
   ┃  $ ls -la
@@ -666,15 +1253,15 @@ curl -fsSL https://opencode.ai/install | bash</code></pre>
 <p>比對樣式時<strong>最後一條符合的規則生效</strong>。（來源：opencode.ai/docs/permissions）</p>
 <h3>4.4 兩個要記住的例外</h3>
 <ul>
-<li><strong><code>opencode run</code> 完全不會問</strong>。它是非互動模式，直接寫檔、直接執行。所以練習階段用 <code>opencode</code>。</li>
+<li><strong><code>opencode run</code> 沒有互動權限對話框</strong>。本專案設為 <code>ask</code> 的動作會自動拒絕；設成 <code>allow</code> 或使用 <code>--auto</code> 時才可能直接執行。練習階段用 <code>opencode</code>。</li>
 <li><strong><code>--auto</code> 這個參數不要加</strong>。<code>opencode --auto</code> 會自動同意所有沒被明確 <code>deny</code> 的請求，官方文件自己標註 <code>dangerous!</code>。</li>
 </ul>
 <h3>4.5 順便說 agent 模式</h3>
-<p>按 <code>Tab</code> 可以在兩個 agent 之間切換，畫面左下角的 <code>Build · Big Pickle</code> 會跟著變成 <code>Plan · Big Pickle</code>（實測）。</p>
+<p>按 <code>Tab</code> 可以在兩個 agent 之間切換，畫面左下角的 <code>Build · Big Pickle</code> 會跟著變成 <code>Plan · Big Pickle</code>。</p>
 <div class="tw"><table><tr><th>agent</th><th>用來做什麼</th></tr><tr><td><code>Build</code></td><td>預設。可以讀、可以改、可以跑指令。工作坊全程用這個</td></tr><tr><td><code>Plan</code></td><td>官方說明是 <code>Plan mode. Disallows all edit tools.</code>，內建權限把 <code>edit</code> 設成 <code>deny</code>（只允許寫 <code>.opencode/plans/*.md</code>），適合先讓它分析、不要動你的檔案</td></tr></table></div>
-<p><code>Plan</code> 的內建 <code>deny</code> 和本專案 <code>opencode.json</code> 裡的 <code>edit: "ask"</code> 疊在一起之後的實際結果，本章沒有實測。工作坊請用 <code>Build</code>。</p>
+<p>模式與專案設定會共同影響權限。現場需要實際產生檔案時用 <code>Build</code>；先規劃時可用 <code>Plan</code>，仍要閱讀工具與權限提示。</p>
 <hr>
-<h2>5. session：對話的記憶邊界</h2>
+<h2 id="section-session-對話的記憶邊界">5. session：對話的記憶邊界</h2>
 <h3>5.1 session 是什麼</h3>
 <p>一個 session 就是一串獨立的對話，有自己的記憶。opencode 把它存在本機（<code>~/.local/share/opencode/opencode.db</code>，來源：learnopencode.com），所以你關掉終端機之後還找得回來。</p>
 <p>agent 的「記憶」只有這個 session 裡的訊息，加上它自己去讀的檔案。換了 session，前面講的話它就不知道了。</p>
@@ -682,7 +1269,7 @@ curl -fsSL https://opencode.ai/install | bash</code></pre>
 <p><strong>換題目就開新的。</strong> 做完 Lab 1 的分群要開始做 Lab 2 的 PCA，就開新 session。理由有兩個：</p>
 <ul>
 <li>舊對話會一直佔 context，愈用愈慢、愈容易被壓縮掉細節</li>
-<li>不相干的舊內容會干擾判斷（例如它以為你還在用 Lab 1 的資料）</li>
+<li>不相干的舊內容會干擾判斷（例如它以為你還要繼續做分群）</li>
 </ul>
 <p>開新 session：</p>
 <pre class="out"><code>/new</code></pre>
@@ -694,13 +1281,13 @@ curl -fsSL https://opencode.ai/install | bash</code></pre>
 <li><strong>同一個題目還沒做完，但 <code>% used</code> 已經很高</strong> → 壓縮（compact）</li>
 </ul>
 <p>壓縮會讓 agent 把前面的對話摘要成一小段，然後把舊訊息清掉，留下摘要繼續做。細節會流失，所以重要的結論要先寫進 <code>notes/</code> 裡的 <code>.md</code> 檔，不要只留在對話裡。</p>
-<p>在 1.18.30，壓縮<strong>沒有斜線指令</strong>，要用其中一種：</p>
+<p>壓縮對話可以用其中一種操作：</p>
 <ul>
 <li>按 <code>ctrl+x c</code></li>
 <li>或按 <code>ctrl+p</code> 開指令面板，搜尋 <code>compact</code>，選 <code>Compact session</code></li>
 </ul>
-<p>注意：指令面板裡的 session 相關指令<strong>要先有對話才會出現</strong>。在剛啟動的首頁按 <code>ctrl+p</code> 搜 <code>compact</code> 會顯示 <code>No results found</code>（實測）。</p>
-<p>learnopencode.com 提到對話太長時 opencode 也會自動觸發壓縮（未實測）。</p>
+<p>注意：指令面板裡的 session 相關指令<strong>要先有對話才會出現</strong>。在剛啟動的首頁按 <code>ctrl+p</code> 搜 <code>compact</code> 會顯示 <code>No results found</code>。</p>
+<p>也可能由程式自動壓縮對話；不必等它觸發，重要結論先寫成檔案。要練習完整的續作流程，接著看 <a href="agent-workflows.html">把需求說清楚，讓工作接得下去</a>。</p>
 <h3>5.4 回到舊 session</h3>
 <pre class="out"><code>/sessions</code></pre>
 <p>或按 <code>ctrl+x l</code>。別名 <code>/resume</code>、<code>/continue</code> 也是同一個指令。session 名稱是 opencode 依你第一句話自動取的，會顯示在右上角。</p>
@@ -708,114 +1295,135 @@ curl -fsSL https://opencode.ai/install | bash</code></pre>
 <pre class="cmd" data-lang="bash"><code>opencode        # 進來後用 /sessions 挑
 opencode -c     # 直接接續上一個 session</code></pre>
 <hr>
-<h2>6. 常用斜線指令速查</h2>
-<p>以下 17 個是 1.18.30 在輸入框打 <code>/</code> 之後<strong>實際列出來</strong>的全部內建指令（實測逐項確認）。描述欄是 opencode 自己顯示的英文說明。</p>
-<div class="tw"><table><tr><th>指令</th><th>opencode 顯示的說明</th><th>你會用到嗎</th></tr><tr><td><code>/agents</code></td><td>Switch agent</td><td>換 Build / Plan。按 <code>Tab</code> 更快</td></tr><tr><td><code>/connect</code></td><td>Connect provider</td><td><strong>不用</strong>。big-pickle 免登入，按到就按 <code>Esc</code></td></tr><tr><td><code>/debug</code></td><td>View debug info</td><td>不用</td></tr><tr><td><code>/diff</code></td><td>Open diff viewer</td><td>會。看 agent 到底改了哪幾行</td></tr><tr><td><code>/editor</code></td><td>Open editor</td><td>會。要打很長的訊息時</td></tr><tr><td><code>/exit</code></td><td>Exit the app</td><td>會。<strong>離開 opencode 請用這個</strong></td></tr><tr><td><code>/help</code></td><td>Help</td><td>忘記按鍵的時候</td></tr><tr><td><code>/init</code></td><td>guided AGENTS.md setup</td><td><strong>不用</strong>。你的專案已經有 <code>AGENTS.md</code> 了</td></tr><tr><td><code>/mcps</code></td><td>Toggle MCPs</td><td>不用</td></tr><tr><td><code>/models</code></td><td>Switch model</td><td>會。開起來會看到 <code>● Big Pickle　Free</code>，<code>●</code> 是目前選的。按 <code>Esc</code> 關掉</td></tr><tr><td><code>/move</code></td><td>Move to another project dir</td><td>不用</td></tr><tr><td><code>/new</code></td><td>New session（別名 <code>/clear</code>）</td><td>會。換題目就用</td></tr><tr><td><code>/review</code></td><td>review changes [commit\</td><td>branch\</td><td>pr]</td><td>進階。讓 agent 檢查你的改動</td></tr><tr><td><code>/sessions</code></td><td>Switch session（別名 <code>/resume</code>、<code>/continue</code>）</td><td>會。回到舊對話</td></tr><tr><td><code>/skills</code></td><td>Skills</td><td>不用</td></tr><tr><td><code>/status</code></td><td>View status</td><td>不用</td></tr><tr><td><code>/themes</code></td><td>Switch theme</td><td>想換配色再說</td></tr></table></div>
-<p><strong>重要差異</strong>：opencode.ai/docs 和 learnopencode.com 都列了 <code>/compact</code>、<code>/undo</code>、<code>/redo</code>、<code>/share</code>、<code>/export</code> 這幾個斜線指令，但實測 1.18.30 的 <code>/</code> 清單裡<strong>沒有這些</strong>。它們變成指令面板（<code>ctrl+p</code>）裡的項目，有各自的快捷鍵：</p>
-<div class="tw"><table><tr><th>想做的事</th><th>1.18.30 的做法</th></tr><tr><td>壓縮 context</td><td><code>ctrl+x c</code>，或 <code>ctrl+p</code> → <code>Compact session</code></td></tr><tr><td>復原上一則訊息</td><td><code>ctrl+x u</code>，或 <code>ctrl+p</code> → <code>Undo previous message</code></td></tr><tr><td>匯出對話記錄</td><td><code>ctrl+x x</code>，或 <code>ctrl+p</code> → <code>Export session transcript</code></td></tr><tr><td>分享對話</td><td><code>ctrl+p</code> → <code>Share session</code>（沒有預設快捷鍵）</td></tr></table></div>
+<h2 id="section-先記住這些操作">6. 先記住這些操作</h2>
+<div class="tw"><table><tr><th>操作</th><th>用途</th></tr><tr><td><code>ctrl+p</code></td><td>打開指令面板，找不到功能時從這裡搜尋</td></tr><tr><td><code>ctrl+j</code></td><td>在同一段任務裡換行</td></tr><tr><td><code>Tab</code></td><td>切換目前的主要 agent 模式，切換後查看畫面標示</td></tr><tr><td><code>Esc</code>，再按一次</td><td>中斷正在進行的回應；看到中斷提示後確認工作已停下</td></tr><tr><td><code>/new</code></td><td>開新的對話</td></tr><tr><td><code>/sessions</code></td><td>找回既有對話</td></tr><tr><td><code>/exit</code></td><td>離開 OpenCode</td></tr></table></div>
+<p>其他指令放在 <a href="cheatsheet.html">速查表</a>，用到再查即可。按 <code>ctrl+x c</code> 壓縮對話時，先按 <code>ctrl+x</code>、放開，再按 <code>c</code>。</p>
 <hr>
-<h2>7. 快捷鍵速查</h2>
-<p><code>ctrl+x</code> 是 <strong>leader key</strong>（前置鍵）。用法是：按 <code>ctrl+x</code>，<strong>整個放開</strong>，再按下一個字母。不要一起按。</p>
-<h3>你一定會用到的</h3>
-<div class="tw"><table><tr><th>按鍵</th><th>作用</th><th>來源</th></tr><tr><td><code>Enter</code></td><td>送出訊息</td><td>實測</td></tr><tr><td><code>ctrl+j</code></td><td>輸入框內換行，不送出</td><td>實測</td></tr><tr><td><code>Esc</code></td><td>中斷 agent。<strong>按一次會變成 <code>esc again to interrupt</code>，要再按一次</strong></td><td>實測</td></tr><tr><td><code>ctrl+c</code></td><td>輸入框<strong>有字</strong> → 清空；輸入框<strong>是空的</strong> → 直接關掉 opencode，沒有確認</td><td>實測</td></tr><tr><td><code>↑</code></td><td>輸入框空的時候，叫回你上一句話</td><td>實測</td></tr><tr><td><code>Tab</code></td><td>切換 agent：Build ↔ Plan</td><td>實測</td></tr><tr><td><code>ctrl+p</code></td><td>開指令面板（Commands）</td><td>實測</td></tr><tr><td><code>ctrl+x</code></td><td>leader key</td><td>實測</td></tr></table></div>
-<p>離開 opencode 請打 <code>/exit</code>。不要習慣性連按兩下 <code>ctrl+c</code>，輸入框一空掉，第二下就把程式關了。</p>
-<h3>leader 組合鍵</h3>
-<p>下面這些是在指令面板（<code>ctrl+p</code>）裡<strong>實際看到 opencode 自己標示</strong>的快捷鍵：</p>
-<div class="tw"><table><tr><th>按鍵</th><th>作用</th><th>來源</th></tr><tr><td><code>ctrl+x n</code></td><td>開新 session</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x l</code></td><td>切換 session</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x c</code></td><td>壓縮目前 session</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x u</code></td><td>復原上一則訊息</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x x</code></td><td>匯出對話記錄</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x m</code></td><td>切換模型</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x e</code></td><td>用外部編輯器寫訊息</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x g</code></td><td>跳到某一則訊息</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x s</code></td><td>看狀態</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+x t</code></td><td>換主題</td><td>實測（面板顯示）</td></tr><tr><td><code>ctrl+r</code></td><td>重新命名 session</td><td>實測（面板顯示）</td></tr></table></div>
-<h3>其他（1.18.30 預設值，本章未實測）</h3>
-<p>這幾組是從 1.18.30 的預設 keybind 表讀出來的，但現場沒有逐一按過；有些組合會被終端機或視窗管理員吃掉。</p>
-<div class="tw"><table><tr><th>按鍵</th><th>作用</th><th>來源</th></tr><tr><td><code>shift+Enter</code> / <code>alt+Enter</code> / <code>ctrl+Enter</code></td><td>輸入框換行（同 <code>ctrl+j</code>）</td><td>二進位預設值（未實測）</td></tr><tr><td><code>shift+Tab</code></td><td>反向切換 agent</td><td>二進位預設值（未實測）</td></tr><tr><td><code>PageUp</code> / <code>PageDown</code></td><td>對話上下捲一頁</td><td>二進位預設值（未實測）</td></tr><tr><td><code>ctrl+x b</code></td><td>開關側邊欄</td><td>二進位預設值（未實測）</td></tr><tr><td><code>ctrl+x y</code></td><td>複製訊息</td><td>二進位預設值（未實測）</td></tr><tr><td><code>ctrl+x r</code></td><td>重做（redo）訊息</td><td>二進位預設值（未實測）</td></tr><tr><td><code>ctrl+a</code> / <code>ctrl+e</code> / <code>ctrl+k</code></td><td>輸入框內：移到行首 / 行尾 / 刪到行尾</td><td>二進位預設值（未實測）</td></tr><tr><td><code>F2</code></td><td>換到上一個用過的模型</td><td>二進位預設值（未實測）</td></tr><tr><td><code>ctrl+f</code></td><td>在權限對話框裡切全螢幕</td><td>實測（畫面提示）</td></tr></table></div>
+<h2 id="section-卡住了">卡住了？</h2>
+<div class="tw"><table><tr><th>你看到的</th><th>為什麼</th><th>怎麼解</th></tr><tr><td><code>Error: Internal server error</code></td><td>這是預設的錯誤訊息，什麼資訊都沒有</td><td>加上 log 參數重跑：<code>opencode run "訊息" --print-logs --log-level ERROR</code>，才看得到真正的原因</td></tr><tr><td><code>Unrecognized request argument supplied: prompt_cache_key</code></td><td>上游的 bug，偶發</td><td><strong>重試一次就好</strong>。不用改任何設定</td></tr><tr><td>畫面底部一直顯示 <code>esc again to interrupt</code></td><td>你只按了一次 <code>Esc</code>，還沒真的中斷</td><td>再按一次 <code>Esc</code>。如果它正在跑工具，多按幾次</td></tr><tr><td>opencode 突然關掉了</td><td>輸入框是空的時候按了 <code>ctrl+c</code>，那就是「離開」</td><td>重新 <code>opencode</code>，再用 <code>/sessions</code>（<code>ctrl+x l</code>）找回剛剛的對話，或直接 <code>opencode -c</code></td></tr><tr><td><code>● Tip Run /connect to add an AI provider</code></td><td>這是給要接自己帳號的人看的提示</td><td>忽略。<code>big-pickle</code> 不用連任何 provider</td></tr><tr><td>agent 用簡體中文或英文回答</td><td>它沒讀到 <code>AGENTS.md</code></td><td>確認你是在專案資料夾裡啟動的（看畫面最底左邊那行路徑），不是在家目錄</td></tr><tr><td>agent 改檔或執行前沒有問我</td><td>權限可能是 <code>allow</code>，或啟動時加了 <code>--auto</code></td><td>確認專案設定為 <code>ask</code>，重新用 <code>opencode</code> 啟動，不加 <code>--auto</code></td></tr><tr><td>跑 <code>python xxx.py</code> 說找不到套件</td><td>沒走 uv 的環境</td><td>一律用 <code>uv run python xxx.py</code></td></tr><tr><td>側邊欄的 Context / tokens 看不到</td><td>終端機視窗太窄，側邊欄自動收起來了</td><td>把視窗拉寬，或在 <code>ctrl+p</code> 搜尋側邊欄</td></tr><tr><td><code>% used</code> 已經很高，agent 開始忘記前面講過的事</td><td>context 快滿了</td><td>換題目就 <code>/new</code>；同一題就按 <code>ctrl+x c</code> 壓縮，壓縮前先把結論寫進 <code>notes/</code></td></tr><tr><td>找不到某個斜線指令</td><td>功能名稱或位置會隨介面調整</td><td>用 <code>ctrl+p</code> 開啟指令面板搜尋；壓縮對話也可按 <code>ctrl+x c</code></td></tr></table></div>
 <hr>
-<h2>卡住了？</h2>
-<div class="tw"><table><tr><th>你看到的</th><th>為什麼</th><th>怎麼解</th></tr><tr><td><code>Error: Internal server error</code></td><td>這是預設的錯誤訊息，什麼資訊都沒有</td><td>加上 log 參數重跑：<code>opencode run "訊息" --print-logs --log-level ERROR</code>，才看得到真正的原因</td></tr><tr><td><code>Unrecognized request argument supplied: prompt_cache_key</code></td><td>上游的 bug，偶發</td><td><strong>重試一次就好</strong>。不用改任何設定</td></tr><tr><td>畫面底部一直顯示 <code>esc again to interrupt</code></td><td>你只按了一次 <code>Esc</code>，還沒真的中斷</td><td>再按一次 <code>Esc</code>。如果它正在跑工具，多按幾次</td></tr><tr><td>opencode 突然關掉了</td><td>輸入框是空的時候按了 <code>ctrl+c</code>，那就是「離開」</td><td>重新 <code>opencode</code>，再用 <code>/sessions</code>（<code>ctrl+x l</code>）找回剛剛的對話，或直接 <code>opencode -c</code></td></tr><tr><td><code>● Tip Run /connect to add an AI provider</code></td><td>這是給要接自己帳號的人看的提示</td><td>忽略。<code>big-pickle</code> 不用連任何 provider</td></tr><tr><td>agent 用簡體中文或英文回答</td><td>它沒讀到 <code>AGENTS.md</code></td><td>確認你是在專案資料夾裡啟動的（看畫面最底左邊那行路徑），不是在家目錄</td></tr><tr><td>agent 直接改了檔案、沒問我</td><td>你用的是 <code>opencode run</code></td><td>改用 <code>opencode</code>（互動模式）。也確認沒有加 <code>--auto</code></td></tr><tr><td>跑 <code>python xxx.py</code> 說找不到套件</td><td>沒走 uv 的環境</td><td>一律用 <code>uv run python xxx.py</code></td></tr><tr><td>側邊欄的 Context / tokens 看不到</td><td>終端機視窗太窄，側邊欄自動收起來了</td><td>把視窗拉寬，或按 <code>ctrl+x b</code>（未實測）</td></tr><tr><td><code>% used</code> 已經很高，agent 開始忘記前面講過的事</td><td>context 快滿了</td><td>換題目就 <code>/new</code>；同一題就按 <code>ctrl+x c</code> 壓縮，壓縮前先把結論寫進 <code>notes/</code></td></tr><tr><td><code>/compact</code>、<code>/undo</code>、<code>/share</code> 打了沒反應</td><td>1.18.30 沒有這幾個斜線指令</td><td>用 <code>ctrl+x c</code>、<code>ctrl+x u</code>，或 <code>ctrl+p</code> 開指令面板搜尋</td></tr></table></div>
-<hr>
-<h2>資料來源</h2>
-<p>本章的操作細節分成四種來源，表格裡都標註了。</p>
-<p><strong>一、1.18.30 實測</strong></p>
-<p>在本機 <code>opencode 1.18.30</code> 上實際操作驗證的項目：<code>/</code> 斜線指令完整清單（17 項，逐項確認）、<code>ctrl+p</code> 指令面板內容與其標示的快捷鍵、權限對話框的完整文字與選項、<code>Esc</code> 需要按兩次才中斷、<code>ctrl+c</code> 在空輸入框會直接離開、<code>ctrl+j</code> 換行、<code>↑</code> 叫回上一句、<code>Tab</code> 切換 Build/Plan、<code>@</code> 補檔名與 subagent、<code>!</code> Shell 模式、<code>/models</code> 顯示 <code>● Big Pickle Free</code>、側邊欄 Context 與 <code>% used</code>、agent 以繁體中文回答。</p>
-<p><strong>二、1.18.30 預設 keybind 表</strong></p>
-<p>從 <code>1.18.30</code> 執行檔內的預設 keybind 定義讀出（leader key 為 <code>ctrl+x</code>）。標註「二進位預設值（未實測）」的項目屬於此類。</p>
-<p><code>plan</code> agent 的權限與說明來自本機指令：</p>
-<pre class="cmd" data-lang="bash"><code>opencode debug agent plan
-opencode agent list
-opencode debug config</code></pre>
-<p><strong>三、官方文件（opencode.ai）</strong></p>
+<h2 id="section-參考資料">參考資料</h2>
 <ul>
-<li><a class="ext" href="https://opencode.ai/docs/tui/" target="_blank" rel="noopener">https://opencode.ai/docs/tui/</a> — TUI 斜線指令與快捷鍵清單（其中 <code>/compact</code>、<code>/undo</code>、<code>/redo</code>、<code>/share</code>、<code>/export</code>、<code>/details</code>、<code>/thinking</code> 在 1.18.30 實測不存在）</li>
-<li><a class="ext" href="https://opencode.ai/docs/keybinds/" target="_blank" rel="noopener">https://opencode.ai/docs/keybinds/</a> — 預設 keybind 與 leader key</li>
-<li><a class="ext" href="https://opencode.ai/docs/permissions/" target="_blank" rel="noopener">https://opencode.ai/docs/permissions/</a> — <code>allow</code> / <code>ask</code> / <code>deny</code>、樣式比對規則、<code>--auto</code>、對話框三個選項</li>
-<li><a class="ext" href="https://opencode.ai/docs/agents/" target="_blank" rel="noopener">https://opencode.ai/docs/agents/</a> — build / plan / general / explore / scout 的定位</li>
+<li><a class="ext" href="https://opencode.ai/docs/tui/" target="_blank" rel="noopener">OpenCode 操作介面</a></li>
+<li><a class="ext" href="https://opencode.ai/docs/permissions/" target="_blank" rel="noopener">OpenCode 權限</a></li>
+<li><a class="ext" href="https://opencode.ai/docs/keybinds/" target="_blank" rel="noopener">OpenCode 快捷鍵</a></li>
+<li><a class="ext" href="https://learnopencode.com/1-start/" target="_blank" rel="noopener">中文入門教學</a></li>
 </ul>
-<p><strong>四、中文教學站（learnopencode.com）</strong></p>
-<ul>
-<li><a class="ext" href="https://learnopencode.com/1-start/" target="_blank" rel="noopener">https://learnopencode.com/1-start/</a> — 第一階段目錄</li>
-<li><a class="ext" href="https://learnopencode.com/sitemap.xml" target="_blank" rel="noopener">https://learnopencode.com/sitemap.xml</a> — 全站頁面清單</li>
-<li><a class="ext" href="https://learnopencode.com/2-daily/01-interface.html" target="_blank" rel="noopener">https://learnopencode.com/2-daily/01-interface.html</a> — 畫面分區、<code>@</code> / <code>!</code> / <code>/</code> 三個開頭字元</li>
-<li><a class="ext" href="https://learnopencode.com/2-daily/02-sessions.html" target="_blank" rel="noopener">https://learnopencode.com/2-daily/02-sessions.html</a> — session 定義、存放位置、自動壓縮、匯入匯出</li>
-<li><a class="ext" href="https://learnopencode.com/2-daily/03-shortcuts.html" target="_blank" rel="noopener">https://learnopencode.com/2-daily/03-shortcuts.html</a> — 快捷鍵表、leader key「按了要放開」的用法</li>
-<li><a class="ext" href="https://learnopencode.com/3-workflow/01-plan-build.html" target="_blank" rel="noopener">https://learnopencode.com/3-workflow/01-plan-build.html</a> — Plan / Build 能力對照與建議流程</li>
-<li><a class="ext" href="https://learnopencode.com/3-workflow/03-init.html" target="_blank" rel="noopener">https://learnopencode.com/3-workflow/03-init.html</a> — <code>/init</code> 掃描專案產生 <code>AGENTS.md</code> 的行為</li>
-</ul>
-<p><strong>已知的文件與實測衝突</strong></p>
-<p>learnopencode.com 與 opencode.ai/docs 都把 <code>/compact</code>、<code>/undo</code>、<code>/redo</code>、<code>/share</code>、<code>/export</code> 列為斜線指令，但 1.18.30 的 <code>/</code> 清單中不存在這些指令。本章一律<strong>以實測為準</strong>。</p>
-<p>learnopencode.com 的 Plan / Build 對照表寫 Plan 可以執行 bash（✓），opencode.ai/docs 寫 Plan 把 bash 設成 <code>ask</code>；實測 <code>opencode debug agent plan</code> 顯示 <code>bash</code> 在本專案設定下為 <code>ask</code>。</p>
-<p><strong>查不到、因此本章沒有寫的內容</strong></p>
-<ul>
-<li><code>opencode.school/lessons/models/</code> 回 HTTP 403，未讀取</li>
-<li>learnopencode.com 的 <code>2-daily/04-sessions.html</code> 與 <code>2-daily/05-shortcuts.html</code> 回 404（正確路徑是 <code>02-sessions.html</code> 與 <code>03-shortcuts.html</code>）</li>
-<li>官方文件提到的 <code>/details</code>、<code>/thinking</code>、<code>/unshare</code>、<code>/summarize</code> 在 1.18.30 的 <code>/</code> 清單中查不到，也找不到對應的指令面板項目，因此未列入</li>
-<li><code>/variants</code>、<code>/workspaces</code>、<code>/org</code>、<code>/warp</code> 存在於 1.18.30 執行檔內，但實測在本專案的 <code>/</code> 清單中不出現（需要特定模型變體或實驗性功能開關），因此未列入</li>
-<li>官方文件提到 <code>tui.jsonc</code> 可自訂 keybind，但未在 1.18.30 驗證檔案位置與格式，因此本章不教如何改鍵</li>
-</ul>
-
-<div class="pager">
-  <a href="prep.html"><div class="d">上一章</div><div class="t2">← 00 · 課前準備</div></a>
-  <a href="lab1-cluster.html" class="next"><div class="d">下一章</div><div class="t2">02 · Lab 1 →</div></a>
-</div>
+<p>找不到指令時，按 <code>ctrl+p</code> 開啟指令面板搜尋。</p>
 
 </div>
+<nav class="pager" aria-label="章節順序"><a href="prep.html" class="prev"><div class="d">上一章</div><div class="t2">← 課前準備</div></a><a href="lab1-cluster.html" class="next"><div class="d">下一章</div><div class="t2">Lab 1 · 分群 →</div></a></nav></main></div>
 
 <footer>
 <div>OpenCode × AI-Math 工作坊教材　·　國立中山大學　人工智慧與數學整合學程</div>
-<div class="stamp">本教材以 opencode 1.18.30 於 2026-09-12 在 WSL2 (Ubuntu 24.04) 與 Windows 11 實測</div>
+<div class="stamp">讓 agent 動手，讓數學說明結果。</div>
 </footer>
 
 <script>
-// 導覽列高亮目前頁面
+/* Progressive enhancement: navigation and disclosure work without JavaScript. */
 (function(){
-  var f=(location.pathname.split('/').pop()||'index.html');
+  'use strict';
+  var pageName=location.pathname.split('/').pop()||'index.html';
   document.querySelectorAll('.topnav nav a').forEach(function(a){
-    if(a.getAttribute('href')===f) a.setAttribute('aria-current','page');
+    if(a.getAttribute('href')===pageName) a.setAttribute('aria-current','page');
   });
-})();
 
-// 指令複製鈕
-document.querySelectorAll('pre.cmd').forEach(function(pre){
-  var b=document.createElement('button');
-  b.className='copy'; b.type='button'; b.textContent='複製';
-  b.addEventListener('click',function(){
-    var t=pre.querySelector('code');
-    navigator.clipboard.writeText((t?t.innerText:pre.innerText).trim()).then(function(){
-      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1400);
-    },function(){ b.textContent='複製失敗'; });
-  });
-  pre.appendChild(b);
-});
-
-// 檢查清單進度（存在這台瀏覽器，換電腦不會跟著走）
-(function(){
-  var key='ocmw:'+(location.pathname.split('/').pop()||'index.html');
-  var saved={};
-  try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
-  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(cb,i){
-    var id=cb.id||('ck'+i); cb.id=id;
-    if(saved[id]) cb.checked=true;
-    cb.addEventListener('change',function(){
-      saved[id]=cb.checked;
-      try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+  var sections=Array.from(document.querySelectorAll('.lesson-main h2[id]'));
+  var sectionLinks=Array.from(document.querySelectorAll('.section-nav a'));
+  var scheduled=false;
+  function markSection(){
+    scheduled=false;
+    var current=sections[0];
+    sections.forEach(function(section){if(section.getBoundingClientRect().top<=145) current=section;});
+    sectionLinks.forEach(function(link){
+      if(current&&link.getAttribute('href')==='#'+current.id) link.setAttribute('aria-current','location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  function scheduleSection(){
+    if(!scheduled){scheduled=true;requestAnimationFrame(markSection);}
+  }
+  window.addEventListener('scroll',scheduleSection,{passive:true});
+  window.addEventListener('resize',scheduleSection);
+  window.addEventListener('hashchange',scheduleSection);
+  markSection();
+  document.querySelectorAll('.course-menu .section-nav a').forEach(function(link){
+    link.addEventListener('click',function(){
+      link.closest('details').open=false;
+      // Closing the menu moves the heading; resolve the anchor after that reflow.
+      var id=link.getAttribute('href').slice(1),target=document.getElementById(id);
+      if(target){
+        requestAnimationFrame(function(){
+          var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({top:window.scrollY+target.getBoundingClientRect().top-88,behavior:reduced?'auto':'smooth'});
+        });
+      }
     });
   });
+
+  var status=document.createElement('span');
+  status.className='sr-only';status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+  document.body.appendChild(status);
+  function fallbackCopy(text){
+    var active=document.activeElement,selection=window.getSelection();
+    var ranges=[];
+    if(selection) for(var i=0;i<selection.rangeCount;i++) ranges.push(selection.getRangeAt(i).cloneRange());
+    var area=document.createElement('textarea');
+    area.value=text;area.setAttribute('readonly','');
+    area.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+    document.body.appendChild(area);area.select();
+    var copied=false;
+    try{copied=document.execCommand('copy');}catch(error){}
+    area.remove();
+    if(active&&active.focus) active.focus({preventScroll:true});
+    if(selection){selection.removeAllRanges();ranges.forEach(function(range){selection.addRange(range);});}
+    return copied;
+  }
+  async function copyText(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      try{await navigator.clipboard.writeText(text);return true;}catch(error){}
+    }
+    return fallbackCopy(text);
+  }
+  document.querySelectorAll('pre.cmd').forEach(function(pre){
+    var button=document.createElement('button');
+    button.className='copy';button.type='button';button.textContent='複製';
+    button.addEventListener('click',async function(){
+      var code=pre.querySelector('code')||pre;
+      var text=(code===pre?Array.from(pre.childNodes).filter(function(node){return node!==button;}).map(function(node){return node.textContent;}).join(''):code.textContent).trim();
+      if(await copyText(text)){
+        button.textContent='已複製';status.textContent='指令已複製。';
+      }else{
+        var range=document.createRange();range.selectNodeContents(code);
+        var selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);
+        button.textContent='請按 Ctrl+C';status.textContent='已選取指令，請按 Ctrl+C 複製。';
+      }
+      setTimeout(function(){button.textContent='複製';status.textContent='';},2200);
+    });
+    pre.appendChild(button);
+  });
+
+  // Keep the existing storage key and checkbox IDs so prior progress survives.
+  var key='ocmw:'+pageName,saved={};
+  try{
+    var parsed=JSON.parse(localStorage.getItem(key)||'{}');
+    if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed)) saved=parsed;
+  }catch(error){}
+  document.querySelectorAll('.ckl input[type=checkbox]').forEach(function(checkbox,index){
+    var id=checkbox.id||('ck'+index);checkbox.id=id;
+    if(saved[id]) checkbox.checked=true;
+    checkbox.addEventListener('change',function(){
+      saved[id]=checkbox.checked;
+      try{localStorage.setItem(key,JSON.stringify(saved));}catch(error){}
+    });
+  });
+  // Wide output stays readable and can be scrolled from the keyboard.
+  document.querySelectorAll('pre.out,.tw').forEach(function(block){
+    block.tabIndex=0;
+    block.setAttribute('aria-label',block.matches('.tw')?'表格；較寬時可左右捲動':'程式輸出；較寬時可左右捲動');
+  });
 })();
+
 </script>
 
 <script>

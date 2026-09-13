@@ -1,0 +1,94 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "分工查證，由主 agent 整合",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "lead",
+      "label": "主 agent"
+    },
+    {
+      "id": "read",
+      "label": "唯讀子任務"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "task",
+      "lane": "lead",
+      "col": 0,
+      "type": "frontend",
+      "label": "交代任務與限制",
+      "width": 160
+    },
+    {
+      "id": "search",
+      "lane": "read",
+      "col": 1,
+      "type": "backend",
+      "label": "查找相關檔案",
+      "width": 160
+    },
+    {
+      "id": "verify",
+      "lane": "read",
+      "col": 2,
+      "type": "backend",
+      "label": "獨立核對結果",
+      "width": 160
+    },
+    {
+      "id": "report",
+      "lane": "lead",
+      "col": 3,
+      "type": "messagebus",
+      "label": "回報摘要與證據",
+      "width": 160
+    },
+    {
+      "id": "join",
+      "lane": "lead",
+      "col": 4,
+      "type": "frontend",
+      "label": "核實後整合",
+      "width": 160
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "from": "task",
+      "to": "search",
+      "label": "委派"
+    },
+    {
+      "id": "e1",
+      "from": "search",
+      "to": "verify"
+    },
+    {
+      "id": "e2",
+      "from": "verify",
+      "to": "report",
+      "label": "回報"
+    },
+    {
+      "id": "e3",
+      "from": "report",
+      "to": "join"
+    }
+  ],
+  "mainPath": [
+    "task",
+    "search",
+    "verify",
+    "report",
+    "join"
+  ]
+}

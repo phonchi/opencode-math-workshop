@@ -1,38 +1,22 @@
 <!--TITLE:課前準備-->
-<!--DESC:工作坊前請務必完成：安裝 opencode 與 uv、建立 Python 環境、跑一次自測。實測建環境要下載 287 MB、花六分半鐘，現場做會來不及。-->
+<!--DESC:課前完成 OpenCode、uv 與 Python 環境準備，確認 agent 能回話、產生檔案並執行程式。-->
 
 <div class="container narrow">
 
 <div class="pagehead">
   <div class="kicker"><span>00</span><span>·</span><span class="badge prep">請在工作坊前完成</span></div>
   <h1>課前準備</h1>
-  <p class="lead">
-    全部照做大約 <strong>10 到 20 分鐘</strong>，主要時間花在等下載。
-    請務必在家裡或宿舍做完。要下載的東西約 <strong>287 MB</strong>，
-    全班三十人同時在教室做，網路會塞住。
-  </p>
-</div>
-
-<div class="box danger">
-<div class="bt">為什麼不能現場做</div>
-<p>
-建立 Python 環境要下載約 <strong>287 MB</strong>（Python 直譯器加上所有套件）。
-本教材實測過三次，耗時從 <strong>2 秒到 6 分 38 秒</strong>都出現過，差異完全看當下的網路狀況。
-</p>
-<p style="margin-bottom:0">
-換句話說：<strong>你沒辦法預測自己會遇到哪一種</strong>。
-而三十個人同時在同一個 WiFi 上抓 287 MB，幾乎保證會遇到慢的那一種。
-</p>
+  <p class="lead">請在工作坊前完成安裝與下方自測。第一次建立環境需要下載套件，請找網路穩定的地方操作；最後看到程式產生檔案並印出結果，就準備好了。</p>
 </div>
 
 <section>
 <h2>先確認一件事：你會用終端機嗎</h2>
 <p>
 這場工作坊全程在<strong>終端機</strong>裡進行。如果你平常只在 VS Code 按執行鍵、
-或只用過 Google Colab，下面這個展開來看一分鐘就夠了。
+或只用過 Google Colab，先跟著下面的操作認識它。
 </p>
 
-<details class="bg"><summary>終端機 60 秒入門：打開它、走到資料夾、確認位置</summary>
+<details class="bg" open><summary>終端機入門：打開它、走到資料夾、確認位置</summary>
 <div class="bg-body">
 <p>
 終端機就是一個「用打字下指令」的視窗。它永遠<strong>站在某一個資料夾裡面</strong>，
@@ -43,7 +27,7 @@
 <tr><th>系統</th><th>怎麼開</th></tr>
 <tr><td>Windows</td><td>開始選單搜尋 <strong>PowerShell</strong></td></tr>
 <tr><td>macOS</td><td>Launchpad 搜尋<strong>終端機</strong>（Terminal）</td></tr>
-<tr><td>Linux / WSL</td><td>你已經在用了</td></tr>
+<tr><td>Linux / WSL</td><td>Linux 開啟 Terminal；WSL 從 Windows 開始選單開啟已安裝的 Ubuntu</td></tr>
 </table></div>
 <h4>三個你會用到的指令</h4>
 <div class="tw"><table>
@@ -52,19 +36,17 @@
 <tr><td><code>ls</code>　（Windows 也能用）</td><td>列出這個資料夾裡有什麼</td></tr>
 <tr><td><code>cd 資料夾名稱</code></td><td>走進某個資料夾。<code>cd ..</code> 是回上一層</td></tr>
 </table></div>
-<h4>最省事的做法：不要用打的</h4>
-<p>
-路徑打字很容易出錯。直接用檔案總管／Finder 走到你要的資料夾，
-然後把資料夾<strong>拖進終端機視窗</strong>，路徑就會自動填好。
-先打 <code>cd </code>（注意後面有空格）再拖，然後按 Enter。
-</p>
+<h4>路徑是資料夾的位置</h4>
+<p>Windows PowerShell 的路徑通常像 <code>C:\Users\你的名字\Documents\ai-math-lab</code>；WSL 像 <code>/home/你的名字/ai-math-lab</code>。請選一個環境完成本教材，同一份虛擬環境不要在兩邊交替使用。路徑含空格時，把整段路徑放在雙引號裡。</p>
+<p>例如在 PowerShell 輸入 <code>cd "C:\Users\你的名字\Documents\ai-math-lab"</code>，請先換成自己的實際位置。接著依序輸入 <code>pwd</code> 和 <code>ls</code>，確認位置與檔案。</p>
+<h4>每一種文字該貼在哪裡</h4>
+<p>看到 <code>uv sync</code>、<code>opencode</code> 這類指令，貼到 PowerShell 或 Ubuntu 終端機，按 Enter 執行。進入 OpenCode 後，才貼「請幫我……」的任務。程式的預期輸出用來比對，不用貼回終端機。多個步驟請逐步執行，確認上一個步驟完成再繼續。</p>
 <div class="box warn">
 <div class="bt">整場工作坊最常見的錯誤</div>
 <p style="margin-bottom:0">
-在<strong>錯的資料夾</strong>裡啟動 opencode。這樣它讀不到你的
-<code>AGENTS.md</code> 與 <code>opencode.json</code>，於是會用簡體中文回答、
-用 <code>python</code> 而不是 <code>uv run python</code>、行為完全不對。
-每次啟動前先 <code>pwd</code> 跟 <code>ls</code> 確認一下，兩秒的事。
+在<strong>錯的資料夾</strong>裡啟動 opencode。這樣它可能找不到你的
+<code>AGENTS.md</code> 與 <code>opencode.json</code>，無法沿用本課程的模型與執行規則。
+每次啟動前先用 <code>pwd</code> 跟 <code>ls</code> 確認位置。
 </p>
 </div>
 <h4>幾個小技巧</h4>
@@ -84,9 +66,9 @@
 <section>
 <h2>你需要安裝兩個東西</h2>
 <div class="tw"><table>
-<tr><th>工具</th><th>作用</th><th>大小</th></tr>
-<tr><td><strong>opencode</strong></td><td>AI agent 本體，在終端機裡跑</td><td>約 100 MB</td></tr>
-<tr><td><strong>uv</strong></td><td>Python 環境管理，比 conda 快很多，而且不需要先裝 Python</td><td>約 40 MB</td></tr>
+<tr><th>工具</th><th>作用</th></tr>
+<tr><td><strong>opencode</strong></td><td>在終端機裡接受你的任務，讀檔、寫程式並執行</td></tr>
+<tr><td><strong>uv</strong></td><td>建立本專案的 Python 環境並管理套件，不需要先另裝 Python</td></tr>
 </table></div>
 <div class="box tip">
 <div class="bt">好消息</div>
@@ -131,7 +113,7 @@ winget 第一次執行會跳出一個要你按 Y 的條款同意，但那個提�
 <pre class="cmd"><code>curl -fsSL https://opencode.ai/install | bash
 curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 <p class="lead" style="font-size:.92rem;color:var(--ink-3)">
-（macOS 步驟依官方文件撰寫，本教材未在 Mac 上實測。若遇到問題請在工作坊開始前告訴助教。）
+（macOS 請依官方安裝說明操作，課前完成同一份自測；需要協助時提早聯絡講師。）
 </p>
 
 <h3>Linux / WSL</h3>
@@ -153,16 +135,11 @@ curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 <h2>確認裝好了</h2>
 <pre class="cmd"><code>opencode --version
 uv --version</code></pre>
-<p>應該各自印出一個版本號。本教材實測的版本：</p>
-<div class="tw"><table>
-<tr><th></th><th>WSL (Ubuntu 24.04)</th><th>Windows 11</th></tr>
-<tr><td>opencode</td><td><code>1.18.30</code></td><td><code>1.18.30</code></td></tr>
-<tr><td>uv</td><td><code>0.12.x</code></td><td><code>0.12.13</code></td></tr>
-</table></div>
+<p>兩個指令都應印出版本號；記下來，之後求助時可以一起提供。</p>
 <div class="box warn">
 <div class="bt">如果出現「找不到指令」</div>
 <p style="margin-bottom:0">
-九成是 PATH 沒重新載入。<strong>把終端機完全關掉、重新開一個</strong>再試。
+先確認終端機能讀到安裝後的新路徑。<strong>把終端機完全關掉、重新開一個</strong>再試。
 還是不行的話，Windows 請確認是用 PowerShell 而不是舊版的 cmd。
 </p>
 </div>
@@ -176,7 +153,8 @@ uv --version</code></pre>
 <p>找一個你記得住的位置（例如 <code>Documents</code>），建立資料夾：</p>
 <pre class="cmd"><code>mkdir ai-math-lab
 cd ai-math-lab
-mkdir notes figs</code></pre>
+mkdir notes
+mkdir figs</code></pre>
 </div>
 
 <div class="step" data-n="2">
@@ -253,10 +231,7 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 <h3>建立 Python 環境（這步會等比較久）</h3>
 <pre class="cmd"><code>uv sync</code></pre>
 <p>
-第一次執行會下載 Python 直譯器與所有套件，共約 <strong>287 MB</strong>。
-實測耗時在 <strong>2 秒到 6 分半</strong>之間，取決於網路。
-之後在同一台機器上再跑就只要幾秒，因為東西都進快取了。
-</p>
+第一次執行會下載 Python 與套件，請等指令完成，回到可輸入下一個指令的提示字元。</p>
 <p>如果超過一分鐘還在跑，去泡杯茶。看到類似這樣就對了：</p>
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">uv sync</span></div>
@@ -281,7 +256,7 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 
 <h3>測試二：agent 會回話</h3>
 <pre class="cmd"><code>opencode run "用一句話說明什麼是主成分分析"</code></pre>
-<p>應該在幾秒內得到一段繁體中文的回答。</p>
+<p>應該得到一段繁體中文的回答。</p>
 
 <h3>測試三：agent 真的會動手（最重要的一關）</h3>
 <pre class="cmd"><code>opencode run --auto "建立一個 hello.py，內容是印出 1 到 10 的平方，然後執行它"</code></pre>
@@ -323,7 +298,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 </p>
 
 <ul class="ckl">
-<li><input type="checkbox" id="p1"><label for="p1"><code>opencode --version</code> 印出 1.18.x</label></li>
+<li><input type="checkbox" id="p1"><label for="p1"><code>opencode --version</code> 印出版本號</label></li>
 <li><input type="checkbox" id="p2"><label for="p2"><code>uv --version</code> 印出版本號</label></li>
 <li><input type="checkbox" id="p3"><label for="p3">專案資料夾裡有 <code>pyproject.toml</code>、<code>opencode.json</code>、<code>AGENTS.md</code></label></li>
 <li><input type="checkbox" id="p4"><label for="p4"><code>uv sync</code> 跑完，沒有紅色錯誤</label></li>
@@ -354,7 +329,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
     <td>加旗標重跑：<code>opencode run "..." --print-logs --log-level ERROR</code></td></tr>
 <tr><td><code>Unrecognized request argument supplied: prompt_cache_key</code></td>
     <td>opencode 的已知上游問題，偶發</td>
-    <td><strong>重試一次</strong>通常就好。實測會自己恢復。</td></tr>
+    <td><strong>重試一次</strong>通常就好。仍然失敗就保留錯誤訊息，請講師協助。</td></tr>
 <tr><td>換成其他模型後回 <code>UnknownError</code></td>
     <td>那些模型需要 API key</td>
     <td>本工作坊<strong>只用 <code>opencode/big-pickle</code></strong>。不要改 <code>opencode.json</code> 裡的 model。</td></tr>

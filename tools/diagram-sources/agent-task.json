@@ -1,0 +1,88 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "從需求到可確認的成果",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "work",
+      "label": "一起完成一個任務"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "ask",
+      "lane": "work",
+      "col": 0,
+      "type": "external",
+      "label": "說明需求",
+      "width": 160
+    },
+    {
+      "id": "read",
+      "lane": "work",
+      "col": 1,
+      "type": "backend",
+      "label": "讀取相關檔案",
+      "width": 160
+    },
+    {
+      "id": "allow",
+      "lane": "work",
+      "col": 2,
+      "type": "security",
+      "label": "確認修改範圍",
+      "width": 160
+    },
+    {
+      "id": "run",
+      "lane": "work",
+      "col": 3,
+      "type": "backend",
+      "label": "修改並執行",
+      "width": 160
+    },
+    {
+      "id": "check",
+      "lane": "work",
+      "col": 4,
+      "type": "frontend",
+      "label": "自己驗證成果",
+      "width": 160
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "from": "ask",
+      "to": "read"
+    },
+    {
+      "id": "e1",
+      "from": "read",
+      "to": "allow"
+    },
+    {
+      "id": "e2",
+      "from": "allow",
+      "to": "run"
+    },
+    {
+      "id": "e3",
+      "from": "run",
+      "to": "check"
+    }
+  ],
+  "mainPath": [
+    "ask",
+    "read",
+    "allow",
+    "run",
+    "check"
+  ]
+}

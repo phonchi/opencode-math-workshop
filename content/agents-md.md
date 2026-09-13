@@ -1,7 +1,6 @@
 # 用 AGENTS.md 馴服 agent
 
-> 課後延伸．預計閱讀與練習時間 40 分鐘
-> 適用版本：opencode 1.18.30
+> 課後延伸 · 把常用要求寫成專案規則
 
 工作坊上你已經會叫 opencode 幫你寫程式了。但你大概也遇過這些狀況：
 
@@ -36,15 +35,15 @@ opencode 啟動時會依序尋找規則檔：
 
 因為是「從目前目錄往上找」，所以有個很實際的後果：
 
-```bash
-# 正確：在專案根目錄啟動，AGENTS.md 讀得到
-cd ~/ai-math-lab
-opencode
+在課前建立的專案資料夾開啟終端機，先確認位置：
 
-# 有風險：在別的地方啟動，讀到的可能不是你的專案規則
-cd ~
-opencode
+```bash
+pwd
+ls
 ```
+
+清單裡應有本課程的 `AGENTS.md` 與 `opencode.json`。如果沒有，先切回正確的資料夾，不要在目前位置另建一套。
+
 
 **養成習慣：一律 `cd` 進專案根目錄再打 `opencode`。** 這是初學者最常見的「規則怎麼沒生效」原因。
 
@@ -64,31 +63,6 @@ opencode
 ```
 
 很多人以為是 `instructions` 這行讓 AGENTS.md 生效的。**不是。** 根目錄的 `AGENTS.md` 是自動被找到的，不寫 `instructions` 也會讀。
-
-這點我實際驗證過。建一個乾淨的資料夾，`opencode.json` 裡**完全沒有 `instructions` 這個鍵**：
-
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "model": "opencode/big-pickle"
-}
-```
-
-旁邊放一份只寫了「執行 Python 一律用 `uv run python <檔案>`」的 `AGENTS.md`，然後問它：
-
-```bash
-opencode run "用一句話回答：依照專案規則，執行 Python 檔案應該用哪一個指令？"
-```
-
-實測回答：
-
-```
-> build · big-pickle
-
-`uv run python <檔案>`
-```
-
-**規則生效了，而設定檔裡一個字都沒提到 AGENTS.md。**
 
 `instructions` 真正的用途是**追加其他檔案**。它支援三種寫法：
 
@@ -122,7 +96,7 @@ remote (.well-known/opencode)
 
 後面的會覆蓋前面同名的鍵。**這門課的所有設定都寫在專案根目錄的 `opencode.json`**，這樣你的設定跟著專案走，換台電腦、交作業都不會掉。
 
-（附帶一提：opencode 會在全域設定目錄自動產生 `opencode.jsonc`，裡面只有一行 `$schema`，以及一個依賴 `@opencode-ai/plugin` 的 `package.json`。那是它自己要用的，不用去動。`.jsonc` 格式允許寫註解。）
+`.jsonc` 是可以包含註解的 JSON 格式；本課程使用專案中的 `opencode.json`，不需要改全域設定。
 
 ---
 
@@ -137,7 +111,7 @@ remote (.well-known/opencode)
 
 判斷原則很簡單：**換一個專案還成立的，放全域；只對這個專案成立的，放專案層。**
 
-「用繁體中文」兩邊都可以。放全域你每個專案都不用再寫；放專案層則保證同學拿到你的專案也會得到中文回應。這門課建議**放專案層**，因為要交作業。
+「用繁體中文」兩邊都可以。放全域你每個專案都不用再寫；放專案層則讓同學拿到你的專案時，也能沿用相同的語言要求。這門課建議**放專案層**，讓規則和練習檔案一起保存。
 
 ---
 
@@ -153,21 +127,9 @@ remote (.well-known/opencode)
 
 **什麼時候用**：從零開始一個新專案，你懶得自己想要寫什麼，用 `/init` 生一份草稿再手動改。
 
-**警告**：官方文件寫的是「產生或更新」`AGENTS.md`，中文教學站則說如果檔案已存在，它會「改善而非覆寫」。不管是哪一種，它都會動到你那個檔案。你的起始專案已經有一份精心寫好的 `AGENTS.md`，跑 `/init` 之後內容一定會變。
+`/init` 可能修改既有的 `AGENTS.md`。本課程已提供規則，現場不用再執行這個指令。
 
-（未實測：我沒有實際拿課程專案去跑 `/init`，因為風險不對稱：寫壞了要重來，跑對了也只是省幾分鐘。）
-
-如果你真的想試：
-
-```bash
-cd ~/ai-math-lab
-git add -A && git commit -m "跑 /init 之前的存檔"   # 先存檔
-# 然後在 opencode 裡打 /init
-# 不滿意就：
-git restore AGENTS.md
-```
-
-這正是下一章要講的 git 工作流。**先 commit 再讓 agent 動手**，永遠不會錯。
+想在其他專案試 `/init`，請先完成 [Git 安全網](git-safety.html)，保存目前狀態，再產生草稿並檢查差異。本章先練習閱讀與修改現成規則。
 
 ---
 
@@ -242,7 +204,7 @@ sklearn 的版本，印出兩者的數值差異來驗證。
 - 不要刪除 `figs/` 或 `notes/` 裡既有的檔案。
 ```
 
-為什麼不准 agent commit：**commit 是你檢查過之後的動作**。如果 agent 改完自己就 commit 了，你就失去了「用 `git diff` 看它改了什麼」的機會，而那正是下一章的核心工作流。讓 agent 只負責改，你負責檢查和存檔。
+為什麼不准 agent commit：**commit 是你檢查過之後的動作**。如果 agent 改完自己就 commit，一般的 `git diff` 就不再顯示那些修改，需要再到歷史中比較。先看差異再存檔，較容易逐步確認。讓 agent 只負責改，你負責檢查和存檔。
 
 `git push` 更是絕對不行，那會把東西推到網路上，收不回來。
 
@@ -349,9 +311,9 @@ PCA 是一種降維方法，它透過計算共變異數矩陣的特徵向量⋯�
 }
 ```
 
-這是實測可用的：把上面這段放進 `opencode.json` 後，用 `opencode agent list` 檢視解析後的權限規則，可以看到 `{"permission": "bash", "pattern": "git push *", "action": "deny"}` 確實生效。規則以樣式比對，**最後一條符合的規則勝出**，所以 `"*": "ask"` 要寫在前面，特例寫後面。
+設定完成後，用 `opencode agent list` 檢視解析後的權限。規則以樣式比對，最後一條符合的規則生效，因此一般規則放前面、特例放後面。
 
-注意上面**同時寫了 `"git push"` 和 `"git push *"` 兩條**。前者擋不帶參數的 `git push`，後者擋 `git push origin main` 這類帶參數的。我沒有實測單寫 `"git push *"` 能不能擋住不帶參數的 `git push`，所以兩條都寫，比較保險。
+注意上面**同時寫了 `"git push"` 和 `"git push *"` 兩條**。前者擋不帶參數的 `git push`，後者擋 `git push origin main` 這類帶參數的。兩種形式都明列，閱讀設定時就能看出想限制哪些動作。
 
 `permission` 的可用值是 `"allow"`、`"ask"`、`"deny"`。除了 `bash`、`edit`、`webfetch`，還有 `read`、`glob`、`grep`、`task`、`skill`、`websearch`、`external_directory` 等。
 
@@ -366,11 +328,10 @@ PCA 是一種降維方法，它透過計算共變異數矩陣的特徵向量⋯�
 ### 層次 1：確認 opencode 讀到了你的設定
 
 ```bash
-cd ~/ai-math-lab
 opencode debug config
 ```
 
-實測輸出（在起始專案裡執行）：
+起始專案中的輸出例子：
 
 ```json
 {
@@ -396,16 +357,15 @@ opencode debug config
 
 **注意這個指令的限制**：它顯示的是**合併後的設定**，不會把 AGENTS.md 的內文印出來。所以它能證明「設定讀到了」，不能證明「規則被遵守了」。要驗證後者，往下看。
 
-### 層次 2：直接問它（實測有效）
+### 層次 2：請它說明執行方式
 
 最快的行為測試，在專案根目錄執行：
 
 ```bash
-cd ~/ai-math-lab
 opencode run "用一句話回答：依照專案規則，執行 Python 檔案應該用哪一個指令？"
 ```
 
-實測輸出：
+輸出例子：
 
 ```
 > build · big-pickle
@@ -413,34 +373,22 @@ opencode run "用一句話回答：依照專案規則，執行 Python 檔案應�
 `uv run python <檔案>`。
 ```
 
-兩件事同時被驗證了：它**用繁體中文回答**（語言規則生效），而且**答出了 `uv run python`**（執行環境規則生效）。
+這次回答符合語言與執行方式的要求。接下來還要看它是否在實際任務中照做。
 
-### 這個測試的陷阱（我實際踩到了）
+:::bg 回答正確，還不能確認什麼
 
-我原本想做一個對照實驗：把 `AGENTS.md` 改名成 `AGENTS.md.bak`，預期 agent 就答不出 `uv run python` 了。**結果完全不是這樣。** 實測輸出：
+agent 可能先自己讀檔，再回答規則。這表示它找得到規則，但不能單靠一句回答判斷規則是不是自動載入。也不要只把檔案改名成 `.bak` 就當成「沒有規則」的對照，agent 仍可能找到它。
 
-```
-→ Read AGENTS.md.bak
-→ Read opencode.json
+對這門課最實用的判斷，是查看下一個實際任務：它是否使用指定的執行方式，輸出是否放在正確位置。
 
-`uv run python <檔案>`。
-```
-
-看到沒有？它**自己用讀檔工具去把 `AGENTS.md.bak` 翻出來讀了**，然後照樣答對。
-
-這件事有兩個重要的意涵：
-
-1. **「問它規則」這個測試會有偽陽性。** 它答對，不代表規則是透過 AGENTS.md 機制自動載入的；也可能是它自己去翻檔案翻到的。agent 比你想的還會找東西。
-2. 所以**要搭配層次 1 的 `opencode debug config` 一起看**。`debug config` 是靜態的設定解析結果，不會被 agent 的臨場發揮干擾。
-
-真的想做乾淨的對照實驗，應該要把檔案**移到專案目錄外面**（例如 `mv AGENTS.md /tmp/`），不能只是改個副檔名放在原地。（我沒有再測這一步，所以不保證有效，agent 對某些外部路徑仍有讀取權限。）
+:::
 
 ### 層次 3：實際任務測試
 
-最終還是要看真實行為。給它一個小任務：
+最終還是要看真實行為。先執行 `opencode`，在互動介面貼上下面的小任務，閱讀並確認寫檔要求：
 
-```bash
-opencode run "在 notes/ 寫一個 test.md，裡面用 LaTeX 寫出 PCA 的目標函式"
+```text
+在 notes/ 寫一個 test.md，裡面用 LaTeX 寫出 PCA 的目標函式，並定義式子裡的符號。
 ```
 
 然後檢查：檔案是不是寫在 `notes/`？數學式是不是用 `$$...$$`？說明是不是繁體中文？
@@ -453,7 +401,7 @@ opencode run "在 notes/ 寫一個 test.md，裡面用 LaTeX 寫出 PCA 的目�
 |---|---|---|
 | 完全不理會規則 | 不在專案根目錄啟動 opencode | `cd` 到根目錄再開 |
 | 偶爾遵守偶爾不遵守 | 規則太含糊，或整份檔案太長 | 改具體、砍掉不重要的條文 |
-| 改了 AGENTS.md 沒反應 | 可能是舊對話的脈絡還在 | 開新對話再試（中文教學站說規則是熱載入、改完立即生效，我未實測） |
+| 改了 AGENTS.md 沒反應 | 可能是舊對話的脈絡還在 | 開新對話再試 |
 | 某條永遠沒用 | 跟另一條規則矛盾 | 從頭讀一次，找出打架的條文 |
 
 ---
@@ -486,9 +434,3 @@ opencode run "在 notes/ 寫一個 test.md，裡面用 LaTeX 寫出 PCA 的目�
 - https://opencode.ai/docs/permissions/ — `permission` 的鍵、值與樣式比對規則
 - https://learnopencode.com/3-workflow/03-init.html — `/init` 對既有 AGENTS.md 是「改善而非覆寫」（中文教學站，簡體）
 - https://learnopencode.com/2-daily/04-global-rules.html — 全域規則路徑、規則熱載入的說法（中文教學站，簡體）
-
-本機實測（opencode 1.18.30，Linux/WSL2）：
-
-- `opencode debug config` 於起始專案的實際輸出
-- `opencode run` 的行為測試，含「無 `instructions` 鍵仍讀取 AGENTS.md」與「改名後 agent 自行讀檔」兩組對照
-- `opencode agent list` 解析後的 `permission` 規則（`git push *` → `deny`）

@@ -1,0 +1,146 @@
+{
+  "status": "PASS",
+  "checks": [
+    "diff vs index",
+    "cached vs HEAD",
+    "HEAD vs working",
+    "restore from index",
+    "untracked preserved",
+    "restore --staged preserves worktree"
+  ],
+  "commands": [
+    {
+      "command": [
+        "git",
+        "init",
+        "-q"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "add",
+        "tracked.txt"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "user.name=Workshop",
+        "-c",
+        "user.email=workshop@example.invalid",
+        "commit",
+        "-qm",
+        "initial"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "add",
+        "tracked.txt"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff"
+      ],
+      "exit": 0,
+      "stdout": "diff --git a/tracked.txt b/tracked.txt\nindex 19d9cc8..d26b33d 100644\n--- a/tracked.txt\n+++ b/tracked.txt\n@@ -1 +1 @@\n-staged\n+working\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached"
+      ],
+      "exit": 0,
+      "stdout": "diff --git a/tracked.txt b/tracked.txt\nindex d0fe822..19d9cc8 100644\n--- a/tracked.txt\n+++ b/tracked.txt\n@@ -1 +1 @@\n-committed\n+staged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "HEAD"
+      ],
+      "exit": 0,
+      "stdout": "diff --git a/tracked.txt b/tracked.txt\nindex d0fe822..d26b33d 100644\n--- a/tracked.txt\n+++ b/tracked.txt\n@@ -1 +1 @@\n-committed\n+working\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "restore",
+        "tracked.txt"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached"
+      ],
+      "exit": 0,
+      "stdout": "diff --git a/tracked.txt b/tracked.txt\nindex d0fe822..19d9cc8 100644\n--- a/tracked.txt\n+++ b/tracked.txt\n@@ -1 +1 @@\n-committed\n+staged\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "restore",
+        "--staged",
+        "tracked.txt"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff"
+      ],
+      "exit": 0,
+      "stdout": "diff --git a/tracked.txt b/tracked.txt\nindex d0fe822..19d9cc8 100644\n--- a/tracked.txt\n+++ b/tracked.txt\n@@ -1 +1 @@\n-committed\n+staged\n",
+      "stderr": ""
+    }
+  ]
+}

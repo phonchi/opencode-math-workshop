@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* 逐頁量每個 pre / table 是否被裁切（scrollWidth > clientWidth）。
+/* 逐頁量 pre / table 是否真的裁切；允許可操作的區塊內水平捲動。
  * 這是「截圖歪掉」那類問題的自動化把關。
  *
  * 用法：node tools/check_overflow.js [頁名...]
@@ -19,8 +19,7 @@ const pages = process.argv.slice(2).length
   ? process.argv.slice(2)
   : fs.readdirSync(ROOT).filter(f => f.endsWith('.html')).map(f => f.replace(/\.html$/, ''));
 
-// 桌機寬度才是重點：手機本來就得捲，但桌機被裁掉是設計問題
-const VIEWS = [['desktop', 1440], ['laptop', 1280]];
+const VIEWS = [['desktop',1440],['laptop',1280],['tablet',1024],['mobile',390]];
 
 (async () => {
   const br = await puppeteer.launch({ executablePath: CHROME, args: ['--no-sandbox'] });
@@ -34,9 +33,12 @@ const VIEWS = [['desktop', 1440], ['laptop', 1280]];
       await new Promise(r => setTimeout(r, 1200));
       const hits = await p.evaluate(() => {
         const out = [];
+        const pageOver=document.documentElement.scrollWidth-innerWidth;
+        if(pageOver>1)out.push({kind:'page',over:pageOver,txt:'整頁橫向溢出'});
         document.querySelectorAll('pre, .tw').forEach(el => {
           const over = el.scrollWidth - el.clientWidth;
-          if (over > 1) {
+          const scrolling=/^(auto|scroll)$/.test(getComputedStyle(el).overflowX);
+          if (over > 1 && !scrolling) {
             const t = (el.innerText || '').trim().split('\n')[0].slice(0, 46);
             out.push({ kind: el.tagName === 'PRE' ? (el.className || 'pre') : 'table',
                        over, txt: t });
@@ -56,5 +58,5 @@ const VIEWS = [['desktop', 1440], ['laptop', 1280]];
     bad.forEach(b => console.log('  ' + b));
     process.exit(1);
   }
-  console.log('  PASS — 桌機寬度下沒有任何 pre 或表格被裁切');
+  console.log('  PASS — 四種寬度無整頁溢出或裁切；允許輸出與表格自身捲動');
 })().catch(e => { console.error(e); process.exit(2); });
