@@ -4,7 +4,7 @@
 對象是接觸過部分微積分、線性代數，能看懂少量 Python 的大學生。
 
 [線上教材](https://phonchi.github.io/opencode-math-workshop/)；本機可直接開啟 `index.html`。
-現場三小時，以 sklearn digits 貫穿分群、PCA、分類與數學筆記；課後分成數學應用和 OpenCode 工作法兩條路線。
+現場兩小時，以 sklearn digits 貫穿分群、PCA、分類與數學筆記；課後分成數學應用和 OpenCode 工作法兩條路線。
 
 ## 閱讀路線
 
