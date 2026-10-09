@@ -118,6 +118,45 @@ async function checkAnchor(page,selector){
   return page.evaluate(anchor=>({href:location.hash,top:document.getElementById(anchor.slice(1)).getBoundingClientRect().top}),href);
 }
 async function interactionChecks(){
+  if(pages.includes('index'))for(const width of [1440,390])await scenario('workshop-start-links-'+width,async page=>{
+    const height=width===390?844:1000;
+    await page.setViewport({width,height});
+    await load(page,fileURL('index'));
+    const entries=await page.$$eval('.hero-actions a',links=>links.map(a=>({href:a.getAttribute('href'),top:a.getBoundingClientRect().top,bottom:a.getBoundingClientRect().bottom})));
+    expect(entries.length===2&&entries.every(a=>a.top>=0&&a.bottom<=height),'Start links must be visible in the first viewport',entries);
+    await Promise.all([page.waitForNavigation({waitUntil:'networkidle0'}),page.click('.action-primary')]);
+    expect(page.url().endsWith('/prep.html'),'Preparation entry leads to the wrong page');
+    await load(page,fileURL('index'));
+    await Promise.all([page.waitForNavigation({waitUntil:'networkidle0'}),page.click('.action-secondary')]);
+    expect(page.url().endsWith('/first-run.html'),'Ready entry must start with the first conversation');
+    return {width,entries};
+  });
+  if(pages.includes('research-notes'))await scenario('research-note-template-copy',async page=>{
+    await page.evaluateOnNewDocument(()=>{
+      Object.defineProperty(navigator,'clipboard',{value:undefined,configurable:true});
+      const original=document.execCommand.bind(document);
+      document.execCommand=function(command,...args){
+        const selected=document.activeElement&&document.activeElement.value;
+        const result=original(command,...args);
+        if(command==='copy')window.__copyEvidence={text:selected,result};return result;
+      };
+    });
+    await load(page,fileURL('research-notes'));
+    const selector='pre.cmd[data-lang="markdown"]';
+    const expected=await page.$eval(selector+' code',code=>code.textContent.trim());
+    await page.click(selector+' .copy');
+    await page.waitForFunction(()=>document.querySelector('pre.cmd[data-lang="markdown"] .copy').textContent==='已複製');
+    const detail=await page.evaluate(()=>window.__copyEvidence);
+    expect(detail&&detail.result&&detail.text===expected,'Reading-note template copy changed its Markdown',detail);
+    return {characters:expected.length,templateCopied:true};
+  });
+  if(pages.includes('lab3-notes'))await scenario('lab3-to-reading-supplement',async page=>{
+    await load(page,fileURL('lab3-notes'));
+    const detail=await checkAnchor(page,'.chapter-path a[href="#section-最後-把它變成一份筆記"]');
+    await Promise.all([page.waitForNavigation({waitUntil:'networkidle0'}),page.click('.lesson-main p a[href="research-notes.html"]')]);
+    expect(page.url().endsWith('/research-notes.html'),'Lab 3 reading link leads to the wrong page');
+    return {...detail,destination:page.url()};
+  });
   if(pages.includes('first-run')){
     await scenario('desktop-section-anchor',async page=>{
       expect(!(await load(page,fileURL('first-run'))).length,'Runtime errors');

@@ -12,6 +12,7 @@
 - 現場：`first-run.html` → `lab1-cluster.html` → `lab2-pca.html` → `lab3-notes.html`。
 - 課後工作法：`agent-workflows.html` → `agents-md.html` → `git-safety.html` → `mcp-skills.html` → `local-models.html`。
 - 課後數學：`math-applications.html`，低秩近似、梯度下降與最短路徑。
+- 課後閱讀與筆記：`research-notes.html`，用 OpenCode 整理指定來源，回原文與自己的 Lab 核對。
 - 隨時查閱：`cheatsheet.html`。
 
 學生使用 OpenCode 內建網路模型，不需要新增付款方式。`starter/` 是起始專案；`reference/` 是完成練習後可閱讀的參考解答。
@@ -33,6 +34,8 @@
 - `<!--INCLUDE:tools/片段.html-->`：內嵌指定的可信 HTML 片段。
 
 圖解來源、匯出方法及技能驗證在 `tools/diagram-sources/`；PCA 互動來源在 `tools/pca-explorer.html`。正式教學頁面只呈現概念、操作和結果判讀，歷史實測、平台差異、查核過程與讀者審查一律放 `internal/`，不從教材導覽連出。
+
+教學資料圖由 `tools/make_figs.py` 產生，SVG、數據與 provenance 放在 `assets/figures/`。重建方式見該目錄的 README；Lab 3 圖是既有七列範例數據的重繪，不是新的梯度實驗。
 
 ## 維護檢查
 

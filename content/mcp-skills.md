@@ -439,6 +439,8 @@ description: 根據本專案已完成的數學實驗與輸出整理學習筆記�
 
 資料夾名稱與 frontmatter 的 `name` 都是 `math-notes`。`description` 說明何時使用；下面的正文才是實際流程。這份練習只需一個檔案，沒有額外安裝或網路服務。[OpenCode 官方 skills 說明](https://opencode.ai/docs/skills/) 列出了命名、載入與權限規則。
 
+想把筆記流程用在課本或文獻，可接著做[課後補充：整理數學文獻與筆記](research-notes.html)，練習整理指定來源並回原文核對。
+
 ### 先確認發現，再確認真的載入
 
 在同一個專案資料夾執行：
