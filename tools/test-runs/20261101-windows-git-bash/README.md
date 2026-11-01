@@ -19,5 +19,7 @@
 講師回報：依教材步驟設定 `setx PYTHONUTF8 1` 並重開 Git Bash 後，在 OpenCode 內由 AI 以 `bash` 工具執行並核准 `uv run python -c "print(chr(0x4e2d)+chr(0x6587))"`，印出「中文」。
 
 ## 未實測
-- 乾淨 Windows 上從官方 exe 安裝 Git，以及在 Git Bash 實際執行 `winget install`。
+- 乾淨 Windows 上從官方 exe 安裝 Git。
 - macOS 的 Git 安裝流程。
+
+後續 Windows 安裝改用官方腳本，實測見 `tools/test-runs/20261101-git-bash-no-winget/README.md`。

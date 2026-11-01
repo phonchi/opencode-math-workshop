@@ -8,7 +8,7 @@
 
 ## 閱讀路線
 
-- 課前：`prep.html`，安裝 Git、OpenCode、uv 並完成環境自測。Windows 從官方安裝檔安裝 Git，全程使用 Git Bash。
+- 課前：`prep.html`，安裝 Git、OpenCode、uv 並完成環境自測。Windows 從官方安裝檔安裝 Git，全程使用 Git Bash，opencode 與 uv 用官方腳本安裝。
 - 現場：`first-run.html` → `lab1-cluster.html` → `lab2-pca.html` → `lab3-notes.html`。
 - 課後工作法：`agent-workflows.html` → `agents-md.html` → `git-safety.html` → `mcp-skills.html` → `local-models.html`。
 - 課後數學：`math-applications.html`，低秩近似、梯度下降與最短路徑。

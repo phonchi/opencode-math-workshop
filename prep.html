@@ -879,34 +879,21 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 </div>
 <div class="step" data-n="2">
 <h3>開啟 Git Bash，安裝 opencode 與 uv</h3>
-<p>從開始選單搜尋並開啟 <strong>Git Bash</strong>，貼上這兩行：</p>
-<pre class="cmd"><code>winget install SST.opencode --accept-source-agreements --accept-package-agreements
-winget install astral-sh.uv --accept-source-agreements --accept-package-agreements</code></pre>
+<p>從開始選單搜尋並開啟 <strong>Git Bash</strong>，<strong>依序</strong>貼上這三行：</p>
+<pre class="cmd"><code>touch ~/.bash_profile
+curl -fsSL https://opencode.ai/install | bash
+curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
+<p>第一行建立 Git Bash 的設定檔。少了它，opencode 的安裝程式找不到地方記錄路徑，重開後會找不到 <code>opencode</code>。</p>
 </div>
 <div class="step" data-n="3">
 <h3>讓 Python 正確輸出中文</h3>
 <p>在同一個視窗執行一次，之後不用再設定：</p>
 <pre class="cmd"><code>setx PYTHONUTF8 1</code></pre>
-<p>繁體中文 Windows 上的 Python 預設不用 UTF-8 輸出，少了這一步，程式印出的中文可能變成亂碼。</p>
+<p>繁體中文 Windows 上的 Python 預設不一定用 UTF-8 輸出，少了這一步，OpenCode 裡看到的中文可能變成亂碼。</p>
 </div>
 <div class="step" data-n="4">
 <h3>關掉 Git Bash，再重新開啟</h3>
 <p>新裝的程式與環境變數不會出現在已經開著的視窗裡。重開後才往下走；之後的指令與 <code>opencode</code> 都在 Git Bash 裡執行。</p>
-</div>
-<div class="box tip">
-<div class="bt">如果 Git Bash 說找不到 winget</div>
-<p>
-表示這台 Windows 沒有 App Installer（較舊的 Windows 可能沒有內建）。
-開啟 <strong>Microsoft Store</strong>，搜尋 <strong>App Installer</strong> 安裝，再重開 Git Bash。
-</p>
-<p style="margin-bottom:0">Git 不受影響，因為它是用官方安裝檔裝的。</p>
-</div>
-<div class="box warn">
-<div class="bt">為什麼指令要加 <code>--accept-source-agreements</code></div>
-<p style="margin-bottom:0">
-winget 第一次執行會跳出要你按 Y 的條款同意，但那個提示常常收不到鍵盤輸入，
-指令就會停住。上面的指令已經幫你跳過了。
-</p>
 </div>
 
 <h3>macOS</h3>
@@ -1120,7 +1107,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <tr><th>症狀</th><th>原因</th><th>怎麼辦</th></tr>
 <tr><td><code>opencode: command not found</code></td>
     <td>PATH 沒重新載入</td>
-    <td>把終端機<strong>完全關掉重開</strong>。Windows 請用 Git Bash，不要用 PowerShell 或 cmd。</td></tr>
+    <td>把終端機<strong>完全關掉重開</strong>。Windows 請用 Git Bash，不要用 PowerShell 或 cmd。仍然找不到時，在 Git Bash 執行下面的補救指令，再重開一次。<pre class="cmd"><code>echo 'export PATH="$HOME/.opencode/bin:$HOME/.local/bin:$PATH"' &gt;&gt; ~/.bash_profile</code></pre></td></tr>
 <tr><td>開始選單找不到 Git Bash<br><code>git: command not found</code></td>
     <td>Git 還沒裝好</td>
     <td>Windows 重新從<a href="https://git-scm.com/install/windows">官方下載頁</a>下載安裝檔，保留預設選項安裝。</td></tr>
@@ -1130,12 +1117,6 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <tr><td><code>curl: command not found</code></td>
     <td>Linux/WSL 沒有內建 <code>curl</code></td>
     <td>先跑 <code>sudo apt update &amp;&amp; sudo apt install -y git curl ca-certificates</code>，再重跑安裝指令。</td></tr>
-<tr><td><code>winget: command not found</code></td>
-    <td>Windows 版本較舊，沒有內建 App Installer</td>
-    <td>Microsoft Store 搜尋 <strong>App Installer</strong> 安裝，關掉 Git Bash 重開。</td></tr>
-<tr><td>winget 停在 <code>Do you agree...[Y] Yes [N] No</code> 不動</td>
-    <td>互動式條款同意收不到鍵盤輸入</td>
-    <td>Ctrl+C 中斷，改用本頁那組帶 <code>--accept-source-agreements</code> 的指令。</td></tr>
 <tr><td><code>Error: Internal server error</code></td>
     <td>看不到真正原因</td>
     <td>加旗標重跑：<code>opencode run "..." --print-logs --log-level ERROR</code></td></tr>
