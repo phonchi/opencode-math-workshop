@@ -303,30 +303,73 @@ agent 給你的每個數字都是對的，但它擅自替你做了一個<strong>
 
 <details class="bg"><summary>ARI 是什麼？為什麼要「調整」？</summary>
 <div class="bg-body">
-<p>
-分群的編號是任意的：把「第 0 群」跟「第 3 群」的編號對調，分群結果<strong>完全沒變</strong>。
-所以不能直接比編號。要比的是<strong>「哪些點被放在一起」這個關係</strong>。
-</p>
-<h4>先看 Rand index</h4>
-<p>
-把所有資料點兩兩配對，總共 $\binom{n}{2}$ 對。對每一對問一個是非題：
-<em>這兩個點在真實標籤裡是同一類嗎？在分群結果裡是同一群嗎？</em>
-兩邊答案一致就算「同意」：
-</p>
-$$\text{RI}=\frac{\text{兩邊都說同群}+\text{兩邊都說不同群}}{\binom{n}{2}}$$
-<p>這完全繞開了編號問題，只看配對關係。</p>
+<h4>不能直接比編號</h4>
+<p>分群的編號是任意的。下面的編號完全相反，但 A、B、C 仍在一起，D、E、F 也在一起，分群其實是完美的：</p>
+<div class="tw"><table>
+<tr><th>資料點</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr>
+<tr><td>真實類別</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td></tr>
+<tr><td>分群結果</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+</table></div>
+<p>所以要比的是<strong>「任意兩個點有沒有被放在一起」這個關係</strong>。</p>
+
+<h4>Rand index（RI）：數配對</h4>
+<p>把所有點兩兩配對，總共 $M=\binom{n}{2}$ 對。對每一對問：這兩個點在真實標籤裡同類嗎？在分群結果裡同群嗎？兩邊答案一致就算一對。</p>
+$$\text{RI}=\frac{TP+TN}{M}$$
+<p>$TP$ 是兩邊都說同群的配對數，$TN$ 是兩邊都說不同群的配對數。這裡數的都是<strong>配對</strong>，不是單一資料點。</p>
+<p>舉例來說，四個點的真實類別是 $0,0,1,1$，分群結果是 $0,0,0,1$，共 $\binom{4}{2}=6$ 對：</p>
+<div class="tw"><table>
+<tr><th>配對</th><th>真實同類？</th><th>分群同群？</th><th>一致？</th></tr>
+<tr><td>A, B</td><td>是</td><td>是</td><td>一致</td></tr>
+<tr><td>A, C</td><td>否</td><td>是</td><td>不一致</td></tr>
+<tr><td>A, D</td><td>否</td><td>否</td><td>一致</td></tr>
+<tr><td>B, C</td><td>否</td><td>是</td><td>不一致</td></tr>
+<tr><td>B, D</td><td>否</td><td>否</td><td>一致</td></tr>
+<tr><td>C, D</td><td>是</td><td>否</td><td>不一致</td></tr>
+</table></div>
+<p>有 3 對一致，所以 $\text{RI}=3/6=0.5$。</p>
+
 <h4>為什麼要「調整」</h4>
-<p>
-RI 有個毛病：<strong>就算亂分，也會拿到不低的分數</strong>。
-群數一多，隨便兩個點「剛好都不同群」的機率就很高，分母白白被灌水。
-所以會把隨機情況下的期望值扣掉、再正規化：
-</p>
-$$\text{ARI}=\frac{\text{RI}-\mathbb{E}[\text{RI}]}{\max(\text{RI})-\mathbb{E}[\text{RI}]}$$
-<p style="margin-bottom:0">
-調整之後：完全正確是 <strong>1</strong>，<strong>隨機亂分約等於 0</strong>（可以是小負數）。
-接近 0 表示與這個隨機分群基準相近，不能據此斷言資料中完全沒有資訊。
-你可以叫 agent 用隨機標籤實際跑一次驗證這點，五行程式就能做完。
-</p>
+<p>RI 有個毛病：<strong>就算亂分，也會拿到不低的分數</strong>。假設有 100 個點，真實分成 10 類，每類 10 個點：</p>
+$$M=\binom{100}{2}=4950,\qquad 10\binom{10}{2}=450$$
+<p>4950 對裡只有 450 對同類，其餘 4500 對本來就不同類，而亂分也很容易把它們分開，於是 $TN$ 自然很大。這就像 95% 的資料都是負類時，永遠猜負類也有 95% 的準確率。</p>
+
+<h4>算出隨機分群的期望值</h4>
+<p>標準 ARI 的隨機模型是：<strong>固定兩邊各群的大小，只隨機打亂標籤</strong>。設真實各類大小為 $a_k$，分群各群大小為 $b_\ell$，同群的配對數分別是</p>
+$$A=\sum_k\binom{a_k}{2},\qquad B=\sum_\ell\binom{b_\ell}{2}$$
+<p>在這個模型下，一對點在真實標籤同類的比例是 $A/M$，在分群結果同群的機率是 $B/M$，兩者獨立相乘，所以</p>
+$$\mathbb{E}[TP]=M\cdot\frac{A}{M}\cdot\frac{B}{M}=\frac{AB}{M},\qquad \mathbb{E}[TN]=M\left(1-\frac{A}{M}\right)\left(1-\frac{B}{M}\right)$$
+<p>代回 RI 並整理：</p>
+$$\mathbb{E}[\text{RI}]=1-\frac{A+B}{M}+\frac{2AB}{M^2}$$
+<p>把 $A=B=450$、$M=4950$ 代入，得到 $\mathbb{E}[\text{RI}]\approx 0.835$。<strong>只靠隨機排列，RI 的期望值就有約 0.835。</strong>實際隨機排列 5000 次取平均，RI 約為 0.8347，和公式一致。</p>
+
+<h4>ARI：扣掉隨機基準</h4>
+$$\text{ARI}=\frac{\text{RI}-\mathbb{E}[\text{RI}]}{1-\mathbb{E}[\text{RI}]}$$
+<p>分子是比隨機多出多少，分母是比隨機最多能多出多少。例如同樣是 100 個點，$\text{RI}=0.9$ 看起來很高，但</p>
+$$\text{ARI}=\frac{0.9-0.8347}{1-0.8347}\approx 0.395$$
+<p>前面四個點的例子也一樣：$A=2$、$B=3$、$M=6$，算出 $\mathbb{E}[\text{RI}]=0.5$，所以 $\text{RI}=0.5$ 其實只等於隨機基準，$\text{ARI}=0$。</p>
+<p>上式可以再整理成文獻常見的形式，其中 $n_{ij}$ 是真實第 $i$ 類和分群第 $j$ 群共有的點數：</p>
+$$\text{ARI}=\frac{\sum_{ij}\binom{n_{ij}}{2}-\dfrac{AB}{M}}{\dfrac{1}{2}(A+B)-\dfrac{AB}{M}}$$
+<p>分子的 $\sum_{ij}\binom{n_{ij}}{2}$ 就是 $TP$，$AB/M$ 就是它的隨機期望值。</p>
+
+<h4>分數怎麼讀</h4>
+<div class="tw"><table>
+<tr><th>ARI</th><th>意義</th></tr>
+<tr><td>1</td><td>和真實標籤的分組完全一致（編號可以不同）</td></tr>
+<tr><td>接近 0</td><td>和這個隨機基準差不多，不能據此斷言資料中完全沒有資訊</td></tr>
+<tr><td>小於 0</td><td>一致程度比隨機基準還差</td></tr>
+</table></div>
+<p>「隨機時期望值為 0」只對固定群大小的隨機排列模型成立，換一種亂分方式不一定如此。</p>
+
+<h4>和 silhouette 的差別</h4>
+<div class="tw"><table>
+<tr><th></th><th>silhouette</th><th>ARI</th></tr>
+<tr><td>需要真實標籤</td><td>不需要</td><td>需要</td></tr>
+<tr><td>看的東西</td><td>點與點的距離</td><td>點與點是否同群</td></tr>
+<tr><td>評估重點</td><td>幾何上的分離程度</td><td>和真實類別的一致程度</td></tr>
+<tr><td>最佳值</td><td>1</td><td>1</td></tr>
+<tr><td>隨機基準</td><td>沒有固定為 0</td><td>上述模型下期望值為 0</td></tr>
+</table></div>
+<p style="margin-bottom:0">兩者不一定同高。真實類別在空間中重疊時，演算法可能找到幾何上分得很開、卻和真實類別不一致的分法，也就是 silhouette 高、ARI 低；反過來，分群不夠緊密，也可能和真實類別很一致。所以兩個指標常一起報告。</p>
 </div>
 </details>
 <div class="box tip">
