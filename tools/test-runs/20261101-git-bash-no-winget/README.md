@@ -22,6 +22,11 @@ Git Bash 視窗直接輸出時，未設定也能顯示中文。輸出經過管�
 ## 講師手動驗收（2026-11-01）
 講師回報：在官方腳本安裝、使用者層級 `PYTHONUTF8=1` 的環境下，從 Git Bash 啟動 OpenCode，由 AI 以 `bash` 工具執行並核准 `uv run python -c "print(chr(0x4e2d)+chr(0x6587))"`，印出「中文」。
 
+## Ctrl+V 貼上
+講師手動操作時，在 `git-bash.exe` 視窗的 OpenCode 按 `Ctrl+V` 貼不上，標題變成 `Windows PowerShell`。讀 1.19.5 執行檔：`Ctrl+V` 先啟動 `powershell.exe` 查圖片，再呼叫 `fallbacks/windows/clipboard_${an}.exe` 讀文字，錯誤被吞掉；執行檔內找不到 `clipboard_x86_64`（工具缺失為推論，未直接執行驗證）。
+
+講師加上 `KeyFunctions=C+v:paste` 與 `ShootFoot=on`（mintty 官方文件的寫法）到 `~/.minttyrc` 並重開後回報：`Ctrl+V` 可以貼上。先前以 SendKeys 模擬可貼上的原因未完全釐清，模擬按鍵的結果不能代表實體按鍵。
+
 ## 未實測
 - 乾淨 Windows 上從官方 exe 安裝 Git。
 - 全新帳號；本機已有 uv 下載的 Python 與快取。
