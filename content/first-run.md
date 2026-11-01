@@ -15,11 +15,11 @@
 
 ### 1.1 先完成課前準備
 
-這一章從已準備好的專案開始。尚未安裝 OpenCode、uv 或建立設定檔時，先完成 [課前準備](prep.html) 的自測，再回到這裡。
+這一章從已準備好的專案開始。尚未安裝 Git、OpenCode、uv 或建立設定檔時，先完成 [課前準備](prep.html) 的自測，再回到這裡。
 
 ### 1.2 確認是同一個專案
 
-開啟課前建立的 `ai-math-lab` 資料夾，在該處開啟終端機。它可能位於 Documents，也可能在你選的其他位置；請以自己的實際路徑為準。
+開啟終端機（Windows 用 Git Bash），用 `cd` 走到課前建立的 `ai-math-lab` 資料夾。它可能位於 Documents，也可能在你選的其他位置；請以自己的實際路徑為準。
 
 ```bash
 pwd
@@ -126,7 +126,7 @@ opencode run "讀 pyproject.toml，用一句話說明這個專案裝了哪些套
 |---|---|---|
 | `/` | 跳出斜線指令清單 | `/models` |
 | `@` | 補檔名，也可以叫 subagent | 打 `@AGENT` 會補成 `@AGENTS.md`；`@explore`、`@general` 是 subagent |
-| `!` | 進入 Shell 模式，直接在這裡跑 shell 指令，底部會顯示 `esc exit shell mode`，按 `Esc` 退出 | `!ls -la` |
+| `!` | 進入 Shell 模式，直接在這裡跑 shell 指令，底部會顯示 `esc exit shell mode`，按 `Esc` 退出 | 按一次 `!` 後輸入 `ls -la`，不用連打兩個 `!` |
 
 ---
 

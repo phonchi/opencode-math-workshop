@@ -22,7 +22,7 @@
 
 ### Windows 與 macOS
 
-從 [Ollama 官方下載頁](https://ollama.com/download) 安裝對應版本，開啟 Ollama。Windows 安裝後請重開 PowerShell，讓終端機能找到新指令。
+從 [Ollama 官方下載頁](https://ollama.com/download) 安裝對應版本，開啟 Ollama。Windows 安裝後請重開 Git Bash，讓終端機能找到新指令。
 
 ### Linux／WSL
 

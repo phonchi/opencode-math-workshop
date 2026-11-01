@@ -1555,3 +1555,7 @@ git restore AGENTS.md
 <tr><td>opencode</td><td><code>1.18.30</code></td><td><code>1.18.30</code></td></tr>
 <tr><td>uv</td><td><code>0.12.x</code></td><td><code>0.12.13</code></td></tr>
 </table></div>
+
+## Windows 改用 Git Bash（2026-11-01）
+
+教材的 Windows 路線改為：從官方 exe 安裝 Git，之後全程用 Git Bash，並執行 `setx PYTHONUTF8 1`。原因與實測結果見 `tools/test-runs/20261101-windows-git-bash/README.md`。`opencode.json` 不需要 `shell`，從 Git Bash 啟動時 OpenCode 會自動使用 bash。

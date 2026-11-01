@@ -44,13 +44,13 @@ git 解決的正是這件事。一句話：
 git --version
 ```
 
-有版本號就可以了。Ubuntu/WSL 尚未安裝時用 `sudo apt install git`。Windows 在 PowerShell 執行：
+有版本號就可以了。[課前準備](prep.html) 已經裝過 Git；如果還沒有：
 
-```powershell
-winget install --id Git.Git -e --source winget --accept-source-agreements --accept-package-agreements
-```
+- **Windows**：到 [Git for Windows 官方下載頁](https://git-scm.com/install/windows) 下載並執行安裝檔（`.exe`），保留預設選項安裝，再從開始選單開啟 **Git Bash**。
+- **macOS**：執行 `git --version`，依畫面提示安裝 Command Line Tools。
+- **Ubuntu／WSL**：執行 `sudo apt install git`。
 
-安裝後關掉終端機再開，重新檢查 `git --version`。也可依 [Git for Windows 官方安裝頁](https://git-scm.com/install/windows) 下載安裝檔。
+安裝後關掉終端機再開，重新檢查 `git --version`。Windows 請在 Git Bash 裡操作本章所有指令。
 
 第一次用要設定身分（只設定一次，之後所有專案通用）：
 

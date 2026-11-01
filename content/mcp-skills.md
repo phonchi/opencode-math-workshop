@@ -411,10 +411,10 @@ opencode agent create
 
 ### 建立資料夾與 SKILL.md
 
-回到專案資料夾的終端機。下列指令在 PowerShell 與 WSL 都能使用：
+回到專案資料夾的終端機（Windows 為 Git Bash），建立資料夾：
 
 ```bash
-uv run python -c "from pathlib import Path; Path('.opencode/skills/math-notes').mkdir(parents=True, exist_ok=True)"
+mkdir -p .opencode/skills/math-notes
 ```
 
 用文字編輯器建立 `.opencode/skills/math-notes/SKILL.md`，貼上以下完整內容。Windows 請確認副檔名是 `.md`，沒有多出 `.txt`。

@@ -66,7 +66,7 @@
 
 `ModuleNotFoundError` 是錯誤種類，下面的檔名與行號才說明它發生在哪裡。請保留從 `Traceback` 開始到最後一行的完整內容。不要只截取最後一個單字，也不要要求 agent 在看過錯誤前把整個專案重寫。
 
-在原本執行程式的 PowerShell 或 Ubuntu 終端機確認位置：
+在原本執行程式的終端機（Windows 為 Git Bash）確認位置：
 
 ```bash
 pwd
@@ -76,7 +76,7 @@ ls
 然後把下面的範本填完整，貼進 OpenCode：
 
 ```text
-我在 Windows PowerShell／WSL Ubuntu（請保留實際使用的一個）遇到錯誤。
+我在 Windows Git Bash／macOS／WSL Ubuntu（請保留實際使用的一個）遇到錯誤。
 目前資料夾：填入 pwd 的結果。
 執行指令：貼上剛才實際執行的完整指令。
 預期結果：說明原本應該產生什麼。
