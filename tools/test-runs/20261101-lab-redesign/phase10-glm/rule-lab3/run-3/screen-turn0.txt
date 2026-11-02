@@ -1,0 +1,40 @@
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 148ms                                                                                                   
+                                                                                                                        
+     結果：不建議直接上線                                                                                               
+                                                                                                                        
+     模型：RandomForest（class_weight='balanced'），資料 900 筆、故障僅 71 筆（8%）。                                   
+                                                                                                                        
+     測試集表現（225 筆、18 筆故障）：                                                                                  
+                                                                                                                        
+     - 整體準確率 95%，但這是沒意義的數字（全猜 0 也有 92%）                                                            
+     - 故障類別：recall 只有 0.56（18 次故障漏抓 8 次）、precision 0.71                                                 
+     - CV average precision 只有 0.47–0.60，且 CV 和測試集波動大，代表訊號偏弱、結果不穩                                
+                                                                                                                        
+     漏抓 44% 的故障，對產線來說代價太高。                                                                              
+                                                                                                                        
+     建議                                                                                                               
+                                                                                                                        
+     1. 如果漏報成本高，把閾值調低換 recall（會犧牲 precision，誤報變多）                                               
+     2. 收集更多故障樣本，或加入時間序列特徵（溫度變化率、振動趨勢）                                                    
+     3. 目前最重要的特徵是 temp_c（重要性 0.44）與 vibration_mm_s                                                       
+                                                                                                                        
+     我自己做的決定                                                                                                     
+                                                                                                                        
+     - 丟棄 record_id（僅是編號，非感測值）                                                                             
+     - 75/25 分層切分 train/test，CV 用 5-fold 分層                                                                     
+     - 用 class_weight='balanced' 處理類別不平衡                                                                        
+     - 未做特徵縮放（樹模型不需要）、未刪任何欄位、無缺失值                                                             
+                                                                                                                        
+     訓練腳本在 train_fault.py。                                                                                        
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 46.6s                                                                                   
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-glm/rule-lab3-3/project               17.7K (2%)  ctrl+p commands  
+                                                                                                                        

@@ -1,0 +1,40 @@
+  ┃  lab = gm.predict(X)                                                                                                
+  ┃  print(df[cols].groupby(lab).mean().round(1))                                                                       
+  ┃  print(pd.Series(lab).value_counts().sort_index().to_dict())                                                        
+  ┃  EOF                                                                                                                
+  ┃  uv run python /tmp/opencode/modes7.py                                                                              
+  ┃                                                                                                                     
+  ┃  temp_c  vibration_mm_s  pressure_kpa  flow_lpm  current_a  speed_rpm                                               
+  ┃  0    56.7             1.9         429.5     183.2       10.0     1805.7                                            
+  ┃  1    79.7             3.7         451.3     195.4       11.4     1484.0                                            
+  ┃  2    55.8             2.9         384.4     163.7       11.9     1884.7                                            
+  ┃  3    55.2             2.7         374.4     192.1        8.5     1415.0                                            
+  ┃  4    70.8             3.5         496.3     162.5       15.3     1795.1                                            
+  ┃  5    56.4             4.0         392.4     185.2        9.6      956.1                                            
+  ┃  6    78.1             3.8         402.9     215.6       14.9     1398.0                                            
+  ┃  {0: 90, 1: 126, 2: 147, 3: 77, 4: 65, 5: 59, 6: 159}                                                               
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 583ms                                                                                                   
+                                                                                                                        
+     結論：資料裡有 7 種運作模式。                                                                                      
+                                                                                                                        
+     驗證過程：                                                                                                         
+                                                                                                                        
+     - firmware_ver、sample_period_s 是常數欄位，可忽略；其餘 6 個感測特徵都有明顯多峰分布。                            
+     - KMeans/GMM 的 silhouette 與 BIC 一直隨 k 上升，暗示群內還有子群；PCA 投影（figs/line_modes_pca.png）證實是 7     
+       個完全分離的緊密群，不是 3 個。                                                                                  
+     - GMM k=7 的 7 群中心（各 59–159 筆）彼此差異明顯，例如模式 0：低溫低振動高轉速（56.7°C, 1.9 mm/s, 1806 rpm），    
+       模式 5：低溫高振動低轉速（56.4°C, 4.0 mm/s, 956 rpm），模式 4：高溫高壓大電流（70.8°C, 496 kPa, 15.3 A）。       
+                                                                                                                        
+     如果你想進一步看每個模式的完整特徵均值表或分派標籤存成 CSV，跟我說一聲即可。                                       
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 4m 0s                                                                                   
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-glm/lab1-2/project                    21.1K (2%)  ctrl+p commands  
+                                                                                                                        

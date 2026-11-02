@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lab 1 · 分群｜OpenCode × AI-Math 工作坊</title>
-<meta name="description" content="先丟一句模糊的問題，看 AI 默默替你做了哪些決定。同一份資料，最佳群數可以是 4、9、10 或 12，練習判斷數字是否回答了你的問題。">
+<meta name="description" content="接到一份沒見過的產線資料，問 AI 有幾種運作模式。它會給你肯定的答案，但它不知道你要拿來做什麼。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2213%22%20fill%3D%22%23191922%22%2F%3E%3Cpath%20d%3D%22M16%2020l12%2012-12%2012%22%20fill%3D%22none%22%20stroke%3D%22%23e3c273%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Crect%20x%3D%2233%22%20y%3D%2240%22%20width%3D%2217%22%20height%3D%226%22%20rx%3D%223%22%20fill%3D%22%23b8503c%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -579,9 +579,9 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 .hero-actions .action-secondary{background:transparent;color:var(--link);}
 .hero-actions a:hover{background:var(--paper);color:var(--link);}
 .hero-actions a:active{transform:translateY(1px);}
-.digits-preview{margin:24px 0 0;padding-top:14px;border-top:1px solid var(--rule);max-width:700px;}
-.digits-preview img{display:block;width:100%;height:auto;}
-.digits-preview figcaption{font-size:.75rem;line-height:1.7;color:var(--ink-2);margin-top:6px;}
+.data-preview{margin:24px 0 0;padding-top:14px;border-top:1px solid var(--rule);max-width:700px;}
+.data-preview img{display:block;width:100%;height:auto;}
+.data-preview figcaption{font-size:.75rem;line-height:1.7;color:var(--ink-2);margin-top:6px;}
 .lab-preview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:28px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);}
 .lab-preview>a{display:block;padding:22px 20px;text-decoration:none;color:var(--ink);}
 .lab-preview>a:first-child{padding-left:0;}
@@ -623,7 +623,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
   .hero-actions{display:grid;gap:10px;}
   .hero-actions a{font-size:.8rem;gap:8px;}
   .hero-break{display:none;}
-  .digits-preview img{aspect-ratio:auto;}
+  .data-preview img{aspect-ratio:auto;}
   .lab-preview{grid-template-columns:1fr;}
   .lab-preview>a,.lab-preview>a:first-child{padding:18px 0;}
   .lab-preview>a+a{border-left:0;border-top:1px solid var(--rule);}
@@ -700,7 +700,6 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a href="#section-這一關的資料">這一關的資料</a></li>
 <li><a href="#section-動手">動手</a></li>
 <li><a href="#section-誰錯了">誰錯了</a></li>
-<li><a href="#section-追問">追問</a></li>
 <li><a href="#section-檢查清單">檢查清單</a></li>
 <li><a href="#section-如果還有時間">如果還有時間</a></li>
 </ul>
@@ -749,7 +748,6 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a href="#section-這一關的資料">這一關的資料</a></li>
 <li><a href="#section-動手">動手</a></li>
 <li><a href="#section-誰錯了">誰錯了</a></li>
-<li><a href="#section-追問">追問</a></li>
 <li><a href="#section-檢查清單">檢查清單</a></li>
 <li><a href="#section-如果還有時間">如果還有時間</a></li>
 </ul>
@@ -786,57 +784,24 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 </nav></details></aside><main id="main-content" class="lesson-main" tabindex="-1"><div class="container narrow">
 
 <div class="pagehead">
-  <div class="kicker"><span>Lab 1</span><span>·</span><span class="badge live">現場 25 分</span><span>·</span><span>AI 的風險：數字對，問題錯</span></div>
-  <h1>分群：數字都對，就回答了你的問題嗎？</h1>
+  <div class="kicker"><span>Lab 1</span><span>·</span><span class="badge live">現場 25 分</span><span>·</span><span>AI 的風險：不知道你要什麼，還是給了答案</span></div>
+  <h1>分群：它說有 9 種，你要相信嗎？</h1>
   <p class="lead">
-    這一關先丟一句模糊的問題，看 AI 怎麼回答，再把它默默做的決定一個個找出來。
+    你接到一份沒見過的產線資料，AI 也沒見過。它算得出數字，也會給你肯定的群數，但它不知道你要拿這個答案做什麼。
     你要帶走的能力：判斷 AI 的結論，是否回答了你真正想問的問題。
   </p>
 </div>
 
-<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#section-這一關的資料">看資料</a></li><li><a href="#section-動手">問、想、改寫問題</a></li><li><a href="#section-誰錯了">判讀曲線</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
+<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#section-這一關的資料">看資料</a></li><li><a href="#section-動手">問、判斷、揭曉、改問題</a></li><li><a href="#section-誰錯了">判讀結果</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
 
 <section>
 <h2 id="section-這一關的資料">這一關的資料</h2>
-<p><strong>分群</strong>是先不看答案，依資料的相似程度把樣本分組。本關的每張圖都是一個樣本，像素值是描述它的特徵；數字標籤留到後面檢查分群結果時才使用。</p>
-<p>
-三個實作共用同一份資料：scikit-learn 內建的 <code>digits</code>，
-1797 張 8×8 的手寫數字灰階圖，攤平成 64 維向量，真實類別有 10 類（0 到 9）。
-</p>
-
-<details class="bg"><summary>資料到底長什麼樣？「64 維」是什麼意思？</summary>
-<div class="bg-body">
-<p>
-每張圖是 8×8 = 64 個像素，每個像素是 0 到 16 的灰階值。
-把這 64 個數字<strong>依序排成一列</strong>，一張圖就變成一個 64 維的向量
-$\mathbf{x}\in\mathbb{R}^{64}$。1797 張圖疊起來，就是一個 $1797\times 64$ 的矩陣 $X$。
-</p>
-<p>
-「64 維」不是什麼玄學，就是<strong>線代課上那個 $\mathbb{R}^n$</strong>，
-只是 $n=64$ 而已。你在線代學的內積、範數、正交、投影，
-在這裡全部原封不動可以用，Lab 2 就會派上用場。
-</p>
-<h4>兩個向量「像不像」怎麼量</h4>
-<p>用你已經會的歐氏距離：</p>
-$$\|\mathbf{x}-\mathbf{y}\|_2=\sqrt{\sum_{j=1}^{64}(x_j-y_j)^2}$$
-<p>
-兩張圖如果每個像素都差不多，距離就小。整個 k-means 就建立在這一個量上。
-</p>
-<h4>會看到的 numpy 寫法</h4>
-<div class="tw"><table>
-<tr><th>寫法</th><th>意思</th></tr>
-<tr><td><code>X.shape</code></td><td>回傳 <code>(1797, 64)</code>，也就是「1797 列、64 行」</td></tr>
-<tr><td><code>X[5]</code></td><td>第 6 張圖（從 0 數起）的那個 64 維向量</td></tr>
-<tr><td><code>X.mean(axis=0)</code></td><td>沿著「列」的方向壓扁，得到 64 個平均值＝每個像素的平均亮度</td></tr>
-<tr><td><code>X[y == 3]</code></td><td>只取出標籤是 3 的那些列（布林遮罩）</td></tr>
-</table></div>
-<p style="margin-bottom:0">
-<code>axis=0</code> 常讓人搞混。記法：<strong>axis 指的是「要被吃掉的那個維度」</strong>。
-<code>X</code> 是 (1797, 64)，<code>axis=0</code> 吃掉 1797 那一維，剩下 64 個數。
-</p>
+<p>課前你已把 <code>data/line_modes.csv</code> 下載到專案裡：一條產線的 723 筆感測讀數，有溫度、振動、壓力、流量、電流、轉速，另外兩欄是韌體版本和取樣週期。檔案裡<strong>沒有</strong>答案欄。</p>
+<div class="box tip">
+<div class="bt">這是講師設計的資料</div>
+<p style="margin-bottom:0">真實工作上，你拿到的資料多半沒有名氣，AI 也沒看過，背後的情況只有現場的人知道。這份資料就是用來模擬這件事。它不是用來證明 AI 很差，AI 算的數字多半是對的，你要看的是它缺資訊時怎麼處理。</p>
 </div>
-</details>
-
+<p><strong>分群</strong>是先不看答案，依資料的相似程度把樣本分組。每筆讀數是一個樣本，也是空間中的一個點：6 個感測值就是 $\mathbb{R}^6$ 中的向量。兩筆讀數的相似程度，可以用歐氏距離來量。</p>
 <details class="bg"><summary>什麼是「分群」？跟「分類」差在哪？</summary>
 <div class="bg-body">
 <p>這是機器學習裡最基本的一組區分：</p>
@@ -849,12 +814,11 @@ $$\|\mathbf{x}-\mathbf{y}\|_2=\sqrt{\sum_{j=1}^{64}(x_j-y_j)^2}$$
 </table></div>
 <p>
 <strong>分群演算法看不到答案</strong>。
-digits 雖然附了正確標籤，但我們<em>不會</em>把標籤餵給 k-means。
-它只看得到那 1797 個 64 維向量，得自己決定誰跟誰是一夥的。
+這份資料的批次紀錄要到揭曉時才給，k-means 全程看不到。
+它只看得到每筆感測讀數，得自己決定誰跟誰是一夥的。
 </p>
 <p style="margin-bottom:0">
-這就是為什麼待會會出現「指標偏好 9 群、但資料有 10 種數字標籤」這種事。
-它<strong>本來就不知道</strong>答案是 10。
+所以就算資料來自幾個批次，演算法也<strong>不會知道</strong>。它能告訴你的，只有幾何上怎麼分比較開。
 </p>
 </div>
 </details>
@@ -889,129 +853,101 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 </p>
 </div>
 </details>
-<div class="box tip">
-<div class="bt">為什麼用這份</div>
-<p style="margin-bottom:0">
-不用下載（套件裡就有）、夠小（幾秒跑完）、維度夠高（64 維，PCA 才有意義）、
-而且<strong>它附有 10 種數字的標籤</strong>，分群結果才有東西可以對照。
-</p>
-</div>
 </section>
 
 <section>
 <h2 id="section-動手">動手</h2>
 
 <div class="step" data-n="1">
-<h3>啟動 agent</h3>
-<p>在你課前準備好的專案資料夾裡打開終端機：</p>
-<pre class="cmd"><code>opencode</code></pre>
-<p>看到 TUI 介面，左下角顯示 <code>Build · Big Pickle</code> 就對了。</p>
-</div>
-
-<div class="step" data-n="2">
-<h3>先丟一句模糊的問題</h3>
-<p>整句貼進去，先不要補充任何條件：</p>
-<pre class="cmd"><code>幫我看 sklearn digits 這份資料分幾群最好，給明確群數和理由。</code></pre>
+<h3>先照平常的方式問</h3>
+<p>如果已在 OpenCode 裡，先輸入 <code>/new</code>；還沒啟動就在專案資料夾輸入 <code>opencode</code>。左下角應顯示 <code>Build · Big Pickle</code>。貼上這句，不要補充任何條件：</p>
+<pre class="cmd"><code>data/line_modes.csv 是產線感測讀數，幫我看有幾種運作模式。</code></pre>
 <p>等它回答時，每個權限要求都讀一下，看它實際跑了什麼。</p>
 </div>
 
-<div class="step" data-n="3">
-<h3>想：它替你決定了什麼？</h3>
-<p>看完回答，<strong>先別追問</strong>，自己寫下它默默做了哪些決定：</p>
+<div class="step" data-n="2">
+<h3>判斷：接受、保留，還是拒絕？</h3>
+<p>看完回答，<strong>先別追問</strong>。在 <code>notes/</code> 或紙上寫下：</p>
 <ul>
-<li>資料有沒有先處理？標準化、降維，還是直接用像素？</li>
-<li>用哪個指標判斷「最好」？k 掃了哪些值？</li>
-<li>它有沒有偷看答案，也就是用數字標籤來選群數？</li>
-<li>它說的「最好」，是分得最開，還是最接近十種數字？</li>
+<li>你會接受、保留，還是拒絕這個答案？</li>
+<li>它替你做了哪些決定？資料有沒有處理、用了什麼方法和指標、比了哪些 k？</li>
+<li>還缺什麼資訊，你才敢把這個答案交給別人用？</li>
 </ul>
+<p>和鄰座對一下答案。如果它先問你要拿來做什麼，那很好：回答它，再看建議怎麼變。</p>
+<details class="bg"><summary>寫完判斷再打開：講師實測</summary>
+<div class="bg-body">
 <div class="box tip">
-<div class="bt">講師實測：big-pickle 的回答</div>
-<p>2026-11-01，OpenCode 1.19.5 互動模式，上面同一句 prompt。完整答完 3 次（另外 2 次遇到免費額度用完而中斷，不列入），<strong>3 次都答 10 群</strong>。三次的理由都提到「資料本來就是 0–9 十個數字」，也都引用了需要真實標籤才算得出來的 ARI。</p>
-<p style="margin-bottom:0">10 是合理的答案，有幾次它也主動提醒 silhouette 不能單獨採信。但這個答案靠的是「已知有十種數字」。如果你想問的是<em>不看標籤時，資料自己呈現幾群</em>，它回答的就是另一題。所以先決定你要問哪一題，你的回答不一定相同。</p>
+<div class="bt">講師實測：同一句 prompt</div>
+<p>2026-11-02，OpenCode 1.19.5 互動模式，每次都是新對話。</p>
+<div class="tw"><table>
+<tr><th>模型</th><th>它給的答案</th></tr>
+<tr><td><code>Gemini 3.5 Flash Lite</code>（3 次）</td><td>4 種（另提可細分為 6 種）、9 種、4 種（另提可細分為 5 至 6 種）</td></tr>
+<tr><td><code>GLM-5.3-Flash</code>（3 次）</td><td>9 種、7 種、9 種</td></tr>
+</table></div>
+<p>6 次都給了明確的群數，沒有一次先問要拿來做什麼。其中一次寫「BIC 明確指向 9，可信度較高」，另一次寫「證實是 7 個完全分離的緊密群」。</p>
+<p style="margin-bottom:0">這裡的數字多半算得對，只是每次的決定不同。<code>big-pickle</code> 當天額度用完，還沒有這一題的紀錄。樣本很少，所以這不是模型排名，你那次也可能不一樣。</p>
 </div>
+</div>
+</details>
+</div>
+
+<div class="step" data-n="3">
+<h3>揭曉：現場的人知道什麼</h3>
+<details class="bg"><summary>寫完判斷再打開：需求卡與結果</summary>
+<div class="bg-body">
+<p>寫完判斷再往下看。這是資料管理員後來補給你的資訊：</p>
+<div class="box warn">
+<div class="bt">需求卡</div>
+<ul style="margin-bottom:0">
+<li>這 723 筆來自 <strong>10 個生產批次</strong>。批次 1 和批次 10 的設定相近。</li>
+<li><strong>任務 A</strong>：整理巡檢手冊，相近的狀態可以合併。</li>
+<li><strong>任務 B</strong>：追蹤每筆讀數來自哪個批次，出問題時要能回查。</li>
+</ul>
+</div>
+<p>下載批次紀錄。它只用來檢查，選 k 時不能用。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
+<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/line_modes_batches.csv -o data/line_modes_batches.csv</code></pre>
+<p>先想：AI 的答案對任務 A 夠用嗎？對任務 B 呢？如果它說的不是 10，算它錯嗎？</p>
+</div>
+</details>
 </div>
 
 <div class="step" data-n="4">
-<h3>規劃：把問題改到它不用猜</h3>
-<p>自己動手改寫前一句，至少說清楚：<strong>資料怎麼處理、比哪些 k、用什麼指標、不可以用什麼、結果存到哪、最後要回答什麼。</strong>寫好就貼給它，檔名用 <code>lab1_cluster.py</code>，圖存到 <code>figs/lab1_k_selection.png</code>。</p>
-<details class="bg"><summary>寫完再對照：一份參考的清楚版</summary>
-<div class="bg-body">
-<pre class="cmd"><code>用 sklearn 內建的 digits 資料集做 k-means 分群，直接用原始像素。
-
-請掃過 k = 2 到 12，每個 k 都記錄 inertia 與 silhouette score，
-把逐項數值印出來，並畫成兩張並排的圖存到 figs/lab1_k_selection.png。
-
-要求：
-- 選 k 時不可以使用數字標籤
-- random_state 固定為 0，n_init=10
-- 寫成 lab1_cluster.py，用 uv run python 執行
-- 最後告訴我 silhouette 最高的 k 是多少</code></pre>
-</div>
-</details>
-<p>照參考版跑出來的結果大致如下：</p>
-
-<div class="term">
-  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">參考程式輸出（reference/lab1_cluster.py）</span></div>
-  <div class="term-body"><div class="b">uv run python lab1_cluster.py</div>
-<div class="sp"></div>
-<div class="o">資料形狀 X=(1797, 64), 真實類別數=10</div>
-<div class="o">k= 2  inertia= 1914619.6  silhouette=0.1183</div>
-<div class="o">k= 3  inertia= 1730182.3  silhouette=0.1265</div>
-<div class="o">k= 4  inertia= 1612274.9  silhouette=0.1229</div>
-<div class="o">k= 5  inertia= 1497722.5  silhouette=0.1382</div>
-<div class="o">k= 6  inertia= 1404975.3  silhouette=0.1515</div>
-<div class="o">k= 7  inertia= 1336540.0  silhouette=0.1623</div>
-<div class="o">k= 8  inertia= 1265053.1  silhouette=0.1784</div>
-<div class="o">k= 9  inertia= 1202300.1  silhouette=0.1893</div>
-<div class="o">k=10  inertia= 1165188.9  silhouette=0.1825</div>
-<div class="o">k=11  inertia= 1131795.0  silhouette=0.1830</div>
-<div class="o">k=12  inertia= 1112363.4  silhouette=0.1848</div>
-</div>
-</div>
-
-<div class="box warn">
-<div class="bt">停在這裡，先不要往下</div>
-<p style="margin-bottom:0">
-這次 silhouette 最高的是 <strong>9</strong>，模糊版的回答是 <strong>10</strong>，而資料有 10 種數字。
-在往下看之前，先自己想三十秒：<strong>誰錯了？</strong>
-</p>
-</div>
+<h3>規劃：自己把問題改好</h3>
+<p>挑一個任務，把第一句改到它不用猜：<strong>要回答什麼、資料怎麼處理、比哪些 k、用什麼指標、什麼不能用、結果存到哪。</strong>程式存成 <code>lab1_cluster.py</code>，圖存到 <code>figs/lab1_k_selection.png</code>。</p>
+<p>再加一個你自己想試的變化，例如換指標或拿掉一欄，和鄰座比較。</p>
+<p>你應該能回答這三個問題：</p>
+<ul>
+<li>原始尺度和標準化，選出的 k 一樣嗎？</li>
+<li>silhouette 最高的 k，和批次 ARI 最高的 k，是同一個嗎？</li>
+<li>那你會怎麼回答任務 A 和任務 B？</li>
+</ul>
 </div>
 </section>
 
 <section>
 <h2 id="section-誰錯了">誰錯了</h2>
-<p>
-這組計算中，0.1893 確實是最高的 silhouette。若目標就是最大化這個指標，選 9 群有依據；但<strong>這還不能回答「如何辨識十種數字」</strong>。閱讀建議前，先確認它回答的是哪個問題。
-</p>
-<p>
-更精確地說：10 是這份資料<strong>標註的類別數</strong>，它不保證原始像素空間裡
-恰好存在 10 個符合 k-means 偏好的緊密、近似球形群組結構的群。
-所以這裡沒有「誰算錯了」，只有「兩個不同的問題被當成同一個」。
-</p>
-
+<p>做完第 4 步再往下讀。下面是講師用參考程式算的結果（<code>reference/lab1_cluster.py</code>，<code>random_state=0</code>、<code>n_init=10</code>）。你的方法不同，數字也可能不同。</p>
+<div class="tw"><table>
+<tr><th>做法</th><th>silhouette 最高的 k</th><th>分數</th><th>這個 k 對 10 個批次的 ARI</th></tr>
+<tr><td>原始尺度</td><td><strong>3</strong></td><td>0.7416</td><td>0.261</td></tr>
+<tr><td>標準化</td><td><strong>9</strong></td><td>0.7943</td><td>0.881</td></tr>
+<tr><td>標準化，直接指定 k=10</td><td>10（不是最高）</td><td>0.7252</td><td><strong>0.990</strong></td></tr>
+</table></div>
 <figure class="teaching-figure">
-<picture><source media="(max-width: 720px)" srcset="assets/figures/lab1-k-selection-mobile.svg"><img src="assets/figures/lab1-k-selection.svg" alt="k 從 2 到 12 的兩條曲線。上圖 inertia 隨群數增加而下降；下圖 silhouette 在本次搜尋中以 k=9 最高，k=10 較低。" width="900" height="840"></picture>
-<figcaption>把上方表格畫出來：上圖是群內距離平方和（inertia），下圖是平均 silhouette。9 是本次搜尋的 silhouette 最高值，10 是資料標籤的種類數；要選哪個，得先說清楚你想回答的問題。<a href="assets/figures/lab1-k-selection.csv">查看曲線數據</a></figcaption>
+<picture><source media="(max-width: 720px)" srcset="assets/figures/lab1-k-selection-mobile.svg"><img src="assets/figures/lab1-k-selection.svg" alt="k 從 2 到 12 的兩張圖。上圖 silhouette：原始尺度在 k=3 最高，標準化在 k=9 最高。下圖對 10 個批次的 ARI：標準化在 k=10 最高。" width="900" height="840"></picture>
+<figcaption>上圖不看批次，下圖揭曉後才算得出來。<a href="assets/figures/lab1-k-selection.csv">查看曲線數據</a></figcaption>
 </figure>
+<p>k=9 把批次 1 和批次 10 併成一群，其他批次都分得開。對任務 A，這可能正好合適；對任務 B，就是把兩個批次混在一起。</p>
+<p>所以 AI 說 9 並沒有算錯。<strong>問題在於它還不知道你要做什麼，就給了答案。</strong>如果它沒說自己標準化了，你也不會知道為什麼你的同學算出 3。</p>
 
 <h3>silhouette 在量什麼</h3>
-<p>
-對每個點 $i$，設 $a(i)$ 是它到<em>同群</em>其他點的平均距離，
-$b(i)$ 是它到<em>最近的其他群</em>所有點的平均距離，則
-</p>
+<p>對每個點 $i$，設 $a(i)$ 是它到<em>同群</em>其他點的平均距離，$b(i)$ 是它到<em>最近的其他群</em>所有點的平均距離，則</p>
 <div class="box math">
 <div class="bt">silhouette</div>
 $$s(i)=\frac{b(i)-a(i)}{\max\{a(i),\,b(i)\}},\qquad s(i)\in[-1,1]$$
-<p style="margin-bottom:0">整體分數就是所有 $s(i)$ 的平均。它衡量的是<strong>「群內夠不夠緊、群間夠不夠開」</strong>，
-一個純粹的幾何性質，完全沒有碰到真實標籤。</p>
+<p style="margin-bottom:0">整體分數是所有 $s(i)$ 的平均。它衡量<strong>群內夠不夠緊、群間夠不夠開</strong>，完全沒有用到批次紀錄。</p>
 </div>
-
-<p>
-所以 silhouette 回答的問題是「哪個 $k$ 讓分群<em>幾何上</em>最漂亮」，
-而不是「哪個 $k$ 是<em>正確</em>的類別數」。
-</p>
-
+<p><strong>ARI</strong>（adjusted Rand index）則要拿分群結果和批次紀錄比，分數 1 表示分組完全一致，和群的編號無關。</p>
 <details class="bg"><summary>silhouette 詳解：公式怎麼來、分數怎麼讀</summary>
 <div class="bg-body">
 <h4>$a(i)$ 與 $b(i)$ 的完整定義</h4>
@@ -1056,7 +992,7 @@ $$S=\frac{1}{n}\sum_{i=1}^{n}s(i)$$
 <h4>沒用真實標籤，但有用分群標籤</h4>
 <ul>
 <li><strong>分群標籤</strong>：演算法產生的群編號。計算 $a(i)$、$b(i)$ 需要它</li>
-<li><strong>真實標籤</strong>：資料原本的類別，例如 digits 的數字。silhouette 用不到它</li>
+<li><strong>真實標籤</strong>：資料原本的類別，例如這份資料的批次。silhouette 用不到它</li>
 </ul>
 <p>所以 silhouette 是<strong>內部驗證指標</strong>。下一節的 ARI 要和真實標籤或另一組分群比較，屬於<strong>外部驗證指標</strong>。</p>
 
@@ -1065,60 +1001,9 @@ $$S=\frac{1}{n}\sum_{i=1}^{n}s(i)$$
 <li>某群只有一個點時，$a(i)$ 的分母是 $0$，scikit-learn 的慣例是把這個點的分數定為 $0$</li>
 <li>計算整體分數時，群數 $k$ 要滿足 $2\le k\le n-1$</li>
 </ul>
-<p style="margin-bottom:0">回到本 Lab：最高分 0.1893 離 $1$ 還很遠，代表在這個距離下，各群沒有分得很開，所以 0.1893 和 0.1825 的小差距不宜過度解讀。</p>
+<p style="margin-bottom:0">回到本 Lab：標準化後最高分 0.7943，k=10 也有 0.7252，兩者都不低。分數高只表示幾何上分得開，不代表它回答了你的問題。</p>
 </div>
 </details>
-
-<h3>同一份資料，換一個默默的決定</h3>
-<p>同樣掃 k = 2 到 12、同樣看 silhouette，只改前處理（講師實算，<code>random_state=0</code>、<code>n_init=10</code>）：</p>
-<div class="tw"><table>
-<tr><th>資料怎麼處理</th><th>silhouette 最高的 k</th></tr>
-<tr><td>原始像素</td><td><strong>9</strong></td></tr>
-<tr><td>每個像素標準化</td><td><strong>12</strong></td></tr>
-<tr><td>PCA 降到 2 維</td><td><strong>4</strong></td></tr>
-</table></div>
-<p>三個都算對了。和鄰座分工試一次：一人用原始像素，一人用標準化，同樣跑 AI，再對照彼此的答案。AI 只說「最好是幾群」卻沒說這些選擇，你就還不知道它在回答什麼。</p>
-
-<h3>為什麼 digits 會是 9</h3>
-<p>
-在這份資料、本次初始化與搜尋範圍中，$k=9$ 的 silhouette 最高。這是已觀察到的結果；單靠這個分數，還不能知道哪些數字混在一起，或為什麼這組分群較好。合併兩群也不保證讓群內距離下降或 silhouette 上升。
-</p>
-<p>
-<strong>「幾何上最漂亮的分法」跟「語意上正確的分法」不一樣。</strong>
-如果想解釋原因，可以請 agent 畫群中心，或列出每群包含各種數字的筆數，再對照標籤判讀。
-</p>
-
-<div class="box danger">
-<div class="bt">這一關真正要你帶走的</div>
-<p style="margin-bottom:0">
-<strong>數字對，問題可能是錯的。</strong>AI 不會自動知道你要的是幾何上分得開，還是辨識十種數字；它會自己挑一個，然後說得很肯定。
-往後每次看到「所以建議……」，先找出它做了哪些你沒要求的決定，再把結論改寫成帶條件的句子，例如：「用原始像素、以 silhouette 比較 k=2 到 12 時，k=9 最高。」
-</p>
-</div>
-</section>
-
-<section>
-<h2 id="section-追問">追問</h2>
-<p>回到剛才的對話，再丟一個同樣模糊的問題：</p>
-<pre class="cmd"><code>k=10 的分群準確率是多少？</code></pre>
-<p>「準確率」這裡也有一個默默的決定，因為群編號只是任意的代號，第 0 群不一定對應數字 0。以 <code>random_state=0</code> 的 k=10 為例（講師實算）：</p>
-<div class="tw"><table>
-<tr><th>算法</th><th>結果</th></tr>
-<tr><td>群編號直接和數字比</td><td>0.185</td></tr>
-<tr><td>先把群對應到最合適的數字再比</td><td>0.792</td></tr>
-<tr><td>ARI（不受編號影響）</td><td>0.666</td></tr>
-</table></div>
-<p>檢查它用的是哪一種，並請它把群編號重新排列後再算一次：分群沒變，直接比的準確率會變，ARI 不會。</p>
-<p>接著把這句話丟回給 agent，看它怎麼回應：</p>
-<pre class="cmd"><code>這份資料我知道真實類別有 10 類，但你算出 silhouette 最高是 k=9。
-
-請解釋這個落差。並且：
-- 用 sklearn 的 adjusted_rand_score 與真實標籤比對 k=9 和 k=10 的結果
-- 告訴我在「不知道真實答案」的情境下，還有什麼方法可以判斷 k</code></pre>
-<p>
-<strong>ARI（adjusted Rand index）</strong>是需要真實標籤的外部指標，silhouette 則是不看標籤的內部指標。
-對照兩者的結果，就能看出差別。
-</p>
 
 <details class="bg"><summary>ARI 是什麼？為什麼要「調整」？</summary>
 <div class="bg-body">
@@ -1191,11 +1076,11 @@ $$\text{ARI}=\frac{\sum_{ij}\binom{n_{ij}}{2}-\dfrac{AB}{M}}{\dfrac{1}{2}(A+B)-\
 <p style="margin-bottom:0">兩者不一定同高。真實類別在空間中重疊時，演算法可能找到幾何上分得很開、卻和真實類別不一致的分法，也就是 silhouette 高、ARI 低；反過來，分群不夠緊密，也可能和真實類別很一致。所以兩個指標常一起報告。</p>
 </div>
 </details>
-<div class="box tip">
-<div class="bt">順便驗證一件事</div>
+
+<div class="box danger">
+<div class="bt">這一關真正要你帶走的</div>
 <p style="margin-bottom:0">
-ARI 是「調整過的」Rand index，意思是它<strong>扣掉了隨機分群的期望值</strong>，
-所以隨機亂分的 ARI 約等於 0，而不是某個正數。可以叫 agent 用隨機標籤實際跑一次驗證這點。
+<strong>AI 不知道你要什麼時，還是可能給你一個肯定的答案。</strong>往後每次看到「判定為」「建議」，先找出它做了哪些你沒要求的決定，再把結論改寫成帶條件的句子，例如：「標準化後以 silhouette 比較 k=2 到 12 時，k=9 最高；若要追蹤批次，k=10 較合適。」
 </p>
 </div>
 </section>
@@ -1203,22 +1088,36 @@ ARI 是「調整過的」Rand index，意思是它<strong>扣掉了隨機分群�
 <section>
 <h2 id="section-檢查清單">檢查清單</h2>
 <ul class="ckl">
-<li><input type="checkbox" id="l1a"><label for="l1a">我列出了模糊版回答默默做的決定，並打開 <code>lab1_cluster.py</code> 看過</label></li>
-<li><input type="checkbox" id="l1b"><label for="l1b"><code>figs/lab1_k_selection.png</code> 存在，兩張圖都畫出來了</label></li>
-<li><input type="checkbox" id="l1c"><label for="l1c">我確認程式裡 <code>random_state=0</code>，重跑後 inertia 在容差內相同、兩次分群的 ARI = 1</label></li>
-<li><input type="checkbox" id="l1d"><label for="l1d">我能把 AI 的結論改寫成帶條件的句子，說清楚用什麼資料、什麼指標、比了哪些 k</label></li>
-<li><input type="checkbox" id="l1e"><label for="l1e">我知道 silhouette 不看標籤、ARI 要看標籤，也能說明「準確率」為什麼要先對齊群編號</label></li>
+<li><input type="checkbox" id="l1a"><label for="l1a">看到揭曉前，我寫下了接受、保留或拒絕，以及它替我做的決定</label></li>
+<li><input type="checkbox" id="l1b"><label for="l1b">我自己改寫了問題，並打開 <code>lab1_cluster.py</code> 看過</label></li>
+<li><input type="checkbox" id="l1c"><label for="l1c"><code>figs/lab1_k_selection.png</code> 存在，我看得懂它在比什麼</label></li>
+<li><input type="checkbox" id="l1d"><label for="l1d">我能把結論改寫成帶條件的句子，說清楚資料怎麼處理、用什麼指標、回答哪個任務</label></li>
+<li><input type="checkbox" id="l1e"><label for="l1e">我知道 silhouette 不看批次、ARI 要看批次，也能說明兩者為什麼可能選不同的 k</label></li>
 </ul>
 </section>
 
 <section>
 <h2 id="section-如果還有時間">如果還有時間</h2>
 <ul>
-<li>叫 agent 把 k=10 的十個群中心 reshape 回 8×8 畫出來。觀察哪些群中心比較模糊，再列出各群的數字標籤組成；不能只憑模糊就判定合併了哪些類別。</li>
-<li>silhouette 的差距（0.1893 vs 0.1825）其實很小。用不同 <code>random_state</code> 重跑，比較兩個 k 的分數與差值，觀察排序對初始化是否穩定。這是初始化敏感性分析，不是對樣本母體做顯著性檢定。</li>
-<li>問它：<strong>「inertia 為什麼隨 k 遞減？用數學證明給我看。」</strong>（提示：$k+1$ 群的<em>最佳</em>解一定不差於 $k$ 群，因為可以把多的那群留空。但 k-means 找到的是局部解，所以實務上偶爾會出現不單調的情形。這也是 elbow 法只能「看轉折」、不能「取最小值」的原因。）</li>
-<li>換一個距離度量（例如先做 L2 正規化再分群），看 silhouette 的最佳 k 會不會變。</li>
+<li>請它列出每群包含各批次的筆數，自己找出哪兩個批次被併在一起。</li>
+<li>用不同 <code>random_state</code> 重跑，看 k=9 和 k=10 的排序穩不穩定。</li>
+<li>問它：<strong>「inertia 為什麼隨 k 遞減？用數學證明給我看。」</strong>再自己檢查：k-means 找到的是局部解，實務上偶爾會不單調。</li>
 </ul>
+<details class="bg"><summary>寫完再對照：一份參考的清楚版 prompt</summary>
+<div class="bg-body">
+<pre class="cmd"><code>用 data/line_modes.csv 做 k-means 分群。先拿掉標準差為 0 的欄位，再標準化。
+
+掃過 k = 2 到 12，每個 k 都記錄 silhouette，也算一次不標準化的結果做對照，
+逐項印出數值，並把兩條曲線畫到 figs/lab1_k_selection.png。
+
+要求：
+- 選 k 時不可以使用 data/line_modes_batches.csv
+- random_state 固定為 0，n_init=10
+- 寫成 lab1_cluster.py，用 uv run python 執行
+- 選好 k 之後，再用批次紀錄算 k=9、k=10 的 ARI，並列出每群包含哪些批次
+- 最後分別回答：巡檢手冊適合幾群？追蹤批次適合幾群？</code></pre>
+</div>
+</details>
 </section>
 
 

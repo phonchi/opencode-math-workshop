@@ -181,10 +181,12 @@
 </section>
 
 <section>
-<h2>下指令的四個習慣</h2>
+<h2>下指令的五個習慣</h2>
 <p>想自己寫一份完整任務，或讓中斷的工作繼續，請看<a href="agent-workflows.html">讓 agent 把工作做完整</a>。</p>
 <div class="tw"><table>
 <tr><th>習慣</th><th>差別</th></tr>
+<tr><td><strong>先說要做什麼</strong></td>
+    <td>「看有幾種模式」→ 它會自己假設用途。<br>「要追蹤批次，請比較……」→ 它回答的才是你的問題。</td></tr>
 <tr><td><strong>說清楚存到哪</strong></td>
     <td>「畫個圖」→ 你不知道它存去哪了。<br>「畫成兩張並排的圖存到 <code>figs/lab1.png</code>」→ 你找得到。</td></tr>
 <tr><td><strong>要求印出中間結果</strong></td>
@@ -201,20 +203,15 @@
 <p>下面是課程設定下的參考結果。先核對資料、參數與比較方式；浮點數用容差比對，不要求每一位都相同。</p>
 <div class="tw"><table>
 <tr><th>Lab</th><th>項目</th><th>參考值</th></tr>
-<tr><td rowspan="4">1</td><td>silhouette 最高的 k（原始像素）</td><td>9（分數 0.1893）</td></tr>
-<tr><td>k=10 的 silhouette</td><td>0.1825</td></tr>
-<tr><td>標準化／PCA 2 維時最高的 k</td><td>12／4</td></tr>
-<tr><td>k=10 準確率（直接比／對齊後）與 ARI</td><td>0.185／0.792，ARI 0.666</td></tr>
-<tr><td rowspan="5">2</td><td>前 3 個特徵值</td><td>179.0069　163.7177　141.7884</td></tr>
-<tr><td>重建 MSE（K=10）</td><td>4.9142964257</td></tr>
-<tr><td>直接相減 components_ 最大差</td><td>0.9411（<strong>不代表錯</strong>）</td></tr>
-<tr><td>分母寫成 n 時，特徵值的差</td><td>0.0996（其他檢查全 PASS）</td></tr>
-<tr><td>用 evecs[:K] 取列時，最小 |cos|</td><td>0.0007（比例、正交、特徵值都 PASS）</td></tr>
-<tr><td rowspan="5">3</td><td>梯度檢查最佳步長</td><td>h ≈ 1e-4（誤差 7.2e-12）</td></tr>
-<tr><td>loss、grad 一起換 MSE／只把 grad 乘 2</td><td>4.4e-12 PASS／0.14 FAIL（講師注入）</td></tr>
-<tr><td>3 和 8 中恆為常數的像素</td><td>10 個，梯度恰為 0</td></tr>
-<tr><td>幾何間隔</td><td>1.174682e-02（&gt; 0，故線性可分）</td></tr>
-<tr><td>手刻 vs sklearn 的 ‖w‖</td><td>19.14 vs 97.90（準確率都 1.0）</td></tr>
+<tr><td rowspan="3">1</td><td>silhouette 最高的 k（原始尺度／標準化）</td><td>3（0.7416）／9（0.7943）</td></tr>
+<tr><td>k=10（標準化）的 silhouette</td><td>0.7252</td></tr>
+<tr><td>對 10 個批次的 ARI（k=9／k=10）</td><td>0.881／0.990</td></tr>
+<tr><td rowspan="3">2</td><td>標準化後前 5 個解釋變異比例</td><td>0.3195　0.2052　0.1655　0.1486　0.0907</td></tr>
+<tr><td>保留 3／4／5 個主成分的累積變異</td><td>69.0%／83.9%／92.9%</td></tr>
+<tr><td>保留 3／4 個主成分辨識故障的 AUC</td><td>0.588／1.000</td></tr>
+<tr><td rowspan="3">3</td><td>永遠猜「沒故障」的準確率</td><td>0.922</td></tr>
+<tr><td>含 <code>record_id</code>：測試集／下一批 recall</td><td>0.952／0.000</td></tr>
+<tr><td>不含 <code>record_id</code>，門檻 0.5：測試集／下一批 recall</td><td>0.476／0.462</td></tr>
 </table></div>
 </section>
 

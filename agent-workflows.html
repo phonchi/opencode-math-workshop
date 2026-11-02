@@ -579,9 +579,9 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 .hero-actions .action-secondary{background:transparent;color:var(--link);}
 .hero-actions a:hover{background:var(--paper);color:var(--link);}
 .hero-actions a:active{transform:translateY(1px);}
-.digits-preview{margin:24px 0 0;padding-top:14px;border-top:1px solid var(--rule);max-width:700px;}
-.digits-preview img{display:block;width:100%;height:auto;}
-.digits-preview figcaption{font-size:.75rem;line-height:1.7;color:var(--ink-2);margin-top:6px;}
+.data-preview{margin:24px 0 0;padding-top:14px;border-top:1px solid var(--rule);max-width:700px;}
+.data-preview img{display:block;width:100%;height:auto;}
+.data-preview figcaption{font-size:.75rem;line-height:1.7;color:var(--ink-2);margin-top:6px;}
 .lab-preview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:28px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);}
 .lab-preview>a{display:block;padding:22px 20px;text-decoration:none;color:var(--ink);}
 .lab-preview>a:first-child{padding-left:0;}
@@ -623,7 +623,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
   .hero-actions{display:grid;gap:10px;}
   .hero-actions a{font-size:.8rem;gap:8px;}
   .hero-break{display:none;}
-  .digits-preview img{aspect-ratio:auto;}
+  .data-preview img{aspect-ratio:auto;}
   .lab-preview{grid-template-columns:1fr;}
   .lab-preview>a,.lab-preview>a:first-child{padding:18px 0;}
   .lab-preview>a+a{border-left:0;border-top:1px solid var(--rule);}
@@ -797,22 +797,23 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <p>這一章練習三件事：把想做的事交代清楚、遇到錯誤時提供足夠線索，以及讓下一次對話接得上。你不需要多裝工具，也不需要換模型。</p>
 <h2 id="section-一份任務要交代什麼">一份任務要交代什麼</h2>
 <p>想像你請同學幫忙。他需要知道你要做什麼、資料在哪裡，以及做到哪裡算完成。給 agent 的需求也一樣。</p>
-<div class="tw"><table><tr><th>要素</th><th>你要回答的問題</th><th>分群例子</th></tr><tr><td>目標</td><td>我想知道什麼？</td><td>比較群數改變時，分群結果有何差異</td></tr><tr><td>輸入</td><td>資料或既有程式在哪裡？</td><td>本專案的 <code>lab1_cluster.py</code> 與 sklearn digits</td></tr><tr><td>限制</td><td>哪些方法或條件要保留？</td><td>沿用 <code>random_state=0</code>，用 <code>uv run python</code> 執行</td></tr><tr><td>輸出</td><td>要交付哪些檔案？</td><td>新程式、圖檔與一段解釋，放在指定路徑</td></tr><tr><td>完成判準</td><td>我要看到什麼才算完成？</td><td>檔案確實存在、程式跑完、解釋對得上結果</td></tr></table></div>
+<div class="tw"><table><tr><th>要素</th><th>你要回答的問題</th><th>分群例子</th></tr><tr><td>目標</td><td>我想知道什麼？</td><td>比較群數改變時，分群結果有何差異</td></tr><tr><td>輸入</td><td>資料或既有程式在哪裡？</td><td>本專案的 <code>lab1_cluster.py</code> 與 <code>data/line_modes.csv</code></td></tr><tr><td>限制</td><td>哪些方法或條件要保留？</td><td>沿用 <code>random_state=0</code>，用 <code>uv run python</code> 執行</td></tr><tr><td>輸出</td><td>要交付哪些檔案？</td><td>新程式、圖檔與一段解釋，放在指定路徑</td></tr><tr><td>完成判準</td><td>我要看到什麼才算完成？</td><td>檔案確實存在、程式跑完、解釋對得上結果</td></tr></table></div>
 <p>不必每次都寫很長。工作坊已把共通規則放進 <code>AGENTS.md</code>，每次只補上這個任務的條件。</p>
 <h2 id="section-練習-先自己寫一份需求">練習：先自己寫一份需求</h2>
-<p>請 agent 把 Lab 1 的群中心畫回手寫數字影像。先自己寫需求，再展開下面的參考寫法。這裡選 <code>k=10</code> 是為了觀察十個群中心，並不表示每群一定對應一個數字。</p>
+<p>請 agent 把 Lab 1 的群中心整理成一張表，對照每群包含哪些批次。先自己寫需求，再展開下面的參考寫法。這裡選 <code>k=10</code> 是為了觀察十個群中心，並不表示每群一定對應一個批次。</p>
 <details class="bg"><summary>參考寫法</summary><div class="bg-body"><p>把下列文字貼到 OpenCode 對話裡：</p>
 <pre class="cmd" data-lang="text"><code>請先讀 lab1_cluster.py 與 AGENTS.md，整理目前的資料前處理與分群參數。
 
-我要觀察 k=10 的群中心，各自像哪些手寫數字。
+我要觀察 k=10 的群中心，以及每群包含哪些批次。
+批次紀錄在 data/line_modes_batches.csv，列序和資料相同，請印出群編號 × 批次編號的交叉表。
 請另寫 lab1_centers.py，保留原檔；沿用原本的資料前處理，
-使用 random_state=0、n_init=10，將十個群中心各自 reshape 成 8×8。
+使用 random_state=0、n_init=10，把群中心換回原始單位。
 
-把十張影像排在同一張圖，標出群編號，存成 figs/lab1_centers.png。
+把十個群中心畫成一張熱圖，標出群編號，存成 figs/lab1_centers.png。
 用 uv run python 實際執行，印出群中心的 shape 與圖檔路徑。
-最後說明：為什麼群編號不能直接當成數字標籤？</code></pre>
-<p>這份需求指定了讀取來源、保留原檔、產圖方式與完成判準。如果你改成其他前處理，請先思考群中心能否直接還原成原本的像素尺度。</p></div></details>
-<p>完成後自己開圖。確認十個群中心都出現、標籤是群編號，並用自己的話解釋其中一張模糊影像。agent 的解釋需要和你看到的結果相符。</p>
+最後說明：為什麼群編號不能直接當成批次編號？</code></pre>
+<p>這份需求指定了讀取來源、保留原檔、產圖方式與完成判準。如果你改成其他前處理，請先思考群中心要怎麼換回原本的單位。</p></div></details>
+<p>完成後自己開圖。確認十個群中心都出現、標籤是群編號，並用自己的話解釋其中一群的特徵。agent 的解釋需要和你看到的結果相符。</p>
 <h2 id="section-把一個大任務分成幾次對話">把一個大任務分成幾次對話</h2>
 <p>不確定做法時，先讓 agent 提出步驟，再決定要執行哪一步。可以用 <code>Tab</code> 切換到 Plan，查看畫面上的模式標示；回到 Build 才開始寫程式。仍要閱讀每次的權限要求。</p>
 <pre class="cmd" data-lang="text"><code>先不要修改檔案。請讀 lab1_cluster.py，告訴我若要比較不同 random_state，

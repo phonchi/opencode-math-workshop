@@ -1,0 +1,40 @@
+  ┃   26 - `figs/fault_importance.png`：RF 特徵重要性。                                                                 
+  ┃   27                                                                                                                
+  ┃   28 ## 能不能上線？                                                                                                
+  ┃   29 **可以有限度上線，但不能全自動。**                                                                             
+  ┃   30 - 正例太少（71 筆），CV AP 波動大（±0.11），估計不準。                                                         
+  ┃   31 - recall 只有 5–8 成，漏抓故障的代價高，建議用低 threshold（約 0.3）做「預警」而非自動停機。                   
+  ┃   32 - `line_modes.csv` 的操作區間超出訓練分布，新模式下需先收集標籤再重訓。                                        
+  ┃   33 - 建議：上線時輸出機率分級（低/中/高風險），人員複核；持續累積標籤後重訓。                                     
+  ┃   34                                                                                                                
+  ┃                                                                                                                     
+                                                                                                                        
+     訓練完成，程式在 train_fault.py，筆記在 notes/fault_model.md。                                                     
+                                                                                                                        
+     結論：可以有限度上線，但不建議全自動。                                                                             
+                                                                                                                        
+     結果摘要：                                                                                                         
+                                                                                                                        
+     - 資料 900 筆、故障僅 71 筆（7.9%），用分層切分 + 5-fold CV 比較兩個模型                                           
+     - Logistic Regression 較穩：CV AP = 0.669 ± 0.113、AUC = 0.954；Random Forest AP 只有 0.473                        
+     - Test set（threshold 0.5）：precision 0.71、recall 0.56；threshold 降到 0.3 時 recall 0.78、precision 0.54        
+     - 最重要特徵是 temp_c（重要性 0.44），其次是 vibration_mm_s、pressure_kpa                                          
+                                                                                                                        
+     上線前的三個顧慮：                                                                                                 
+                                                                                                                        
+     1. 正例太少，AP 波動大（±0.11），效能估計不夠準                                                                    
+     2. recall 只有 5–8 成——漏抓故障代價高，建議輸出風險機率當「預警」由人員複核，不要自動停機                          
+     3. data/line_modes.csv 的操作區間超出訓練分布（speed_rpm 到 2012，訓練資料最大 1676），新模式下模型不可信，        
+        需先收集標籤再重訓                                                                                              
+                                                                                                                        
+     圖存在 figs/fault_pr_curve.png 和 figs/fault_importance.png。                                                      
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 3m 13s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-glm/lab3-3/project                    20.4K (2%)  ctrl+p commands  
+                                                                                                                        

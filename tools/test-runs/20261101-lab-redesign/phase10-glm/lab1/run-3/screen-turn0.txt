@@ -1,0 +1,40 @@
+  ┃  cols=['temp_c','vibration_mm_s','pressure_kpa','flow_lpm','current_a','speed_rpm']                                 
+  ┃  X = StandardScaler().fit_transform(df[cols])                                                                       
+  ┃  g = GaussianMixture(9, n_init=5, random_state=0).fit(X)                                                            
+  ┃  lab = g.predict(X)                                                                                                 
+  ┃  out = df[cols].groupby(lab).mean().round(1)                                                                        
+  ┃  out['n'] = pd.Series(lab).value_counts().sort_index()                                                              
+  ┃  print(out)                                                                                                         
+  ┃  "                                                                                                                  
+  ┃                                                                                                                     
+  ┃  temp_c  vibration_mm_s  pressure_kpa  flow_lpm  current_a  speed_rpm    n                                          
+  ┃  0    70.8             3.5         496.3     162.5       15.3     1795.1   65                                       
+  ┃  1    78.1             3.8         402.9     215.6       14.9     1398.0  159                                       
+  ┃  2    55.2             2.7         374.4     192.1        8.5     1415.0   77                                       
+  ┃  3    52.2             3.1         412.2     156.5       10.9     1930.6   92                                       
+  ┃  4    80.8             3.4         486.7     200.9       10.2     1434.4   57                                       
+  ┃  5    56.7             1.9         429.5     183.2       10.0     1805.7   90                                       
+  ┃  6    61.7             2.7         337.9     175.8       13.5     1807.9   55                                       
+  ┃  7    56.4             4.0         392.4     185.2        9.6      956.1   59                                       
+  ┃  8    78.7             4.0         422.0     190.9       12.4     1524.9   69                                       
+  ┃                                                                                                                     
+                                                                                                                        
+     看起來是 9 種運作模式（KMeans 和 GMM 的 silhouette / BIC 都在 k=9 達到最佳，之後下降）。各群在溫度、振動、壓力、   
+     流量、電流、轉速上都有明顯區隔，例如：                                                                             
+                                                                                                                        
+     - 低溫低速高振動（temp ~56°C、speed 956 rpm、vibration 4.0）—— 像是低速運轉模式                                    
+     - 高溫高壓模式（temp ~71-81°C、pressure ~486-496 kPa）                                                             
+     - 低溫低振動常速模式（temp ~57°C、vibration 1.9、speed 1806 rpm）                                                  
+     - 高溫高流量模式（temp ~78°C、flow ~216 lpm）等                                                                    
+                                                                                                                        
+     另外 firmware_ver（全 3.0）和 sample_period_s（全 0.5）是常數欄位，不影響分群。                                    
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 2m 36s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-glm/lab1-3/project                    19.3K (2%)  ctrl+p commands  
+                                                                                                                        

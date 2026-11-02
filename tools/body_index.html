@@ -1,5 +1,5 @@
 <!--TITLE:總覽-->
-<!--DESC:AI Agent × 數學｜OpenCode 體驗工作坊。國立中山大學人工智慧與數學整合學程。AI 這麼強，為什麼還要自己想、自己驗證？兩小時用真實紀錄，練習判斷 AI 這次到底做對了什麼、又替你決定了什麼。-->
+<!--DESC:AI Agent × 數學｜OpenCode 體驗工作坊。國立中山大學人工智慧與數學整合學程。接到 AI 沒見過的資料時，它算得出數字，但不知道你要什麼。兩小時練習判斷它替你決定了什麼，也親手看懂 agent 怎麼運作。-->
 
 <header class="hero workshop-hero">
 <div class="inner">
@@ -11,9 +11,9 @@
     <a class="action-primary" href="prep.html">先完成課前準備 <span aria-hidden="true">→</span></a>
     <a class="action-secondary" href="first-run.html">已準備好，開始第一次對話 <span aria-hidden="true">→</span></a>
   </div>
-  <figure class="digits-preview">
-    <picture><source media="(max-width: 720px)" srcset="assets/figures/digits-samples-mobile.svg"><img src="assets/figures/digits-samples.svg" alt="digits 資料集中標籤為 0 到 9 的十張手寫數字影像，每張是 8 × 8 像素。" width="1200" height="228"></picture>
-    <figcaption>同一份手寫數字資料，從分群、PCA，一路用到分類。圖為 scikit-learn digits 的真實樣本。</figcaption>
+  <figure class="data-preview">
+    <picture><source media="(max-width: 720px)" srcset="assets/figures/line-preview-mobile.svg"><img src="assets/figures/line-preview.svg" alt="一條產線前 40 筆感測讀數標準化後的熱圖，縱軸是溫度、振動、壓力、流量、電流、轉速。" width="1200" height="312"></picture>
+    <figcaption>三關都用同一條產線的感測資料。這是講師設計的資料，AI 沒見過，答案也不在檔案裡。</figcaption>
   </figure>
 </div>
 </header>
@@ -21,17 +21,17 @@
 <div class="container">
 <section>
 <h2>這場工作坊在做什麼</h2>
-<p class="lead">AI 能跑程式時，數字多半算得對。但它算的常是它自己定義的題目，也可能把錯的事講得很肯定。這門課練的是：<strong>知道該驗什麼，才分得出這次對不對</strong>。</p>
+<p class="lead">真實工作中，你接到的多半是 AI 沒見過的資料。它算得出數字，但不知道你要什麼，還是可能給你一個肯定的答案。這門課練三件事：<strong>不全信 AI、自己判斷，也親手看懂 agent 怎麼運作</strong>。</p>
 <div class="box tip">
 <div class="bt">一個實測案例</div>
-<p>我們在互動模式問 <code>big-pickle</code>：「不要執行任何程式，digits 的 64 個像素中，哪幾個在全部 1797 張圖裡都是 0？」正確答案是 3 個（0、32、39）。</p>
-<p style="margin-bottom:0">5 次中有 <strong>3 次肯定地答錯</strong>（16 個、16 個、28 個），1 次說無法可靠回答，1 次上網查到正確答案（2026-11-01，OpenCode 1.19.5）。這題禁止它跑程式，不代表它平常也這樣；重點是答錯和答對的語氣可能一樣。後面三關的 AI 數字多半是對的，你要判斷的是：它回答了哪一題、它的驗證抓不抓得到錯。Lab 2 實測還有一次，它什麼都沒執行，卻寫「從實際執行可看到」。</p>
+<p>我們給 AI 一份產線資料，問：「幫我看有幾種運作模式。」資料裡沒有寫答案，也沒有說要拿來做什麼。</p>
+<p style="margin-bottom:0">同一句話跑 6 次，答案是 <strong>4、9、4、9、7、9</strong>，都講得很肯定，沒有一次先問要拿來做什麼（2026-11-02，OpenCode 1.19.5，兩個模型各 3 次）。數字多半算得對，問題是它還不知道你要做什麼。這不代表每次都會這樣，而且 AI 主動追問或答得好時，這堂課一樣學得到東西。</p>
 </div>
-<p>看得懂少量 Python、接觸過一些微積分或線性代數，就可以從課前準備開始。每一關都走同樣的節奏：看 AI 的問題、先自己想、改寫需求、實際驗證，最後用主張、證據和限制說明結論。</p>
+<p>看得懂少量 Python、接觸過一些微積分或線性代數，就可以從課前準備開始。每一關都走同樣的節奏：先問、自己判斷、揭曉現場資訊、自己改問題、實際驗證，最後寫一句帶條件的結論。</p>
 <div class="lab-preview" aria-label="三個實作與你要判斷的問題">
-  <a href="lab1-cluster.html"><span class="preview-label">Lab 1 · 分群</span><h3>數字都對，就回答了你的問題嗎？</h3><p>AI 的風險：數字算對，問題答錯。找出它默默替你做的決定。</p><span class="preview-result">帶走：把結論改寫成帶條件的句子 <span aria-hidden="true">↗</span></span></a>
-  <a href="lab2-pca.html"><span class="preview-label">Lab 2 · PCA</span><h3>全部 PASS，就真的沒錯嗎？</h3><p>AI 的風險：驗證全過，卻沒驗到錯。故意放錯，看哪些檢查抓得到。</p><span class="preview-result">帶走：補上一項抓得到漏洞的檢查 <span aria-hidden="true">↗</span></span></a>
-  <a href="lab3-notes.html"><span class="preview-label">Lab 3 · 分類與筆記</span><h3>準確率 1.0，能證明什麼？</h3><p>AI 的風險：推導和結論都講得很肯定。分清楚每個證據能證明什麼。</p><span class="preview-result">帶走：觀察、解釋與不能證明什麼 <span aria-hidden="true">↗</span></span></a>
+  <a href="lab1-cluster.html"><span class="preview-label">Lab 1 · 分群</span><h3>它說有 9 種，你要相信嗎？</h3><p>AI 的風險：不知道你要什麼，還是給了答案。看懂同一句話為什麼每次不同。</p><span class="preview-result">帶走：把結論改寫成帶條件的句子 <span aria-hidden="true">↗</span></span></a>
+  <a href="lab2-pca.html"><span class="preview-label">Lab 2 · PCA</span><h3>保留 93% 的變異，就夠了嗎？</h3><p>AI 的風險：說「夠了」，沒問夠做什麼。對照摘要、畫面與檔案，再審查它的驗證。</p><span class="preview-result">帶走：補上一項抓得到漏洞的檢查 <span aria-hidden="true">↗</span></span></a>
+  <a href="lab3-notes.html"><span class="preview-label">Lab 3 · 分類與筆記</span><h3>它說可以上線，誰來決定？</h3><p>AI 的風險：替你決定了該由你決定的事。看懂 context、記憶與規則的界線。</p><span class="preview-result">帶走：自己選門檻，並說清楚理由 <span aria-hidden="true">↗</span></span></a>
 </div>
 </section>
 
@@ -42,16 +42,16 @@
 <tr><td class="t">00:00</td><td class="n"><a href="prep.html">綠燈檢查</a> <span class="badge prep">課前</span></td>
     <td class="d">確認每台電腦都能啟動 OpenCode、用 uv 執行 Python。還沒完成安裝的，在這一步一起處理。</td></tr>
 <tr><td class="t">00:05</td><td class="n"><a href="first-run.html">第一次對話</a> <span class="badge live">現場</span></td>
-    <td class="d">熟悉操作畫面與權限要求，再親手抓 AI 一個講得很肯定的錯。</td></tr>
+    <td class="d">熟悉操作畫面，親手拒絕一次工具，看 agent 接下來怎麼做。</td></tr>
 <tr><td class="t">00:18</td><td class="n"><a href="lab1-cluster.html">Lab 1 · 分群</a> <span class="badge live">現場</span></td>
-    <td class="d">數字對，問題錯。先丟一句模糊的問題，找出 AI 默默做的決定，再把問題改到它不用猜。</td></tr>
+    <td class="d">先丟一句模糊的問題，判斷它的答案，揭曉現場資訊後，自己把問題改好。</td></tr>
 <tr><td class="t">00:43</td><td class="n">休息</td><td class="d"></td></tr>
 <tr><td class="t">00:48</td><td class="n"><a href="lab2-pca.html">Lab 2 · 降維</a> <span class="badge live">現場</span></td>
-    <td class="d">全 PASS，沒驗到錯。先預測哪些檢查抓得到錯，再放入講師設計的錯誤，對照結果補上檢查。</td></tr>
+    <td class="d">「夠了」是夠做什麼？揭曉用途後，再手刻 PCA，放入講師設計的錯誤審查驗證。</td></tr>
 <tr><td class="t">01:20</td><td class="n"><a href="lab3-notes.html">Lab 3 · 分類與筆記</a> <span class="badge live">現場</span></td>
-    <td class="d">講得肯定，不等於證明。自己規劃梯度檢查，判讀準確率 1.0 的意義，寫一份短筆記核對 AI 的結論。</td></tr>
+    <td class="d">自己選門檻，看準確率為什麼會騙人，規劃梯度檢查，寫一份短筆記核對 AI 的結論。</td></tr>
 <tr><td class="t">01:48</td><td class="n">收尾</td>
-    <td class="d">回答開場的問題，把今天親手抓到的問題寫成一條 <code>AGENTS.md</code> 規則。</td></tr>
+    <td class="d">回答開場的問題，看記憶的邊界，把今天遇到的問題寫成規則再測一次。</td></tr>
 </table>
 </section>
 
@@ -86,27 +86,17 @@
 
 <section class="sample-section">
 <h2>從一段回答練習追問</h2>
-<p>agent 寫完程式，通常也會說明它怎麼驗證。讀到下面這段回應，你會接著問什麼？</p>
-<details class="bg sample-response"><summary>展開 PCA 任務與回應的範例節錄</summary><div class="bg-body">
+<p>下面是 AI 的實際回答節錄（2026-11-02，<code>GLM-5.3-Flash</code>）。讀到這段，你會接著問什麼？</p>
 <div class="term">
-  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">OpenCode · 範例節錄，非完整驗證</span></div>
-  <div class="term-body"><div class="u">手刻一個 PCA，不可以呼叫 sklearn。寫完自己驗證，並把驗證結果印出來。</div>
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">OpenCode · 實際回答節錄</span></div>
+  <div class="term-body"><div class="u">data/line_modes.csv 是產線感測讀數，幫我看有幾種運作模式。</div>
 <div class="sp"></div>
-<div class="t">Read　AGENTS.md</div>
-<div class="w">Write　pca_manual.py</div>
-<div class="b">uv run python pca_manual.py</div>
-<div class="sp"></div>
-<div class="o">驗證 1：解釋變異比例　最大差異 = 8.327e-17　→ PASS</div>
-<div class="o">驗證 2：主成分方向 |cos|　最大偏離 1 = 8.882e-16　→ PASS</div>
-<div class="o">驗證 3：重建誤差　差異 = 0.000e+00　→ PASS</div>
-<div class="sp"></div>
-<div class="c">三項驗證都通過了。補充一點：第 4、7、8、9、10 個主成分的方向跟 sklearn 相反，
-這是正常的，特徵向量的正負號本來就任意，所以我用 |cos| 而不是直接相減。</div>
+<div class="c">CSV 裡沒有標籤欄位（……），所以我對六個感測特徵做標準化後用 GMM 分群：
+BIC 在 k = 9 時最低（k=10 起又回升），判定為 9 種運作模式。
+附註：……GMM BIC 明確指向 9，可信度較高。</div>
 </div>
 </div>
-<p class="figure-note">這段只節錄三項檢查，不是完整驗證流程。Lab 2 會逐步補齊檢查，並示範為什麼全部 PASS 仍可能漏掉錯誤。</p>
-</div></details>
-<p>例如：特徵向量的正負號可以不同，那麼用 <code>|cos|</code> 比對主成分方向就一定有效嗎？<a href="lab2-pca.html">Lab 2</a> 會帶你檢查這個條件。</p>
+<p>例如：它為什麼標準化？「可信度較高」是對什麼而言？如果要拿這個答案做別的用途，9 還夠嗎？<a href="lab1-cluster.html">Lab 1</a> 會帶你查清楚。</p>
 </section>
 
 <section>
@@ -116,7 +106,7 @@
 <p><strong>一、免費模型會看你送過去的東西。</strong>
 本工作坊用的 <code>opencode/big-pickle</code> 是限時免費的試用模型，
 官方明講資料可能被用於改進模型。所以：<strong>不要把還沒發表的研究資料、
-個人隱私資料、或任何機密內容丟進去</strong>。課堂用的都是 scikit-learn 內建的公開資料集。額度用完時可改用其他免費模型，例如 <code>beam-free</code>，它的資料會保留 30 天，同樣不要放機密內容；<a href="prep.html#backup-keys">Gemini 和 NVIDIA 備案</a>的免費服務也可能用你送出的內容改進產品。</p>
+個人隱私資料、或任何機密內容丟進去</strong>。課堂用的都是講師設計的合成資料。額度用完時可改用其他免費模型，例如 <code>beam-free</code>，它的資料會保留 30 天，同樣不要放機密內容；<a href="prep.html#backup-keys">Gemini 和 NVIDIA 備案</a>的免費服務也可能用你送出的內容改進產品。</p>
 <p style="margin-bottom:0"><strong>二、agent 會動你的檔案。</strong>
 它真的會寫檔、刪檔、執行指令。這不是聊天機器人。
 先看過<a href="git-safety.html">Git 安全網</a>，或至少在動手前把重要的東西備份一份。</p>

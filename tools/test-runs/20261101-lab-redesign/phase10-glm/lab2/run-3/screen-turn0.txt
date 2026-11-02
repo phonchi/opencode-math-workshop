@@ -1,0 +1,40 @@
+  ┃    4   plt.rcParams["font.family"] = "Noto Sans CJK TC"                                                             
+  ┃    5   from sklearn.preprocessing import StandardScaler                                                             
+  ┃                                                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  $ uv run python analysis_pca.py 2>&1 | tail -15                                                                    
+  ┃                                                                                                                     
+  ┃  PC11: 0.0022  累積: 1.0000                                                                                         
+  ┃                                                                                                                     
+  ┃  前 3 個主成分的負荷量：                                                                                            
+  ┃          PC1    PC2    PC3                                                                                          
+  ┃  ch01 -0.390 -0.441  0.006                                                                                          
+  ┃  ch02 -0.458 -0.018  0.306                                                                                          
+  ┃  ch03 -0.407 -0.256 -0.366                                                                                          
+  ┃  ch04 -0.419  0.251  0.331                                                                                          
+  ┃  ch05  0.210  0.296  0.579                                                                                          
+  ┃  ch06 -0.196  0.565 -0.244                                                                                          
+  ┃  …                                                                                                                  
+  ┃                                                                                                                     
+  ┃  Click to expand                                                                                                    
+  ┃                                                                                                                     
+                                                                                                                        
+     分析完成，圖已存到 figs/pca_scree.png。結果摘要：                                                                  
+                                                                                                                        
+     - 11 個通道標準化後做 PCA，*5 個主成分可累積解釋 92.95%*（90% 關卡落在 PC5）；前 3 個只有 69%，前 4 個 83.9%。     
+     - 各主成分解釋比例：PC1 32.0%、PC2 20.5%、PC3 16.6%、PC4 14.9%、PC5 9.1%，之後快速遞減。                           
+     - 負荷量看起來：PC1 主要由 ch01–ch04、ch07 驅動（整體製程水準）；PC2 以 ch06、ch08 為主；PC3 以 ch05、ch08 為主。  
+       ch09、ch10、ch11 貢獻極小（量測值非常小，標準化後仍無變異貢獻），可考慮剔除。                                    
+                                                                                                                        
+     結論：取 5 個主成分即可；若可接受 84% 的解釋力，用 4 個更精簡。                                                    
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 1m 21s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-glm/lab2-3/project                    20.5K (2%)  ctrl+p commands  
+                                                                                                                        

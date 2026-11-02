@@ -1,60 +1,32 @@
-"""Lab 1 參考解答 — 加速器：k-means 分群與 k 的選擇
+"""Lab 1 參考程式：同一份感測資料，前處理不同，silhouette 選出的 k 就不同。
 
-驗收重點（經跨模型獨立審查後修正措辭）：
-  * random_state=0 固定初始化的隨機來源；n_init=10 是「跑 10 次取較佳」，
-    本身不是可重現性保證。同資料、同版本、同運算設定下可在容差內重現，
-    但不保證跨版本或跨硬體逐位元相同。
-  * 不直接比較 cluster **編號**（編號可任意置換）。要比較分群結構時，
-    用 ARI、共同分群關係，或先做 label 對齊。
-  * inertia 相同也不保證分群相同。
+line_modes.csv 是講師設計的資料。批次標籤只在揭曉時使用，選 k 時不看。
 """
-import numpy as np
 from pathlib import Path
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-from sklearn.datasets import load_digits
+
+import numpy as np
 from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import adjusted_rand_score, silhouette_score
+from sklearn.preprocessing import StandardScaler
 
-RANDOM_STATE = 0
-X, y = load_digits(return_X_y=True)
-print(f"資料形狀 X={X.shape}, 真實類別數={len(np.unique(y))}")
+DATA = Path(__file__).resolve().parents[1] / "assets" / "data"
+X = np.genfromtxt(DATA / "line_modes.csv", delimiter=",", skip_header=1)
+batch = np.genfromtxt(DATA / "reveal" / "line_modes_batches.csv", delimiter=",", skip_header=1)
+print(f"資料形狀 X={X.shape}；標準差為 0 的欄位索引 = {np.flatnonzero(X.std(0) == 0).tolist()}")
 
-ks = list(range(2, 13))
-inertias, sils = [], []
-for k in ks:
-    km = KMeans(n_clusters=k, random_state=RANDOM_STATE, n_init=10).fit(X)
-    inertias.append(km.inertia_)
-    sils.append(silhouette_score(X, km.labels_))
-    print(f"k={k:2d}  inertia={km.inertia_:10.1f}  silhouette={sils[-1]:.4f}")
 
-best_k = ks[int(np.argmax(sils))]
-print(f"\nsilhouette 最高的 k = {best_k}")
-print("注意：10 是**標註的數字類別數**，不保證原始像素空間恰好有 10 個")
-print("      符合 k-means 幾何假設的群。silhouette 偏好 k=9 只代表：")
-print("      在這份資料、歐氏距離與本次搜尋設定下，k=9 的幾何分群品質較好。")
-print("      『幾何分群品質』與『辨識 10 種數字』是兩個不同的評估目標。")
+def sweep(Z):
+    out = {}
+    for k in range(2, 13):
+        km = KMeans(n_clusters=k, n_init=10, random_state=0).fit(Z)
+        out[k] = (km.inertia_, silhouette_score(Z, km.labels_), adjusted_rand_score(batch, km.labels_))
+    return out
 
-fig, ax = plt.subplots(1, 2, figsize=(11, 4))
-ax[0].plot(ks, inertias, "o-"); ax[0].set_xlabel("k"); ax[0].set_ylabel("inertia")
-ax[0].set_title("Elbow: inertia vs k")
-ax[1].plot(ks, sils, "o-", color="tab:orange")
-ax[1].axvline(best_k, ls="--", color="gray")
-ax[1].set_xlabel("k"); ax[1].set_ylabel("silhouette"); ax[1].set_title("Silhouette vs k")
-Path("figs").mkdir(exist_ok=True)
-fig.tight_layout(); fig.savefig("figs/lab1_k_selection.png", dpi=110)
-plt.close(fig)
-print("圖已存至 figs/lab1_k_selection.png")
 
-# 可重現性檢查：固定資料、套件版本與運算設定下，inertia 應在容差內重現
-a = KMeans(n_clusters=10, random_state=RANDOM_STATE, n_init=10).fit(X)
-b = KMeans(n_clusters=10, random_state=RANDOM_STATE, n_init=10).fit(X)
-tol = 1e-6 * max(1.0, abs(a.inertia_))
-print(f"\n可重現性：兩次 inertia 差 = {abs(a.inertia_-b.inertia_):.3e}（容差 {tol:.3e}） -> "
-      f"{'PASS' if abs(a.inertia_-b.inertia_) < tol else 'FAIL'}")
-# 分群結構是否也一致（忽略編號置換）——用 ARI 比對兩次結果
-from sklearn.metrics import adjusted_rand_score
-ari = adjusted_rand_score(a.labels_, b.labels_)
-print(f"兩次分群結構 ARI = {ari:.6f}  -> {'PASS' if ari > 1-1e-9 else 'FAIL'}"
-      "   （ARI 忽略編號置換，這才是真正該比的）")
+raw = sweep(X)
+std = sweep(StandardScaler().fit_transform(X))
+print(f"{'k':>3} {'原始 silhouette':>16} {'原始 ARI':>9} {'標準化 silhouette':>18} {'標準化 ARI':>11}")
+for k in raw:
+    print(f"{k:>3} {raw[k][1]:>16.4f} {raw[k][2]:>9.3f} {std[k][1]:>18.4f} {std[k][2]:>11.3f}")
+print("原始尺度 silhouette 最高的 k =", max(raw, key=lambda k: raw[k][1]))
+print("標準化後 silhouette 最高的 k =", max(std, key=lambda k: std[k][1]))

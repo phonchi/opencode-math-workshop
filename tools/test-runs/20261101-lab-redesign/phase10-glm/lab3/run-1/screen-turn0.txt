@@ -1,0 +1,40 @@
+  ┃   16 - 重要特徵：以 `vibration_mm_s`、`temp_c` 為主（見 feature importance 圖）。                                   
+  ┃   17                                                                                                                
+  ┃   18 ## Threshold 取捨（holdout）                                                                                   
+  ┃   19 | threshold | precision | recall | 警報數 |                                                                    
+  ┃   20 |---|---|---|---|                                                                                              
+  ┃   21 | 0.2 | 0.357 | 0.833 | 42 |                                                                                   
+  ┃   22 | 0.3 | 0.519 | 0.778 | 27 |                                                                                   
+  ┃   23 | 0.5 | 0.714 | 0.556 | 14 |                                                                                   
+  ┃   24                                                                                                                
+  ┃   25 ## 上線結論                                                                                                    
+  ┃   26 **可以「輔助監控」上線，不建議全自動停機。**                                                                   
+  ┃   27 - 優點：AUC 0.91 顯示訊號確實存在，低 threshold 時可抓到 8 成故障。                                            
+  ┃   28 - 限制：樣本太少（故障僅 71 筆），precision-recall 波動大；每 100 次警報約 3~5 成是誤報（依 threshold          
+  ┃      而定）。                                                                                                       
+  ┃   29 - 建議：threshold 設 0.3 左右當預警（recall 0.78），警報交由人員複查；累積更多標籤後再重新訓練、               
+  ┃      評估是否升級為自動停機。                                                                                       
+  ┃   30                                                                                                                
+  ┃                                                                                                                     
+                                                                                                                        
+     完成。模型用 RandomForest（train_fault_model.py），評估圖存到 figs/fault_model_eval.png，筆記在 notes/             
+     fault_model.md。                                                                                                   
+                                                                                                                        
+     結果：能不能上線？→ 可以當「輔助監控」，不建議全自動停機。                                                         
+                                                                                                                        
+     - 資料 900 筆但故障只有 71 筆（7.9%），嚴重不平衡                                                                  
+     - CV ROC-AUC 0.913 ± 0.026 → 訊號確實存在                                                                          
+     - Holdout（threshold 0.5）：故障 precision 0.71 / recall 0.56，18 筆故障漏抓 8 筆                                  
+     - 把 threshold 降到 0.3 可抓到 78% 的故障，但每 100 次警報約一半是誤報                                             
+                                                                                                                        
+     建議：threshold 設 0.3 左右作預警，警報交人員複查；等故障樣本累積更多再重訓，評估升級自動停機。                    
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 1m 35s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-glm/lab3-1/project                    19.5K (2%)  ctrl+p commands  
+                                                                                                                        

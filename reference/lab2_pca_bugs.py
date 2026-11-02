@@ -3,12 +3,16 @@
 學生現場可請 AI 自己做這張表；若來不及，講師用本檔示範。
 所有錯誤都是講師注入，不是 AI 自己犯的。
 """
+from pathlib import Path
+
 import numpy as np
-from sklearn.datasets import load_digits
 from sklearn.decomposition import PCA
 
-K, TOL = 10, 1e-6
-X, _ = load_digits(return_X_y=True)
+K, TOL = 4, 1e-6
+DATA = Path(__file__).resolve().parents[1] / "assets" / "data"
+X = np.genfromtxt(DATA / "line_channels.csv", delimiter=",", skip_header=1)
+# 只除以標準差、不減平均，中心化留給 PCA 本身，「忘記中心化」才測得出來。
+X = X / X.std(0)
 n = len(X)
 mu = X.mean(0)
 Xc = X - mu
@@ -38,7 +42,7 @@ def checks(bug):
     }
 
 
-NAMES = {None: "正確版本", "ratio_topk": "比例分母只用前 10 個", "denom_n": "共變異數分母用 n",
+NAMES = {None: "正確版本", "ratio_topk": "比例分母只用前 4 個", "denom_n": "共變異數分母用 n",
          "no_center": "忘記中心化", "rows": "用 evecs[:K] 取列"}
 labels = list(checks(None))
 print(f"{'錯誤（講師注入）':<24}" + "".join(f"{x:>10}" for x in labels))
@@ -46,5 +50,5 @@ for bug, name in NAMES.items():
     r = checks(bug)
     print(f"{name:<24}" + "".join(f"{'PASS' if r[x] < TOL else 'FAIL':>10}" for x in labels))
     print(f"{'':<24}" + "".join(f"{r[x]:>10.1e}" for x in labels))
-print(f"\n比例分母只用前 10 個時，比例總和 = {pca('ratio_topk')[2].sum():.6f}；正確應為 {pca()[2].sum():.6f}")
+print(f"\n比例分母只用前 4 個時，比例總和 = {pca('ratio_topk')[2].sum():.6f}；正確應為 {pca()[2].sum():.6f}")
 print(f"用 evecs[:K] 取列時，最小 |cos| = {np.abs((pca('rows')[1] * sk.components_).sum(1)).min():.6f}")

@@ -1,0 +1,40 @@
+  ┃      次誤報（整體誤報率約 10%）。                                                                                   
+  ┃   24 - 適合當「預警系統」提醒人員巡檢；若誤報成本高，可調高 threshold 換較低誤報（但漏報會增加）。                  
+  ┃   25                                                                                                                
+  ┃   26 ## 圖                                                                                                          
+  ┃   27 - `figs/pr_curve.png`、`figs/feature_importance.png`                                                           
+  ┃   28                                                                                                                
+  ┃   29 ## 改善方向                                                                                                    
+  ┃   30 - 正例只有 71 筆，收集更多故障樣本最能提升 precision。                                                         
+  ┃   31 - 可加入時間序列特徵（滑動窗均值/變化率），目前只用了單點快照。                                                
+  ┃   32                                                                                                                
+  ┃                                                                                                                     
+                                                                                                                        
+     完成，訓練與評估腳本在 train_fault_model.py，筆記在 notes/fault_model.md，圖在 figs/pr_curve.png、figs/            
+     feature_importance.png。                                                                                           
+                                                                                                                        
+     能不能上線：可以當「預警輔助」上線，不建議直接全自動停機。                                                         
+                                                                                                                        
+     結果（5-fold out-of-fold，資料 900 筆、正例僅 71 筆 / 7.9%）：                                                     
+                                                                                                                        
+     - 最佳模型：LogisticRegression（PR-AUC 0.711、ROC-AUC 0.959）                                                      
+     - 設定 threshold ≈ 0.56（recall 優先）：recall 0.915、precision 0.436、誤報率約 10%                                
+     - 意思是：約 92% 的故障抓得到，但每抓到 1 次真故障會伴隨約 1.3 次誤報                                              
+                                                                                                                        
+     我自行做的決定：                                                                                                   
+                                                                                                                        
+     - 移除 record_id（純編號）                                                                                         
+     - data/line_channels.csv（無標籤）與 data/line_modes.csv（firmware、sample period 全為常數，無鑑別力）未納入訓練   
+     - 因漏報故障代價高，threshold 以 recall ≥ 0.9 為前提挑 precision 最高者；若誤報成本高可調高 threshold，            
+       但漏報會增加                                                                                                     
+     - 若要提升 precision，最有效的是收集更多故障樣本（目前正例太少），或加入時間序列特徵                               
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 1m 19s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-glm/rule-lab3-2/project               19.0K (2%)  ctrl+p commands  
+                                                                                                                        

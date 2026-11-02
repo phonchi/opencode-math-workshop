@@ -1,0 +1,40 @@
+  ┃   12 ## 結果                                                                                                        
+  ┃   13 - CV：ROC-AUC 0.913 ± 0.027，AP 0.473 ± 0.073，recall 0.41、precision 0.45。                                   
+  ┃   14 - Holdout（threshold=0.295）：故障 recall 0.78、precision 0.50，AP 0.602。                                     
+  ┃   15 - 重要特徵：temp_c（0.44）> vibration（0.19）> pressure（0.12）。                                              
+  ┃   16                                                                                                                
+  ┃   17 ## 能不能上線？                                                                                                
+  ┃   18 - **看用途**：若作為「警示/預警工具」（召回故障約 78%，代價是誤報約 7%），勉強可用於輔助人力，                 
+  ┃      **不建議完全自動停機**。                                                                                       
+  ┃   19 - 主要風險：AP 偏低且 CV 變異大（±0.07），故障樣本太少，模型不夠穩。                                           
+  ┃   20 - 建議先以 shadow mode 跑一段時間驗證；若能蒐集更多故障樣本或加入其他特徵（如 line_channels.csv /              
+  ┃      line_modes.csv 若可對齊），再考慮正式上線。                                                                    
+  ┃   21                                                                                                                
+  ┃   22 ## 圖                                                                                                          
+  ┃   23 - `figs/fault_model_eval.png`：PR curve 與特徵重要度。                                                         
+  ┃   24                                                                                                                
+  ┃                                                                                                                     
+                                                                                                                        
+     結論：不建議直接全自動上線，但可以先當預警輔助工具試行（shadow mode）。                                            
+                                                                                                                        
+     - 訓練：RandomForest + class_weight="balanced"，75/25 分層切分，5-fold CV（train_fault_model.py）                  
+     - 效果：ROC-AUC 0.913，但在 threshold=0.295 下，故障 recall 0.78、precision 0.50 ——                                
+       大約每抓到一個故障會誤報一個；漏抓率約 22%                                                                       
+     - 主要問題：故障樣本只有 71 筆（7.9%），CV 平均 precision-recall（AP）只有 0.47 且波動大，模型穩定度不足           
+     - 重要特徵：temp_c 最關鍵（0.44），其次 vibration、pressure                                                        
+                                                                                                                        
+     評估圖在 figs/fault_model_eval.png，筆記在 notes/fault_model.md。                                                  
+                                                                                                                        
+     我自己做的決定：移除 record_id（流水號不該當特徵）、用 stratified split 處理不平衡、threshold 0.295 是從 PR        
+     curve 挑「precision ≥ 0.5 之下 recall 最大」的點。另外 data/ 裡有 line_channels.csv 和 line_modes.csv，            
+     若能和故障紀錄對齊（例如同 record_id 或時間軸），加入後可能明顯提升效果——需要我試嗎？                              
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 1m 1s                                                                                   
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-glm/rule-lab3-1/project               19.6K (2%)  ctrl+p commands  
+                                                                                                                        

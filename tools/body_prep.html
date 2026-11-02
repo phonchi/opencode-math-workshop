@@ -167,7 +167,12 @@ uv --version</code></pre>
 mkdir ai-math-lab
 cd ai-math-lab
 mkdir notes
-mkdir figs</code></pre>
+mkdir figs
+mkdir data</code></pre>
+<p>接著下載三份練習資料，它們是講師設計的產線資料：</p>
+<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/line_modes.csv -o data/line_modes.csv
+curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/line_channels.csv -o data/line_channels.csv
+curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/line_faults.csv -o data/line_faults.csv</code></pre>
 </div>
 
 <div class="step" data-n="2">
@@ -319,7 +324,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <li><input type="checkbox" id="p0"><label for="p0"><code>git --version</code> 印出版本號</label></li>
 <li><input type="checkbox" id="p1"><label for="p1"><code>opencode --version</code> 印出版本號</label></li>
 <li><input type="checkbox" id="p2"><label for="p2"><code>uv --version</code> 印出版本號</label></li>
-<li><input type="checkbox" id="p3"><label for="p3">專案資料夾裡有 <code>pyproject.toml</code>、<code>opencode.json</code>、<code>AGENTS.md</code></label></li>
+<li><input type="checkbox" id="p3"><label for="p3">專案資料夾裡有 <code>pyproject.toml</code>、<code>opencode.json</code>、<code>AGENTS.md</code>，<code>data/</code> 裡有三份 CSV</label></li>
 <li><input type="checkbox" id="p4"><label for="p4"><code>uv sync</code> 跑完，沒有紅色錯誤</label></li>
 <li><input type="checkbox" id="p5"><label for="p5">測試一印出「環境 OK」</label></li>
 <li><input type="checkbox" id="p6"><label for="p6">測試二得到繁體中文回答</label></li>
@@ -339,14 +344,14 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <tr><td>1</td><td><code>big-pickle</code></td><td>預設</td><td>不用登入</td></tr>
 <tr><td>2</td><td>其他免費模型，例如 <code>beam-free</code></td><td><code>big-pickle</code> 額度用完</td><td>用 <code>/models</code> 切換；可能和 <code>big-pickle</code> 一起被擋</td></tr>
 <tr><td>3</td><td><code>Gemini 3.5 Flash Lite</code></td><td>免費模型都不能用</td><td>要自己的 Gemini key</td></tr>
-<tr><td>4</td><td><code>GLM-5.3-Flash</code></td><td>Gemini 也不能用</td><td>要自己的 NVIDIA key；實測約慢 3 倍，但一樣能完成三個 Lab</td></tr>
+<tr><td>4</td><td><code>GLM-5.3-Flash</code></td><td>Gemini 也不能用</td><td>要自己的 NVIDIA key；實測較慢，但一樣能完成三個 Lab</td></tr>
 </table></div>
 
 <div class="box warn">
 <div class="bt">申請前請先看</div>
 <ul style="margin-bottom:0">
 <li><strong>要滿 18 歲。</strong>Gemini API 條款要求滿 18 歲，NVIDIA 條款要求達法定成年。未滿 18 歲請不要申請，先告訴講師。</li>
-<li><strong>送出的內容可能被用來改進產品，也可能有人工審閱。</strong>只用課堂的公開資料，不要送未發表研究、個人資料或機密內容。</li>
+<li><strong>送出的內容可能被用來改進產品，也可能有人工審閱。</strong>只用課堂的練習資料，不要送未發表研究、個人資料或機密內容。</li>
 <li><strong>每人用自己的帳號。</strong>額度是按專案計算的，共用 key 會一起用完。</li>
 <li><strong>不要綁信用卡或設定帳單。</strong>如果畫面要求付款，先停下來問講師。</li>
 <li><strong>key 就像密碼。</strong>不要貼到聊天室、截圖、<code>opencode.json</code> 或 Git。</li>
@@ -385,7 +390,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 </ul>
 </div>
 
-<p style="font-size:.88rem;color:var(--ink-3)">講師實測（2026-11-02，OpenCode 1.19.5，一次跑一人）：兩個備案都能完成讀檔、寫檔和執行。Gemini 3.5 Flash Lite 同一天累計至少 167 個請求沒有被擋；GLM-5.3-Flash 跑了開場和三個 Lab 各一次。全班同時使用的情況還沒測過，額度也可能變動。</p>
+<p style="font-size:.88rem;color:var(--ink-3)">講師實測（2026-11-02，OpenCode 1.19.5，一次跑一人）：兩個備案都能完成讀檔、寫檔和執行。Gemini 3.5 Flash Lite 同一天累計至少 365 個請求沒有被擋；GLM-5.3-Flash 的開場和三個 Lab 各跑 3 次。全班同時使用的情況還沒測過，額度也可能變動。</p>
 
 <ul class="ckl">
 <li><input type="checkbox" id="p8"><label for="p8">Gemini 3.5 Flash Lite 回答了問題</label></li>
@@ -448,7 +453,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <p style="margin-bottom:0">
 <code>opencode/big-pickle</code> 是限時免費的試用模型，官方明講資料可能被用於改進模型；Gemini 和 NVIDIA 的免費服務也一樣。
 <strong>不要把未發表的研究資料、個人隱私資料或任何機密內容丟進去。</strong>
-課堂用的都是 scikit-learn 內建的公開資料集，沒有這個問題。
+課堂用的都是講師設計的合成資料，沒有這個問題。
 </p>
 </div>
 </section>

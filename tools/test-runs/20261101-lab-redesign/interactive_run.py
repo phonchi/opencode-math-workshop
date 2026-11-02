@@ -46,7 +46,7 @@ def screen(s, hist=False):
     return tm('capture-pane', '-p', '-J', *(['-S', '-6000'] if hist else []), '-t', s).stdout
 def paste(s, text):
     b = 'b' + s; tm('set-buffer', '-b', b, '--', text); tm('paste-buffer', '-p', '-b', b, '-t', s); tm('delete-buffer', '-b', b)
-def run_turn(s, text, log, timeout):
+def run_turn(s, text, log, timeout, reject_first=False):
     paste(s, text); time.sleep(1.5); tm('send-keys', '-t', s, 'Enter')
     t0 = time.time(); last = ''; stable = 0; seen_busy = False; perms = 0
     while time.time() - t0 < timeout:
@@ -58,7 +58,7 @@ def run_turn(s, text, log, timeout):
         k = re.sub(r'\d+s ', '', w.group(0)) if w else ''
         if w and not any(x.get('notice') == k for x in log): log.append({'t': round(time.time() - t0), 'notice': k, 'screen': sc[-800:]})
         if 'Allow once' in sc:
-            bad = DENY.search(sc); perms += 1
+            bad = DENY.search(sc) or reject_first; reject_first = False; perms += 1
             log.append({'t': round(time.time() - t0), 'permission': 'reject' if bad else 'allow_once', 'screen': sc[-1500:]})
             if bad: tm('send-keys', '-t', s, 'Right'); time.sleep(.3); tm('send-keys', '-t', s, 'Right'); time.sleep(.3)
             tm('send-keys', '-t', s, 'Enter'); time.sleep(2); stable = 0; seen_busy = True; continue
@@ -85,7 +85,10 @@ def one(case, n, out, timeout):
                 else: x[k] = v
         merge(cfg, json.loads(Path(CONFIG_EXTRA).read_text(encoding='utf-8')))
         (proj / 'opencode.json').write_text(json.dumps(cfg, ensure_ascii=False, indent=2), encoding='utf-8')
-    (proj / 'AGENTS.md').write_text(AGENTS + case.get('agents_extra', ''), encoding='utf-8'); (proj / 'notes').mkdir(); (proj / 'figs').mkdir()
+    (proj / 'AGENTS.md').write_text((ROOT / 'starter' / 'AGENTS.md').read_text(encoding='utf-8') + case.get('agents_extra', ''), encoding='utf-8'); (proj / 'notes').mkdir(); (proj / 'figs').mkdir()
+    if case.get('data'):
+        (proj / 'data').mkdir()
+        for f in case['data']: shutil.copy(ROOT / 'assets' / 'data' / f, proj / 'data' / f)
     sp.run(['uv', 'sync', '--quiet'], cwd=proj, env=e, capture_output=True)
     envargs = [x for k in ['HOME','XDG_DATA_HOME','XDG_CONFIG_HOME','XDG_STATE_HOME','XDG_CACHE_HOME','UV_CACHE_DIR','UV_PYTHON_INSTALL_DIR','TERM'] for x in ('-e', f'{k}={e[k]}')]
     if os.environ.get('GOOGLE_GENERATIVE_AI_API_KEY'): envargs += ['-e', 'GOOGLE_GENERATIVE_AI_API_KEY=' + os.environ['GOOGLE_GENERATIVE_AI_API_KEY']]
@@ -99,7 +102,10 @@ def one(case, n, out, timeout):
             text = turn['text'] if isinstance(turn, dict) else turn
             if isinstance(turn, dict) and turn.get('tab'):
                 tm('send-keys', '-t', s, 'Tab'); time.sleep(1.5)
-            r = run_turn(s, text, log, timeout); r['turn'] = i
+            if isinstance(turn, dict) and turn.get('keys'):
+                tm('send-keys', '-t', s, '-l', text); time.sleep(1.5); tm('send-keys', '-t', s, 'Enter'); time.sleep(4)
+                res.append(dict(status='keys', turn=i, secs=0, perms=0)); (d / f'screen-turn{i}.txt').write_text(screen(s, True), encoding='utf-8'); continue
+            r = run_turn(s, text, log, timeout, bool(isinstance(turn, dict) and turn.get('reject_first'))); r['turn'] = i
             r['agent_shown'] = 'Plan' if re.search(r'Plan\s+·', screen(s)) else 'Build' if re.search(r'Build\s+·', screen(s)) else '?'
             res.append(r)
             if r['status'] == 'quota': STOP.set(); break

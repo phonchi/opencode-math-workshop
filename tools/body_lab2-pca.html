@@ -1,34 +1,32 @@
 <!--TITLE:Lab 2 · 降維-->
-<!--DESC:AI 手刻 PCA 並宣告驗證通過。先預測哪些檢查抓得到錯，再放入講師設計的錯誤，對照結果補上檢查。這一關練的是審查驗證方式的能力。-->
+<!--DESC:AI 告訴你 5 個主成分就夠，保留了 93% 的變異。夠，是夠做什麼？再用講師注入的錯誤，審查它的驗證抓得到什麼。-->
 
 <div class="container narrow">
 
 <div class="pagehead">
-  <div class="kicker"><span>Lab 2</span><span>·</span><span class="badge live">現場 32 分</span><span>·</span><span>AI 的風險：全 PASS，沒驗到錯</span></div>
-  <h1>降維：全部 PASS，就真的沒錯嗎？</h1>
+  <div class="kicker"><span>Lab 2</span><span>·</span><span class="badge live">現場 32 分</span><span>·</span><span>AI 的風險：說「夠了」，沒問夠做什麼</span></div>
+  <h1>降維：保留 93% 的變異，就夠了嗎？</h1>
   <p class="lead">
-    請 AI 手刻 PCA，它多半會很快寫好，並告訴你驗證通過。這一關不靠它犯錯：
-    我們故意放入錯誤，看它的驗證到底抓得到什麼。你要帶走的能力：審查 AI 的驗證方式。
+    這一關 AI 多半做得不錯，也會告訴你幾個主成分就夠。你要問兩件事：夠，是夠做什麼？它的驗證，真的抓得到錯嗎？
+    你要帶走的能力：審查 AI 的門檻和驗證方式。
   </p>
 </div>
 
-<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#projection-title">轉動投影</a></li><li><a href="#section-動手">預測與放入錯誤</a></li><li><a href="#section-先規劃-再實作">先規劃，再實作</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
+<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#projection-title">轉動投影</a></li><li><a href="#section-動手">問、核對、揭曉</a></li><li><a href="#section-手刻並審查驗證">審查驗證</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
 
 <!--INCLUDE:tools/pca-explorer.html-->
 
 <section>
 <h2>從投影接到 PCA</h2>
-<p>剛才是二維變一維；接下來每張手寫數字有 64 個像素，我們要保留 10 個方向。先讀懂「減去平均、找方向、投影」這三步，再讓 agent 寫程式。還沒學過特徵向量也可以先跟著做，下方會補上意義。</p>
-
+<p>剛才是二維變一維；這一關的 <code>data/line_channels.csv</code> 有 800 筆資料、11 個通道，通道名稱只有 <code>ch01</code> 到 <code>ch11</code>。這也是<strong>講師設計的資料</strong>。PCA 做的是「減去平均、找方向、投影」。還沒學過特徵向量也可以先跟著做，下方會補上意義。</p>
 <details class="bg"><summary>PCA 在做什麼？為什麼要降維？</summary>
 <div class="bg-body">
 <p>
-每張手寫數字圖是 64 維向量。但這 64 個像素並<strong>不獨立</strong>。
-左上角那個像素永遠是 0，中間幾個像素則高度相關（筆畫是連著的）。
+每筆資料是 11 個通道的讀數。這些通道並<strong>不獨立</strong>，有些會一起變動。
 所以資料實際上只「住」在一個<strong>維度低得多的子空間附近</strong>。
 </p>
 <p>
-PCA 要做的就是找出那個子空間：在 $\mathbb{R}^{64}$ 裡找 $K$ 個互相正交的方向，
+PCA 要做的就是找出那個子空間：在 $\mathbb{R}^{11}$ 裡找 $K$ 個互相正交的方向，
 讓資料投影上去之後<strong>保留最多的變異</strong>。
 </p>
 <h4>這裡會用到哪些線性代數概念</h4>
@@ -42,7 +40,7 @@ PCA 要做的就是找出那個子空間：在 $\mathbb{R}^{64}$ 裡找 $K$ 個�
 <tr><td>投影與重建</td><td>正交投影 $\mathbf{x}\mapsto W^\top W\mathbf{x}$</td></tr>
 </table></div>
 <p style="margin-bottom:0">
-這些概念不必一次記熟。先掌握 PCA 要保留資料變化最大的方向，再練習「怎麼驗證別人寫的實作」。特徵分解的細節可以配合線性代數課程回來閱讀。
+這些概念不必一次記熟。先掌握 PCA 要保留資料變化最大的方向。變化最大，不一定是你最在意的，這正是本關要看的事。特徵分解的細節可以配合線性代數課程回來閱讀。
 </p>
 </div>
 </details>
@@ -50,14 +48,14 @@ PCA 要做的就是找出那個子空間：在 $\mathbb{R}^{64}$ 裡找 $K$ 個�
 <details class="bg"><summary>共變異數矩陣是什麼？為什麼要先中心化？</summary>
 <div class="bg-body">
 <p>
-先把每一行（每個像素）減掉它自己的平均，得到中心化的 $X_c$。
-然後 $C=\frac{X_c^\top X_c}{n-1}$ 是一個 $64\times 64$ 的矩陣，其中
+先把每一行（每個通道）減掉它自己的平均，得到中心化的 $X_c$。
+然後 $C=\frac{X_c^\top X_c}{n-1}$ 是一個 $11\times 11$ 的矩陣，其中
 </p>
 $$C_{jk}=\frac{1}{n-1}\sum_{i=1}^{n}(x_{ij}-\bar x_j)(x_{ik}-\bar x_k)$$
 <ul>
-<li><strong>對角線</strong> $C_{jj}$：第 $j$ 個像素自己的變異數，也就是它「變化得多劇烈」</li>
-<li><strong>非對角線</strong> $C_{jk}$：第 $j$ 與第 $k$ 個像素<strong>一起變動的程度</strong>。
-    正的代表「一個亮另一個也傾向亮」，負的代表相反，接近 0 代表線性共同變動較弱，仍可能有非線性關係</li>
+<li><strong>對角線</strong> $C_{jj}$：第 $j$ 個通道自己的變異數，也就是它「變化得多劇烈」</li>
+<li><strong>非對角線</strong> $C_{jk}$：第 $j$ 與第 $k$ 個通道<strong>一起變動的程度</strong>。
+    正的代表「一個高另一個也傾向高」，負的代表相反，接近 0 代表線性共同變動較弱，仍可能有非線性關係</li>
 </ul>
 <h4>為什麼一定要先中心化</h4>
 <p style="margin-bottom:0">
@@ -74,12 +72,12 @@ $$C_{jk}=\frac{1}{n-1}\sum_{i=1}^{n}(x_{ij}-\bar x_j)(x_{ik}-\bar x_k)$$
 把 $C$ 的特徵值由大到小排成 $\lambda_1\ge\lambda_2\ge\cdots$。
 每個 $\lambda_j$ 就是<strong>資料在第 $j$ 個主成分方向上的變異數</strong>。
 </p>
-<p>對稱矩陣的跡等於特徵值總和，而這個跡剛好是所有像素的變異數總和，所以</p>
+<p>對稱矩陣的跡等於特徵值總和，而這個跡剛好是所有通道的變異數總和，所以</p>
 $$\text{第 }j\text{ 個主成分的解釋變異比例}=\frac{\lambda_j}{\sum_{m}\lambda_m}$$
 <p>
 意思是「整體變異裡，有百分之幾是由這個方向貢獻的」。
-在這份資料中，第一個主成分約占 <strong>14.89%</strong>，前十個加起來約 <strong>73%</strong>。
-也就是用 10 個數字就能保留原本 64 個數字約七成三的變異。
+在這份資料標準化後，第一個主成分約占 <strong>32%</strong>，前四個加起來約 <strong>84%</strong>。
+也就是用 4 個數字就能保留原本 11 個數字約八成四的變異。
 </p>
 <p style="margin-bottom:0">
 注意這是個<strong>比例</strong>。待會會看到，正因為它是比例，
@@ -94,7 +92,7 @@ $$\text{第 }j\text{ 個主成分的解釋變異比例}=\frac{\lambda_j}{\sum_{m
 <tr><th>寫法</th><th>意思</th></tr>
 <tr><td><code>A @ B</code></td><td><strong>矩陣乘法</strong>（不是逐元素相乘）。<code>A * B</code> 才是逐元素</td></tr>
 <tr><td><code>A.T</code></td><td>轉置 $A^\top$</td></tr>
-<tr><td><code>X - mu</code></td><td><code>X</code> 是 (1797,64)、<code>mu</code> 是 (64,)，numpy 會自動把 <code>mu</code> 對每一列廣播相減（broadcasting）</td></tr>
+<tr><td><code>X - mu</code></td><td><code>X</code> 是 (800,11)、<code>mu</code> 是 (11,)，numpy 會自動把 <code>mu</code> 對每一列廣播相減（broadcasting）</td></tr>
 <tr><td><code>np.linalg.eigh(C)</code></td><td>對稱矩陣專用的特徵分解。回傳的特徵值是<strong>由小到大</strong>，所以要自己反轉</td></tr>
 <tr><td><code>np.argsort(v)[::-1]</code></td><td>取得「由大到小」的索引順序</td></tr>
 <tr><td><code>W[:K]</code></td><td>取前 $K$ 列</td></tr>
@@ -107,16 +105,11 @@ $$\text{第 }j\text{ 個主成分的解釋變異比例}=\frac{\lambda_j}{\sum_{m
 </div>
 </details>
 
-<p>PCA 的定義：對中心化後的資料 $X_c$，計算共變異數矩陣</p>
 <div class="box math">
 <div class="bt">定義</div>
 $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <p style="margin-bottom:0">取 $\Lambda$ 中最大的 $K$ 個特徵值對應的特徵向量，就是前 $K$ 個主成分。</p>
 </div>
-<p>
-一個「正確的 PCA 實作」至少要做對這幾件事：中心化對、分母對、特徵分解對、由大到小排序對、取前 $K$ 個對。
-你的任務是審查 AI 的檢查，找出每一項看的是什麼量，以及什麼錯誤會從縫隙溜過去。
-</p>
 </section>
 
 <section>
@@ -125,179 +118,158 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <div class="step" data-n="1">
 <h3>先照平常的方式問</h3>
 <p>輸入 <code>/new</code> 開新對話，貼上這句：</p>
-<pre class="cmd"><code>用 sklearn digits 手刻 PCA，取前 10 個主成分，然後確認它是對的。</code></pre>
-<p>它多半會算對，也會告訴你驗證通過。先做兩件事：</p>
-<ol>
-<li><strong>確認它真的跑了</strong>：畫面上要有執行指令的紀錄，並按 <code>!</code> 用 <code>ls</code> 看它說的檔案在不在。</li>
-<li><strong>打開程式，找出通過條件到底比了哪些量</strong>，列在 <code>notes/</code> 或紙上。有印出來不代表有列入判定。</li>
-</ol>
-<div class="box tip">
-<div class="bt">講師實測：同一句 prompt</div>
-<p>2026-11-02，OpenCode 1.19.5 互動模式：</p>
-<ul>
-<li><code>big-pickle</code> 跑 3 次。2 次算對、回報一致。<strong>另 1 次完全沒有執行任何工具，卻寫「從實際執行可看到」，附上一段輸出，結論是「手刻 PCA 是正確的」，它列出的程式、圖和筆記都不存在。</strong>3 次都沒有列出特徵值本身的比對。</li>
-<li><code>beam-free</code> 跑 8 次，都有執行、都算對、都宣告通過，其中 7 次沒有比特徵值本身。</li>
-<li><code>flint-40b-free</code> 跑 2 次，都比了特徵值，只是每次要 9 分鐘左右。其中一次它的檢查先 FAIL，判定是檢查寫錯後改到全 PASS；這次它判斷正確，但不讀程式你分不出來。</li>
-</ul>
-<p style="margin-bottom:0">所以 AI 不一定會漏，也不是每次都亂寫。重點是<strong>你要看過才知道這次是哪一種</strong>。</p>
-</div>
+<pre class="cmd"><code>data/line_channels.csv 是產線感測資料，幫我降維，看幾個主成分就夠。</code></pre>
+<p>它回答後，先做一張三欄對照，再相信它：</p>
+<div class="tw"><table>
+<tr><th>摘要說它做了什麼</th><th>畫面上實際出現的工具、你按了幾次 Allow</th><th><code>!</code> 用 <code>ls</code> 看到的檔案</th></tr>
+<tr><td>（抄下來）</td><td>（抄下來）</td><td>（抄下來）</td></tr>
+</table></div>
+<p>三欄對不上就問它。再自己跑一次它的程式，核對一個數字：檔案存在，不代表它跑過。</p>
 </div>
 
 <div class="step" data-n="2">
-<h3>想：先預測，再看答案</h3>
-<p>下面四個錯誤是<strong>講師設計後注入</strong>的，不是 AI 犯的。要測的是它的驗證：如果程式真的錯了，它抓得到嗎？用你剛才列的檢查，先填表：每一格會 PASS 還是 FAIL？</p>
-<div class="tw"><table>
-<tr><th>錯誤（講師注入）</th><th>意思</th></tr>
-<tr><td>比例分母只用前 10 個</td><td>解釋變異比例除以前 10 個特徵值的和，而不是全部</td></tr>
-<tr><td>變異數分母用 n</td><td>和 sklearn 的 $n-1$ 約定不一致</td></tr>
-<tr><td>忘記中心化</td><td>直接用 $X$，沒有減平均</td></tr>
-<tr><td>主成分取錯方向</td><td>該取特徵向量（欄），卻取成矩陣的前 10 列</td></tr>
-</table></div>
+<h3>判斷：夠，是夠做什麼？</h3>
+<p>先寫下：</p>
+<ul>
+<li>「夠了」的門檻是誰定的？為什麼是這個數字？</li>
+<li>它有沒有處理資料尺度？看 <code>ch11</code> 和 <code>ch09</code> 的大小，不處理會發生什麼事？</li>
+<li>它有沒有建議丟掉哪些通道？你敢丟嗎？你還缺什麼資訊？</li>
+</ul>
+<details class="bg"><summary>寫完判斷再打開：講師實測</summary>
+<div class="bg-body">
+<div class="box tip">
+<div class="bt">講師實測：同一句 prompt</div>
+<p>2026-11-02，OpenCode 1.19.5 互動模式，<code>Gemini 3.5 Flash Lite</code> 與 <code>GLM-5.3-Flash</code> 各 3 次：</p>
+<ul>
+<li><strong>6 次都主動標準化</strong>，這步做得很好，否則 <code>ch11</code> 會獨占 100% 的變異。</li>
+<li>都以累積變異為依據，建議 5 個左右（92.95%），也有人同時提 4 個。90% 這類門檻是它自己選的，沒有人先問用途。</li>
+<li>其中一次建議「ch09、ch10、ch11 貢獻極小，可考慮剔除」。</li>
+</ul>
+<p style="margin-bottom:0"><code>big-pickle</code> 當天額度用完，還沒有這一題的紀錄。你那次可能不一樣，先看自己的。</p>
+</div>
+</div>
+</details>
 </div>
 
 <div class="step" data-n="3">
-<h3>驗證：拿它自己的檢查跑「檢查 × 錯誤」表</h3>
-<pre class="cmd"><code>請在剛才的程式加一個 bug 參數，可選：
-none、ratio_topk（比例分母只用前 10 個特徵值的和）、denom_n（變異數分母用 n，不是 n-1）、
-no_center（不中心化）、rows（主成分取錯方向：取矩陣的前 10 列，不是前 10 個特徵向量）。
+<h3>揭曉：這份資料要拿來做什麼</h3>
+<details class="bg"><summary>寫完判斷再打開：需求卡與結果</summary>
+<div class="bg-body">
+<div class="box warn">
+<div class="bt">需求卡</div>
+<ul style="margin-bottom:0">
+<li>降維後的結果要給<strong>故障監控</strong>用。</li>
+<li><code>ch09</code>、<code>ch10</code> 是高頻振動通道，讀數很小。<code>ch11</code> 是累積脈衝數，讀數很大，和故障無關。</li>
+</ul>
+</div>
+<p>下載故障標籤。它只用來檢查降維結果。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
+<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/line_channels_fault.csv -o data/line_channels_fault.csv</code></pre>
+<p>先預測：保留幾個主成分就分得出故障？如果照建議丟掉 <code>ch09</code>～<code>ch11</code> 呢？再請 AI 算。你要自己說清楚比較什麼；下面是參考程式的結果（<code>reference/lab2_pca.py</code>，標準化後，AUC 用 5 折交叉驗證，標準化、PCA 和分類器都只在訓練折擬合，0.5 約等於亂猜，1 是完全分開）：</p>
+<div class="tw"><table>
+<tr><th>保留內容</th><th>累積變異</th><th>辨識故障的 AUC</th></tr>
+<tr><td>前 3 個主成分</td><td>69.0%</td><td>0.588</td></tr>
+<tr><td>前 4 個主成分</td><td>83.9%</td><td><strong>1.000</strong></td></tr>
+<tr><td>前 5 個主成分</td><td>92.9%</td><td>1.000</td></tr>
+<tr><td>拿掉 <code>ch09</code>～<code>ch11</code>，用其餘通道</td><td>不適用</td><td>0.439</td></tr>
+<tr><td>原始尺度只留 1 個主成分</td><td>約 100%</td><td>0.503</td></tr>
+</table></div>
+<p>第 4 個主成分幾乎就是 <code>ch09</code>、<code>ch10</code>，第 5 個幾乎只有和故障無關的 <code>ch11</code>。<strong>解釋變異比例量的是「變化多大」，不是「對你多重要」。</strong>這不是說 90% 這類門檻不能用，而是用之前要先知道用途。標準化也不是萬用解：它救回了弱通道，也把 <code>ch11</code> 這種和故障無關的欄位放大了。</p>
+</div>
+</details>
+</div>
+</section>
+
+<section>
+<h2>手刻並審查驗證</h2>
+<p class="lead">前面看的是「它回答了哪個問題」。接下來看：如果程式真的錯了，它的驗證抓得到嗎？</p>
+
+<div class="step" data-n="4">
+<h3>規劃：手刻，並先說清楚怎麼驗</h3>
+<p>輸入 <code>/new</code>，自己寫 prompt，至少交代：只能用 numpy 的 <code>eigh</code> 手刻；每欄先<strong>除以標準差但不減平均</strong>，中心化留給 PCA 本身；取前 4 個主成分；sklearn（<code>svd_solver='full'</code>）只當對照組；檔名 <code>lab2_pca.py</code>；每項檢查印出實際數值和 PASS/FAIL。</p>
+<p>跑完後打開程式，<strong>找出通過條件到底比了哪些量</strong>，列在 <code>notes/</code> 或紙上。有印出來不代表有列入判定。</p>
+</div>
+
+<div class="step" data-n="5">
+<h3>驗證：先預測，再跑「檢查 × 錯誤」表</h3>
+<p>下面四個錯誤是<strong>講師設計後注入</strong>的，不是 AI 犯的。用你剛才列的檢查，先預測每一格會 PASS 還是 FAIL，再貼上：</p>
+<pre class="cmd"><code>請在 lab2_pca.py 加一個 bug 參數，可選：
+none、ratio_topk（比例分母只用前 4 個特徵值的和）、denom_n（變異數分母用 n，不是 n-1）、
+no_center（不中心化）、rows（主成分取錯方向：取矩陣的前 4 列，不是前 4 個特徵向量）。
 
 每一種 bug 都跑一次你原本那組檢查，做成「檢查 × 錯誤」表，
 每格印出實際數值與 PASS/FAIL。
 
 規則：不准修 bug、不准新增或修改檢查、不准改門檻，表做好就停下來。</code></pre>
-<p>如果它自動修掉錯誤、加新檢查或放寬門檻，就打斷它，要它照規則重做。對照你的預測：哪一格猜錯了？<strong>有沒有哪一列整列都是 PASS？</strong>那個錯誤就從這組檢查的縫隙溜過去了。</p>
-<p>也看一眼它怎麼放這個錯，同一句話可能有不同做法。實測 <code>beam-free</code> 接這一步 3 次，都沒有修 bug 或改門檻，但每張表都不同：</p>
-<div class="tw"><table>
-<tr><th>次</th><th>整列 PASS 的錯誤</th><th>為什麼</th></tr>
-<tr><td>1</td><td>沒有</td><td>它只改了比例的分子，分母沒改，所以被比例檢查抓到</td></tr>
-<tr><td>2</td><td>變異數分母用 n</td><td>分子分母一起改，又沒有比特徵值</td></tr>
-<tr><td>3</td><td>比例分母只用前 10 個</td><td>有比特徵值，但沒有比比例</td></tr>
-</table></div>
-<p>下面是一組參考結果，檢查項目齊全時才長這樣：</p>
+<p>如果它自動修掉錯誤、加新檢查或放寬門檻，就打斷它，要它照規則重做。對照你的預測：哪一格猜錯了？<strong>有沒有哪一列整列都是 PASS？</strong>那個錯誤就從這組檢查的縫隙溜過去了。同一句話每次放錯的方式也可能不同，所以要看它實際怎麼改。</p>
+<p>下面是檢查項目齊全時的參考結果：</p>
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">參考程式輸出（reference/lab2_pca_bugs.py）</span></div>
   <div class="term-body"><div class="o">錯誤（講師注入）　　　比例　 |cos|　重建　 正交　 特徵值</div>
 <div class="o">正確版本　　　　　　　PASS　PASS　 PASS　 PASS　 PASS</div>
-<div class="o">比例分母只用前 10 個　<span class="e">FAIL</span>　PASS　 PASS　 PASS　 PASS</div>
+<div class="o">比例分母只用前 4 個　　<span class="e">FAIL</span>　PASS　 PASS　 PASS　 PASS</div>
 <div class="o">變異數分母用 n　　　　PASS　PASS　 PASS　 PASS　 <span class="e">FAIL</span></div>
 <div class="o">忘記中心化　　　　　　<span class="e">FAIL</span>　<span class="e">FAIL</span>　 <span class="e">FAIL</span>　 PASS　 <span class="e">FAIL</span></div>
 <div class="o">主成分取錯方向　　　　PASS　<span class="e">FAIL</span>　 <span class="e">FAIL</span>　 PASS　 PASS</div>
 </div>
 </div>
-<p>看參考表「變異數分母用 n」那一列：只有直接比特徵值才抓得到。設 $C'=cC$，其中 $c=\frac{n-1}{n}$ 是正常數，而且比例的分子分母都用 $C'$ 的特徵值：</p>
+<p>看「變異數分母用 n」那一列：只有直接比特徵值才抓得到。設 $C'=cC$，其中 $c=\frac{n-1}{n}$，而且比例的分子分母都用 $C'$ 的特徵值：</p>
 <div class="box math">
 <div class="bt">為什麼其他檢查都測不到</div>
 $$Cv=\lambda v\;\Longrightarrow\;C'v=(c\lambda)v$$
 <ul style="margin-bottom:0">
 <li><strong>特徵向量完全不變</strong> → 方向 $|\cos|$、正交性必然通過</li>
-<li>特徵值同乘 $c$，但比例 $\dfrac{c\lambda_i}{\sum_j c\lambda_j}=\dfrac{\lambda_i}{\sum_j\lambda_j}$ → $c$ 被<strong>約掉</strong></li>
-<li>重建 $X_cW^\top W+\mu$ 只用到特徵向量，跟特徵值大小無關 → 重建通過</li>
+<li>比例 $\dfrac{c\lambda_i}{\sum_j c\lambda_j}=\dfrac{\lambda_i}{\sum_j\lambda_j}$ → $c$ 被<strong>約掉</strong></li>
+<li>重建 $X_cW^\top W+\mu$ 只用到特徵向量 → 重建通過</li>
 </ul>
 </div>
-<p>這是數學結構，前提是分子分母一起改。如果分母還是用 $n-1$ 的總變異，$c$ 就約不掉，比例檢查會 FAIL，所以才要看它怎麼放這個錯。比例分母只用前 10 個時，比例總和會變成 <code>1.000000</code>，看起來很整齊，但資料明明只保留約 73.8% 的變異，這種「太漂亮」的數字也值得懷疑。</p>
+<p>比例分母只用前 4 個時，比例總和會變成 <code>1.000000</code>，看起來很整齊，但實際只保留約 83.9% 的變異。這種「太漂亮」的數字也值得懷疑。</p>
 <p><strong>如果你的表每種錯都抓到了呢？</strong>那很好，而且你現在是真的知道它抓得到，不是聽它說的。說說看每項檢查分別看什麼量，拿掉哪一項就會漏掉哪個錯。</p>
 </div>
-</section>
 
-<section>
-<h2>先規劃，再實作</h2>
-<p class="lead">
-前面是做完才發現縫隙。這一步改在它動手之前審查。
-</p>
-
-<div class="step" data-n="4">
-<h3>規劃：在 Plan 模式審它的檢查清單</h3>
-<p>輸入 <code>/new</code>，按 <code>Tab</code> 切到 <strong>Plan</strong>（畫面左下角會顯示），它在這個模式不能改檔、不能跑指令。貼上：</p>
-<pre class="cmd"><code>我要手刻 PCA，取 digits 前 10 個主成分，用 numpy 的 eigh，sklearn（svd_solver='full'）當對照組。
-先不要寫程式。列出你打算做的每一項檢查：比什麼量、容差多少，
-以及每一項各自抓不到哪些錯誤。</code></pre>
-<p>清單可能有 8 到 12 項，先挑你看得懂的審。用剛才的表問兩件事：</p>
-<ul>
-<li><strong>哪個錯它抓不到？</strong>例如有沒有比特徵值本身？沒有就要它補上；已經有了，就換問它還抓不到什麼。</li>
-<li><strong>這個容差做得到嗎？</strong>例如只留 10 個主成分，重建能和原圖一樣嗎？</li>
-</ul>
-<p>這份清單是你們的約定，你看得懂才算數。</p>
-<p>確認後按 <code>Tab</code> 切回 <strong>Build</strong>：</p>
-<pre class="cmd"><code>照剛才確認的清單實作，存成 lab2_pca.py，用 uv run python 執行，
-印出每項檢查的實際數值與 PASS/FAIL。不要增減清單裡的檢查。</code></pre>
-<div class="box warn">
-<div class="bt">Plan 模式要搭配你的判斷才有用</div>
-<p style="margin-bottom:0">
-如果你不知道該看什麼，Plan 只是多等一輪。它把「驗什麼」先攤開來，讓你在它動手前有機會改。檔案有沒有被動，也要看畫面確認。
-</p>
-</div>
-<!--EVIDENCE:plan-->
-<p>實作完，<strong>把程式的通過條件和清單逐項對照</strong>，不要只看它最後說全部 PASS。</p>
-<div class="box tip">
-<div class="bt">講師實測：這一步（<code>beam-free</code>，完整 2 次）</div>
-<p>2 次在 Plan 都沒有改檔；它試著跑指令時被擋下，清單也都列了特徵值。其中 1 次清單要求「重建和原圖的相對誤差 ≤ 1e-7」。這做不到：10 個主成分只留約 73.8% 的變異，實際誤差是 0.286。</p>
-<p style="margin-bottom:0">到了 Build，這項果然 FAIL。它把這個條件從判定裡拿掉，再回報「8 項檢查全部 PASS」，沒有提到改過，雖然我們說了不要增減檢查。拿掉本身是對的，因為條件錯了；但只看摘要，你不會知道。在 Plan 問過「這個容差做得到嗎」，這件事就不必等到實作才發現。和直接 Build 的對照還沒有跑完，所以這裡不宣稱 Plan 一定比較好。</p>
-</div>
-</div>
-
-<div class="step" data-n="5">
+<div class="step" data-n="6">
 <h3>說明：主張、證據、限制</h3>
-<p>用三句話寫下這份 PCA 的結論，不要只寫「驗證通過」。例如：</p>
+<p>用三句話寫下這份結果，不要只寫「驗證通過」。例如：</p>
 <ul>
-<li><strong>主張</strong>：在 digits 前 10 個主成分上，我的手刻 PCA 與 sklearn（<code>svd_solver='full'</code>）在容差內沒有差異。</li>
-<li><strong>證據</strong>：比例、$|\cos|$、重建與特徵值的差都小於門檻；對這份程式重跑四種注入錯誤，都至少被一項抓到（沒重跑或沒抓到，就照實寫，這句不能沿用第 3 步的表）。</li>
-<li><strong>限制</strong>：只針對這份資料與這四種錯誤。sklearn 是對照組，不是真理，兩邊共同的假設問題比不出來。</li>
+<li><strong>主張</strong>：這份資料要做故障監控時，標準化後保留 4 個主成分就夠。</li>
+<li><strong>證據</strong>：AUC 從 3 個的 0.588 升到 4 個的 1.000；手刻 PCA 和 sklearn 在容差內一致，四種注入錯誤都至少被一項檢查抓到（沒跑到的就照實寫）。</li>
+<li><strong>限制</strong>：只針對這份資料和這四種錯誤。sklearn 是對照組，不是真理；換用途要重新判斷。</li>
 </ul>
 </div>
 
 <div class="box tip">
 <div class="bt">這一關真正要你帶走的</div>
 <p>
-<strong>「驗證全部通過」的意思是「在這組檢查下沒有發現差異」，不等於程式沒有錯。</strong>
+<strong>「夠了」要先問夠做什麼；「驗證通過」的意思是「在這組檢查下沒有發現差異」，不等於程式沒有錯。</strong>
 </p>
 <p style="margin-bottom:0">
-看 AI 的驗證時，該問的不是「檢查了幾項」，
-而是「<strong>如果程式真的錯了，這組檢查抓得到嗎</strong>」。
+看 AI 的驗證時，該問的不是「檢查了幾項」，而是「<strong>如果程式真的錯了，這組檢查抓得到嗎</strong>」。
 </p>
 </div>
 </section>
 
 <section>
 <h2>課後補充</h2>
-<details class="bg"><summary>可能發生：直接相減 <code>components_</code> 得到 0.94</summary>
+<details class="bg"><summary>為什麼不能直接相減主成分</summary>
 <div class="bg-body">
-<p>如果 AI 直接逐項比對 <code>components_</code>，最大差可能約 0.94，然後說程式有問題並開始亂改。這只是可能發生，不是每次都會出現。</p>
-<p>關鍵在 $Cv=\lambda v\Rightarrow C(-v)=\lambda(-v)$：特徵向量的正負號是任意的，要比夾角餘弦的絕對值 $|\mathbf{w}^{\text{manual}}_i\cdot\mathbf{w}^{\text{sklearn}}_i|\approx 1$。遇到這種情況先打斷它，檢查比較方式，再決定要不要改程式。</p>
+<p>關鍵在 $Cv=\lambda v\Rightarrow C(-v)=\lambda(-v)$：特徵向量的正負號是任意的。兩份都正確的實作，主成分可能剛好相差一個負號，直接相減會得到很大的差。要比夾角餘弦的絕對值 $|\mathbf{w}^{\text{manual}}_i\cdot\mathbf{w}^{\text{sklearn}}_i|\approx 1$。</p>
+<p style="margin-bottom:0">這也有前提：特徵值不能重複或太接近。若 $\lambda_i=\lambda_{i+1}$，那個二維特徵空間裡任何一組正交基底都合法，逐向量 $|\cos|$ 甚至可以是 0。換一份資料時，先印出相鄰特徵值的間隔。</p>
 </div>
 </details>
 
-<details class="bg"><summary>但書一：$|\cos|$ 不是永遠有效</summary>
-<div class="bg-body">
-<p>
-$|\cos|$ 比對成立的前提是<strong>特徵值單純（沒有重根）且間隔夠大</strong>。
-如果 $\lambda_i=\lambda_{i+1}$，那個二維特徵空間裡<em>任何</em>一組正交基底都是合法的特徵向量。
-兩個都正確的實作，逐向量 $|\cos|$ 甚至可以是 0。
-</p>
-<pre class="cmd"><code>請印出前 11 個特徵值，並計算相鄰特徵值的最小間隔，
-告訴我這份資料有沒有接近重根的問題。</code></pre>
-<div class="term">
-  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">特徵值間隔檢查</span></div>
-  <div class="term-body"><div class="o">前 10 個特徵值：</div>
-<div class="o">  179.0069  163.7177  141.7884  101.1004  69.5132</div>
-<div class="o">   59.1085   51.8845   44.0151   40.3110  37.0118</div>
-<div class="o">λ₁₁ = 28.5190</div>
-<div class="o">相鄰最小間隔 = 3.2992　　第 10／11 之間 = 8.4928</div>
-</div>
-</div>
-<p style="margin-bottom:0">
-digits 剛好安全。但如果你之後換一份資料，<strong>務必先檢查這件事</strong>。
-若要處理重複特徵值，應把對應的整個區塊一起比較，例如比較投影矩陣 $W^\top W$。還要確認保留的第 $K$ 與第 $K+1$ 個特徵值有間隔；若剛好從重根區塊中間切開，兩個都最佳的 $K$ 維子空間也可能不同，不能要求投影矩陣相等。
-</p>
-</div>
-</details>
-
-<details class="bg"><summary>但書二：正交性只是必要條件</summary>
+<details class="bg"><summary>正交性只是必要條件</summary>
 <div class="bg-body">
 <p style="margin-bottom:0">
 $WW^\top\approx I$ 確實不需要對照組，但它只證明「這 $K$ 個向量彼此正交且長度為 1」。
-<strong>隨便一組正交基底都會通過</strong>，包括上面「取列」的錯誤，或「不小心取到最小的那 10 個特徵向量」。
+<strong>隨便一組正交基底都會通過</strong>，包括上面「取列」的錯誤，或「不小心取到最小的那幾個特徵向量」。
 要完整驗證還得檢查特徵方程殘差 $CW^\top-W^\top\Lambda$、特徵值大小與取用順序。
 </p>
+</div>
+</details>
+
+<details class="bg"><summary>先在 Plan 模式審它的檢查清單</summary>
+<div class="bg-body">
+<p>按 <code>Tab</code> 切到 Plan，請它先列出每一項檢查：比什麼量、容差多少、各自抓不到哪些錯誤。用「檢查 × 錯誤」表審過，再切回 Build 實作，並把程式的通過條件和清單逐項對照。問一句「這個容差做得到嗎」：只留部分主成分時，重建不可能和原始資料一樣。</p>
+<p style="margin-bottom:0">如果你不知道該看什麼，Plan 只是多等一輪。它把「驗什麼」先攤開來，讓你在它動手前有機會改。</p>
 </div>
 </details>
 </section>
@@ -305,21 +277,20 @@ $WW^\top\approx I$ 確實不需要對照組，但它只證明「這 $K$ 個向�
 <section>
 <h2>檢查清單</h2>
 <ul class="ckl">
-<li><input type="checkbox" id="l2a"><label for="l2a">我讀過 AI 的驗證程式，能指出它的 PASS 條件到底比了哪些量</label></li>
-<li><input type="checkbox" id="l2b"><label for="l2b">看結果之前，我寫下了「檢查 × 錯誤」的預測</label></li>
-<li><input type="checkbox" id="l2c"><label for="l2c">我的表有實際數值，不是只有 PASS/FAIL；AI 沒有修掉注入的錯誤，也沒有改門檻</label></li>
-<li><input type="checkbox" id="l2d"><label for="l2d">我能說明為什麼「分母用 n」只有直接比特徵值才抓得到（$c$ 被約掉）</label></li>
-<li><input type="checkbox" id="l2e"><label for="l2e">我在 Plan 模式審過檢查清單，圈出它抓不到的錯，再讓它實作</label></li>
-<li><input type="checkbox" id="l2f"><label for="l2f">我能用「主張、證據、限制」說明這份 PCA 驗證了什麼、沒驗證什麼</label></li>
+<li><input type="checkbox" id="l2a"><label for="l2a">我做過摘要、畫面、檔案的三欄對照，也自己重跑過一次</label></li>
+<li><input type="checkbox" id="l2b"><label for="l2b">揭曉前，我寫下了「夠」的門檻是誰定的、還缺什麼資訊</label></li>
+<li><input type="checkbox" id="l2c"><label for="l2c">我能解釋為什麼 84% 的變異能辨識故障，69% 卻不行</label></li>
+<li><input type="checkbox" id="l2d"><label for="l2d">看結果之前，我寫下了「檢查 × 錯誤」的預測</label></li>
+<li><input type="checkbox" id="l2e"><label for="l2e">我的表有實際數值；AI 沒有修掉注入的錯誤，也沒有改門檻</label></li>
+<li><input type="checkbox" id="l2f"><label for="l2f">我能說明為什麼「分母用 n」只有直接比特徵值才抓得到（$c$ 被約掉）</label></li>
 </ul>
 </section>
 
 <section>
 <h2>如果還有時間</h2>
 <ul>
-<li>問 agent：<code>pca._fit_svd_solver</code> 是什麼？你會發現預設 <code>auto</code> 在這份資料上選的是 <code>covariance_eigh</code>，跟手刻是同一種演算法。所以這根本不算「兩種演算法交叉驗證」。要真的交叉驗證必須明寫 <code>svd_solver='full'</code>。</li>
-<li>設計一個「取錯順序」的錯誤（取最小的 10 個特徵值），先預測，再看每項檢查各自會不會抓到。</li>
-<li>把前 10 個主成分 reshape 回 8×8 畫出來，看看 PCA 學到了什麼樣的筆畫結構。</li>
+<li>挑一個自己想試的：不標準化再跑一次、只拿掉 <code>ch11</code>，或改用最小的幾個特徵值。先預測，再看哪些檢查抓得到。</li>
+<li>問 agent：<code>pca._fit_svd_solver</code> 是什麼？確認你的對照組是不是真的用了另一種演算法。</li>
 </ul>
 </section>
 

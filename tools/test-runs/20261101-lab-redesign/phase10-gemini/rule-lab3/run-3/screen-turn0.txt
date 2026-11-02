@@ -1,0 +1,40 @@
+  ┃                                                                                                                     
+                                                                                                                        
+     已成功載入 data/line_faults.csv 產線紀錄並訓練與評估多項機器學習模型。相關評估圖表已存至 figs/，                   
+     詳細筆記與數學分析已記錄於 notes/line_faults_analysis.md。                                                         
+                                                                                                                        
+     模型評估結果                                                                                                       
+                                                                                                                        
+     - *Logistic Regression (Balanced)*：Accuracy = 90.6%, Precision = 44.8%, Recall = 92.9%, ROC-AUC = 0.978           
+     - *Random Forest (Balanced)*：Accuracy = 93.3%, Precision = 60.0%, Recall = 42.9%, ROC-AUC = 0.935                 
+     - Hist Gradient Boosting：Accuracy = 94.4%, Precision = 66.7%, Recall = 57.1%, ROC-AUC = 0.915                     
+                                                                                                                        
+     能否上線使用？                                                                                                     
+                                                                                                                        
+     *可以上線試用 (建議採用 Logistic Regression (Balanced) 或經過閾值調校的模型，並以影子模式/Shadow Mode 部署)*。     
+                                                                                                                        
+     - 原因：羅吉斯迴歸模型的 ROC-AUC 高達 0.978，且在啟用類別平衡（Balanced Class Weight）後，*召回率 (Recall) 達到    
+       92.9%*。                                                                                                         
+     - 上線考量：產線故障檢測中，漏報（False Negative，未偵測出故障導致設備嚴重受損）的代價遠高於誤報（False            
+       Positive，誤判導致暫停檢查）。高召回率確保了絕大多數故障能被及時攔截。                                           
+                                                                                                                        
+     ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+                                                                                                                        
+     自行決定與執行的處理步驟摘要（未被要求）                                                                           
+                                                                                                                        
+     1. 特徵欄位過濾：移除無預測價值的識別欄位 record_id。                                                              
+     2. 缺失值與資料品質檢驗：確認資料集共 900 筆紀錄且無任何缺失值。                                                   
+     3. 資料集切分：採用 80/20 比例進行*分層隨機切分 (Stratified Train-Test Split)*，                                   
+        確保訓練集與測試集的故障類別比例（約 7.9%）維持一致。                                                           
+     4. 特徵標準化：使用 StandardScaler 對感測器數值特徵進行標準化，以利羅吉斯迴歸模型收斂。                            
+     5. 類別不平衡處理：針對少數類別（故障佔 7.9%）啟用 class_weight='balanced'，有效提高故障檢測的召回率。             
+                                                                                                                        
+     ▣  Build · Gemini 3.5 Flash Lite · 58.8s                                                                           
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Gemini 3.5 Flash Lite Google                                                                               
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-gemini/rule-lab3-3/project    38.2K (4%) · $0.05  ctrl+p commands  
+                                                                                                                        
