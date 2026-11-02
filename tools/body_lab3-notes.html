@@ -1,20 +1,20 @@
 <!--TITLE:Lab 3 · 分類與筆記-->
-<!--DESC:有限差分梯度檢查抓出寫錯的公式，撞上線性可分導致 MLE 不存在的陷阱，最後讓 agent 把推導整理成可版控的 LaTeX 筆記。-->
+<!--DESC:AI 寫推導、下結論都很肯定，準確率還是 1.0。練習自己規劃梯度檢查，分清楚 PASS 與準確率能證明什麼、不能證明什麼。-->
 
 <div class="container narrow">
 
 <div class="pagehead">
-  <div class="kicker"><span>Lab 3</span><span>·</span><span class="badge live">現場 25 分</span><span>·</span><span>agent 當學習夥伴</span></div>
-  <h1>分類與筆記：讓 agent 成為學習夥伴</h1>
+  <div class="kicker"><span>Lab 3</span><span>·</span><span class="badge live">現場 28 分</span><span>·</span><span>AI 的風險：講得肯定，不等於證明</span></div>
+  <h1>分類與筆記：準確率 1.0，能證明什麼？</h1>
   <p class="lead">
-    前兩關你在檢查 agent，這一關反過來，讓它當你的推導夥伴：
-    寫程式、驗證公式、然後把整個推導過程整理成一份你之後真的會回去看的筆記。
+    AI 會寫出推導、給出結論，準確率還是 1.0。這一關檢查每個證據到底證明了什麼。
+    你要帶走的能力：說清楚一個 PASS 或一個準確率能證明什麼、不能證明什麼。
   </p>
 </div>
 
 <nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#section-任務">認識分類問題</a></li><li><a href="#section-動手">檢查梯度與結果</a></li><li><a href="#section-最後-把它變成一份筆記">整理筆記</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
 
-<p class="path-note">現場先完成程式與梯度檢查，再判讀分類結果；完整推導與 LaTeX 筆記可以課後補完。</p>
+<p class="path-note">現場先核對推導、規劃梯度檢查，再判讀分類結果；完整推導與長版筆記可以課後補完。</p>
 <section>
 <h2>任務</h2>
 <p>
@@ -158,7 +158,7 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <p>把像素矩陣加上一欄 1 得到 $X_b$，並把截距放在參數向量 $w$ 的最後一項。令 $z=X_bw$、$\sigma(z)=\dfrac{1}{1+e^{-z}}$，平均對數損失與其梯度為</p>
 $$L(w)=\frac1n\sum_i\Bigl[\log\bigl(1+e^{z_i}\bigr)-y_iz_i\Bigr],
 \qquad \nabla_wL=\frac1nX_b^\top\bigl[\sigma(X_bw)-y\bigr]$$
-<p style="margin-bottom:0">agent 會很快寫出來。問題是：<strong>你怎麼知道它沒寫錯？</strong></p>
+<p style="margin-bottom:0">AI 會很快寫出來。問題是：<strong>你怎麼知道它沒寫錯？</strong></p>
 </div>
 </section>
 
@@ -166,41 +166,60 @@ $$L(w)=\frac1n\sum_i\Bigl[\log\bigl(1+e^{z_i}\bigr)-y_iz_i\Bigr],
 <h2>動手</h2>
 
 <div class="step" data-n="1">
-<h3>先說明公式，再要求程式</h3>
-<pre class="cmd"><code>我要手刻一個二元 logistic 迴歸，資料是 digits 裡的 3 和 8。
-
-先用兩三句話說明：損失函數衡量什麼，梯度告訴我們什麼。
-依本頁公式 L(w) = (1/n) Σ [log(1+e^z) - y z]，
-以及 ∇L = (1/n) Xb^T (σ(Xb w) - y) 實作。
-
-說明後寫成 lab3_logistic.py。本輪只實作資料讀取、loss(w) 與 grad(w)，
-先不要訓練、切分資料、增加其他演算法或產生新資料。
-使用全部 digits 的 3 與 8：像素除以 16，8 設為 1、3 設為 0；
-最後加一欄 1 作為截距，所以 Xb 有 65 欄。loss 使用平均值。
-用 uv run python lab3_logistic.py 執行，印出資料 shape 後停止，等我給下一步。</code></pre>
-<p>
-先對照本頁公式，確認損失與梯度各自的意義。待會的數值檢查只能檢查「程式內部是否一致」，不能單獨確認「公式本身正確」。完整的概似推導可在課後慢慢閱讀。
-</p>
+<h3>先照平常的方式問</h3>
+<p>輸入 <code>/new</code> 開新對話，貼上這句：</p>
+<pre class="cmd"><code>用 digits 的 3 和 8 手刻 logistic 迴歸，寫出推導，跟 sklearn 比較，確認你寫的是對的，並告訴我該怎麼判斷兩個模型一樣。</code></pre>
+<p>等它回答時，每個權限要求都讀一下。回答後先別追問，自己檢查三件事：</p>
+<ul>
+<li><strong>推導</strong>：代入一個例子驗號。$y=1,z=0$ 時損失應該是 $\log 2\approx 0.693$；$y=1$ 且 $z$ 很大時損失應該接近 0，$z$ 很負時應該很大。</li>
+<li><strong>做了你沒要求的決定嗎</strong>：有沒有加正則化、切訓練／測試集、換演算法？按 <code>!</code> 用 <code>grep -n "C=\|penalty\|train_test_split" *.py</code> 查程式，再對照摘要有沒有寫。</li>
+<li><strong>它的結論</strong>：它說判斷兩個模型一樣要比什麼？比權重有標準答案嗎？後面第 4 步會回來核對。</li>
+</ul>
+<div class="box tip">
+<div class="bt">講師實測：同一句 prompt</div>
+<p>2026-11-02，OpenCode 1.19.5 互動模式，<code>beam-free</code> 跑 5 次。實際算出的數字沒有發現錯誤，每次都回報和 sklearn 非常接近。但：</p>
+<ul>
+<li><strong>5 次都自行加上 L2 正則化</strong>（<code>C=1.0</code>），其中 3 次在最後的摘要沒有提到</li>
+<li>4 次自行切出測試集</li>
+<li>5 次都沒有做 <code>loss</code> 與 <code>grad</code> 的數值檢查</li>
+</ul>
+<p>另一次紀錄更清楚：它先做無正則化的版本，和 sklearn 的係數差 7.6、機率最大差 0.56、預測一致率 0.98；改成 L2、<code>C=1</code> 後，差距變成 1.6e-6，最後摘要只報了「一致」。</p>
+<p>加 L2 是合理的做法，因為資料可分時權重沒有有限解；它的筆記多半也寫到這點。問題不在它算錯，而在<strong>它比的已經不是你以為的模型，只讀摘要看不出來</strong>。</p>
+<p style="margin-bottom:0">不過 <code>big-pickle</code> 目前唯一完整的 1 次做得很好：它把 L2 和無正則化都跑了，摘要也講明 3 和 8 線性可分、無正則化沒有唯一解。這次花了近 5 分鐘、25 個權限要求。<strong>如果你的 AI 也寫得這麼清楚，還是用上面的 <code>grep</code> 對一次</strong>：寫得清楚不等於寫得正確，你要自己看過才知道。</p>
+</div>
 </div>
 
 <div class="step" data-n="2">
-<h3>有限差分梯度檢查</h3>
-<p>這是數值方法裡最乾淨的自我驗證：用損失函數本身去逼近梯度，跟解析梯度比。</p>
+<h3>規劃：自己設計梯度檢查</h3>
+<p>梯度算錯，訓練就會走錯方向。可以用損失函數本身去逼近梯度，再和解析梯度比：</p>
 <div class="box math">
 <div class="bt">中央差分</div>
 $$\frac{\partial L}{\partial w_i}\;\approx\;\frac{L(w+h\mathbf{e}_i)-L(w-h\mathbf{e}_i)}{2h}$$
 </div>
+<p>先把題目定清楚，後面的數字才對得上。貼上這句，把程式整理回你要的版本：</p>
+<pre class="cmd"><code>把程式改成下面這個版本，存成 lab3_logistic.py，先不要訓練：
+- 使用全部 3 和 8，不切分資料；像素除以 16；8 設為 1、3 設為 0
+- 最後加一欄 1 作為截距，所以 Xb 有 65 欄
+- 不加正則化。loss 用本頁的平均對數損失，grad 用本頁的公式
+印出資料 shape 後停止。</code></pre>
+<p>接著自己寫下梯度檢查的 prompt。先決定：<strong>檢查幾個維度？在哪個點檢查？用哪些步長？怎樣算過關？</strong>寫完貼給它，看它有沒有照做。</p>
+<div class="box warn">
+<div class="bt">這裡有個陷阱，想想看你的檢查會不會踩到</div>
+<p style="margin-bottom:0">
+3 和 8 的資料中有 10 個像素恆為常數，這些維度的解析梯度恰好是 0。如果相對誤差直接除以 $|\nabla L|$，就會得到 <code>nan</code>。只抽樣幾個維度也可能完全沒碰到它們。
+</p>
+</div>
+<details class="bg"><summary>寫完再對照：一份參考的清楚版與結果</summary>
+<div class="bg-body">
 <pre class="cmd"><code>請加一段有限差分梯度檢查：
 
-- 用中央差分，檢查**全部** 65 個維度（不要只抽樣幾個）
+- 用中央差分，檢查全部 65 個維度，不要抽樣
 - 步長 h 掃過 1e-2 到 1e-9，每個 h 印出最大絕對誤差與最大相對誤差
 - 使用 np.random.RandomState(0).normal(size=65)*0.01 作為檢查點 w0
 - 最大絕對誤差小於 1e-8 記為 PASS，否則記為需調查；相對誤差分母至少取 1e-12
-- 做成表格，用 uv run python lab3_logistic.py 執行
-- 本輪只加梯度檢查，不訓練、不新增資料或演算法；完成後停止</code></pre>
-
+- 做成表格，用 uv run python 執行，只加梯度檢查，完成後停止</code></pre>
 <div class="term">
-  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">opencode　build · big-pickle</span></div>
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">參考程式輸出（reference/lab3_logistic.py）</span></div>
   <div class="term-body"><div class="b">uv run python lab3_logistic.py</div>
 <div class="sp"></div>
 <div class="o">    步長 h      最大絕對誤差      最大相對誤差   判定</div>
@@ -213,12 +232,12 @@ $$\frac{\partial L}{\partial w_i}\;\approx\;\frac{L(w+h\mathbf{e}_i)-L(w-h\mathb
 <div class="o">     1e-09       8.026e-08       7.274e-04   FAIL</div>
 </div>
 </div>
-
 <figure class="teaching-figure">
 <picture><source media="(max-width: 720px)" srcset="assets/figures/lab3-gradient-error-mobile.svg"><img src="assets/figures/lab3-gradient-error.svg" alt="步長與最大絕對誤差的雙對數圖。七個表列點中，中間步長的誤差較低，兩端較高；虛線為 1e-8 檢查門檻。" width="900" height="576"></picture>
 <figcaption>橫軸是步長，縱軸是最大絕對誤差，兩軸都用對數刻度。這裡畫的是既有範例表的七個步長，線只連接資料點，並非重新執行梯度檢查。先和你自己的表比較：步長變小時，誤差會一直下降嗎？<a href="assets/figures/lab3-gradient-error.csv">查看七個資料點</a></figcaption>
 </figure>
-
+</div>
+</details>
 <details class="bg"><summary>深入：為什麼步長太大或太小都可能 FAIL</summary><div class="bg-body"><h3>為什麼兩頭都會 FAIL</h3>
 <p>中央差分的總誤差有兩個來源，方向相反：</p>
 <div class="box math">
@@ -247,13 +266,39 @@ $h$ 太小時 $L(w+h)$ 與 $L(w-h)$ 幾乎相等，相減會損失有效位數�
 </div>
 
 <div class="step" data-n="3">
-<h3>訓練，然後撞上一個陷阱</h3>
-<pre class="cmd"><code>現在用梯度下降訓練（lr=0.5，20000 次迭代），
-並在第 100、1000、5000、10000、20000 次時印出 ||w|| 與損失。
+<h3>驗證：PASS 到底證明了什麼？</h3>
+<p>下面兩個錯誤是<strong>講師設計後注入</strong>的，不是 AI 犯的。先預測梯度檢查的結果，再請它跑。數值會隨資料縮放與檢查點不同，看 PASS/FAIL 的方向就好：</p>
+<pre class="cmd"><code>請做兩個實驗，不要修改原本的 loss 和 grad，完成後停止：
+A. 把 loss 和 grad 一起換成均方誤差 mean((σ(z)-y)^2) 與它正確的梯度
+B. loss 不變，只把 grad 乘以 2
+兩個都用同一段梯度檢查跑一次，印出最大絕對誤差與 PASS/FAIL。</code></pre>
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">參考程式輸出（reference/lab3_gradcheck_bugs.py），h=1e-5，門檻 1e-8</span></div>
+  <div class="term-body"><div class="o">正確的 loss 與 grad　　　　 1.03e-11　PASS</div>
+<div class="o">loss、grad 一起換成 MSE　　 4.41e-12　PASS</div>
+<div class="e">只把 grad 乘 2　　　　　　　 1.38e-01　FAIL</div>
+</div>
+</div>
+<div class="box danger">
+<div class="bt">目標函數都換了，還是 PASS</div>
+<p style="margin-bottom:0">
+梯度檢查只證明 <code>grad</code> 和 <code>loss</code> <strong>彼此一致</strong>，不證明 <code>loss</code> 是你要的那個函數。所以第 1 步要自己核對公式，這一步代替不了。
+</p>
+</div>
+</div>
 
-訓練完跟 sklearn 的 LogisticRegression 比對。
-注意 sklearn 1.8 起 penalty 參數已棄用，無正則化要用 C=np.inf。</code></pre>
+<div class="step" data-n="4">
+<h3>想：準確率 1.0 能證明什麼？</h3>
+<p>先預測：手刻和 sklearn 的準確率如果都是 1.0，兩個模型一樣嗎？權重會一樣嗎？然後一次跑完：</p>
+<pre class="cmd"><code>用梯度下降訓練全部資料（lr=0.5，20000 次迭代），不切分資料，
+在第 100、1000、5000、10000、20000 次印出 ||w|| 與損失。
 
+訓練完跟 sklearn 的 LogisticRegression 比對（無正則化用 C=np.inf），印出：
+1. 兩邊的準確率與 ||w||
+2. 預測標籤是否完全一致
+3. 預測機率的最大差
+4. 兩個權重向量的夾角餘弦
+只印結果，判讀交給我。</code></pre>
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">訓練過程</span></div>
   <div class="term-body"><div class="o">      迭代        ||w||               損失</div>
@@ -267,19 +312,25 @@ $h$ 太小時 $L(w+h)$ 與 $L(w-h)$ 幾乎相等，相減會損失有效位數�
 <div class="o">手刻 ||w|| = 19.1436　　sklearn ||w|| = 97.8955</div>
 </div>
 </div>
-
+<div class="term">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">決策邊界比對</span></div>
+  <div class="term-body"><div class="o">預測標籤完全一致？　PASS</div>
+<div class="o">預測機率最大差　　= 0.0341　　&lt;- 標籤一樣，機率差很多</div>
+<div class="o">權重向量 cos　　　= 0.994942　&lt;- 方向相近但不相同</div>
+</div>
+</div>
 <div class="box danger">
-<div class="bt">看出問題了嗎</div>
+<div class="bt">判讀交給你</div>
 <p style="margin-bottom:0">
-損失一直往 0 掉，但 <strong>$\|w\|$ 一直長，沒有要停的跡象</strong>。
-而 sklearn 算出來的 $\|w\|$ 是 97.9，是手刻版的五倍。
-兩邊準確率都是 1.0000。<strong>誰對？</strong>
+損失一直往 0 掉，$\|w\|$ 一直長，沒有要停的跡象。兩邊準確率都是 1.0，但權重大小差了五倍、機率也不同。<strong>哪一邊是對的？</strong>
 </p>
 </div>
-</div>
-
-<div class="step" data-n="4">
-<p>這份資料能被一個線性邊界完全分開；下面的補充用程式檢查這件事。現場先觀察係數持續增大，再比較預測結果。</p>
+<p>
+這份資料能被一條線性邊界完全分開。這時無正則化的損失沒有有限的最小值點，權重可以一直變大，所以「手刻權重 vs sklearn 權重」<strong>根本沒有標準答案可比</strong>，兩邊只是停在不同位置。回頭核對第 1 步：AI 的結論有考慮到這件事嗎？如果它自行加了正則化，權重當然對得上，但那已經不是你要求的模型，也要寫進結論。
+</p>
+<p>
+準確率相同也<strong>不代表決策邊界相同</strong>。不同的超平面可以把同一批資料都分對，對新資料的機率預測卻不一樣。準確率只是「表現檢查」，不能證明實作正確。
+</p>
 <details class="bg"><summary>深入：用線性規劃確認可分性與推導其影響</summary><div class="bg-body">
 <h3>證明它真的線性可分</h3>
 <p>
@@ -329,30 +380,8 @@ $L(cv)=\frac1n\sum_i\log\bigl(1+e^{-c\,t_i\mathbf{x}_i^\top v}\bigr)\to 0$，
 </p>
 </div>
 </div></details>
-</div>
-
-<div class="step" data-n="5">
-<h3>那準確率都 1.0，是不是代表兩邊一樣？</h3>
-<pre class="cmd"><code>請比較手刻與 sklearn 的：
-1. 預測標籤是否完全一致
-2. 預測機率的最大差
-3. 兩個權重向量的夾角餘弦</code></pre>
-<div class="term">
-  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">決策邊界比對</span></div>
-  <div class="term-body"><div class="o">預測標籤完全一致？　PASS</div>
-<div class="o">預測機率最大差　　= 0.0341　　&lt;- 標籤一樣，機率差很多</div>
-<div class="o">權重向量 cos　　　= 0.994942　&lt;- 方向相近但不相同</div>
-</div>
-</div>
-<p>
-所以「兩邊準確率都是 1.0」<strong>不代表決策邊界相同</strong>。
-不同的超平面可以把同一批訓練資料分對，但對新資料的機率預測會不一樣。
-準確率相同只能算是「表現檢查」，不能當作實作正確的證明。
-</p>
-</div>
-
-<div class="step" data-n="6">
-<h3>正則化把問題變回有解</h3>
+<details class="bg"><summary>深入：正則化把問題變回有解</summary>
+<div class="bg-body">
 <pre class="cmd"><code>加上 L2 正則化（sklearn 用 l1_ratio=0, C=1.0）再跑一次，
 比較 ||w|| 跟準確率。</code></pre>
 <div class="term">
@@ -361,35 +390,39 @@ $L(cv)=\frac1n\sum_i\log\bigl(1+e^{-c\,t_i\mathbf{x}_i^\top v}\bigr)\to 0$，
 <div class="o">L2 (C=1.0) ||w|| =  6.0144　準確率 = 1.0000</div>
 </div>
 </div>
-<p>
+<p style="margin-bottom:0">
 $\|w\|$ 從 97.9 掉到 6.0，準確率完全沒變。
 這裡 sklearn 的 L2 懲罰作用於不含截距的特徵權重 $\beta$，以本章平均損失的記法，懲罰項為 $\|\beta\|^2/(2nC)$。上方顯示的 $\|w\|$ 則仍包含截距，方便與前面的輸出對照。<br>在本例兩類樣本都存在的條件下，加入正的 L2 懲罰後有有限且唯一的解。它除了限制權重大小，也解決了這個例子原本沒有有限最小值點的問題。
+
 </p>
+</div>
+</details>
 </div>
 </section>
 
 <section>
 <h2>最後：把它變成一份筆記</h2>
 <p>
-把今天已完成的程式、檢查與發現整理成筆記。
-這些東西如果只留在終端機的捲動紀錄裡，下週就沒了。
+把今天的發現寫下來。這份短筆記的重點不是讓 AI 寫得漂亮，而是你要讀過每一句，抓出它說過頭的地方。
 </p>
-<pre class="cmd"><code>請把今天已完成的步驟整理成 notes/logistic.md，寫給之後複習的我看。
+<pre class="cmd"><code>請把這次已完成的步驟整理成 notes/logistic.md，寫給之後複習的我看，分三段：
 
-請說明：我們用什麼資料、損失與梯度各代表什麼、梯度檢查看到了什麼，
-以及為什麼準確率相同還不能判斷兩個模型完全相同。
-引用這次實際執行的指令、輸出與數字，數學式用 $...$ 與 $$...$$。
-沒有完成的推導或檢查列在「接下來想弄懂的事」，不要寫成已完成。
-最後給我一個可以不用看筆記就回答的問題，答案分開寫。</code></pre>
+1. 觀察：實際執行的指令與輸出數字
+2. 解釋：損失與梯度的意義、為什麼 ||w|| 一直變大
+3. 不能證明什麼：梯度檢查 PASS、準確率相同，各自不能證明什麼
+
+數學式用 $...$ 與 $$...$$。沒有實際跑過的內容不要寫成已完成。</code></pre>
+<p>寫完後核對：<strong>每個數字都對得上剛才的輸出嗎？有沒有哪句結論比證據說得更滿？</strong>如果都沒有，也請寫下你怎麼確認的。結論是「AI 這次是對的」也可以，只要說得出憑據。</p>
+
 <details class="bg"><summary>課後：補成包含完整推導的筆記</summary><div class="bg-body">
-<p>完成前面的深入補充後，再用這份需求擴充筆記。範例中的數值要核對自己實際的執行結果。</p>
+<p>完成前面的深入補充後，再用這份需求擴充筆記。範例中的數值要核對自己實際的執行結果。這一步比較花時間，不必在現場做。</p>
 <pre class="cmd"><code>請把今天這一輪的推導與發現整理成 notes/logistic.md，內容包含：
 
 1. 從負對數概似到 L(w) 的完整推導（用 $...$ 與 $$...$$ 寫數學式）
 2. 梯度的推導
 3. 有限差分梯度檢查：原理、誤差分解 E(h) ≈ A h² + B u/h、為什麼兩頭都會 FAIL
 4. 線性可分導致 MLE 不存在的完整論證（含那個「只在已分對時成立」的但書）
-5. 為什麼準確率相同不代表決策邊界相同（附上我們實測的機率差 0.0341）
+5. 為什麼準確率相同不代表決策邊界相同
 6. 正則化怎麼讓問題重新有解
 
 寫給三個月後的我看，那時我已經忘記細節了。</code></pre>
@@ -401,7 +434,6 @@ $\|w\|$ 從 97.9 掉到 6.0，準確率完全沒變。
 因為檔案可以進 git。下次你叫 agent 補充或修改這份筆記，
 <code>git diff</code> 會告訴你它<strong>到底改了哪幾行</strong>。
 你不必重讀整份文件去找差異，也不會不知不覺讓它把你原本寫對的東西改掉。
-筆記因此變成會累積的資產，而不是散落在各個對話視窗裡的碎片。
 詳見<a href="git-safety.html">第 07 章</a>。
 </p>
 </div>
@@ -412,14 +444,42 @@ $\|w\|$ 從 97.9 掉到 6.0，準確率完全沒變。
 </section>
 
 <section>
+<h2>收尾：回答開場的問題</h2>
+<p>回到開場那句：<strong>AI 這麼強，為什麼還要自己想、自己驗證？</strong></p>
+<p>先誠實看今天的結果：<strong>AI 能跑程式時，數字幾乎都是對的。</strong>今天 Lab 2、Lab 3 的錯誤，也有不少是我們故意放進去的。所以答案不是「AI 很爛」，而是：</p>
+<ul>
+<li>它算對了數字，回答的卻不一定是你要問的那一題（Lab 1）</li>
+<li>它說驗證通過，不代表真的跑過，也不代表錯了它抓得到（Lab 2）</li>
+<li>它的做法可能很合理，但摘要沒告訴你它換了題目（Lab 3）</li>
+</ul>
+<p>只有你知道自己要問什麼，也只有你要為結論負責。<strong>如果 AI 今天全都做對了，你怎麼知道的？</strong>答得出來，就是今天學到的東西。</p>
+<div class="step" data-n="1">
+<h3>交一則結論</h3>
+<p>從今天挑一個結果，寫下「主張、輸出、限制」。結論可以是「AI 這次是對的」，只要你說得出憑據。</p>
+</div>
+<div class="step" data-n="2">
+<h3>把一個問題寫成規則，再測它</h3>
+<p>挑一個你今天真的遇到的情況，寫成一條規則加進 <code>AGENTS.md</code>。寫具體一點，它才做得到：</p>
+<pre class="cmd"><code># 例子，請換成你自己遇到的問題
+## 數學程式的規矩
+- 驗證要印出實際數值，並列出通過條件比了哪些量。
+- 宣告通過前，說明這組檢查抓不到哪些錯誤。
+- 最後的摘要要寫出沒被要求、由你自己做的決定，例如前處理、正則化、切分資料。</code></pre>
+<p>規則寫好不代表它會照做。輸入 <code>/new</code>，把今天其中一句模糊的 prompt 再問一次，<strong>檢查它有沒有照規則做</strong>。</p>
+<!--EVIDENCE:rule-->
+<p>想多練習，看<a href="agents-md.html">用 AGENTS.md 寫下專案規則</a>。</p>
+</div>
+</section>
+
+<section>
 <h2>檢查清單</h2>
 <ul class="ckl">
-<li><input type="checkbox" id="l3a"><label for="l3a">我能說明損失與梯度的用途，並把程式對照過本頁公式</label></li>
-<li><input type="checkbox" id="l3b"><label for="l3b">梯度檢查掃過多個步長，我比較過步長改變時的誤差</label></li>
-<li><input type="checkbox" id="l3c"><label for="l3c">我能說明步長太大或太小都可能讓梯度檢查不準確</label></li>
-<li><input type="checkbox" id="l3d"><label for="l3d">我知道係數變大不能單獨證明線性可分；想深入時會回來完成 linprog 檢查</label></li>
-<li><input type="checkbox" id="l3e"><label for="l3e">我知道「準確率都 1.0」不代表決策邊界相同</label></li>
-<li><input type="checkbox" id="l3f"><label for="l3f"><code>notes/logistic.md</code> 存在，而且我能用自己的話說明其中一個結論</label></li>
+<li><input type="checkbox" id="l3a"><label for="l3a">我用 $y=1,z=0$ 這類代入，自己核對過 AI 的損失函數與推導</label></li>
+<li><input type="checkbox" id="l3b"><label for="l3b">梯度檢查是我規劃的：檢查了哪些維度、用什麼門檻，我都能說明理由</label></li>
+<li><input type="checkbox" id="l3c"><label for="l3c">我親眼看到 <code>loss</code>、<code>grad</code> 一起換成 MSE 仍然 PASS，能說明 PASS 只證明兩者一致</label></li>
+<li><input type="checkbox" id="l3d"><label for="l3d">我知道 $\|w\|$ 持續變大不能單獨證明線性可分；想深入時會回來完成 linprog 檢查</label></li>
+<li><input type="checkbox" id="l3e"><label for="l3e">我知道「準確率都 1.0」不代表兩個模型相同，也核對過 AI 對這件事的結論</label></li>
+<li><input type="checkbox" id="l3f"><label for="l3f"><code>notes/logistic.md</code> 寫了觀察、解釋、不能證明什麼，而且我讀過每一句</label></li>
 </ul>
 </section>
 

@@ -1,18 +1,18 @@
 <!--TITLE:Lab 1 · 分群-->
-<!--DESC:用 opencode 一次跑完 k=2 到 12 的 k-means，畫出 elbow 與 silhouette 曲線。然後發現 agent 選出的最佳 k 是 9，而真實類別數是 10。-->
+<!--DESC:先丟一句模糊的問題，看 AI 默默替你做了哪些決定。同一份資料，最佳群數可以是 4、9、10 或 12，練習判斷數字是否回答了你的問題。-->
 
 <div class="container narrow">
 
 <div class="pagehead">
-  <div class="kicker"><span>Lab 1</span><span>·</span><span class="badge live">現場 30 分</span><span>·</span><span>agent 當加速器</span></div>
-  <h1>分群：請 agent 做實驗，再判讀結果</h1>
+  <div class="kicker"><span>Lab 1</span><span>·</span><span class="badge live">現場 25 分</span><span>·</span><span>AI 的風險：數字對，問題錯</span></div>
+  <h1>分群：數字都對，就回答了你的問題嗎？</h1>
   <p class="lead">
-    把重複寫程式、跑參數與畫圖的工作交給 agent，再由你比較結果。
-    當它建議某個群數時，我們要先問：這個指標回答的問題，和我們想知道的一樣嗎？
+    這一關先丟一句模糊的問題，看 AI 怎麼回答，再把它默默做的決定一個個找出來。
+    你要帶走的能力：判斷 AI 的結論，是否回答了你真正想問的問題。
   </p>
 </div>
 
-<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#section-這一關的資料">看資料</a></li><li><a href="#section-動手">請 agent 跑實驗</a></li><li><a href="#section-誰錯了">判讀曲線</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
+<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#section-這一關的資料">看資料</a></li><li><a href="#section-動手">問、想、改寫問題</a></li><li><a href="#section-誰錯了">判讀曲線</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
 
 <section>
 <h2>這一關的資料</h2>
@@ -127,29 +127,50 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 </div>
 
 <div class="step" data-n="2">
-<h3>下第一個指令</h3>
-<p>把下面這段整個貼進去。注意它的結構：<strong>做什麼、用什麼、存到哪、印出什麼</strong>。
-再補上「如何判斷完成」，就成為可反覆使用的任務格式。完整練習見<a href="agent-workflows.html">需求與續作</a>。</p>
-<pre class="cmd"><code>用 sklearn 內建的 digits 資料集做 k-means 分群。
+<h3>先丟一句模糊的問題</h3>
+<p>整句貼進去，先不要補充任何條件：</p>
+<pre class="cmd"><code>幫我看 sklearn digits 這份資料分幾群最好，給明確群數和理由。</code></pre>
+<p>等它回答時，每個權限要求都讀一下，看它實際跑了什麼。</p>
+</div>
+
+<div class="step" data-n="3">
+<h3>想：它替你決定了什麼？</h3>
+<p>看完回答，<strong>先別追問</strong>，自己寫下它默默做了哪些決定：</p>
+<ul>
+<li>資料有沒有先處理？標準化、降維，還是直接用像素？</li>
+<li>用哪個指標判斷「最好」？k 掃了哪些值？</li>
+<li>它有沒有偷看答案，也就是用數字標籤來選群數？</li>
+<li>它說的「最好」，是分得最開，還是最接近十種數字？</li>
+</ul>
+<div class="box tip">
+<div class="bt">講師實測：big-pickle 的回答</div>
+<p>2026-11-01，OpenCode 1.19.5 互動模式，上面同一句 prompt。完整答完 3 次（另外 2 次遇到免費額度用完而中斷，不列入），<strong>3 次都答 10 群</strong>。三次的理由都提到「資料本來就是 0–9 十個數字」，也都引用了需要真實標籤才算得出來的 ARI。</p>
+<p style="margin-bottom:0">10 是合理的答案，有幾次它也主動提醒 silhouette 不能單獨採信。但這個答案靠的是「已知有十種數字」。如果你想問的是<em>不看標籤時，資料自己呈現幾群</em>，它回答的就是另一題。所以先決定你要問哪一題，你的回答不一定相同。</p>
+</div>
+</div>
+
+<div class="step" data-n="4">
+<h3>規劃：把問題改到它不用猜</h3>
+<p>自己動手改寫前一句，至少說清楚：<strong>資料怎麼處理、比哪些 k、用什麼指標、不可以用什麼、結果存到哪、最後要回答什麼。</strong>寫好就貼給它，檔名用 <code>lab1_cluster.py</code>，圖存到 <code>figs/lab1_k_selection.png</code>。</p>
+<details class="bg"><summary>寫完再對照：一份參考的清楚版</summary>
+<div class="bg-body">
+<pre class="cmd"><code>用 sklearn 內建的 digits 資料集做 k-means 分群，直接用原始像素。
 
 請掃過 k = 2 到 12，每個 k 都記錄 inertia 與 silhouette score，
 把逐項數值印出來，並畫成兩張並排的圖存到 figs/lab1_k_selection.png。
 
 要求：
+- 選 k 時不可以使用數字標籤
 - random_state 固定為 0，n_init=10
 - 寫成 lab1_cluster.py，用 uv run python 執行
 - 最後告訴我 silhouette 最高的 k 是多少</code></pre>
 </div>
-
-<div class="step" data-n="3">
-<h3>看著它工作</h3>
-<p>觀察 agent 是否讀取規則、寫出檔案並實際執行。下面是一份範例輸出：</p>
+</details>
+<p>照參考版跑出來的結果大致如下：</p>
 
 <div class="term">
-  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">opencode　build · big-pickle</span></div>
-  <div class="term-body"><div class="t">Read　AGENTS.md</div>
-<div class="w">Write　lab1_cluster.py</div>
-<div class="b">uv run python lab1_cluster.py</div>
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">參考程式輸出（reference/lab1_cluster.py）</span></div>
+  <div class="term-body"><div class="b">uv run python lab1_cluster.py</div>
 <div class="sp"></div>
 <div class="o">資料形狀 X=(1797, 64), 真實類別數=10</div>
 <div class="o">k= 2  inertia= 1914619.6  silhouette=0.1183</div>
@@ -163,16 +184,13 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <div class="o">k=10  inertia= 1165188.9  silhouette=0.1825</div>
 <div class="o">k=11  inertia= 1131795.0  silhouette=0.1830</div>
 <div class="o">k=12  inertia= 1112363.4  silhouette=0.1848</div>
-<div class="sp"></div>
-<div class="c">完成。silhouette 分數最高的是 k = 9（0.1893），建議用 9 群。
-圖已存到 figs/lab1_k_selection.png。</div>
 </div>
 </div>
 
 <div class="box warn">
 <div class="bt">停在這裡，先不要往下</div>
 <p style="margin-bottom:0">
-agent 說最佳 k 是 <strong>9</strong>。但你知道這份資料有 <strong>10</strong> 個數字。
+這次 silhouette 最高的是 <strong>9</strong>，模糊版的回答是 <strong>10</strong>，而資料有 10 種數字。
 在往下看之前，先自己想三十秒：<strong>誰錯了？</strong>
 </p>
 </div>
@@ -269,6 +287,16 @@ $$S=\frac{1}{n}\sum_{i=1}^{n}s(i)$$
 </div>
 </details>
 
+<h3>同一份資料，換一個默默的決定</h3>
+<p>同樣掃 k = 2 到 12、同樣看 silhouette，只改前處理（講師實算，<code>random_state=0</code>、<code>n_init=10</code>）：</p>
+<div class="tw"><table>
+<tr><th>資料怎麼處理</th><th>silhouette 最高的 k</th></tr>
+<tr><td>原始像素</td><td><strong>9</strong></td></tr>
+<tr><td>每個像素標準化</td><td><strong>12</strong></td></tr>
+<tr><td>PCA 降到 2 維</td><td><strong>4</strong></td></tr>
+</table></div>
+<p>三個都算對了。和鄰座分工試一次：一人用原始像素，一人用標準化，同樣跑 AI，再對照彼此的答案。AI 只說「最好是幾群」卻沒說這些選擇，你就還不知道它在回答什麼。</p>
+
 <h3>為什麼 digits 會是 9</h3>
 <p>
 在這份資料、本次初始化與搜尋範圍中，$k=9$ 的 silhouette 最高。這是已觀察到的結果；單靠這個分數，還不能知道哪些數字混在一起，或為什麼這組分群較好。合併兩群也不保證讓群內距離下降或 silhouette 上升。
@@ -281,16 +309,25 @@ $$S=\frac{1}{n}\sum_{i=1}^{n}s(i)$$
 <div class="box danger">
 <div class="bt">這一關真正要你帶走的</div>
 <p style="margin-bottom:0">
-agent 給你的每個數字都是對的，但它擅自替你做了一個<strong>你才有資格做的判斷</strong>。
-它沒有先確認你要優化的是幾何分群品質，還是辨識數字類別。
-往後每次 agent 說「所以建議……」，停在那個「所以」上面檢查一下。
+<strong>數字對，問題可能是錯的。</strong>AI 不會自動知道你要的是幾何上分得開，還是辨識十種數字；它會自己挑一個，然後說得很肯定。
+往後每次看到「所以建議……」，先找出它做了哪些你沒要求的決定，再把結論改寫成帶條件的句子，例如：「用原始像素、以 silhouette 比較 k=2 到 12 時，k=9 最高。」
 </p>
 </div>
 </section>
 
 <section>
 <h2>追問</h2>
-<p>把這句話丟回給 agent，看它怎麼回應：</p>
+<p>回到剛才的對話，再丟一個同樣模糊的問題：</p>
+<pre class="cmd"><code>k=10 的分群準確率是多少？</code></pre>
+<p>「準確率」這裡也有一個默默的決定，因為群編號只是任意的代號，第 0 群不一定對應數字 0。以 <code>random_state=0</code> 的 k=10 為例（講師實算）：</p>
+<div class="tw"><table>
+<tr><th>算法</th><th>結果</th></tr>
+<tr><td>群編號直接和數字比</td><td>0.185</td></tr>
+<tr><td>先把群對應到最合適的數字再比</td><td>0.792</td></tr>
+<tr><td>ARI（不受編號影響）</td><td>0.666</td></tr>
+</table></div>
+<p>檢查它用的是哪一種，並請它把群編號重新排列後再算一次：分群沒變，直接比的準確率會變，ARI 不會。</p>
+<p>接著把這句話丟回給 agent，看它怎麼回應：</p>
 <pre class="cmd"><code>這份資料我知道真實類別有 10 類，但你算出 silhouette 最高是 k=9。
 
 請解釋這個落差。並且：
@@ -384,11 +421,11 @@ ARI 是「調整過的」Rand index，意思是它<strong>扣掉了隨機分群�
 <section>
 <h2>檢查清單</h2>
 <ul class="ckl">
-<li><input type="checkbox" id="l1a"><label for="l1a">agent 產生了 <code>lab1_cluster.py</code>，而且我打開看過裡面在做什麼</label></li>
+<li><input type="checkbox" id="l1a"><label for="l1a">我列出了模糊版回答默默做的決定，並打開 <code>lab1_cluster.py</code> 看過</label></li>
 <li><input type="checkbox" id="l1b"><label for="l1b"><code>figs/lab1_k_selection.png</code> 存在，兩張圖都畫出來了</label></li>
 <li><input type="checkbox" id="l1c"><label for="l1c">我確認程式裡 <code>random_state=0</code>，重跑後 inertia 在容差內相同、兩次分群的 ARI = 1</label></li>
-<li><input type="checkbox" id="l1d"><label for="l1d">我能用自己的話解釋為什麼 silhouette 選 9 而不是 10</label></li>
-<li><input type="checkbox" id="l1e"><label for="l1e">我知道 silhouette 是內部指標、ARI 是外部指標，差別在哪</label></li>
+<li><input type="checkbox" id="l1d"><label for="l1d">我能把 AI 的結論改寫成帶條件的句子，說清楚用什麼資料、什麼指標、比了哪些 k</label></li>
+<li><input type="checkbox" id="l1e"><label for="l1e">我知道 silhouette 不看標籤、ARI 要看標籤，也能說明「準確率」為什麼要先對齊群編號</label></li>
 </ul>
 </section>
 

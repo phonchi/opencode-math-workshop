@@ -1,0 +1,40 @@
+  ┃  from scipy.optimize import linear_sum_assignment                                                                   
+  ┃  from sklearn.datasets import load_digits                                                                           
+  ┃  from sklearn.preprocessing import StandardScaler                                                                   
+  ┃  from sklearn.cluster import KMeans                                                                                 
+  ┃  from sklearn.metrics import confusion_matrix                                                                       
+  ┃                                                                                                                     
+  ┃  def cluster_acc(y, lab):                                                                                           
+  ┃      D = confusion_matrix(y, lab)                                                                                   
+  ┃      r, c = linear_sum_assignment(-D)                                                                               
+  ┃      return D[r, c].sum() / len(y)                                                                                  
+  ┃                                                                                                                     
+  ┃  X, y = load_digits(return_X_y=True)                                                                                
+  ┃  for name, XX in [("raw", X), ("standardized", StandardScaler().fit_transform(X))]:                                 
+  ┃      lab = KMeans(n_clusters=10, n_init=10, random_state=42).fit_predict(XX)                                        
+  ┃      print(f"{name:12s} clustering accuracy = {cluster_acc(y, lab):.4f}")                                           
+  ┃  EOF                                                                                                                
+  ┃  uv run python /tmp/opencode/digits_acc.py                                                                          
+  ┃                                                                                                                     
+  ┃  raw          clustering accuracy = 0.7935                                                                          
+  ┃  standardized clustering accuracy = 0.6628                                                                          
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 1.4s                                                                                                    
+                                                                                                                        
+     k=10 的 KMeans「分群準確率」（用匈牙利演算法把群對到真實數字後計算）：                                             
+                                                                                                                        
+     - 原始像素特徵：79.4%                                                                                              
+     - 標準化特徵：66.3%                                                                                                
+                                                                                                                        
+     注意這不是分類器準確率，而是分群結果最佳對應到 0–9 後的還原率；隨機猜測約 10%，所以 79% 算不錯。                   
+                                                                                                                        
+     ▣  Build · Big Pickle · 10.5s                                                                                      
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Big Pickle OpenCode                                                                                        
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase0/lab1-vague-1/project                  25.2K (13%)  ctrl+p commands  
+                                                                                                                        

@@ -1,0 +1,40 @@
+  ┃       ）。浮點與 solver 差異下，\(10^{-6}\sim10^{-7}\) 已可視為相同。                                               
+  ┃   111 2. **機率對齊**：\(\max |p_{\text{hand}}-p_{\text{sk}}|\)、RMSE、相關係數；應在 \(10^{-6}\) 以內。            
+  ┃   112 3. **決策一致**：accuracy、confusion matrix、預測 label 一致率；在可分資料上皆應 1.0。                        
+  ┃   113 4. **校準/排序**：AUC、log loss、Brier score 應一致。                                                         
+  ┃   114 5. **功能等價測試**：對大量隨機/邊界輸入（含訓練/測試外）比對預測與機率；檢查決策邊界。                       
+  ┃   115 6. **控制變因**：資料分割、標準化（fit 範圍）、正則化強度（\(C\)↔\(\lambda\)）、solver、tol、max_iter、       
+  ┃       隨機種子必須一致；任一不同都可能造成差異。                                                                    
+  ┃   116 7. **注意不可比的情況**：未正則化且資料可分時，MLE 不存在有限解，不同 solver                                  
+  ┃       收斂到不同有限近似（權重大小不同但預測幾乎相同）——此時只能比「預測」不能比「參數」。                          
+  ┃   117                                                                                                               
+  ┃   118 結論：本手刻實作（L2 對齊、Newton/IRLS）與 sklearn 在參數、機率、預測、loss 上皆在 \(10^{-6}\) 以內一致，     
+  ┃       可判定為同一模型。                                                                                            
+  ┃   119                                                                                                               
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 76ms                                                                                                    
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  $ ls figs                                                                                                          
+  ┃                                                                                                                     
+  ┃  logistic_roc.png                                                                                                   
+  ┃  logistic_weights_proba.png                                                                                         
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 115ms                                                                                                   
+                                                                                                                        
+     完成。手刻 L2-regularized logistic regression（Newton/IRLS，\(\lambda=1/(Cn)\) 對齊 sklearn）與 sklearn 在         
+     digits 3 vs 8 上參數差 \(\sim 2.4\times10^{-7}\)、機率差 \(\sim 1.5\times10^{-7}\)、預測一致率 1.0。推導與比較見   
+     notes/logistic_regression.md，圖在 figs/。判斷兩模型相同看：參數/機率在 tolerance 內（如 \(10^{-6}\)）、決策與     
+     confusion matrix 一致、loss/AUC 一致，且控制資料分割、標準化、正則強度、solver、tol、seed 等變因。                 
+                                                                                                                        
+     ▣  Build · Beam Free · 1m 24s                                                                                      
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Beam Free OpenCode                                                                                         
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase0-beam-free/lab3-vague-2/project         24.8K (2%)  ctrl+p commands  
+                                                                                                                        

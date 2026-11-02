@@ -1,13 +1,14 @@
 # 第一次對話
 
-> 現場 20 分鐘
+> 現場 13 分鐘（第 5 節課後再讀）
 
 ## 這一章你會學到
 
 - 用一行指令啟動 opencode，看懂畫面上每一塊在說什麼
 - 送出你的第一個指令，並且看懂 agent 是「先想、再動手、再回報」
 - 在 agent 要改檔或跑指令時，看得懂權限對話框並做出選擇
-- 知道 session 是什麼、什麼時候該開新的、context 快滿了怎麼辦
+- 親手抓到 AI 一個講得很肯定的錯，用一行程式核對
+- 知道 session 是什麼（細節課後再讀）
 
 ---
 
@@ -260,14 +261,42 @@ opencode run --auto "讀 pyproject.toml，用一句話說明這個專案裝了�
 
 | agent | 用來做什麼 |
 |---|---|
-| `Build` | 預設。可以讀、可以改、可以跑指令。工作坊全程用這個 |
-| `Plan` | 官方說明是 `Plan mode. Disallows all edit tools.`，內建權限把 `edit` 設成 `deny`（只允許寫 `.opencode/plans/*.md`），適合先讓它分析、不要動你的檔案 |
+| `Build` | 預設。可以讀、可以改、可以跑指令。工作坊多半用這個，Lab 2 會練習先切到 Plan |
+| `Plan` | 先討論與規劃，不動檔案。本專案的 `opencode.json` 已設定 Plan 不能編輯、不能跑指令 |
 
-模式與專案設定會共同影響權限。現場需要實際產生檔案時用 `Build`；先規劃時可用 `Plan`，仍要閱讀工具與權限提示。
+Plan 的限制來自設定，不是模式名稱。如果設定檔只寫 `"edit": "ask"`，這條會蓋掉 Plan 內建的禁止，它就只是問你。所以起始專案特別加了 `agent.plan.permission`，可以用 `opencode debug agent plan` 查實際結果。
+
+### 4.6 開場練習：它說得很肯定，你怎麼判斷？
+
+這門課貫穿一個問題：**AI 這麼強，為什麼還要自己想、自己驗證？**先試一次。貼上這句，**如果跳出權限要求就選 `Reject`**，這題要看它不查資料、不跑程式時怎麼答：
+
+```text
+不要執行任何程式，直接回答：sklearn 的 digits 資料集，64 個像素中有哪幾個在全部 1797 張圖裡都是 0？
+```
+
+看到答案後先別急著相信。先判斷：**它給的證據，夠你相信這個答案嗎？**寫下你的判斷，再按 `!` 進 Shell 模式，自己核對：
+
+```bash
+uv run python -c "from sklearn.datasets import load_digits; import numpy as np; print(np.flatnonzero((load_digits().data==0).all(axis=0)))"
+```
+
+正確答案是 `[ 0 32 39]`，只有三個。
+
+講師實測（2026-11-01，OpenCode 1.19.5 互動模式，`big-pickle`，同一句 prompt 跑 5 次）：
+
+| 結果 | 次數 |
+|---|---|
+| 肯定地答錯（2 次答最左右兩欄 16 個，1 次答最外圈 28 個） | 3 |
+| 說無法可靠回答，建議實際檢查 | 1 |
+| 答對，但不是憑記憶，而是上網查資料 | 1 |
+
+這題禁止它跑程式，對它不公平；讓它跑程式，它多半一次就對。但這題要練的不是「AI 很笨」，而是**答錯和答對的語氣可能一樣，光看回答分不出來**。如果你的 AI 這次答對或拒答，也是好結果，同樣要問：你憑什麼相信它？
 
 ---
 
 ## 5. session：對話的記憶邊界
+
+> 現場只要記得：**換題目就打 `/new`**。其餘細節課後再讀，操作都列在 [速查表](cheatsheet.html)。
 
 ### 5.1 session 是什麼
 
@@ -346,6 +375,7 @@ opencode -c     # 直接接續上一個 session
 | 你看到的 | 為什麼 | 怎麼解 |
 |---|---|---|
 | `Error: Internal server error` | 這是預設的錯誤訊息，什麼資訊都沒有 | 加上 log 參數重跑：`opencode run "訊息" --print-logs --log-level ERROR`，才看得到真正的原因 |
+| `Free usage exceeded`，並顯示很長的重試倒數 | 免費模型的額度用完了，等待沒有用 | 按 `Esc` 中斷，打 `/models` 換一個免費模型，先試 `beam-free`（講師實測較快）。其他模型也可能一起被擋，這時請講師協助 |
 | `Unrecognized request argument supplied: prompt_cache_key` | 上游的 bug，偶發 | **重試一次就好**。不用改任何設定 |
 | 畫面底部一直顯示 `esc again to interrupt` | 你只按了一次 `Esc`，還沒真的中斷 | 再按一次 `Esc`。如果它正在跑工具，多按幾次 |
 | opencode 突然關掉了 | 輸入框是空的時候按了 `ctrl+c`，那就是「離開」 | 重新 `opencode`，再用 `/sessions`（`ctrl+x l`）找回剛剛的對話，或直接 `opencode -c` |

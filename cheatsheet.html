@@ -922,6 +922,8 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
     <td>PATH 沒重新載入。<strong>關掉終端機重開</strong>。Windows 用 Git Bash，不要用 PowerShell 或 cmd。</td></tr>
 <tr><td><code>permission requested: edit ...; auto-rejecting</code></td>
     <td><code>opencode run</code> 是非互動模式，沒人能回答權限詢問。加 <code>--auto</code>，或改用互動模式（直接打 <code>opencode</code>）。</td></tr>
+<tr><td><code>Free usage exceeded</code>，倒數很長</td>
+    <td>免費額度用完了，等待沒有用。按 <code>Esc</code> 中斷，用 <code>/models</code> 換一個免費模型（先試 <code>beam-free</code>）。其他模型也可能一起被擋，這時請講師協助。</td></tr>
 <tr><td><code>Error: Internal server error</code></td>
     <td>看不到原因。加 <code>--print-logs --log-level ERROR</code> 重跑。</td></tr>
 <tr><td><code>Unrecognized request argument supplied: prompt_cache_key</code></td>
@@ -970,13 +972,18 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <p>下面是課程設定下的參考結果。先核對資料、參數與比較方式；浮點數用容差比對，不要求每一位都相同。</p>
 <div class="tw"><table>
 <tr><th>Lab</th><th>項目</th><th>參考值</th></tr>
-<tr><td rowspan="2">1</td><td>silhouette 最高的 k</td><td>9（分數 0.1893）</td></tr>
+<tr><td rowspan="4">1</td><td>silhouette 最高的 k（原始像素）</td><td>9（分數 0.1893）</td></tr>
 <tr><td>k=10 的 silhouette</td><td>0.1825</td></tr>
-<tr><td rowspan="4">2</td><td>前 3 個特徵值</td><td>179.0069　163.7177　141.7884</td></tr>
+<tr><td>標準化／PCA 2 維時最高的 k</td><td>12／4</td></tr>
+<tr><td>k=10 準確率（直接比／對齊後）與 ARI</td><td>0.185／0.792，ARI 0.666</td></tr>
+<tr><td rowspan="5">2</td><td>前 3 個特徵值</td><td>179.0069　163.7177　141.7884</td></tr>
 <tr><td>重建 MSE（K=10）</td><td>4.9142964257</td></tr>
 <tr><td>直接相減 components_ 最大差</td><td>0.9411（<strong>不代表錯</strong>）</td></tr>
-<tr><td>分母寫成 n 時，關卡 5 的差</td><td>0.0996</td></tr>
-<tr><td rowspan="3">3</td><td>梯度檢查最佳步長</td><td>h ≈ 1e-4（誤差 7.2e-12）</td></tr>
+<tr><td>分母寫成 n 時，特徵值的差</td><td>0.0996（其他檢查全 PASS）</td></tr>
+<tr><td>用 evecs[:K] 取列時，最小 |cos|</td><td>0.0007（比例、正交、特徵值都 PASS）</td></tr>
+<tr><td rowspan="5">3</td><td>梯度檢查最佳步長</td><td>h ≈ 1e-4（誤差 7.2e-12）</td></tr>
+<tr><td>loss、grad 一起換 MSE／只把 grad 乘 2</td><td>4.4e-12 PASS／0.14 FAIL（講師注入）</td></tr>
+<tr><td>3 和 8 中恆為常數的像素</td><td>10 個，梯度恰為 0</td></tr>
 <tr><td>幾何間隔</td><td>1.174682e-02（&gt; 0，故線性可分）</td></tr>
 <tr><td>手刻 vs sklearn 的 ‖w‖</td><td>19.14 vs 97.90（準確率都 1.0）</td></tr>
 </table></div>

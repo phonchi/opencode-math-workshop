@@ -1,0 +1,40 @@
+  ┃   62 2. 預測一致：train/test 上預測標籤 agreement = 1（或 ≥ 0.99）。                                                
+  ┃   63 3. 機率接近：$\max |p_{\text{hand}}-p_{\text{sk}}|$ 在 $10^{-5}$ 以內。                                        
+  ┃   64 4. 指標一致：accuracy / confusion matrix 相同。                                                                
+  ┃   65 5. 係數接近：$\max |w_{\text{hand}}-w_{\text{sk}}|$ 在 $10^{-5}$ 以內，且 $\operatorname{corr}\approx 1$。     
+  ┃   66 6. 注意：若不加正則化且資料可分離，MLE 係數會發散，不同 solver 停在不同尺度，此時不能用係數大小判斷，          
+  ┃      只能用預測/機率/決策邊界判斷。                                                                                 
+  ┃   67                                                                                                                
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 116ms                                                                                                   
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  $ cd /home/phonchi/.cache/oc-lab-redesign/runs/phase3-beam-free/lab3-refined-1/project && ls figs notes && uv      
+  ┃  run python logistic_digits.py >/dev/null 2>&1 && echo OK                                                           
+  ┃                                                                                                                     
+  ┃  figs:                                                                                                              
+  ┃  logistic_coef.png                                                                                                  
+  ┃  logistic_loss.png                                                                                                  
+  ┃  logistic_result.npz                                                                                                
+  ┃                                                                                                                     
+  ┃  notes:                                                                                                             
+  ┃  logistic_digits.md                                                                                                 
+  ┃  OK                                                                                                                 
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 114ms                                                                                                   
+                                                                                                                        
+     手刻 logistic 迴歸與 sklearn 在 digits 3/8 上預測完全一致（agreement 1.0，accuracy 1.0），係數最大差 $1.6\         
+     times10^{-6}$。推導與結果見 notes/logistic_digits.md，程式 logistic_digits.py，圖 figs/logistic_*.png。            
+     判斷兩模型相同：前處理一致、預測/機率/指標/係數在容差內一致；無正則化且可分離時只能用預測與決策邊界判斷。          
+                                                                                                                        
+     ▣  Build · Beam Free · 2m 13s                                                                                      
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Beam Free OpenCode                                                                                         
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase3-beam-free/lab3-refined-1/project       44.8K (4%)  ctrl+p commands  
+                                                                                                                        

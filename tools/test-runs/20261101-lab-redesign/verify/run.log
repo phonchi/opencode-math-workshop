@@ -1,0 +1,23 @@
+## opener zero pixels [ 0 32 39]
+## Lab1 silhouette best k (k=2..12, random_state=0, n_init=10)
+raw: best k=9 sil=0.1893; k=10 sil=0.1825
+std: best k=12 sil=0.1580; k=10 sil=0.1471
+pca2: best k=4 sil=0.4259; k=10 sil=0.3937
+## k=10 raw: direct acc 0.185 matched acc 0.792 ARI 0.666
+relabel: direct acc 0.189 ARI 0.666
+## Lab2 check x bug
+bug | ratio-sk | ratio-sum | min|cos| | recMSE diff | orth | eigval diff
+None        1.804e-16 sum=0.738227 1.000000 0.000e+00 8.882e-16 0.0000
+ratio_topk  5.280e-02 sum=1.000000 1.000000 0.000e+00 8.882e-16 0.0000
+denom_n     1.943e-16 sum=0.738227 1.000000 0.000e+00 1.665e-15 0.0996
+nocenter    5.475e-01 sum=0.916349 0.002104 1.089e-01 1.332e-15 2499.0401
+rows        1.804e-16 sum=0.738227 0.000734 1.136e+01 9.992e-16 0.0000
+sk sum ratio 0.7382 first 0.1489
+## Lab3
+shape (357, 65) constant cols 10 [0, 23, 24, 31, 32, 39, 40, 47, 48, 56]
+correct abs err 1.03e-11
+exact zero grad dims [0, 23, 24, 31, 32, 39, 40, 47, 48, 56]
+naive rel err max (nan?) 3.715620711502845e-07 has nan True inf False
+mse+mse abs err 4.41e-12
+grad*2 abs err 0.138
+sign flip loss check y=1,z=0: L=log(1+1)-0=0.6931; y=1,z=large(10): 0.000045; y=1,z=-10: 10.0000

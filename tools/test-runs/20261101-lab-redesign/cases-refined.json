@@ -1,0 +1,17 @@
+[
+ {
+  "id": "lab2-refined",
+  "turns": [
+   "手刻一個 PCA，取前 10 個主成分，資料用 sklearn 內建的 digits。\n\n要求：\n- 只能用 numpy：中心化、共變異數矩陣（分母 n-1）、np.linalg.eigh、排序、取前 10 個\n- 不可以呼叫 sklearn.decomposition.PCA 來算，它只能當對照組\n- 寫成 lab2_pca.py，用 uv run python 執行\n\n先列出你要做的每一項檢查：比什麼量、容差多少。\n再實作並執行，印出每項的實際數值與 PASS/FAIL。",
+   "請在 lab2_pca.py 加一個 bug 參數，可選：\nnone、ratio_topk（比例分母只用前 10 個特徵值的和）、denom_n（共變異數分母用 n）、\nno_center（不中心化）、rows（用 evecs[:K] 取列，不是取欄）。\n\n每一種 bug 都跑一次你剛才列的所有檢查，做成「檢查 × 錯誤」表，\n每格印出實際數值與 PASS/FAIL。\n\n規則：不准修程式裡的 bug、不准改檢查或門檻，表做好就停下來。"
+  ]
+ },
+ {
+  "id": "lab3-refined",
+  "turns": [
+   "用 digits 的 3 和 8 手刻 logistic 迴歸，寫出推導，跟 sklearn 比較，確認你寫的是對的，並告訴我該怎麼判斷兩個模型一樣。",
+   "請加一段有限差分梯度檢查：\n\n- 用中央差分，檢查全部 65 個維度，不要抽樣\n- 步長 h 掃過 1e-2 到 1e-9，每個 h 印出最大絕對誤差與最大相對誤差\n- 使用 np.random.RandomState(0).normal(size=65)*0.01 作為檢查點 w0\n- 最大絕對誤差小於 1e-8 記為 PASS，否則記為需調查；相對誤差分母至少取 1e-12\n- 做成表格，用 uv run python 執行，只加梯度檢查，完成後停止",
+   "請做兩個實驗，不要修改原本的 loss 和 grad，完成後停止：\nA. 把 loss 和 grad 一起換成均方誤差 mean((σ(z)-y)^2) 與它正確的梯度\nB. loss 不變，只把 grad 乘以 2\n兩個都用同一段梯度檢查跑一次，印出最大絕對誤差與 PASS/FAIL。"
+  ]
+ }
+]

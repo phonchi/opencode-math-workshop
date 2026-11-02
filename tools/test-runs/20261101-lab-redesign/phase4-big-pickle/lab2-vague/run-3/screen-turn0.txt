@@ -1,0 +1,40 @@
+                                                                                                                        
+     ## 步驟                                                                                                            
+     1. 中心化：$X_c = X - \bar{x}$                                                                                     
+     2. 共變異數矩陣：$S = \frac{1}{n-1}X_c^T X_c$                                                                      
+     3. 特徵分解：$S v_i = \lambda_i v_i$，取 $\lambda$ 最大對應之 $v_i$ 組成 $V_k = [v_1,\ldots,v_k]$                  
+     4. 投影：$Z = X_c V_k$                                                                                             
+                                                                                                                        
+     ## 驗證方式                                                                                                        
+     - 比對 `explained_variance_ratio_`：$\lambda_i / \sum_j \lambda_j$                                                 
+     - 投影值可能差正負號，改用逐欄 $|\mathrm{corr}(Z_{:,j}^{(scratch)}, Z_{:,j}^{(sklearn)})| \approx 1$               
+     - 主成分向量只需方向一致，改用 $|v^{(scratch)}| \approx |v^{(sklearn)}|$                                           
+                                                                                                                        
+     ## 結論                                                                                                            
+     只要共變異數矩陣正確、$eigh$ 排序正確且考慮正負號，手刻結果就會與 `sklearn.PCA` 高度吻合。                         
+                                                                                                                        
+     執行結果（重點）                                                                                                   
+                                                                                                                        
+     從實際執行可看到：                                                                                                 
+                                                                                                                        
+     X shape: (1797, 64)                                                                                                
+     === 驗證結果 ===                                                                                                   
+     explained_variance_ratio 前10 是否一致: True                                                                       
+     前10欄投影 |correlation| 最小值: 1.000000000000                                                                    
+     第一個主成分 |v| 是否一致: True                                                                                    
+                                                                                                                        
+     前 10 個主成分的 explained_variance_ratio 與 sklearn 完全一致，投影值僅有正負號差異（絕對相關係數 = 1），          
+     第一主成分方向（絕對值）也一致。因此手刻 PCA 是正確的。                                                            
+                                                                                                                        
+     圖檔：figs/pca_digits_cumvar_scratch.png                                                                           
+     筆記：notes/pca_digits_handmade.md                                                                                 
+                                                                                                                        
+     ▣  Build · Big Pickle · 44.5s                                                                                      
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Big Pickle OpenCode                                                                                        
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase4-big-pickle/lab2-vague-3/project        17.8K (9%)  ctrl+p commands  
+                                                                                                                        

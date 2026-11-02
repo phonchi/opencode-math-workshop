@@ -1,0 +1,40 @@
+       question, read, skill, task, todowrite, webfetch, websearch.]                                                    
+                                                                                                                        
+     + Thought: 75ms                                                                                                    
+                                                                                                                        
+     ✱ Glob "**/*" (100 matches)                                                                                        
+     → Read AGENTS.md                                                                                                   
+                                                                                                                        
+     + Thought: 233ms                                                                                                   
+                                                                                                                        
+     → Read pyproject.toml                                                                                              
+                                                                                                                        
+     + Thought: 15.3s                                                                                                   
+                                                                                                                        
+      1. 中心化：每特徵均值 max|mean| ≤ 1e-12。抓不到：用錯 axis、或用測試集均值等「仍讓某個均值近 0」的錯誤。          
+      2. 協方差矩陣（若手刻經 cov）：max|S_hand − XcᵀXc/(n−1)| ≤ 1e-10。抓不到：後續分解仍一致的錯誤、或 ddof           
+         錯誤（特徵向量不受尺度影響）。                                                                                 
+      3. 特徵值：排序後 rtol=1e-6, atol=1e-8。抓不到：特徵向量錯誤、退化子空間內的旋轉。                                
+      4. 解釋變異比：rtol=1e-8。抓不到：與 3 相同，且不能驗證成分方向。                                                 
+      5. 成分向量對齊：每個 |v_hand·v_ref| ≥ 1−1e-6（允許符號）。抓不到：全域符號、退化特徵值對應子空間內旋轉、         
+         向量順序錯但值相近。                                                                                           
+      6. 正交性：‖VᵀV−I‖_F ≤ 1e-10。抓不到：張成錯誤子空間但仍正交的向量。                                              
+      7. sklearn 符號慣例（可選）：最大絕對值元素符號完全一致。抓不到：數學正確性。                                     
+      8. transform 座標：先依參考對齊符號，max|Z_hand−Z_ref| ≤ 1e-5。抓不到：被符號對齊掩蓋的整體翻轉、                 
+         或兩邊相同尺度錯誤。                                                                                           
+      9. inverse_transform 重建：max|X̂_hand−X̂_ref| ≤ 1e-5。抓不到：投影與重建錯誤互相抵消。                             
+     10. PC 變異數一致性：每列變異數與特徵值 rtol=1e-6。抓不到：系統性中心化/尺度錯誤同時影響兩邊。                     
+     11. PC 不相關性：非對角共變異 max|·| ≤ 1e-8。抓不到：正交但非主方向。                                              
+     12. 形狀/有限值：components (10,64)、transform (1797,10)、無 NaN/Inf。抓不到：數值正確性。                         
+                                                                                                                        
+     主要盲點：退化特徵值子空間的旋轉、全域符號、以及「兩邊共同犯同類錯誤」。                                           
+                                                                                                                        
+     ▣  Plan · Beam Free · 27.6s                                                                                        
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Plan · Beam Free OpenCode                                                                                          
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase4-beam-free/e2-plan-1/project            22.5K (2%)  ctrl+p commands  
+                                                                                                                        

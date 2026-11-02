@@ -983,6 +983,9 @@ dependencies = [
     "edit": "ask",
     "webfetch": "ask"
   },
+  "agent": {
+    "plan": { "permission": { "edit": "deny", "bash": "deny" } }
+  },
   "instructions": ["AGENTS.md"]
 }</code></pre>
 <div class="box tip">
@@ -997,7 +1000,7 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 
 <div class="step" data-n="4">
 <h3>建立 <code>AGENTS.md</code></h3>
-<p>這是給 agent 看的專案規則。同一個資料夾，建立 <code>AGENTS.md</code>：</p>
+<p>這是給 agent 看的專案規則。課前只放操作規則；「數學要怎麼驗證」先不寫，今天課程結束時，你會把自己抓到的問題寫成規則加回來。同一個資料夾，建立 <code>AGENTS.md</code>：</p>
 <pre class="cmd"><code># AI-Math 工作坊　專案規則
 
 ## 語言
@@ -1007,19 +1010,11 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 本專案用 uv 管理環境。執行 Python 一律用：`uv run python &lt;檔案&gt;`
 不要用 `python`、`python3`、`pip install`。要加套件用 `uv add &lt;套件&gt;`。
 
-## 數學程式的規矩
-1. 可重現：用到隨機性的地方一律設 `random_state=0` 或 `np.random.seed(0)`。
-2. 先說數學，再寫程式：動手前先用兩三句話說明你要用的公式或步驟。
-3. 自己驗證：寫完數值方法必須附驗證程式碼，實際執行並印出比對結果。
-   不可以只說「應該正確」。
-4. 不要偷懶：如果我要求「手刻」某個方法，就不可以直接呼叫 sklearn 的
-   對應實作來充數。sklearn 只能當對照組。
-
 ## 圖檔
 所有圖存到 `figs/`，用 `savefig()`，不要用 `plt.show()`（無視窗環境無效）。
 
 ## 筆記
-數學筆記寫在 `notes/` 底下的 .md 檔，數學式用 $...$ 與 $$...$$。
+筆記寫在 `notes/` 底下的 .md 檔，數學式用 $...$ 與 $$...$$。
 
 ## 不要做的事
 - 不要 git commit 或 git push，除非我明講。

@@ -1,0 +1,40 @@
+  ┃    k= 4 sil=0.1287 ARI=0.286                                                                                        
+  ┃    k= 5 sil=0.1356 ARI=0.358                                                                                        
+  ┃    k= 6 sil=0.1504 ARI=0.403                                                                                        
+  ┃    k= 7 sil=0.1643 ARI=0.500                                                                                        
+  ┃    k= 8 sil=0.1784 ARI=0.578                                                                                        
+  ┃    k= 9 sil=0.1872 ARI=0.595                                                                                        
+  ┃    k=10 sil=0.1804 ARI=0.667                                                                                        
+  ┃  …                                                                                                                  
+  ┃                                                                                                                     
+  ┃  Click to expand                                                                                                    
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 8.1s                                                                                                    
+                                                                                                                        
+     結論：10 群（若要兼顧可解釋性，別超過 10）。                                                                       
+                                                                                                                        
+     理由：                                                                                                             
+                                                                                                                        
+     - digits 本身是 0–9 共 10 類手寫數字，分群的實務目標就是還原這 10 類。                                             
+     - 以原始像素跑 KMeans：silhouette 在 $k=9$ 有局部高點（0.187），$k=10$ 略降到 0.180；但對照真實標籤的 ARI 從       
+       $k=9$ 的 0.595 明顯跳到 $k=10$ 的 0.667，代表第 10 群抓到了實質結構。                                            
+     - Ward 階層分群在 $k=10$ 也有 ARI≈0.60、NMI≈0.75，支持這個量級。                                                   
+     - $k>10$ 之後 silhouette 幾乎持平（約 0.18），多切出來的群只是把本來就重疊的 4/9、3/8/9 硬拆開，                   
+       邊際效益低（$k=11$ 的 ARI 0.726 只小幅上升）。                                                                   
+                                                                                                                        
+     要注意：整體 silhouette 只有 ~0.18，表示這些數字在像素空間本來就高度重疊、沒有「天然很乾淨」的群數；10             
+     是在指標與可解釋性之間最合理的選擇。                                                                               
+                                                                                                                        
+     分析腳本：digits_cluster.py、digits_cluster2.py；圖：figs/digits_cluster_diagnostics.png、figs/                    
+     digits_cluster_extended.png。                                                                                      
+                                                                                                                        
+     ▣  Build · Big Pickle · 1m 24s                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Big Pickle OpenCode                                                                                        
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase0/lab1-vague-1/project                  24.6K (12%)  ctrl+p commands  
+                                                                                                                        

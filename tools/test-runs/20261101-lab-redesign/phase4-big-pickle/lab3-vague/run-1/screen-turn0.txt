@@ -1,0 +1,40 @@
+  ┃                                                                                                                     
+  ┃  Click to expand                                                                                                    
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 1.3s                                                                                                    
+                                                                                                                        
+     → Read notes/logistic_regression_digits.md                                                                         
+                                                                                                                        
+     + Thought: 10.5s                                                                                                   
+                                                                                                                        
+     已完成，檔案如下：                                                                                                 
+                                                                                                                        
+     - logreg_digits.py：手刻 sigmoid、NLL、梯度、Hessian、GD、Newton/IRLS，並與 sklearn 對照。                         
+     - notes/logistic_regression_digits.md：完整 MLE 推導、正則化對應、比較結果與判準。                                 
+     - figs/：收斂曲線、係數/機率對照、PCA 決策邊界。                                                                   
+                                                                                                                        
+     關鍵結果：                                                                                                         
+                                                                                                                        
+     - L2 C=1（主對照）：max|Δp| = 1.47e-7，108 筆測試預測 0 筆不同，目標函數差 2.05e-15 → 同一個模型。                 
+     - PCA 3 維、無正則化：max|Δp| = 4.54e-9，0/108 不同 → 同一個 MLE。                                                 
+     - 64 維、無正則化：3 與 8 線性可分，MLE 不存在；兩邊訓練 loss 都約 1e-12，但 ||w|| 為 45.28 vs 30.66，3/108        
+       預測不同。這不是寫錯，是問題沒有唯一解，需加正則化或降維。                                                       
+                                                                                                                        
+     判斷兩個模型一樣，依序看：                                                                                         
+                                                                                                                        
+     1. 先確認資料切分、標籤、前處理、截距、損失、正則化強度都相同（sklearn 的 C 要換成 λ = 1/(nC)）。                  
+     2. 比預測而非係數：max|Δz|、max|Δp|、預測標籤不同筆數；例如 max|Δp|<1e-6 且 0 筆不同。                             
+     3. 比最佳化條件：梯度範數接近 0、目標函數值在浮點誤差內。                                                          
+     4. 係數只在模型可辨識且參數化相同時比較；若要比泛化表現，另用 bootstrap 信賴區間、McNemar、DeLong 等統計檢定。     
+        「準確率一樣」不等於模型一樣。                                                                                  
+                                                                                                                        
+     ▣  Build · Big Pickle · 4m 41s                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Big Pickle OpenCode                                                                                        
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase4-big-pickle/lab3-vague-1/project       59.9K (30%)  ctrl+p commands  
+                                                                                                                        

@@ -1,0 +1,40 @@
+     驗證數字非常漂亮。再確認一下圖檔有效：                                                                             
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  $ file /home/phonchi/.cache/oc-lab-redesign/runs/phase0-flint-40b-free/lab2-vague-2/project/figs/pca_digits_svd.   
+  ┃  png; python3 -c "print('ok')" 2>/dev/null; ls -la /home/phonchi/.cache/oc-lab-redesign/runs/phase0-flint-40b-      
+  ┃  free/lab2-vague_2/project/figs/ 2>&1                                                                               
+  ┃                                                                                                                     
+  ┃  /home/phonchi/.cache/oc-lab-redesign/runs/phase0-flint-40b-free/lab2-vague-2/project/figs/pca_digits_svd.png:      
+  ┃  PNG image data, 800 x 500, 8-bit/color RGBA, non-interlaced                                                        
+  ┃  ok                                                                                                                 
+  ┃  ls: cannot access '/home/phonchi/.cache/oc-lab-redesign/runs/phase0-flint-40b-free/lab2-vague_2/project/figs/':    
+  ┃  No such file or directory                                                                                          
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 13.4s                                                                                                   
+                                                                                                                        
+     完成。已用 uv run python pca_digits.py 完成手刻 PCA 並驗證：                                                       
+                                                                                                                        
+     - 手刻流程：digits（1797×64）→ 中心化 → np.linalg.svd → 特徵值 S²/(n−1) → 取 Vt 前 10 主成分 → 投影。              
+     - 驗證結果：四項比對都通過——主成分向量、特徵值、解釋方差比、投影資料與 sklearn.decomposition.PCA(n_components=10)  
+        完全吻合（最大差異 ≤ ~4×10⁻¹³），且前 10 主成分滿足正交性（Gram matrix ≈ I）。                                  
+     - 數據：前 10 個主成分累積解釋方差約 0.738（73.8%）。                                                              
+                                                                                                                        
+     交付物：                                                                                                           
+                                                                                                                        
+     - pca_digits.py:1 — 手刻 PCA 腳本                                                                                  
+     - figs/pca_digits_svd.png — 特徵值截面圖（手刻 SVD vs sklearn PCA）                                                
+                                                                                                                        
+     順帶一提：sklearn 內部因資料屬「高長寬比」、選擇了 covariance_eigh solver，手刻的 SVD                              
+     解法與其結果在機器精度內一致，確認手刻實作正確無誤。                                                               
+                                                                                                                        
+     ▣  Build · Flint 40B Free · 8m 40s                                                                                 
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Flint 40B Free OpenCode                                                                                    
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase0-flint-40b-free/lab2-vague-2/project   50.0K (19%)  ctrl+p commands  
+                                                                                                                        

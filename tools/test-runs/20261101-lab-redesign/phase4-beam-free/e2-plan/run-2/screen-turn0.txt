@@ -1,0 +1,40 @@
+        抓不到：covariance/特徵向量/排序錯誤。                                                                          
+                                                                                                                        
+     2. explained variance（eigenvalues）                                                                               
+        比：np.allclose(ev_hand, pca.explained_variance_, rtol=1e-7, atol=1e-10)                                        
+        抓不到：特徵向量方向、符號、transform 錯誤。                                                                    
+                                                                                                                        
+     3. 主成分方向 components_（先用 sklearn 的 svd_flip 符號慣例對齊）                                                 
+        比：每列 cosine |v·w| ≥ 1-1e-8，或投影矩陣 ‖VVᵀ - WWᵀ‖_F ≤ 1e-8                                                 
+        抓不到：eigenvalue 數值錯誤；degenerate 子空間內的旋轉需改用子空間檢查。                                        
+                                                                                                                        
+     4. 降維結果 transform                                                                                              
+        比：np.allclose(X_hand, X_sklearn, rtol=1e-7, atol=1e-8)                                                        
+        抓不到：只依賴 components 的錯誤若與 mean 錯誤互相抵消（少見）；eigenvalue 錯誤。                               
+                                                                                                                        
+     5. 重構誤差                                                                                                        
+        比：‖X - (X_pca @ components + mean)‖_F / ‖X‖_F ≤ 1e-7，並與 sklearn inverse_transform 比                       
+        抓不到：eigenvalue/ explained variance 錯誤。                                                                   
+                                                                                                                        
+     6. explained variance ratio                                                                                        
+        比：np.allclose(ratio_hand, pca.explained_variance_ratio_, rtol=1e-7, atol=1e-10)                               
+        抓不到：方向/transform 錯誤。                                                                                   
+                                                                                                                        
+     7. 正交性 sanity check                                                                                             
+        比：‖components @ components.T - I‖_F ≤ 1e-12                                                                   
+        抓不到：與 sklearn 是否一致。                                                                                   
+                                                                                                                        
+     8. 形狀/數量                                                                                                       
+        比：components_.shape == (10,64)、transform.shape == (1797,10)。                                                
+                                                                                                                        
+     額外注意：digits 前 10 個 eigenvalue 若有近簡併，個別向量比較無效，需改用子空間主角度；eigh 回傳升序需自行反轉。   
+                                                                                                                        
+     ▣  Plan · Beam Free · 20.8s                                                                                        
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Plan · Beam Free OpenCode                                                                                          
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase4-beam-free/e2-plan-2/project            21.4K (2%)  ctrl+p commands  
+                                                                                                                        
