@@ -1,0 +1,40 @@
+     - Sklearn 內建模型 (LogisticRegression) 準確率：約 99.07%                                                          
+                                                                                                                        
+     視覺化對比圖已儲存至 figs/logistic_comparison.png（包含權重對比與預測機率分佈對比）。                              
+                                                                                                                        
+     ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+                                                                                                                        
+     三、 如何判斷兩個模型「一樣」？                                                                                    
+                                                                                                                        
+     要嚴格判斷兩個機器學習模型（例如手刻實作 vs. 套件實作）是否為同一個模型，應從以下四個層面進行檢驗：                
+                                                                                                                        
+     1. *超參數與優化目標一致 (Hyperparameters & Objective Function)*：                                                 
+        - 兩者必須使用相同的損失函數（如 Cross-Entropy）、相同的正則化型態（如 L2 或是無正則化                          
+          penalty=None）以及相同的強度參數（$C$ 值）。                                                                  
+        - 注意：不同套件（如 Scipy 的 minimize 與 Sklearn 的 lbfgs）對目標函數中正則化係數的縮放定義（例如 $\frac{1}{   
+          2C}\|\mathbf{w}\|^2$ vs $C \times \text{Loss} + \frac{1}{2}\|\mathbf{w}\|^2$）可能存在常數倍數差異，          
+          這會導致權重數值微幅不同。                                                                                    
+                                                                                                                        
+     2. *參數權重與截距對齊 ($\mathbf{w}$ 與 $b$)*：                                                                    
+        - 當優化目標完全對齊且收斂充分時，兩者的權重向量 $\mathbf{w}$（coef_）與偏置                                    
+          $b$（intercept_）的絕對差值應小於容忍誤差（例如 $\|\mathbf{w}_{\text{custom}} - \mathbf{w}_{\text{sklearn}}\  
+          |_\infty < 10^{-4}$）。                                                                                       
+                                                                                                                        
+     3. *預測機率一致性 ($\hat{y}$)*：                                                                                  
+        - 對於相同的測試集 $\mathbf{X}_{\text{test}}$，兩者輸出的條件機率 $\hat{y} = P(y=1|\mathbf{X})$                 
+          的最大差異應趨近於 0（$\max|\hat{y}_{\text{custom}} - \hat{y}_{\text{sklearn}}| < 10^{-4}$）。                
+                                                                                                                        
+     4. 預測分類與評估指標一致性：                                                                                      
+        - 在相同的分類閾值（Threshold = 0.5）下，兩者產生的預測類別標籤（$0$ 與 $1$）、準確率（Accuracy）、             
+          混淆矩陣（Confusion Matrix）以及 F1-score 應完全相同。                                                        
+                                                                                                                        
+     ▣  Build · Gemini 3.5 Flash Lite · 1m 16s                                                                          
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Gemini 3.5 Flash Lite Google                                                                               
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase6-gemini-3.5-flash-lite-flow/lab3-    41.2K (4%) · $0.0ctrl+p         
+   refined-2/project                                                                                     commands       
+                                                                                                                        

@@ -1,0 +1,40 @@
+       - 維度轉置錯誤 (Dimension Transposition)： 若矩陣形狀搞錯（例如將 (10, D) 誤存為 (D, 10)），                     
+         若未嚴格檢查維度或發生錯誤廣播，可能無法正確對齊。                                                             
+       - 正負號未對齊時的誤判： 若直接進行逐元素比較而未先做正負號校正，會導致完全正確的 PCA 被誤判為失敗。             
+                                                                                                                        
+     ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+                                                                                                                        
+     四、降維投影結果檢查 (Transformed Data / Scores Check)                                                             
+                                                                                                                        
+     - 比什麼量：                                                                                                       
+       - 投影後的低維資料 $X_{\text{transformed}} = X_{\text{centered}} W^T$ 與 sklearn 的 pca.transform(X)             
+         （同樣需經正負號對齊）。                                                                                       
+     - 容差： atol=1e-4, rtol=1e-4                                                                                      
+     - 抓不到哪些錯誤：                                                                                                 
+       - 全域偏移或縮放盲點： 若特徵向量未作 $L_2$ 單位化（Unit Norm），投影結果的尺度會錯誤；若中心化步驟漏減平均值，  
+         投影結果會產生平移。但若投影後只看相對關係或部分統計量，有時不易第一時間定位問題根源。                         
+                                                                                                                        
+     ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+                                                                                                                        
+     五、資料重建與重建誤差檢查 (Reconstruction & Reconstruction Error Check)                                           
+                                                                                                                        
+     - 比什麼量：                                                                                                       
+       - 將低維投影反投影回原維度的重建資料 $X_{\text{reconstructed}} = X_{\text{transformed}} W + \mu$ 與 sklearn 的   
+         pca.inverse_transform(...)。                                                                                   
+       - 兩者的重建均方誤差 (Reconstruction MSE)。                                                                      
+     - 容差： atol=1e-4, rtol=1e-4                                                                                      
+     - 抓不到哪些錯誤：                                                                                                 
+       - 正負號抵銷盲點（極重要）： 由於重構公式為 $X_{\text{transformed}} W = (X_{\text{centered}} W^T) W$，           
+         若某個主成分的正負號放反，在投影時變號、在反投影時又再變號一次（$(-v)(-v) = vv$），正負號會互相抵銷！因此，    
+         重建誤差檢查完全無法抓出「特徵向量正負號放反」的錯誤。                                                         
+                                                                                                                        
+     ▣  Plan · Gemini 3.5 Flash Lite · 13.5s                                                                            
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Plan · Gemini 3.5 Flash Lite Google                                                                                
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase6-gemini-3.5-flash-lite-flow/e2-plan-26.3K (3%) · $0.0 ctrl+p         
+   2/project                                                                                             commands       
+                                                                                                                        

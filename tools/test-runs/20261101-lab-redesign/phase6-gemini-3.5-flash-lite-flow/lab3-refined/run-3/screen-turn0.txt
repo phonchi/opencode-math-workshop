@@ -1,0 +1,40 @@
+     截距最大絕對差異 (Max Intercept Diff): 2.35e-02                                                                    
+     預測機率最大絕對差異 (Max Proba Diff): 1.03e-02                                                                    
+     預測標籤是否完全一致: True                                                                                         
+                                                                                                                        
+     ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+                                                                                                                        
+     三、 如何判斷兩個模型一樣？                                                                                        
+                                                                                                                        
+     要嚴格確認手刻模型與 Sklearn 模型是否完全一樣，可從以下四個維度進行檢驗：                                          
+                                                                                                                        
+     1. *參數數值一致性 (Weights & Bias Check)*：                                                                       
+        - 計算兩者權重向量 $w$ 的最大絕對誤差 $\max |w_{\text{custom}} - w_{\text{sklearn}}|$ 以及截距 $b$ 的差值。     
+          若小於 $10^{-2}$～$10^{-3}$（取決於優化收斂精度與容許誤差 tolerance），代表底層優化目標與梯度一致。           
+     2. *預測機率一致性 (Predicted Probabilities Check)*：                                                              
+        - 將測試集輸入兩模型，計算預測機率 $\hat{y}$ 的最大絕對誤差或均方誤差 (MSE)。在數值精度範圍內應高度趨近於       
+          0（本實驗最大差值僅約 $1.03 \times 10^{-2}$）。                                                               
+     3. *預測標籤與分類指標一致性 (Predictions & Accuracy Check)*：                                                     
+        - 在相同決策門檻（通常為 $0.5$）下，兩者的預測類別 (predict) 應 100% 完全一致，且準確率（Accuracy）、           
+          混淆矩陣應完全相同（本實驗兩者 Accuracy 皆為 1.0000）。                                                       
+     4. *特徵熱力圖對比 (Visual Heatmap Comparison)*：                                                                  
+        - 將 $8 \times 8$ 的權重向量 $w$ 繪製成熱力圖，觀察兩者對手寫數字 3 與 8 的空間特徵敏感度分佈是否相同。         
+                                                                                                                        
+     ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+                                                                                                                        
+     四、 檔案存放位置                                                                                                  
+                                                                                                                        
+     - 數學推導筆記：notes/logistic_regression_digits_3_8.md                                                            
+     - 實作與對比程式碼：run_logistic_regression.py                                                                     
+     - 權重與預測對比圖表：figs/logistic_regression_comparison.png                                                      
+                                                                                                                        
+     ▣  Build · Gemini 3.5 Flash Lite · 52.3s                                                                           
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Gemini 3.5 Flash Lite Google                                                                               
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase6-gemini-3.5-flash-lite-flow/lab3-    34.3K (3%) · $0.0ctrl+p         
+   refined-3/project                                                                                     commands       
+                                                                                                                        

@@ -1,0 +1,40 @@
+  ┃   24                                                                                                                
+  ┃                                                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  $ uv run python digits_acc.py                                                                                      
+  ┃                                                                                                                     
+  ┃  k=10 分群對應到數字後的準確率: 0.5904                                                                              
+  ┃  cluster  9 -> digit 0: 177/178 = 0.994                                                                             
+  ┃  cluster  6 -> digit 1:  58/182 = 0.319                                                                             
+  ┃  cluster  1 -> digit 2:  48/177 = 0.271                                                                             
+  ┃  cluster  3 -> digit 3: 152/183 = 0.831                                                                             
+  ┃  cluster  5 -> digit 4: 158/181 = 0.873                                                                             
+  ┃  cluster  0 -> digit 5:  41/182 = 0.225                                                                             
+  ┃  cluster  2 -> digit 6: 175/181 = 0.967                                                                             
+  ┃  cluster  8 -> digit 7: 150/179 = 0.838                                                                             
+  ┃  cluster  4 -> digit 8:  99/174 = 0.569                                                                             
+  ┃  …                                                                                                                  
+  ┃                                                                                                                     
+  ┃  Click to expand                                                                                                    
+  ┃                                                                                                                     
+                                                                                                                        
+     *k=10 的分群準確率約 59.0%*（用 Hungarian 演算法把 10 個 cluster 最適對應到 0–9 數字後的對角和）。                 
+                                                                                                                        
+     各數字差異很大：                                                                                                   
+                                                                                                                        
+     - 分得很好：0（99%）、6（97%）、4（87%）、7（84%）、3（83%）                                                       
+     - 分得很差：9（2%）、5（23%）、2（27%）、1（32%）——這幾個數字的樣本被 KMeans 拆散、混進別的 cluster                
+                                                                                                                        
+     這也呼應上一輪的觀察：手寫數字的類內變異大（尤其 1、9 有多種寫法），KMeans 這種球狀群假設的方法對它們表現差，ARI   
+     0.47 左右正是這個水準。腳本存在 digits_acc.py。                                                                    
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 1m 5s                                                                                   
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase7-nvidia-glm-low/lab1-vague-1/project    18.3K (2%)  ctrl+p commands  
+                                                                                                                        

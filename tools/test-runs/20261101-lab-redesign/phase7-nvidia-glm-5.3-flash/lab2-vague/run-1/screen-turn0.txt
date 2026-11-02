@@ -1,0 +1,40 @@
+  ┃   33 | 主成分單範正交 $VV^\top = I$ | PASS |                                                                        
+  ┃   34 | 投影均值 $=0$、投影各軸變異數 $=\lambda_j$ | PASS |                                                          
+  ┃   35 | 10 成分重建誤差 = sklearn 重建誤差，且 $= \frac{n-1}{n}\cdot\frac{\text{總變異} - \sum_{j\le K}\lambda_j}{   
+  ┃      d}$ | PASS |                                                                                                   
+  ┃   36 | 另用 `np.linalg.eigh(C)` 算特徵值／向量，與 SVD 一致 | PASS |                                                
+  ┃   37                                                                                                                
+  ┃   38 EVR：PC1 $14.89\%$、PC2 $13.62\%$、PC3 $11.79\%$ … 前 10 主成分累計 $73.82\%$，重建 MSE $\approx 4.91$。       
+  ┃   39                                                                                                                
+  ┃   40 ## 注意事項                                                                                                    
+  ┃   41                                                                                                                
+  ┃   42 - **符號不唯一**：$v$ 與 $-v$ 都是合法主成分，sklearn 與手刻版本可能差正負號（圖中 PC1 落在 $y=-x$、PC2        
+  ┃      落在 $y=x$），比較時要先對齊符號。                                                                             
+  ┃   43 - **MSE 的 $n-1$ 因子**：sklearn 變異數用 $1/(n-1)$，逐元素 MSE 是 $1/n$，兩者換算差 $(n-1)/n$。               
+  ┃   44 - 數值上偏好 SVD 而非顯式形成 $C$ 再特徵分解，條件數較好。                                                     
+  ┃   45                                                                                                                
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 542ms                                                                                                   
+                                                                                                                        
+     完成。手刻 PCA（中心化 + SVD 取 Vt[:10]）與 sklearn.PCA(n_components=10) 的 11 項驗證全數通過：EVR、               
+     成分向量（差正負號）、投影座標、正交單範性、投影變異數＝特徵值、重建誤差，另用 eigh(C) 交叉確認特徵分解與 SVD      
+     一致。前 10 主成分累計解釋變異 73.82%，重建 MSE ≈ 4.91。                                                           
+                                                                                                                        
+     - 程式：pca_digits.py（uv run python pca_digits.py 可重跑）                                                        
+     - 圖：figs/pca_digits_check.png                                                                                    
+     - 筆記：notes/hand-coded-pca-digits.md                                                                             
+                                                                                                                        
+     小提醒：驗證過程抓到一個我自己公式錯誤（MSE 的 $1/n$ vs 變異數的 $1/(n-1)$，差 $(n-1)/n$ 因子），已修正；另外      
+     PCA 符號不唯一，比較時需先對齊正負號。                                                                             
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 4m 36s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase7-nvidia-glm-5.3-flash/lab2-vague-1/     27.4K (3%) ctrl+p commands   
+   project                                                                                                              
+                                                                                                                        

@@ -1,0 +1,40 @@
+                                                                                                                        
+     重點結果                                                                                                           
+                                                                                                                        
+     推導核心（筆記有逐步代數）：MLE 等價於最小化 BCE，梯度收斂到乾淨的殘差形式                                         
+                                                                                                                        
+     $$\nabla_w \ell=\tfrac{1}{n}X^\top(\hat{p}-y),\qquad \nabla^2\ell=\tfrac{1}{n}X^\top\mathrm{diag}(\hat p_i(1-\     
+     hat p_i))X\succeq0$$                                                                                               
+                                                                                                                        
+     手刻 GD（$\eta=1/L$）與 Newton/IRLS，和 sklearn 比較（3 vs 8，267/90 切分，像素除以 16）：                         
+                                                                                                                        
+     - 先踩到一個關鍵陷阱：無正則化時訓練集可分離 → MLE 不存在，$w$ 沿分離方向發散。我的 Newton 停在 $\|w\|=1611$、     
+       sklearn(C=inf) 停在 93.6，係數差 17 倍，Newton 還 overconfident 到 test logloss 爆到 0.885。                     
+     - 給兩邊相同的 L2（$\lambda=1/(Cn)$，bias 不正則）後三方完全吻合：train loss 同為 0.1101270、相對係數誤差 $\sim5\  
+       times10^{-7}$、$\max|\Delta p|\sim1.7\times10^{-7}$、預測不一致 0、test acc 0.9778 / logloss 0.0775 / AUC 1.0。  
+                                                                                                                        
+     怎麼判斷兩個模型「一樣」                                                                                           
+                                                                                                                        
+     三層檢查，缺一不可：                                                                                               
+                                                                                                                        
+     1. 規格相同：同一份資料/縮放/loss/正則化。最容易踩的雷是 sklearn 用 sum、自寫用 mean，強度要換算 $\lambda=1/(Cn)   
+        $；還要確認類別方向（coef_ 對應 classes_[1]=8）。                                                               
+     2. 解存在且唯一：目標強凸（L2 + 滿秩）→ 全域最優唯一 → 兩邊收斂就必然是同一個模型。可分離 + 無正則時解不存在，     
+        「一樣嗎」是偽命題（Phase A 的教訓）。                                                                          
+     3. 數值驗證，由強到弱：                                                                                            
+        - 把 sklearn 的解代進自己寫的目標函數算梯度 $\approx0$（實測 $2.4\times10^{-8}$）——證明對方解的正是我的問題，   
+          且停在唯一最優點上；                                                                                          
+        - 係數相對誤差、$\max|\Delta p|$（比看硬標籤嚴格）、預測不一致率 = 0、指標一致。                                
+        - 不同 optimizer／停止條件不可能位元相同，$10^{-5}\sim10^{-6}$ 級就算一樣；且只看 accuracy 一樣不算數——Phase    
+          A 兩個係數差 17 倍的模型 acc 也差不多。                                                                       
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 14m 8s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase7-nvidia-glm-5.3-flash/lab3-vague-1/     43.4K (4%) ctrl+p commands   
+   project                                                                                                              
+                                                                                                                        

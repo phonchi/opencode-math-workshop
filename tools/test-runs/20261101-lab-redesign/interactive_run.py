@@ -8,8 +8,10 @@ ROOT = Path(__file__).resolve().parents[3]
 ISO = Path.home() / '.cache/oc-lab-redesign'
 OC = ISO / 'home/.opencode/bin/opencode'
 QUOTA = 'Free usage exceeded'
+NOTICE = re.compile(r'[Rr]etrying[^\n]{0,80}|RESOURCE_EXHAUSTED|[Qq]uota[^\n]{0,80}|high demand|Too Many Requests|UNAVAILABLE')
 STOP = threading.Event()
 MODEL = None
+CONFIG_EXTRA = None
 DENY = re.compile(r'rm\s+-rf|sudo|git\s+push|curl\s|wget\s|ssh\s')
 AGENTS = """# AI-Math 工作坊　專案規則
 
@@ -49,7 +51,12 @@ def run_turn(s, text, log, timeout):
     t0 = time.time(); last = ''; stable = 0; seen_busy = False; perms = 0
     while time.time() - t0 < timeout:
         time.sleep(2); sc = screen(s)
-        if QUOTA in sc: return dict(status='quota', secs=round(time.time() - t0), perms=perms)
+        if QUOTA in sc or 'Quota exceeded for' in sc or 'exceeded your current quota' in sc:
+            log.append({'t': round(time.time() - t0), 'notice': 'quota-stop', 'screen': sc[-1800:]})
+            return dict(status='quota', secs=round(time.time() - t0), perms=perms)
+        w = NOTICE.search(sc)
+        k = re.sub(r'\d+s ', '', w.group(0)) if w else ''
+        if w and not any(x.get('notice') == k for x in log): log.append({'t': round(time.time() - t0), 'notice': k, 'screen': sc[-800:]})
         if 'Allow once' in sc:
             bad = DENY.search(sc); perms += 1
             log.append({'t': round(time.time() - t0), 'permission': 'reject' if bad else 'allow_once', 'screen': sc[-1500:]})
@@ -70,9 +77,19 @@ def one(case, n, out, timeout):
     base = ISO / 'runs' / out.name / name; shutil.rmtree(base, ignore_errors=True); base.mkdir(parents=True)
     proj = base / 'project'; proj.mkdir(); e = env(base)
     for f in ['pyproject.toml', 'uv.lock', 'opencode.json']: shutil.copy(ROOT / 'starter' / f, proj / f)
+    if CONFIG_EXTRA:
+        cfg = json.loads((proj / 'opencode.json').read_text(encoding='utf-8'))
+        def merge(x, y):
+            for k, v in y.items():
+                if isinstance(v, dict) and isinstance(x.get(k), dict): merge(x[k], v)
+                else: x[k] = v
+        merge(cfg, json.loads(Path(CONFIG_EXTRA).read_text(encoding='utf-8')))
+        (proj / 'opencode.json').write_text(json.dumps(cfg, ensure_ascii=False, indent=2), encoding='utf-8')
     (proj / 'AGENTS.md').write_text(AGENTS + case.get('agents_extra', ''), encoding='utf-8'); (proj / 'notes').mkdir(); (proj / 'figs').mkdir()
     sp.run(['uv', 'sync', '--quiet'], cwd=proj, env=e, capture_output=True)
     envargs = [x for k in ['HOME','XDG_DATA_HOME','XDG_CONFIG_HOME','XDG_STATE_HOME','XDG_CACHE_HOME','UV_CACHE_DIR','UV_PYTHON_INSTALL_DIR','TERM'] for x in ('-e', f'{k}={e[k]}')]
+    if os.environ.get('GOOGLE_GENERATIVE_AI_API_KEY'): envargs += ['-e', 'GOOGLE_GENERATIVE_AI_API_KEY=' + os.environ['GOOGLE_GENERATIVE_AI_API_KEY']]
+    if os.environ.get('NVIDIA_API_KEY'): envargs += ['-e', 'NVIDIA_API_KEY=' + os.environ['NVIDIA_API_KEY']]
     s = 'lab' + out.name.replace('.', '_') + '-' + name.replace('.', '_')
     tm('kill-session', '-t', s)
     tm('new-session', '-d', '-s', s, '-x', '120', '-y', '40', '-c', str(proj), *envargs, str(OC), *(['--model', MODEL] if MODEL else []))
@@ -106,8 +123,8 @@ def one(case, n, out, timeout):
     shutil.rmtree(base, ignore_errors=True)
     return name, [r['status'] for r in res]
 if __name__ == '__main__':
-    ap = argparse.ArgumentParser(); ap.add_argument('cases'); ap.add_argument('out'); ap.add_argument('--only'); ap.add_argument('--model'); ap.add_argument('--runs', type=int, default=5); ap.add_argument('--jobs', type=int, default=3); ap.add_argument('--timeout', type=int, default=420)
-    a = ap.parse_args(); MODEL = a.model; out = Path(a.out).resolve(); out.mkdir(parents=True, exist_ok=True)
+    ap = argparse.ArgumentParser(); ap.add_argument('cases'); ap.add_argument('out'); ap.add_argument('--only'); ap.add_argument('--model'); ap.add_argument('--config-extra'); ap.add_argument('--runs', type=int, default=5); ap.add_argument('--jobs', type=int, default=3); ap.add_argument('--timeout', type=int, default=420)
+    a = ap.parse_args(); MODEL = a.model; CONFIG_EXTRA = a.config_extra and str(Path(a.config_extra).resolve()); out = Path(a.out).resolve(); out.mkdir(parents=True, exist_ok=True)
     cases = [c for c in json.load(open(a.cases, encoding='utf-8')) if not a.only or c['id'] == a.only]
     jobs = [(c, n) for c in cases for n in range(1, a.runs + 1)]
     with cf.ThreadPoolExecutor(a.jobs) as ex:

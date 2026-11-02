@@ -697,6 +697,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a href="#section-確認裝好了">確認裝好了</a></li>
 <li><a href="#section-建立工作坊專案">建立工作坊專案</a></li>
 <li><a href="#section-綠燈自測">綠燈自測</a></li>
+<li><a href="#section-準備備案-key">準備備案 key</a></li>
 <li><a href="#section-卡住了">卡住了？</a></li>
 <li><a href="#section-最後提醒">最後提醒</a></li>
 </ul>
@@ -748,6 +749,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a href="#section-確認裝好了">確認裝好了</a></li>
 <li><a href="#section-建立工作坊專案">建立工作坊專案</a></li>
 <li><a href="#section-綠燈自測">綠燈自測</a></li>
+<li><a href="#section-準備備案-key">準備備案 key</a></li>
 <li><a href="#section-卡住了">卡住了？</a></li>
 <li><a href="#section-最後提醒">最後提醒</a></li>
 </ul>
@@ -861,8 +863,8 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <div class="box tip">
 <div class="bt">好消息</div>
 <p style="margin-bottom:0">
-<strong>不需要註冊任何帳號、不需要 API key、不需要信用卡。</strong>
-工作坊用的模型 <code>opencode/big-pickle</code> 是內建免費的，裝完就能直接用。
+工作坊預設用的模型 <code>opencode/big-pickle</code> 內建免費，<strong>不需要帳號、API key 或信用卡</strong>，裝完就能直接用。
+它的免費額度會浮動，所以裝好後，請再依下方<a href="#backup-keys">「準備備案 key」</a>申請兩把免費 key，額度用完時才派得上用場。
 </p>
 </div>
 </section>
@@ -978,6 +980,15 @@ dependencies = [
 <pre class="cmd"><code>{
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode/big-pickle",
+  "provider": {
+    "nvidia": {
+      "models": {
+        "z-ai/glm-5.3-flash": {
+          "options": { "reasoningEffort": "low" }
+        }
+      }
+    }
+  },
   "permission": {
     "bash": "ask",
     "edit": "ask",
@@ -988,6 +999,7 @@ dependencies = [
   },
   "instructions": ["AGENTS.md"]
 }</code></pre>
+<p>中間的 <code>provider</code> 只在你切到備案模型 GLM-5.3-Flash 時才有作用。少了它，這個模型會推理很久：同一題實測從 22 秒變成 12 分鐘。</p>
 <div class="box tip">
 <div class="bt">為什麼放在專案裡而不是全域設定</div>
 <p style="margin-bottom:0">
@@ -1101,6 +1113,72 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <li><input type="checkbox" id="p6"><label for="p6">測試二得到繁體中文回答</label></li>
 <li><input type="checkbox" id="p7"><label for="p7">測試三真的產生了 <code>hello.py</code> 並印出平方數</label></li>
 </ul>
+<p>如果測試二或測試三出現 <code>Free usage exceeded</code>，代表免費額度暫時用完了，不是你裝錯。先完成下一節，再用備案模型確認能回話。</p>
+</section>
+
+<section id="backup-keys">
+<h2 id="section-準備備案-key">準備備案 key</h2>
+<p>
+<code>big-pickle</code> 這類免費模型的額度，是按對外 IP 和日期計算，上限也會變動。教室全班共用校園 Wi-Fi，可能很快就用完。
+請在課前申請好兩把免費 key；上課時一樣先用 <code>big-pickle</code>，不能用才照下面的順序換。
+</p>
+<div class="tw"><table>
+<tr><th>順序</th><th>模型</th><th>什麼時候用</th><th>注意</th></tr>
+<tr><td>1</td><td><code>big-pickle</code></td><td>預設</td><td>不用登入</td></tr>
+<tr><td>2</td><td>其他免費模型，例如 <code>beam-free</code></td><td><code>big-pickle</code> 額度用完</td><td>用 <code>/models</code> 切換；可能和 <code>big-pickle</code> 一起被擋</td></tr>
+<tr><td>3</td><td><code>Gemini 3.5 Flash Lite</code></td><td>免費模型都不能用</td><td>要自己的 Gemini key</td></tr>
+<tr><td>4</td><td><code>GLM-5.3-Flash</code></td><td>Gemini 也不能用</td><td>要自己的 NVIDIA key；實測約慢 3 倍，但一樣能完成三個 Lab</td></tr>
+</table></div>
+
+<div class="box warn">
+<div class="bt">申請前請先看</div>
+<ul style="margin-bottom:0">
+<li><strong>要滿 18 歲。</strong>Gemini API 條款要求滿 18 歲，NVIDIA 條款要求達法定成年。未滿 18 歲請不要申請，先告訴講師。</li>
+<li><strong>送出的內容可能被用來改進產品，也可能有人工審閱。</strong>只用課堂的公開資料，不要送未發表研究、個人資料或機密內容。</li>
+<li><strong>每人用自己的帳號。</strong>額度是按專案計算的，共用 key 會一起用完。</li>
+<li><strong>不要綁信用卡或設定帳單。</strong>如果畫面要求付款，先停下來問講師。</li>
+<li><strong>key 就像密碼。</strong>不要貼到聊天室、截圖、<code>opencode.json</code> 或 Git。</li>
+</ul>
+</div>
+
+<div class="step" data-n="1">
+<h3>申請 Gemini key</h3>
+<p>開啟 <a href="https://aistudio.google.com/apikey">Google AI Studio 的 API key 頁面</a>，建議用個人 Gmail 登入並接受條款。頁面上已經有 key 就直接複製；沒有就按 <strong>Create API key</strong>。學校帳號可能沒有建立權限。</p>
+</div>
+<div class="step" data-n="2">
+<h3>申請 NVIDIA key</h3>
+<p>開啟 <a href="https://build.nvidia.com">build.nvidia.com</a>，點開任一個模型，按右側的 <strong>Get API Key</strong>。輸入 email 按 <strong>Next</strong>，完成註冊或登入後，按 <strong>Copy Key</strong> 複製。</p>
+</div>
+<div class="step" data-n="3">
+<h3>把 key 連到 OpenCode</h3>
+<p>在專案資料夾輸入 <code>opencode</code>，然後在 OpenCode 裡操作：</p>
+<ol>
+<li>輸入 <code>/connect</code> 按 Enter，打 <code>Google</code> 按 Enter，貼上 Gemini key 按 Enter。</li>
+<li>接著會跳出模型清單。打 <code>Flash Lite</code>，選 <code>Gemini 3.5 Flash Lite</code>；出現 variant 選單時，選 <code>Default</code> 按 Enter。</li>
+<li>確認左下角顯示 <code>Gemini 3.5 Flash Lite</code>，輸入 <code>1+1 等於多少？只回答數字</code>，應該收到回答。</li>
+<li>再做一次 <code>/connect</code>：打 <code>NVIDIA</code>，貼上 NVIDIA key，模型選 <code>GLM-5.3-Flash</code>，variant 同樣選 <code>Default</code>，再問一次同樣的問題。</li>
+<li>輸入 <code>/exit</code> 離開。</li>
+</ol>
+<p>key 會存在這台電腦的 OpenCode 設定裡，之後不用再貼。<strong>每次重開 OpenCode 都會回到 <code>big-pickle</code></strong>，上課要用備案時，用 <code>/models</code> 再選一次即可。</p>
+</div>
+
+<div class="box tip">
+<div class="bt">上課時可能看到的訊息</div>
+<ul style="margin-bottom:0">
+<li><code>high demand</code> 或 <code>way too hot</code>：Google 暫時過載，OpenCode 會自動重試，先等一下。等超過一分鐘還沒恢復，就換下一個模型。</li>
+<li><code>Quota exceeded for metric</code>：這個模型今天的額度用完了，換下一個模型。</li>
+<li>Gemini 模型請選 <code>Gemini 3.5 Flash Lite</code>。<code>Gemini 3.6 Flash</code> 實測每天只有 20 個請求，一堂課不夠用。</li>
+<li>畫面底部的 <code>$0.01</code> 是估算的費用。只要沒有設定帳單，就不會收費。</li>
+<li>Gemini 偶爾會把英文思考過程混進回答，這不影響程式執行。</li>
+</ul>
+</div>
+
+<p style="font-size:.88rem;color:var(--ink-3)">講師實測（2026-11-02，OpenCode 1.19.5，一次跑一人）：兩個備案都能完成讀檔、寫檔和執行。Gemini 3.5 Flash Lite 同一天累計 167 個請求沒有被擋；GLM-5.3-Flash 跑了開場和三個 Lab 各一次。全班同時使用的情況還沒測過，額度也可能變動。</p>
+
+<ul class="ckl">
+<li><input type="checkbox" id="p8"><label for="p8">Gemini 3.5 Flash Lite 回答了問題</label></li>
+<li><input type="checkbox" id="p9"><label for="p9">GLM-5.3-Flash 回答了問題</label></li>
+</ul>
 </section>
 
 <section>
@@ -1125,9 +1203,12 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <tr><td><code>Unrecognized request argument supplied: prompt_cache_key</code></td>
     <td>opencode 的已知上游問題，偶發</td>
     <td><strong>重試一次</strong>通常就好。仍然失敗就保留錯誤訊息，請講師協助。</td></tr>
-<tr><td>換成其他模型後回 <code>UnknownError</code></td>
-    <td>那些模型需要 API key</td>
-    <td>本工作坊<strong>只用 <code>opencode/big-pickle</code></strong>。不要改 <code>opencode.json</code> 裡的 model。</td></tr>
+<tr><td><code>Free usage exceeded</code></td>
+    <td>免費額度暫時用完</td>
+    <td>等待沒有用。照<a href="#backup-keys">備案順序</a>換模型。</td></tr>
+<tr><td>換成其他模型後回 <code>UnknownError</code> 或 <code>API key is missing</code></td>
+    <td>那個模型的 key 還沒連好，或不是課程指定的模型</td>
+    <td>只用<a href="#backup-keys">備案順序</a>裡的模型，需要 key 的先做 <code>/connect</code>。不要改 <code>opencode.json</code> 裡的 model。</td></tr>
 <tr><td><code>uv sync</code> 下載很慢或中斷</td>
     <td>網路</td>
     <td>重跑一次，uv 會接續已下載的部分，不會從頭來。</td></tr>
@@ -1153,7 +1234,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <div class="box warn">
 <div class="bt">免費模型會看你送過去的內容</div>
 <p style="margin-bottom:0">
-<code>opencode/big-pickle</code> 是限時免費的試用模型，官方明講資料可能被用於改進模型。
+<code>opencode/big-pickle</code> 是限時免費的試用模型，官方明講資料可能被用於改進模型；Gemini 和 NVIDIA 的免費服務也一樣。
 <strong>不要把未發表的研究資料、個人隱私資料或任何機密內容丟進去。</strong>
 課堂用的都是 scikit-learn 內建的公開資料集，沒有這個問題。
 </p>

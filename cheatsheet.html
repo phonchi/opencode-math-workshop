@@ -728,6 +728,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a href="#section-最常用的五件事">最常用的五件事</a></li>
 <li><a href="#section-opencode-cli">opencode CLI</a></li>
 <li><a href="#section-tui-斜線指令">TUI 斜線指令</a></li>
+<li><a href="#section-模型備案順序">模型備案順序</a></li>
 <li><a href="#section-常用快捷鍵">常用快捷鍵</a></li>
 <li><a href="#section-uv">uv</a></li>
 <li><a href="#section-git-最小組合">git 最小組合</a></li>
@@ -780,6 +781,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a href="#section-最常用的五件事">最常用的五件事</a></li>
 <li><a href="#section-opencode-cli">opencode CLI</a></li>
 <li><a href="#section-tui-斜線指令">TUI 斜線指令</a></li>
+<li><a href="#section-模型備案順序">模型備案順序</a></li>
 <li><a href="#section-常用快捷鍵">常用快捷鍵</a></li>
 <li><a href="#section-uv">uv</a></li>
 <li><a href="#section-git-最小組合">git 最小組合</a></li>
@@ -841,7 +843,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <tr><td><code>/new</code></td><td>開新 session（別名 <code>/clear</code>）</td><td class="ok">會　換題目就用</td></tr>
 <tr><td><code>/sessions</code></td><td>切換 session（別名 <code>/resume</code>、<code>/continue</code>）</td><td class="ok">會　回到舊對話</td></tr>
 <tr><td><code>/diff</code></td><td>開 diff 檢視器</td><td class="ok">會　看它改了哪幾行</td></tr>
-<tr><td><code>/models</code></td><td>切換模型</td><td class="ok">會　確認是 Big Pickle</td></tr>
+<tr><td><code>/models</code></td><td>切換模型</td><td class="ok">會　確認模型或換備案</td></tr>
 <tr><td><code>/editor</code></td><td>開編輯器打長訊息</td><td class="ok">會　貼長指令時</td></tr>
 <tr><td><code>/exit</code></td><td>離開</td><td class="ok">會　請用這個離開</td></tr>
 <tr><td><code>/help</code></td><td>說明</td><td>忘記按鍵時</td></tr>
@@ -849,7 +851,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <tr><td><code>/review</code></td><td>讓 agent 檢查改動</td><td>進階</td></tr>
 <tr><td><code>/themes</code></td><td>換配色</td><td>想換再說</td></tr>
 <tr><td><code>/init</code></td><td>引導式建立 AGENTS.md</td><td class="no">不用　已經有了</td></tr>
-<tr><td><code>/connect</code></td><td>連接 provider</td><td class="no">不用　big-pickle 免登入</td></tr>
+<tr><td><code>/connect</code></td><td>連接 provider</td><td>只在連備案 key 時用</td></tr>
 <tr><td><code>/mcps</code> <code>/skills</code> <code>/status</code> <code>/debug</code> <code>/move</code></td><td>其他</td><td class="no">不用</td></tr>
 </table></div>
 
@@ -859,6 +861,17 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 找不到斜線指令時，按 <code>ctrl+p</code> 搜尋功能名稱。壓縮、還原等操作也可以用下面的快捷鍵。
 </p>
 </div>
+
+<h2 id="section-模型備案順序">模型備案順序</h2>
+<p>先用預設模型，不能用才往下換。免費額度會浮動，全班共用 Wi-Fi 時可能很快用完。</p>
+<div class="tw"><table>
+<tr><th>順序</th><th>模型</th><th>怎麼換</th></tr>
+<tr><td>1</td><td><code>big-pickle</code></td><td>預設，不用登入</td></tr>
+<tr><td>2</td><td>其他免費模型，例如 <code>beam-free</code></td><td><code>/models</code></td></tr>
+<tr><td>3</td><td><code>Gemini 3.5 Flash Lite</code></td><td><code>/models</code>；還沒連過就先 <code>/connect</code> → <code>Google</code> → 貼 key</td></tr>
+<tr><td>4</td><td><code>GLM-5.3-Flash</code>（較慢）</td><td><code>/models</code>；還沒連過就先 <code>/connect</code> → <code>NVIDIA</code> → 貼 key</td></tr>
+</table></div>
+<p>選模型後出現 variant 選單就選 <code>Default</code>。重開 OpenCode 會回到 <code>big-pickle</code>，要再選一次。申請 key 的步驟在<a href="prep.html#backup-keys">課前準備</a>。</p>
 
 <h2 id="section-常用快捷鍵">常用快捷鍵</h2>
 <div class="tw"><table>
@@ -923,13 +936,19 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <tr><td><code>permission requested: edit ...; auto-rejecting</code></td>
     <td><code>opencode run</code> 是非互動模式，沒人能回答權限詢問。加 <code>--auto</code>，或改用互動模式（直接打 <code>opencode</code>）。</td></tr>
 <tr><td><code>Free usage exceeded</code>，倒數很長</td>
-    <td>免費額度用完了，等待沒有用。按 <code>Esc</code> 中斷，用 <code>/models</code> 換一個免費模型（先試 <code>beam-free</code>）。其他模型也可能一起被擋，這時請講師協助。</td></tr>
+    <td>免費額度用完了，等待沒有用。按 <code>Esc</code> 中斷，用 <code>/models</code> 換一個免費模型（先試 <code>beam-free</code>）。其他模型也可能一起被擋，這時改用上面的 Gemini 或 GLM 備案。</td></tr>
+<tr><td><code>high demand</code>、<code>way too hot</code></td>
+    <td>Google 暫時過載，OpenCode 會自動重試。等超過一分鐘還沒恢復，就換下一個模型。</td></tr>
+<tr><td><code>Quota exceeded for metric</code></td>
+    <td>這個 Gemini 模型今天的額度用完了，換下一個模型。請選 <code>Gemini 3.5 Flash Lite</code>，<code>Gemini 3.6 Flash</code> 每天只有 20 個請求。</td></tr>
+<tr><td><code>API key is missing</code></td>
+    <td>這個模型的 key 還沒連好。用 <code>/connect</code> 貼上 key，或換回備案順序裡已連好的模型。</td></tr>
 <tr><td><code>Error: Internal server error</code></td>
     <td>看不到原因。加 <code>--print-logs --log-level ERROR</code> 重跑。</td></tr>
 <tr><td><code>Unrecognized request argument supplied: prompt_cache_key</code></td>
     <td>上游的已知偶發問題。<strong>重試一次</strong>通常就好。</td></tr>
 <tr><td><code>UnknownError / Unexpected server error</code></td>
-    <td>多半是換到了需要 API key 的模型。確認 <code>opencode.json</code> 的 model 是 <code>opencode/big-pickle</code>。</td></tr>
+    <td>多半是換到了需要 API key 的模型。確認 <code>opencode.json</code> 的 model 是 <code>opencode/big-pickle</code>，並只用備案順序裡的模型。</td></tr>
 <tr><td>agent 用 <code>python</code> 而不是 <code>uv run python</code></td>
     <td><code>AGENTS.md</code> 沒被讀到。確認它跟 <code>opencode.json</code> 在同一個資料夾，且你在該資料夾裡啟動。用 <code>opencode debug config</code> 確認。</td></tr>
 <tr><td>agent 說「應該正確」但沒真的跑</td>

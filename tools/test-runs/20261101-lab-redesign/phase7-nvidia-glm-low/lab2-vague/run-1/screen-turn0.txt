@@ -1,0 +1,40 @@
+  ┃  explained variance ratio: [0.1489 0.1362 0.1179 0.0841 0.0578 0.0492 0.0432 0.0366 0.0335 0.0308]                  
+  ┃  explained variance ratio (sklearn): [0.1489 0.1362 0.1179 0.0841 0.0578 0.0492 0.0432 0.0366 0.0335 0.0308]        
+  ┃  max |Z - Z_ref| after sign fix: 2.6645352591003757e-13                                                             
+  ┃  explained variance ratio allclose: True                                                                            
+  ┃  OK: 手刻 PCA 與 sklearn 一致                                                                                       
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 11.1s                                                                                                   
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  ← Edit pca_digits.py                                                                                               
+  ┃                                                                                                                     
+  ┃    15   # 對照 sklearn                                                                                              
+  ┃    16   pca = PCA(n_components=10)                                                                                  
+  ┃    17   Z_ref = pca.fit_transform(X)                                                                                
+  ┃    18                                                                                                               
+  ┃    19 - print("explained variance ratio (手刻):", np.round(eigvals[idx] / (cov.shape[0] * (eigvals.sum() / cov.     
+  ┃         shape[0])), 4))                                                                                             
+  ┃    20 - # 上面的寫法多餘，直接用總變異                                                                              
+  ┃    19   total_var = (Xc ** 2).sum() / (X.shape[0] - 1)                                                              
+  ┃    20   print("explained variance ratio:", np.round(eigvals[idx] / total_var, 4))                                   
+  ┃    21   print("explained variance ratio (sklearn):", np.round(pca.explained_variance_ratio_, 4))                    
+  ┃    22                                                                                                               
+  ┃                                                                                                                     
+                                                                                                                        
+     完成，pca_digits.py 已驗證正確：                                                                                   
+                                                                                                                        
+     - 用中心化後的 covariance $X_c^T X_c / (n-1)$ 做 eigh，取前 10 個特徵向量投影                                      
+     - explained variance ratio 與 sklearn PCA(n_components=10) 完全一致（前 10 個累積約 73.8%）                        
+     - 投影座標在修正特徵向量符號差後，最大誤差僅 ~2.7e-13                                                              
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 1m 51s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase7-nvidia-glm-low/lab2-vague-1/project    17.1K (2%)  ctrl+p commands  
+                                                                                                                        

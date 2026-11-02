@@ -1,0 +1,40 @@
+     二、 手刻模型與 Sklearn 模型比較結果                                                                               
+                                                                                                                        
+     在相同超參數設定（$C = 1.0$、L2 正則化）下，執行 uv run python run_logistic.py 的比較結果如下：                    
+                                                                                                                        
+     - *測試集準確率 (Accuracy)*：                                                                                      
+       - 手刻模型：1.0000                                                                                               
+       - sklearn 模型：1.0000                                                                                           
+     - *權重向量 L2 差異 ($\|w_{\text{hand}} - w_{\text{sk}}\|_2$)*：0.1345                                             
+     - *偏差差異 ($|b_{\text{hand}} - b_{\text{sk}}|$)*：0.1268                                                         
+     - 預測機率最大絕對差異：0.0245                                                                                     
+                                                                                                                        
+     兩者在測試集上均達到 100% 準確率，且權重與預測機率高度吻合（圖表已存至 figs/logistic_comparison.png）。            
+                                                                                                                        
+     ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+                                                                                                                        
+     三、 如何判斷兩個模型「一樣」？                                                                                    
+                                                                                                                        
+     要確認手刻模型與 sklearn 模型是否相同，應從以下四個維度進行檢驗：                                                  
+                                                                                                                        
+     1. 參數對齊（Weights & Bias Alignment）：                                                                          
+        確保兩者使用相同的正則化強度（如相同的 $C$ 值或皆無正則化）。當優化收斂時，檢查權重向量 $w$ 與截距 $b$          
+        的歐式距離是否接近 0（$\|w_{\text{hand}} - w_{\text{sk}}\|_2 < \epsilon$）。                                    
+     2. 預測機率一致性（Predicted Probabilities）：                                                                     
+        對相同的測試集輸入 $X_{\text{test}}$，比較兩者輸出的預測機率 $\hat{y}$。最大絕對誤差應小於容忍閾值（例如 $<     
+        10^{-2}$ 或更低）。                                                                                             
+     3. 預測分類與指標一致性（Predictions & Metrics）：                                                                 
+        以 $0.5$ 為閾值轉換為類別標籤後，兩者的預測標籤、混淆矩陣以及 Accuracy / F1-score 必須完全相同。                
+     4. 損失函數值一致性（Loss Value）：                                                                                
+        在相同資料集上計算出的 Log Loss 數值應當幾乎完全相等。                                                          
+                                                                                                                        
+     ▣  Build · Gemini 3.5 Flash Lite · 1m 11s                                                                          
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Gemini 3.5 Flash Lite Google                                                                               
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase6-gemini-3.5-flash-lite/lab3-vague-1/6.1K (3%) · $0.0 ctrl+p          
+   project                                                                                              commands        
+                                                                                                                        

@@ -1,0 +1,40 @@
+  ┃    46   | test accuracy | 1.0000 | 1.0000 |                                                                         
+  ┃    47   | test log-loss | 0.029345 | 0.029345 |                                                                     
+  ┃    48   | train NLL | 0.0124048485 | 0.0124048483 |                                                                 
+  ┃    49 - | $\|w_{\text{hand}} - w_{\text{sk}}\|_2$ | \multicolumn{2}{c}{$1.14 \times 10^{-6}$} | |                   
+  ┃    49 + | $\|w_{\text{hand}} - w_{\text{sk}}\|_2$ | $1.14 \times 10^{-6}$ | — |                                     
+  ┃    50                                                                                                               
+  ┃    51   兩個模型的權重相關係數 = 1.00000000，等於是解到了同一個點。                                                 
+  ┃    52                                                                                                               
+  ┃    53   ## 4. 怎麼判斷「兩個模型一樣」？                                                                            
+  ┃                                                                                                                     
+                                                                                                                        
+     完成。產出：logreg_digits.py、notes/logistic-regression-digits.md。                                                
+                                                                                                                        
+     結果：手刻牛頓法（L2 正則化）10 次迭代收斂，與 sklearn 係數差 $\|w_1-w_2\|_2 \approx 1.1\times10^{-6}$，test       
+     accuracy 都是 1.0000，train NLL 只差 $2\times10^{-10}$——兩邊解到同一個點。                                         
+                                                                                                                        
+     推導重點（詳見筆記）：從 Bernoulli likelihood 出發，梯度 $\nabla J = \frac{1}{n}X^\top(\sigma(Xw)-y)+\lambda\      
+     tilde{w}$，Hessian $\frac{1}{n}X^\top\mathrm{diag}(p_i(1-p_i))X+\lambda I$，代牛頓法。過程中踩到兩個關鍵坑：       
+                                                                                                                        
+     1. 不加正則化會發散：3 vs 8 標準化後幾乎線性可分，MLE 權重會跑到無窮大，所以必須和 sklearn 一樣加 L2。             
+     2. sklearn 不懲罰截距：我第一次把截距也放進正則化，係數差到 0.3；修正後兩邊才吻合。                                
+        這正好示範了「怎麼判斷兩個模型一樣」：                                                                          
+                                                                                                                        
+     判斷流程：                                                                                                         
+                                                                                                                        
+     1. 目標函數一致（正則化強度、截距處理、前處理都要對齊）——先確認在解同一道數學題。                                  
+     2. 係數逐項比 $\|w_1-w_2\|_2$（不能只看相關係數，那不保證尺度相同）。                                              
+     3. 最關鍵：比 train NLL——兩邊都在最小化同一個 $J$，若某邊 $J$ 值明顯偏高，是最佳化器沒收斂，不是模型不同。         
+        這也幫我抓出了 lbfgs 未完全收斂的問題。                                                                         
+     4. 最後才看連續預測值／log-loss，accuracy 是離散指標，最不具鑑別力。                                               
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 5m 48s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase7-nvidia-glm-low/lab3-vague-1/project    23.6K (2%)  ctrl+p commands  
+                                                                                                                        

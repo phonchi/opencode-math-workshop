@@ -1,0 +1,40 @@
+       - 向量夾角餘弦值：|cos(θ)| > 1 - 1e-6（或透過 np.abs(np.sum(v_custom * v_sklearn, axis=1)) 接近 1）。            
+       - 數值差值：在對齊符號後，atol = 1e-5, rtol = 1e-5。                                                             
+     - 各自抓不到哪些錯誤：                                                                                             
+       - 抓不到特徵向量維度轉置錯誤（Transposition Errors）： 如果手刻時行列維度搞錯（例如把 $(D, K)$ 存成 $(K, D)      
+         $），若未檢查矩陣 shape 或投影維度會漏看。                                                                     
+       - 抓不到未做資料中心化（Mean Centering）： 若手刻時忘記對原始資料減去平均數 $\mu$，算出來的共變異數矩陣會錯誤，  
+         導致特徵向量完全偏離（但若強行對齊某些巧合可能誤導，實際上此項能抓出大部分未中心化問題，                       
+         但若只看特徵向量本身在極端情況下無法單獨完全排除資料預處理細節的微小偏差）。                                   
+                                                                                                                        
+     3. 投影資料 / 降維後座標（Transformed Data / Scores）檢查                                                          
+                                                                                                                        
+     - 比什麼量： 將原始 Digits 資料投影到前 10 個主成分後的坐標矩陣（X_transformed = (X - mean) @ components.T vs      
+       sklearn 的 fit_transform(X)）。                                                                                  
+     - 容差 (Tolerance)： atol = 1e-4, rtol = 1e-4（因涉及矩陣乘法累積，容差比純量略寬鬆一個量級）。                    
+     - 各自抓不到哪些錯誤：                                                                                             
+       - 抓不到全域常數縮放或符號同步取反： 若某個主成分的特徵向量不小心帶有負號，且投影坐標也跟著變號，                
+         兩者相乘的降維結果可能在部分維度上互相抵銷，若未逐維檢查可能漏掉局部符號定義差異。                             
+       - 抓不到行/列索引對應錯置：                                                                                      
+         如果資料樣本數（$N$）或特徵數（$D$）在矩陣運算中因廣播（Broadcasting）機制發生隱式變形（Shape Mismatch），     
+         如果形狀剛好相容但維度意義錯置，數值比對可能會直接報錯或得到無意義結果，需先嚴格檢查 Shape。                   
+                                                                                                                        
+     4. 解釋變異數比例（Explained Variance Ratio）檢查                                                                  
+                                                                                                                        
+     - 比什麼量： 前 10 個主成分各自及累積的解釋變異數比例（explained_variance_ratio_）。                               
+     - 容差 (Tolerance)： atol = 1e-5, rtol = 1e-5                                                                      
+     - 各自抓不到哪些錯誤：                                                                                             
+       - 抓不到整體數值常數縮放錯誤： 因為比例是將個別特徵值除以總變異數（Total Variance），                            
+         任何全域常數縮放（例如總和分母算錯但分子分母同比例放大縮小）在比例上會自動約掉，                               
+         因此無法抓出總變異數計算分母的常數偏差。                                                                       
+                                                                                                                        
+     ▣  Plan · Gemini 3.5 Flash Lite · 12.5s                                                                            
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Plan · Gemini 3.5 Flash Lite Google                                                                                
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase6-gemini-3.5-flash-lite-flow/e2-plan-26.3K (3%) · $0.0 ctrl+p         
+   3/project                                                                                             commands       
+                                                                                                                        

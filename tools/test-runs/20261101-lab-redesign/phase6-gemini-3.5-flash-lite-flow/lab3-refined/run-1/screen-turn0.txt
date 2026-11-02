@@ -1,0 +1,40 @@
+     三、 與 Scikit-Learn 比較結果                                                                                      
+                                                                                                                        
+     在超參數設定一致（$C = 1.0$、相同訓練/測試分割與標準化）下：                                                       
+                                                                                                                        
+     - *測試集準確率 (Accuracy)*：                                                                                      
+       - 手刻模型：$100\%$ ($1.0000$)                                                                                   
+       - Sklearn 模型：$100\%$ ($1.0000$)                                                                               
+     - 參數差異：                                                                                                       
+       - 權重向量 L2 差值 ($\|\mathbf{w}_{\text{custom}} - \mathbf{w}_{\text{sklearn}}\|_2$)：$\approx 0.0291$          
+       - 截距差值 ($|b_{\text{custom}} - b_{\text{sklearn}}|$)：$\approx 0.0010$                                        
+     - 預測機率最大絕對誤差：$< 0.01$                                                                                   
+                                                                                                                        
+     這證明了我們手刻的梯度下降實作完全正確，且收斂至與 sklearn（使用 LBFGS 最佳化器）極其一致的解。                    
+                                                                                                                        
+     ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+                                                                                                                        
+     四、 如何判斷兩個模型一樣？                                                                                        
+                                                                                                                        
+     要嚴謹判斷兩個線性模型是否「一樣」，可從三個維度檢驗：                                                             
+                                                                                                                        
+     1. *參數空間同等性 (Parameter Space Equivalence)*：                                                                
+        檢查權重向量 $\mathbf{w}_1$ 與 $\mathbf{w}_2$、截距 $b_1$ 與 $b_2$ 的歐氏距離或絕對差是否小於容忍閾值（如 $\    
+        epsilon = 10^{-3}$）。數值高度接近即代表模型等價。                                                              
+     2. *預測輸出空間同等性 (Output Space Equivalence)*：                                                               
+        檢查兩者對測試樣本產生的預測機率 $\hat{y}$ 最大絕對誤差是否極小（$\max |\hat{y}_1 - \hat{y}_2| < 10^{-3}$），   
+        且硬分類標籤（Confusion Matrix）完全一致。                                                                      
+     3. *決策邊界同等性 (Decision Boundary Equivalence)*：                                                              
+        羅吉斯迴歸的決策邊界為超平面 $\mathbf{w}^T \mathbf{x} + b = 0$。若兩模型的權重向量成比例（$\mathbf{w}_1 \       
+        propto \mathbf{w}_2$ 且截距對應匹配），則其決策邊界完全相同，對任何輸入的分類決策與超平面距離皆成正比。         
+                                                                                                                        
+     ▣  Build · Gemini 3.5 Flash Lite · 1m 28s                                                                          
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Gemini 3.5 Flash Lite Google                                                                               
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase6-gemini-3.5-flash-lite-flow/lab3-    41.8K (4%) · $0.0ctrl+p         
+   refined-1/project                                                                                     commands       
+                                                                                                                        

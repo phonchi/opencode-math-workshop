@@ -1,0 +1,40 @@
+       - 抓不到資料中心化（Mean Centering）過程中的維度或廣義廣播（broadcasting）瑕疵。                                 
+       - 抓不到矩陣相乘維度寫反（轉置錯誤）造成的特徵值錯置。                                                           
+                                                                                                                        
+     2. 主成分方向 / 特徵向量 (Components)                                                                              
+                                                                                                                        
+     - 比什麼量：手刻得到的特徵向量矩陣 $V$（需轉置以符合 sklearn 的 (n_components, n_features) 形狀）與 pca.           
+       components_。因特徵向量具有正負號多義性（$v$ 與 $-v$ 皆合法），                                                  
+       比對前需先進行正負號對齊（例如確保對應向量的內積大於 0，或強制主元素為正）。                                     
+     - *容差 (Tolerance)*：對齊正負號後，元素間的絕對誤差 $\le 10^{-5}$。                                               
+     - 抓不到哪些錯誤：                                                                                                 
+       - 若未做正負號對齊，會誤判為數值完全不符。                                                                       
+       - 抓不到當特徵值出現簡併（Degenerate eigenvalues，即數值相近的特徵值）時，子空間基底旋轉產生的差異。             
+                                                                                                                        
+     3. 降維投影資料 (Projected Data / Transform)                                                                       
+                                                                                                                        
+     - 比什麼量：手刻投影結果 $(X - \mu) V^T$ 與 pca.transform(X)。同樣需在比對時依對應主成分的正負號進行調整。         
+     - *容差 (Tolerance)*：矩陣各元素的最大絕對誤差 $\le 10^{-5}$。                                                     
+     - 抓不到哪些錯誤：                                                                                                 
+       - 若特徵向量與投影係數的符號錯誤互相抵銷，可能無法暴露某些對齊細節上的邏輯漏洞。                                 
+                                                                                                                        
+     4. 資料重建誤差 (Reconstruction / Inverse Transform)                                                               
+                                                                                                                        
+     - 比什麼量：手刻重建資料 $X_{\text{proj}} V + \mu$ 與 pca.inverse_transform(pca.transform(X)) 的均方誤差 (MSE)     
+       或最大絕對差。                                                                                                   
+     - *容差 (Tolerance)*：MSE 差異 $\le 10^{-10}$。                                                                    
+     - 抓不到哪些錯誤：                                                                                                 
+       - 無法抓到正負號錯誤：因為重構公式為 $X_{\text{rec}} = Z V + \mu$，若某個主成分 $v_i$ 變號成 $-v_i$，            
+         其投影係數 $z_i$ 也會同步變號，兩者相乘 $(-z_i)(-v_i) = z_i v_i$ 結果不變。因此，                              
+         重建誤差完全無法檢測出正負號相反的錯誤。                                                                       
+                                                                                                                        
+     ▣  Plan · Gemini 3.5 Flash Lite · 10.0s                                                                            
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Plan · Gemini 3.5 Flash Lite Google                                                                                
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase6-gemini-3.5-flash-lite-flow/e2-plan-19.2K (2%) · $0.0 ctrl+p         
+   1/project                                                                                             commands       
+                                                                                                                        
