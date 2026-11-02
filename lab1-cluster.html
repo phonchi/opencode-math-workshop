@@ -839,7 +839,7 @@ $$\|\mathbf{x}-\mathbf{y}\|_2=\sqrt{\sum_{j=1}^{64}(x_j-y_j)^2}$$
 
 <details class="bg"><summary>什麼是「分群」？跟「分類」差在哪？</summary>
 <div class="bg-body">
-<p>這是機器學習裡最基本的一組區分，值得花三十秒搞清楚：</p>
+<p>這是機器學習裡最基本的一組區分：</p>
 <div class="tw"><table>
 <tr><th></th><th>分類（classification）</th><th>分群（clustering）</th></tr>
 <tr><td>你有什麼</td><td>資料 <strong>＋ 正確答案</strong></td><td><strong>只有資料</strong></td></tr>
@@ -848,7 +848,7 @@ $$\|\mathbf{x}-\mathbf{y}\|_2=\sqrt{\sum_{j=1}^{64}(x_j-y_j)^2}$$
 <tr><td>本工作坊</td><td>Lab 3</td><td><strong>Lab 1（現在這關）</strong></td></tr>
 </table></div>
 <p>
-關鍵在於：<strong>分群演算法看不到答案</strong>。
+<strong>分群演算法看不到答案</strong>。
 digits 雖然附了正確標籤，但我們<em>不會</em>把標籤餵給 k-means。
 它只看得到那 1797 個 64 維向量，得自己決定誰跟誰是一夥的。
 </p>
@@ -861,7 +861,7 @@ digits 雖然附了正確標籤，但我們<em>不會</em>把標籤餵給 k-mean
 
 <details class="bg"><summary>k-means 到底在做什麼？（三行講完）</summary>
 <div class="bg-body">
-<p>給定你想分幾群（那個 $k$），演算法只做兩件事，反覆做到不變為止：</p>
+<p>給定你想分幾群（那個 $k$），演算法先挑起點，再反覆做兩件事，直到不變為止：</p>
 <ol>
 <li>隨機挑 $k$ 個點當「中心」$\boldsymbol{\mu}_1,\dots,\boldsymbol{\mu}_k$</li>
 <li><strong>指派</strong>：每個資料點歸到離它最近的那個中心</li>
@@ -869,7 +869,7 @@ digits 雖然附了正確標籤，但我們<em>不會</em>把標籤餵給 k-mean
 </ol>
 <p>然後回到第 2 步，直到沒有點再換群為止。</p>
 <h4>它在最小化什麼</h4>
-<p>整個過程其實是在最小化這個量，sklearn 把它叫做 <code>inertia_</code>：</p>
+<p>整個過程在最小化這個量，sklearn 把它叫做 <code>inertia_</code>：</p>
 $$J=\sum_{i=1}^{n}\bigl\|\mathbf{x}_i-\boldsymbol{\mu}_{c(i)}\bigr\|^2$$
 <p>
 （$c(i)$ 是第 $i$ 個點被分到哪一群。）白話：<strong>每個點到自己那群中心的距離平方，全部加起來</strong>。
@@ -893,7 +893,7 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <div class="bt">為什麼用這份</div>
 <p style="margin-bottom:0">
 不用下載（套件裡就有）、夠小（幾秒跑完）、維度夠高（64 維，PCA 才有意義）、
-而且<strong>它附有 10 種數字的標籤</strong>。這點待會會變成整堂課最重要的伏筆。
+而且<strong>它附有 10 種數字的標籤</strong>，分群結果才有東西可以對照。
 </p>
 </div>
 </section>
@@ -905,7 +905,7 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <h3>啟動 agent</h3>
 <p>在你課前準備好的專案資料夾裡打開終端機：</p>
 <pre class="cmd"><code>opencode</code></pre>
-<p>看到 TUI 介面，左下角顯示 <code>build · big-pickle</code> 就對了。</p>
+<p>看到 TUI 介面，左下角顯示 <code>Build · Big Pickle</code> 就對了。</p>
 </div>
 
 <div class="step" data-n="2">
@@ -1009,7 +1009,7 @@ $$s(i)=\frac{b(i)-a(i)}{\max\{a(i),\,b(i)\}},\qquad s(i)\in[-1,1]$$
 
 <p>
 所以 silhouette 回答的問題是「哪個 $k$ 讓分群<em>幾何上</em>最漂亮」，
-而不是「哪個 $k$ 是<em>正確</em>的類別數」。這是兩個不同的問題。
+而不是「哪個 $k$ 是<em>正確</em>的類別數」。
 </p>
 
 <details class="bg"><summary>silhouette 詳解：公式怎麼來、分數怎麼讀</summary>
@@ -1084,7 +1084,7 @@ $$S=\frac{1}{n}\sum_{i=1}^{n}s(i)$$
 在這份資料、本次初始化與搜尋範圍中，$k=9$ 的 silhouette 最高。這是已觀察到的結果；單靠這個分數，還不能知道哪些數字混在一起，或為什麼這組分群較好。合併兩群也不保證讓群內距離下降或 silhouette 上升。
 </p>
 <p>
-換句話說：<strong>「幾何上最漂亮的分法」跟「語意上正確的分法」不一樣。</strong>
+<strong>「幾何上最漂亮的分法」跟「語意上正確的分法」不一樣。</strong>
 如果想解釋原因，可以請 agent 畫群中心，或列出每群包含各種數字的筆數，再對照標籤判讀。
 </p>
 
@@ -1116,8 +1116,8 @@ $$S=\frac{1}{n}\sum_{i=1}^{n}s(i)$$
 - 用 sklearn 的 adjusted_rand_score 與真實標籤比對 k=9 和 k=10 的結果
 - 告訴我在「不知道真實答案」的情境下，還有什麼方法可以判斷 k</code></pre>
 <p>
-這裡引入了 <strong>ARI（adjusted Rand index）</strong>，這是一個需要真實標籤的外部指標。
-對照 silhouette 這個內部指標，你會很清楚看到兩者的差別。
+<strong>ARI（adjusted Rand index）</strong>是需要真實標籤的外部指標，silhouette 則是不看標籤的內部指標。
+對照兩者的結果，就能看出差別。
 </p>
 
 <details class="bg"><summary>ARI 是什麼？為什麼要「調整」？</summary>

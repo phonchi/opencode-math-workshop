@@ -821,7 +821,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <tr><td><code>opencode run -c "訊息"</code></td><td>接續上一個 session</td></tr>
 <tr><td><code>opencode models</code></td><td>列出目前可用的模型</td></tr>
 <tr><td><code>opencode auth list</code></td><td>看有哪些已登入的 provider</td></tr>
-<tr><td><code>opencode debug config</code></td><td>顯示合併後的最終設定（排查設定問題的第一站）</td></tr>
+<tr><td><code>opencode debug config</code></td><td>顯示合併後的最終設定（設定有問題時先看這個）</td></tr>
 <tr><td><code>opencode debug paths</code></td><td>顯示設定、資料、快取的實際路徑</td></tr>
 <tr><td><code>opencode debug agent &lt;名字&gt;</code></td><td>顯示某個 agent 的設定細節</td></tr>
 <tr><td><code>opencode agent list</code></td><td>列出可用的 agent</td></tr>
@@ -924,7 +924,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <tr><td><code>git log --oneline</code></td><td>看存檔歷史</td></tr>
 </table></div>
 <p>核心工作流只有三步：<strong>動手前 <code>git commit</code> → 讓 agent 改 → <code>git diff</code> 檢查</strong>。
-檢查前先不要 <code>git add</code>；確認不要未暫存修改時才用 <code>git restore .</code>。已暫存的變更用 <code>git diff --cached</code> 查看。詳見<a href="git-safety.html">第 07 章</a>。</p>
+檢查前先不要 <code>git add</code>；確認不要未暫存修改時才用 <code>git restore .</code>。已暫存的變更用 <code>git diff --cached</code> 查看。詳見<a href="git-safety.html">git 安全網</a>。</p>
 </section>
 
 <section>
@@ -940,7 +940,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <tr><td><code>high demand</code>、<code>way too hot</code></td>
     <td>Google 暫時過載，OpenCode 會自動重試。等超過一分鐘還沒恢復，就換下一個模型。</td></tr>
 <tr><td><code>Quota exceeded for metric</code></td>
-    <td>這個 Gemini 模型今天的額度用完了，換下一個模型。請選 <code>Gemini 3.5 Flash Lite</code>，<code>Gemini 3.6 Flash</code> 每天只有 20 個請求。</td></tr>
+    <td>先看後面寫的是哪種額度。每日請求（per day）用完就換下一個模型；每分鐘的上限等一下再試。Gemini 請選 <code>Gemini 3.5 Flash Lite</code>，<code>Gemini 3.6 Flash</code> 實測每天只有 20 個請求。</td></tr>
 <tr><td><code>API key is missing</code></td>
     <td>這個模型的 key 還沒連好。用 <code>/connect</code> 貼上 key，或換回備案順序裡已連好的模型。</td></tr>
 <tr><td><code>Error: Internal server error</code></td>
@@ -952,13 +952,13 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <tr><td>agent 用 <code>python</code> 而不是 <code>uv run python</code></td>
     <td><code>AGENTS.md</code> 沒被讀到。確認它跟 <code>opencode.json</code> 在同一個資料夾，且你在該資料夾裡啟動。用 <code>opencode debug config</code> 確認。</td></tr>
 <tr><td>agent 說「應該正確」但沒真的跑</td>
-    <td>在 <code>AGENTS.md</code> 裡明確要求「必須實際執行並印出結果」。詳見<a href="agents-md.html">第 06 章</a>。</td></tr>
+    <td>在 <code>AGENTS.md</code> 裡明確要求「必須實際執行並印出結果」。詳見<a href="agents-md.html">AGENTS.md 專案規則</a>。</td></tr>
 <tr><td>agent 開始「修」一個沒壞的程式</td>
     <td>按 <strong>Esc</strong> 打斷它，然後問它一個能戳破錯誤前提的問題。不要放任它亂改。</td></tr>
 <tr><td>回答愈來愈短、開始忘記前面講過的事</td>
-    <td>context 快滿了。換題目就 <code>/new</code>；同一題按 <code>ctrl+x c</code> 壓縮（<strong>不是 <code>/compact</code></strong>，1.18.30 沒有那個斜線指令）。壓縮前先把結論寫進 <code>notes/</code>。</td></tr>
+    <td>context 快滿了。換題目就 <code>/new</code>；同一題按 <code>ctrl+x c</code> 壓縮（<code>/compact</code> 可能沒有反應）。壓縮前先把結論寫進 <code>notes/</code>。</td></tr>
 <tr><td><code>/compact</code>、<code>/undo</code>、<code>/share</code>、<code>/export</code> 打了沒反應</td>
-    <td>1.18.30 <strong>沒有</strong>這幾個斜線指令。改用 <code>ctrl+x c</code>／<code>ctrl+x u</code>／<code>ctrl+x x</code>，或 <code>ctrl+p</code> 開指令面板搜尋。</td></tr>
+    <td>這幾個斜線指令可能不存在。改用 <code>ctrl+x c</code>／<code>ctrl+x u</code>／<code>ctrl+x x</code>，或 <code>ctrl+p</code> 開指令面板搜尋。</td></tr>
 <tr><td>按 <code>Esc</code> 停不下來</td>
     <td>要按<strong>兩次以上</strong>。第一次只會顯示 <code>esc again to interrupt</code>。</td></tr>
 <tr><td>opencode 突然關掉了</td>
@@ -966,13 +966,13 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <tr><td><code>ModuleNotFoundError</code></td>
     <td>套件沒裝或沒用 <code>uv run</code>。先跑 <code>uv sync</code>，再確認指令前面有 <code>uv run</code>。</td></tr>
 <tr><td>圖沒出現</td>
-    <td>終端機環境沒有視窗，<code>plt.show()</code> 不會有效果。要用 <code>plt.savefig("figs/xxx.png")</code>。</td></tr>
+    <td><code>plt.show()</code> 不會存檔，還可能開視窗等待關閉。要用 <code>plt.savefig("figs/xxx.png")</code>。</td></tr>
 </table></div>
 </section>
 
 <section>
 <h2 id="section-下指令的四個習慣">下指令的四個習慣</h2>
-<p>想自己寫一份完整任務，或讓中斷的工作繼續，請看<a href="agent-workflows.html">需求與續作練習</a>。</p>
+<p>想自己寫一份完整任務，或讓中斷的工作繼續，請看<a href="agent-workflows.html">讓 agent 把工作做完整</a>。</p>
 <div class="tw"><table>
 <tr><th>習慣</th><th>差別</th></tr>
 <tr><td><strong>說清楚存到哪</strong></td>

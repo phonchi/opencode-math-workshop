@@ -31,11 +31,9 @@ opencode 啟動時會依序尋找規則檔：
 2. **全域**：`~/.config/opencode/AGENTS.md`
 3. **Claude Code 相容**：`~/.claude/CLAUDE.md`（除非關閉此相容性）
 
-找到的檔案會**一起合併**使用，不是只取第一個。同一類別中 `AGENTS.md` 優先於 `CLAUDE.md`。
+專案規則會和選中的全域規則**合併**使用。同一類別中 `AGENTS.md` 優先於 `CLAUDE.md`；全域的 `~/.claude/CLAUDE.md` 只在 `~/.config/opencode/AGENTS.md` 不存在時才使用。
 
-因為是「從目前目錄往上找」，所以有個很實際的後果：
-
-在課前建立的專案資料夾開啟終端機，先確認位置：
+因為是從目前目錄往上找，在錯的資料夾啟動就讀不到專案規則。所以先在課前建立的專案資料夾開啟終端機，確認位置：
 
 ```bash
 pwd
@@ -57,7 +55,19 @@ ls
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode/big-pickle",
+  "provider": {
+    "nvidia": {
+      "models": {
+        "z-ai/glm-5.3-flash": {
+          "options": { "reasoningEffort": "low" }
+        }
+      }
+    }
+  },
   "permission": { "bash": "ask", "edit": "ask", "webfetch": "ask" },
+  "agent": {
+    "plan": { "permission": { "edit": "deny", "bash": "deny" } }
+  },
   "instructions": ["AGENTS.md"]
 }
 ```
@@ -109,7 +119,7 @@ remote (.well-known/opencode)
 | 會不會跟著作業一起交 | 不會 | 會（建議進版控） |
 | 換專案還在嗎 | 在 | 不在 |
 
-判斷原則很簡單：**換一個專案還成立的，放全域；只對這個專案成立的，放專案層。**
+判斷原則：**換一個專案還成立的，放全域；只對這個專案成立的，放專案層。**
 
 「用繁體中文」兩邊都可以。放全域你每個專案都不用再寫；放專案層則讓同學拿到你的專案時，也能沿用相同的語言要求。這門課建議**放專案層**，讓規則和練習檔案一起保存。
 
@@ -189,18 +199,18 @@ sklearn 的版本，印出兩者的數值差異來驗證。
 ```markdown
 ## 圖檔
 所有圖存到 `figs/`，用 `matplotlib.pyplot.savefig()`，不要用 `plt.show()`
-（這是無視窗環境，`show()` 不會有任何效果）。
+（它可能開視窗並等待關閉，程式看起來像卡住）。
 檔名用英文小寫加底線，例如 `figs/pca_scree_plot.png`。
 ```
 
-`plt.show()` 在終端機環境裡是靜默無效的：不會報錯，就是什麼都沒發生，然後你以為程式壞了。明確要求 `savefig()` 到固定目錄，你才找得到圖。
+`plt.show()` 是否開視窗取決於環境：可能什麼都沒發生，也可能開視窗等你關閉，讓程式看起來像卡住。明確要求 `savefig()` 到固定目錄，你才找得到圖。
 
 ### 6.6 不准 commit
 
 ```markdown
 ## 不要做的事
 - 不要執行 `git commit`、`git push`，除非我明講。
-- 不要改 `pyproject.toml` 以外的設定檔。
+- 不要改 `pyproject.toml` 以外的設定檔，除非本次練習明確要求。
 - 不要刪除 `figs/` 或 `notes/` 裡既有的檔案。
 ```
 
@@ -212,7 +222,7 @@ sklearn 的版本，印出兩者的數值差異來驗證。
 
 ## 7. 完整範例（可直接複製）
 
-你的起始專案只放操作規則（語言、uv、圖檔、筆記、不要做的事）。下面這份多了「數學程式的規矩」，是把工作坊學到的事寫回去之後的樣子，可以照自己抓到的問題調整：
+你的起始專案只放操作規則（語言、uv、圖檔、筆記、不要做的事）。下面這份多了「數學程式的規矩」和一條設定檔規則，幾條也寫得更細，是把工作坊學到的事寫回去之後的樣子，可以照自己抓到的問題調整：
 
 ```markdown
 # AI-Math 工作坊　專案規則
@@ -237,18 +247,18 @@ sklearn 的版本，印出兩者的數值差異來驗證。
 
 ## 圖檔
 所有圖存到 `figs/`，用 `matplotlib.pyplot.savefig()`，不要用 `plt.show()`
-（這是無視窗環境，`show()` 不會有任何效果）。
+（它可能開視窗並等待關閉，程式看起來像卡住）。
 
 ## 筆記
 數學筆記寫在 `notes/` 底下的 `.md` 檔，數學式用 `$...$`（行內）與 `$$...$$`（獨立行）。
 
 ## 不要做的事
 - 不要 `git commit`、`git push`，除非我明講。
-- 不要改 `pyproject.toml` 以外的設定檔。
+- 不要改 `pyproject.toml` 以外的設定檔，除非本次練習明確要求。
 - 不要刪除 `figs/` 或 `notes/` 裡既有的檔案。
 ```
 
-注意第 3 條「自己驗證」的寫法：它不只說「要驗證」，還說「**必須實際執行、印出比對結果**，不可以只說『應該正確』」。這個補充很關鍵。不加的話，agent 常常寫一段驗證程式碼然後直接宣稱通過，根本沒跑。
+注意第 3 條「自己驗證」的寫法：它不只說「要驗證」，還說「**必須實際執行、印出比對結果**，不可以只說『應該正確』」。不加這句，agent 可能寫了驗證程式碼卻沒跑，就宣稱通過。
 
 ---
 
@@ -295,7 +305,7 @@ PCA 是一種降維方法，它透過計算共變異數矩陣的特徵向量⋯�
 
 ### 反例 5：以為 AGENTS.md 能強制執行
 
-這是最重要的一個認知：AGENTS.md 是提示，**不是權限控制**。
+AGENTS.md 是提示，**不是權限控制**。
 
 「不要 `git push`」寫在 AGENTS.md 裡，是請求 agent 不要做；模型絕大多數時候會聽，但不保證。真正的強制要靠 `opencode.json` 的 `permission` 設定：
 
@@ -317,7 +327,7 @@ PCA 是一種降維方法，它透過計算共變異數矩陣的特徵向量⋯�
 
 `permission` 的可用值是 `"allow"`、`"ask"`、`"deny"`。除了 `bash`、`edit`、`webfetch`，還有 `read`、`glob`、`grep`、`task`、`skill`、`websearch`、`external_directory` 等。
 
-**心法：想拜託的事寫 AGENTS.md，不能出事的事寫 permission。**
+**簡單記：想拜託的事寫 AGENTS.md，不能出事的事寫 permission。**
 
 ---
 
@@ -337,6 +347,17 @@ opencode debug config
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode/big-pickle",
+  "provider": {
+    "nvidia": {
+      "models": {
+        "z-ai/glm-5.3-flash": {
+          "options": {
+            "reasoningEffort": "low"
+          }
+        }
+      }
+    }
+  },
   "permission": {
     "bash": "ask",
     "edit": "ask",
@@ -345,7 +366,15 @@ opencode debug config
   "instructions": [
     "AGENTS.md"
   ],
-  "agent": {},
+  "agent": {
+    "plan": {
+      "permission": {
+        "edit": "deny",
+        "bash": "deny"
+      },
+      "options": {}
+    }
+  },
   "mode": {},
   "plugin": [],
   "command": {},

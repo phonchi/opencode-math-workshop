@@ -814,7 +814,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 ls</code></pre>
 <p>清單裡應有 <code>pyproject.toml</code>、<code>opencode.json</code> 與 <code>AGENTS.md</code>。</p>
 <p>檢查環境：</p>
-<pre class="cmd" data-lang="bash"><code>uv run python -c "import numpy, sklearn, matplotlib, networkx; print('環境 OK')"</code></pre>
+<pre class="cmd" data-lang="bash"><code>uv run python -c "import numpy, scipy, sklearn, matplotlib, networkx; print('環境 OK')"</code></pre>
 <p>這個專案一律用 <code>uv run python 檔名.py</code> 執行程式，不要用 <code>python</code>、<code>python3</code>，也不要用 <code>pip install</code>。要加套件用 <code>uv add 套件名</code>。這條規則已經寫在專案的 <code>AGENTS.md</code> 裡；執行時仍請看一下它用的指令。</p>
 <h3>1.3 兩種啟動方式</h3>
 <p><strong>互動模式（本章都用這個）</strong>：</p>
@@ -828,7 +828,7 @@ ls</code></pre>
 <pre class="cmd" data-lang="json"><code>{
   "model": "opencode/big-pickle"
 }</code></pre>
-<p><code>big-pickle</code> 不用登入、不用 API key、不用信用卡。啟動後畫面上會有一行提示 <code>Run /connect to add an AI provider and start coding</code>，<strong>忽略它</strong>。那是給要接自己帳號的人看的，你不需要。</p>
+<p><code>big-pickle</code> 不用登入、不用 API key、不用信用卡。畫面下方會輪流顯示 Tip，例如 <code>Run /connect to add an AI provider and start coding</code>，<strong>可以忽略</strong>。只有額度用完、要換<a href="prep.html#backup-keys">備案模型</a>時才需要 <code>/connect</code>。</p>
 <hr>
 <h2 id="section-認識畫面">2. 認識畫面</h2>
 <p>啟動後還沒開始對話時，畫面大概長這樣（位置會隨終端機寬度調整）：</p>
@@ -839,15 +839,15 @@ ls</code></pre>
       ┃
       ┃  Ask anything… "What is the tech stack of this project?"
       ┃
-      ┃  Build · Big Pickle OpenCode Zen
+      ┃  Build · Big Pickle OpenCode
       ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
                                        tab agents  ctrl+p commands
 
               ● Tip Run /connect to add an AI provider and start coding
 
-  /home/you/ai-math-lab                                          1.18.30</code></pre>
+  /home/you/ai-math-lab                                          1.19.5</code></pre>
 <p>由上往下看：</p>
-<div class="tw"><table><tr><th>畫面上的東西</th><th>意思</th></tr><tr><td><code>Ask anything…</code></td><td>輸入框。游標在這裡，直接打字就行</td></tr><tr><td><code>Build · Big Pickle OpenCode Zen</code></td><td>現在用的 <strong>agent</strong>（Build）· <strong>模型</strong>（Big Pickle）· <strong>供應商</strong>（OpenCode Zen）</td></tr><tr><td><code>tab agents</code></td><td>按 <code>Tab</code> 可以換 agent</td></tr><tr><td><code>ctrl+p commands</code></td><td>按 <code>ctrl+p</code> 開指令面板</td></tr><tr><td>最底左邊</td><td>你現在在哪個資料夾。<strong>開始之前先確認這行是對的</strong></td></tr><tr><td>最底右邊</td><td>opencode 版本</td></tr></table></div>
+<div class="tw"><table><tr><th>畫面上的東西</th><th>意思</th></tr><tr><td><code>Ask anything…</code></td><td>輸入框。游標在這裡，直接打字就行</td></tr><tr><td><code>Build · Big Pickle OpenCode</code></td><td>現在用的 <strong>agent</strong>（Build）· <strong>模型</strong>（Big Pickle）· <strong>供應商</strong>（OpenCode）</td></tr><tr><td><code>tab agents</code></td><td>按 <code>Tab</code> 可以換 agent</td></tr><tr><td><code>ctrl+p commands</code></td><td>按 <code>ctrl+p</code> 開指令面板</td></tr><tr><td>最底左邊</td><td>你現在在哪個資料夾。<strong>開始之前先確認這行是對的</strong></td></tr><tr><td>最底右邊</td><td>opencode 版本</td></tr></table></div>
 <p>開始對話之後，右邊會多出一欄側邊欄：</p>
 <pre class="out"><code>                                     列出資料夾內所有檔案     &lt;- session 名稱（自動命名）
 
@@ -1276,7 +1276,7 @@ ls</code></pre>
 <ol>
 <li><strong>agent 先「想」</strong>。畫面上會出現一段淺色的思考過程（Thought），說它打算怎麼做。</li>
 <li><strong>它用了工具</strong>。你會看到 <code>read</code> 之類的工具呼叫列出來。</li>
-<li><strong>它用繁體中文回答</strong>。這不是巧合：<code>AGENTS.md</code> 裡寫了「一律使用台灣繁體中文回答」，agent 啟動時就把這個檔讀進去了。請核對它是否照著規則回應。</li>
+<li><strong>它用繁體中文回答</strong>。因為 <code>AGENTS.md</code> 裡寫了「一律使用台灣繁體中文回答」，agent 啟動時就讀了這個檔。請核對它是否照著規則回應。</li>
 </ol>
 <p>這一句只是讀檔，不會跳出權限對話框。</p>
 <h3>3.2 再下一個要動手的指令</h3>
@@ -1340,7 +1340,7 @@ ls</code></pre>
 <div class="tw"><table><tr><th>agent</th><th>用來做什麼</th></tr><tr><td><code>Build</code></td><td>預設。可以讀、可以改、可以跑指令。工作坊多半用這個，Lab 2 會練習先切到 Plan</td></tr><tr><td><code>Plan</code></td><td>先討論與規劃，不動檔案。本專案的 <code>opencode.json</code> 已設定 Plan 不能編輯、不能跑指令</td></tr></table></div>
 <p>Plan 的限制來自設定，不是模式名稱。如果設定檔只寫 <code>"edit": "ask"</code>，這條會蓋掉 Plan 內建的禁止，它就只是問你。所以起始專案特別加了 <code>agent.plan.permission</code>，可以用 <code>opencode debug agent plan</code> 查實際結果。</p>
 <h3>4.6 開場練習：它說得很肯定，你怎麼判斷？</h3>
-<p>這門課貫穿一個問題：<strong>AI 這麼強，為什麼還要自己想、自己驗證？</strong>先試一次。貼上這句，<strong>如果跳出權限要求就選 <code>Reject</code></strong>，這題要看它不查資料、不跑程式時怎麼答：</p>
+<p>整門課都在問一件事：<strong>AI 這麼強，為什麼還要自己想、自己驗證？</strong>先試一次。貼上這句，<strong>如果跳出權限要求就選 <code>Reject</code></strong>，這題要看它不查資料、不跑程式時怎麼答：</p>
 <pre class="cmd" data-lang="text"><code>不要執行任何程式，直接回答：sklearn 的 digits 資料集，64 個像素中有哪幾個在全部 1797 張圖裡都是 0？</code></pre>
 <p>看到答案後先別急著相信。先判斷：<strong>它給的證據，夠你相信這個答案嗎？</strong>寫下你的判斷，再按 <code>!</code> 進 Shell 模式，自己核對：</p>
 <pre class="cmd" data-lang="bash"><code>uv run python -c "from sklearn.datasets import load_digits; import numpy as np; print(np.flatnonzero((load_digits().data==0).all(axis=0)))"</code></pre>
@@ -1376,7 +1376,7 @@ ls</code></pre>
 <li>或按 <code>ctrl+p</code> 開指令面板，搜尋 <code>compact</code>，選 <code>Compact session</code></li>
 </ul>
 <p>注意：指令面板裡的 session 相關指令<strong>要先有對話才會出現</strong>。在剛啟動的首頁按 <code>ctrl+p</code> 搜 <code>compact</code> 會顯示 <code>No results found</code>。</p>
-<p>也可能由程式自動壓縮對話；不必等它觸發，重要結論先寫成檔案。要練習完整的續作流程，接著看 <a href="agent-workflows.html">把需求說清楚，讓工作接得下去</a>。</p>
+<p>OpenCode 也可能自動壓縮對話，所以重要結論要先寫成檔案。要練習完整的續作流程，接著看 <a href="agent-workflows.html">讓 agent 把工作做完整</a>。</p>
 <h3>5.4 回到舊 session</h3>
 <pre class="out"><code>/sessions</code></pre>
 <p>或按 <code>ctrl+x l</code>。別名 <code>/resume</code>、<code>/continue</code> 也是同一個指令。session 名稱是 opencode 依你第一句話自動取的，會顯示在右上角。</p>
@@ -1389,7 +1389,7 @@ opencode -c     # 直接接續上一個 session</code></pre>
 <p>其他指令放在 <a href="cheatsheet.html">速查表</a>，用到再查即可。按 <code>ctrl+x c</code> 壓縮對話時，先按 <code>ctrl+x</code>、放開，再按 <code>c</code>。</p>
 <hr>
 <h2 id="section-卡住了">卡住了？</h2>
-<div class="tw"><table><tr><th>你看到的</th><th>為什麼</th><th>怎麼解</th></tr><tr><td><code>Error: Internal server error</code></td><td>這是預設的錯誤訊息，什麼資訊都沒有</td><td>加上 log 參數重跑：<code>opencode run "訊息" --print-logs --log-level ERROR</code>，才看得到真正的原因</td></tr><tr><td><code>Free usage exceeded</code>，並顯示很長的重試倒數</td><td>免費模型的額度用完了，等待沒有用</td><td>按 <code>Esc</code> 中斷，打 <code>/models</code> 換一個免費模型，先試 <code>beam-free</code>（講師實測較快）。其他模型也可能一起被擋，這時請講師協助</td></tr><tr><td><code>Unrecognized request argument supplied: prompt_cache_key</code></td><td>上游的 bug，偶發</td><td><strong>重試一次就好</strong>。不用改任何設定</td></tr><tr><td>畫面底部一直顯示 <code>esc again to interrupt</code></td><td>你只按了一次 <code>Esc</code>，還沒真的中斷</td><td>再按一次 <code>Esc</code>。如果它正在跑工具，多按幾次</td></tr><tr><td>opencode 突然關掉了</td><td>輸入框是空的時候按了 <code>ctrl+c</code>，那就是「離開」</td><td>重新 <code>opencode</code>，再用 <code>/sessions</code>（<code>ctrl+x l</code>）找回剛剛的對話，或直接 <code>opencode -c</code></td></tr><tr><td><code>● Tip Run /connect to add an AI provider</code></td><td>這是給要接自己帳號的人看的提示</td><td>忽略。<code>big-pickle</code> 不用連任何 provider</td></tr><tr><td>agent 用簡體中文或英文回答</td><td>它沒讀到 <code>AGENTS.md</code></td><td>確認你是在專案資料夾裡啟動的（看畫面最底左邊那行路徑），不是在家目錄</td></tr><tr><td>agent 改檔或執行前沒有問我</td><td>權限可能是 <code>allow</code>，或啟動時加了 <code>--auto</code></td><td>確認專案設定為 <code>ask</code>，重新用 <code>opencode</code> 啟動，不加 <code>--auto</code></td></tr><tr><td>跑 <code>python xxx.py</code> 說找不到套件</td><td>沒走 uv 的環境</td><td>一律用 <code>uv run python xxx.py</code></td></tr><tr><td>側邊欄的 Context / tokens 看不到</td><td>終端機視窗太窄，側邊欄自動收起來了</td><td>把視窗拉寬，或在 <code>ctrl+p</code> 搜尋側邊欄</td></tr><tr><td><code>% used</code> 已經很高，agent 開始忘記前面講過的事</td><td>context 快滿了</td><td>換題目就 <code>/new</code>；同一題就按 <code>ctrl+x c</code> 壓縮，壓縮前先把結論寫進 <code>notes/</code></td></tr><tr><td>找不到某個斜線指令</td><td>功能名稱或位置會隨介面調整</td><td>用 <code>ctrl+p</code> 開啟指令面板搜尋；壓縮對話也可按 <code>ctrl+x c</code></td></tr></table></div>
+<div class="tw"><table><tr><th>你看到的</th><th>為什麼</th><th>怎麼解</th></tr><tr><td><code>Error: Internal server error</code></td><td>這是預設的錯誤訊息，什麼資訊都沒有</td><td>加上 log 參數重跑：<code>opencode run "訊息" --print-logs --log-level ERROR</code>，才看得到真正的原因</td></tr><tr><td><code>Free usage exceeded</code>，並顯示很長的重試倒數</td><td>免費模型的額度用完了，等待沒有用</td><td>按 <code>Esc</code> 中斷，打 <code>/models</code> 換一個免費模型，先試 <code>beam-free</code>（講師實測較快）。其他模型也可能一起被擋，這時改用課前準備的 <a href="prep.html#backup-keys">Gemini 或 GLM 備案</a></td></tr><tr><td><code>Unrecognized request argument supplied: prompt_cache_key</code></td><td>上游的 bug，偶發</td><td><strong>重試一次就好</strong>。不用改任何設定</td></tr><tr><td>畫面底部一直顯示 <code>esc again to interrupt</code></td><td>你只按了一次 <code>Esc</code>，還沒真的中斷</td><td>再按一次 <code>Esc</code>。如果它正在跑工具，多按幾次</td></tr><tr><td>opencode 突然關掉了</td><td>輸入框是空的時候按了 <code>ctrl+c</code>，那就是「離開」</td><td>重新 <code>opencode</code>，再用 <code>/sessions</code>（<code>ctrl+x l</code>）找回剛剛的對話，或直接 <code>opencode -c</code></td></tr><tr><td><code>● Tip Run /connect to add an AI provider</code></td><td>這是給要接自己帳號的人看的提示</td><td>忽略。<code>big-pickle</code> 不用連任何 provider，換備案模型時才需要</td></tr><tr><td>agent 用簡體中文或英文回答</td><td>它沒讀到 <code>AGENTS.md</code></td><td>確認你是在專案資料夾裡啟動的（看畫面最底左邊那行路徑），不是在家目錄</td></tr><tr><td>agent 改檔或執行前沒有問我</td><td>權限可能是 <code>allow</code>，或啟動時加了 <code>--auto</code></td><td>確認專案設定為 <code>ask</code>，重新用 <code>opencode</code> 啟動，不加 <code>--auto</code></td></tr><tr><td>跑 <code>python xxx.py</code> 說找不到套件</td><td>沒走 uv 的環境</td><td>一律用 <code>uv run python xxx.py</code></td></tr><tr><td>側邊欄的 Context / tokens 看不到</td><td>終端機視窗太窄，側邊欄自動收起來了</td><td>把視窗拉寬，或在 <code>ctrl+p</code> 搜尋側邊欄</td></tr><tr><td><code>% used</code> 已經很高，agent 開始忘記前面講過的事</td><td>context 快滿了</td><td>換題目就 <code>/new</code>；同一題就按 <code>ctrl+x c</code> 壓縮，壓縮前先把結論寫進 <code>notes/</code></td></tr><tr><td>找不到某個斜線指令</td><td>功能名稱或位置會隨介面調整</td><td>用 <code>ctrl+p</code> 開啟指令面板搜尋；壓縮對話也可按 <code>ctrl+x c</code></td></tr></table></div>
 <hr>
 <h2 id="section-參考資料">參考資料</h2>
 <ul>

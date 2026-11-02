@@ -32,7 +32,7 @@ ls
 檢查環境：
 
 ```bash
-uv run python -c "import numpy, sklearn, matplotlib, networkx; print('環境 OK')"
+uv run python -c "import numpy, scipy, sklearn, matplotlib, networkx; print('環境 OK')"
 ```
 
 這個專案一律用 `uv run python 檔名.py` 執行程式，不要用 `python`、`python3`，也不要用 `pip install`。要加套件用 `uv add 套件名`。這條規則已經寫在專案的 `AGENTS.md` 裡；執行時仍請看一下它用的指令。
@@ -65,7 +65,7 @@ opencode run --auto "讀 pyproject.toml，用一句話說明這個專案裝了�
 }
 ```
 
-`big-pickle` 不用登入、不用 API key、不用信用卡。啟動後畫面上會有一行提示 `Run /connect to add an AI provider and start coding`，**忽略它**。那是給要接自己帳號的人看的，你不需要。
+`big-pickle` 不用登入、不用 API key、不用信用卡。畫面下方會輪流顯示 Tip，例如 `Run /connect to add an AI provider and start coding`，**可以忽略**。只有額度用完、要換[備案模型](prep.html#backup-keys)時才需要 `/connect`。
 
 ---
 
@@ -81,13 +81,13 @@ opencode run --auto "讀 pyproject.toml，用一句話說明這個專案裝了�
       ┃
       ┃  Ask anything… "What is the tech stack of this project?"
       ┃
-      ┃  Build · Big Pickle OpenCode Zen
+      ┃  Build · Big Pickle OpenCode
       ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
                                        tab agents  ctrl+p commands
 
               ● Tip Run /connect to add an AI provider and start coding
 
-  /home/you/ai-math-lab                                          1.18.30
+  /home/you/ai-math-lab                                          1.19.5
 ```
 
 由上往下看：
@@ -95,7 +95,7 @@ opencode run --auto "讀 pyproject.toml，用一句話說明這個專案裝了�
 | 畫面上的東西 | 意思 |
 |---|---|
 | `Ask anything…` | 輸入框。游標在這裡，直接打字就行 |
-| `Build · Big Pickle OpenCode Zen` | 現在用的 **agent**（Build）· **模型**（Big Pickle）· **供應商**（OpenCode Zen） |
+| `Build · Big Pickle OpenCode` | 現在用的 **agent**（Build）· **模型**（Big Pickle）· **供應商**（OpenCode） |
 | `tab agents` | 按 `Tab` 可以換 agent |
 | `ctrl+p commands` | 按 `ctrl+p` 開指令面板 |
 | 最底左邊 | 你現在在哪個資料夾。**開始之前先確認這行是對的** |
@@ -147,7 +147,7 @@ opencode run --auto "讀 pyproject.toml，用一句話說明這個專案裝了�
 
 1. **agent 先「想」**。畫面上會出現一段淺色的思考過程（Thought），說它打算怎麼做。
 2. **它用了工具**。你會看到 `read` 之類的工具呼叫列出來。
-3. **它用繁體中文回答**。這不是巧合：`AGENTS.md` 裡寫了「一律使用台灣繁體中文回答」，agent 啟動時就把這個檔讀進去了。請核對它是否照著規則回應。
+3. **它用繁體中文回答**。因為 `AGENTS.md` 裡寫了「一律使用台灣繁體中文回答」，agent 啟動時就讀了這個檔。請核對它是否照著規則回應。
 
 這一句只是讀檔，不會跳出權限對話框。
 
@@ -268,7 +268,7 @@ Plan 的限制來自設定，不是模式名稱。如果設定檔只寫 `"edit":
 
 ### 4.6 開場練習：它說得很肯定，你怎麼判斷？
 
-這門課貫穿一個問題：**AI 這麼強，為什麼還要自己想、自己驗證？**先試一次。貼上這句，**如果跳出權限要求就選 `Reject`**，這題要看它不查資料、不跑程式時怎麼答：
+整門課都在問一件事：**AI 這麼強，為什麼還要自己想、自己驗證？**先試一次。貼上這句，**如果跳出權限要求就選 `Reject`**，這題要看它不查資料、不跑程式時怎麼答：
 
 ```text
 不要執行任何程式，直接回答：sklearn 的 digits 資料集，64 個像素中有哪幾個在全部 1797 張圖裡都是 0？
@@ -335,7 +335,7 @@ agent 的「記憶」只有這個 session 裡的訊息，加上它自己去讀�
 
 注意：指令面板裡的 session 相關指令**要先有對話才會出現**。在剛啟動的首頁按 `ctrl+p` 搜 `compact` 會顯示 `No results found`。
 
-也可能由程式自動壓縮對話；不必等它觸發，重要結論先寫成檔案。要練習完整的續作流程，接著看 [把需求說清楚，讓工作接得下去](agent-workflows.html)。
+OpenCode 也可能自動壓縮對話，所以重要結論要先寫成檔案。要練習完整的續作流程，接著看 [讓 agent 把工作做完整](agent-workflows.html)。
 
 ### 5.4 回到舊 session
 
@@ -375,11 +375,11 @@ opencode -c     # 直接接續上一個 session
 | 你看到的 | 為什麼 | 怎麼解 |
 |---|---|---|
 | `Error: Internal server error` | 這是預設的錯誤訊息，什麼資訊都沒有 | 加上 log 參數重跑：`opencode run "訊息" --print-logs --log-level ERROR`，才看得到真正的原因 |
-| `Free usage exceeded`，並顯示很長的重試倒數 | 免費模型的額度用完了，等待沒有用 | 按 `Esc` 中斷，打 `/models` 換一個免費模型，先試 `beam-free`（講師實測較快）。其他模型也可能一起被擋，這時請講師協助 |
+| `Free usage exceeded`，並顯示很長的重試倒數 | 免費模型的額度用完了，等待沒有用 | 按 `Esc` 中斷，打 `/models` 換一個免費模型，先試 `beam-free`（講師實測較快）。其他模型也可能一起被擋，這時改用課前準備的 [Gemini 或 GLM 備案](prep.html#backup-keys) |
 | `Unrecognized request argument supplied: prompt_cache_key` | 上游的 bug，偶發 | **重試一次就好**。不用改任何設定 |
 | 畫面底部一直顯示 `esc again to interrupt` | 你只按了一次 `Esc`，還沒真的中斷 | 再按一次 `Esc`。如果它正在跑工具，多按幾次 |
 | opencode 突然關掉了 | 輸入框是空的時候按了 `ctrl+c`，那就是「離開」 | 重新 `opencode`，再用 `/sessions`（`ctrl+x l`）找回剛剛的對話，或直接 `opencode -c` |
-| `● Tip Run /connect to add an AI provider` | 這是給要接自己帳號的人看的提示 | 忽略。`big-pickle` 不用連任何 provider |
+| `● Tip Run /connect to add an AI provider` | 這是給要接自己帳號的人看的提示 | 忽略。`big-pickle` 不用連任何 provider，換備案模型時才需要 |
 | agent 用簡體中文或英文回答 | 它沒讀到 `AGENTS.md` | 確認你是在專案資料夾裡啟動的（看畫面最底左邊那行路徑），不是在家目錄 |
 | agent 改檔或執行前沒有問我 | 權限可能是 `allow`，或啟動時加了 `--auto` | 確認專案設定為 `ask`，重新用 `opencode` 啟動，不加 `--auto` |
 | 跑 `python xxx.py` 說找不到套件 | 沒走 uv 的環境 | 一律用 `uv run python xxx.py` |

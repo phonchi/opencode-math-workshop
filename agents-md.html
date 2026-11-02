@@ -823,9 +823,8 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><strong>全域</strong>：<code>~/.config/opencode/AGENTS.md</code></li>
 <li><strong>Claude Code 相容</strong>：<code>~/.claude/CLAUDE.md</code>（除非關閉此相容性）</li>
 </ol>
-<p>找到的檔案會<strong>一起合併</strong>使用，不是只取第一個。同一類別中 <code>AGENTS.md</code> 優先於 <code>CLAUDE.md</code>。</p>
-<p>因為是「從目前目錄往上找」，所以有個很實際的後果：</p>
-<p>在課前建立的專案資料夾開啟終端機，先確認位置：</p>
+<p>專案規則會和選中的全域規則<strong>合併</strong>使用。同一類別中 <code>AGENTS.md</code> 優先於 <code>CLAUDE.md</code>；全域的 <code>~/.claude/CLAUDE.md</code> 只在 <code>~/.config/opencode/AGENTS.md</code> 不存在時才使用。</p>
+<p>因為是從目前目錄往上找，在錯的資料夾啟動就讀不到專案規則。所以先在課前建立的專案資料夾開啟終端機，確認位置：</p>
 <pre class="cmd" data-lang="bash"><code>pwd
 ls</code></pre>
 <p>清單裡應有本課程的 <code>AGENTS.md</code> 與 <code>opencode.json</code>。如果沒有，先切回正確的資料夾，不要在目前位置另建一套。</p>
@@ -836,7 +835,19 @@ ls</code></pre>
 <pre class="cmd" data-lang="json"><code>{
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode/big-pickle",
+  "provider": {
+    "nvidia": {
+      "models": {
+        "z-ai/glm-5.3-flash": {
+          "options": { "reasoningEffort": "low" }
+        }
+      }
+    }
+  },
   "permission": { "bash": "ask", "edit": "ask", "webfetch": "ask" },
+  "agent": {
+    "plan": { "permission": { "edit": "deny", "bash": "deny" } }
+  },
   "instructions": ["AGENTS.md"]
 }</code></pre>
 <p>很多人以為是 <code>instructions</code> 這行讓 AGENTS.md 生效的。<strong>不是。</strong> 根目錄的 <code>AGENTS.md</code> 是自動被找到的，不寫 <code>instructions</code> 也會讀。</p>
@@ -866,7 +877,7 @@ ls</code></pre>
 <hr>
 <h2 id="section-全域-vs-專案層的-agents-md">4. 全域 vs 專案層的 AGENTS.md</h2>
 <div class="tw"><table><tr><th></th><th>全域 <code>~/.config/opencode/AGENTS.md</code></th><th>專案 <code>&lt;專案&gt;/AGENTS.md</code></th></tr><tr><td>適合放</td><td>你個人的偏好</td><td>這個專案的技術規則</td></tr><tr><td>例子</td><td>「一律用繁體中文回答」「解釋時先講結論」</td><td>「用 <code>uv run python</code>」「圖存 <code>figs/</code>」</td></tr><tr><td>會不會跟著作業一起交</td><td>不會</td><td>會（建議進版控）</td></tr><tr><td>換專案還在嗎</td><td>在</td><td>不在</td></tr></table></div>
-<p>判斷原則很簡單：<strong>換一個專案還成立的，放全域；只對這個專案成立的，放專案層。</strong></p>
+<p>判斷原則：<strong>換一個專案還成立的，放全域；只對這個專案成立的，放專案層。</strong></p>
 <p>「用繁體中文」兩邊都可以。放全域你每個專案都不用再寫；放專案層則讓同學拿到你的專案時，也能沿用相同的語言要求。這門課建議<strong>放專案層</strong>，讓規則和練習檔案一起保存。</p>
 <hr>
 <h2 id="section-init-指令會做什麼">5. <code>/init</code> 指令會做什麼</h2>
@@ -907,19 +918,19 @@ sklearn 的版本，印出兩者的數值差異來驗證。</code></pre>
 <h3>6.5 圖存哪裡</h3>
 <pre class="cmd" data-lang="markdown"><code>## 圖檔
 所有圖存到 `figs/`，用 `matplotlib.pyplot.savefig()`，不要用 `plt.show()`
-（這是無視窗環境，`show()` 不會有任何效果）。
+（它可能開視窗並等待關閉，程式看起來像卡住）。
 檔名用英文小寫加底線，例如 `figs/pca_scree_plot.png`。</code></pre>
-<p><code>plt.show()</code> 在終端機環境裡是靜默無效的：不會報錯，就是什麼都沒發生，然後你以為程式壞了。明確要求 <code>savefig()</code> 到固定目錄，你才找得到圖。</p>
+<p><code>plt.show()</code> 是否開視窗取決於環境：可能什麼都沒發生，也可能開視窗等你關閉，讓程式看起來像卡住。明確要求 <code>savefig()</code> 到固定目錄，你才找得到圖。</p>
 <h3>6.6 不准 commit</h3>
 <pre class="cmd" data-lang="markdown"><code>## 不要做的事
 - 不要執行 `git commit`、`git push`，除非我明講。
-- 不要改 `pyproject.toml` 以外的設定檔。
+- 不要改 `pyproject.toml` 以外的設定檔，除非本次練習明確要求。
 - 不要刪除 `figs/` 或 `notes/` 裡既有的檔案。</code></pre>
 <p>為什麼不准 agent commit：<strong>commit 是你檢查過之後的動作</strong>。如果 agent 改完自己就 commit，一般的 <code>git diff</code> 就不再顯示那些修改，需要再到歷史中比較。先看差異再存檔，較容易逐步確認。讓 agent 只負責改，你負責檢查和存檔。</p>
 <p><code>git push</code> 更是絕對不行，那會把東西推到網路上，收不回來。</p>
 <hr>
 <h2 id="section-完整範例-可直接複製">7. 完整範例（可直接複製）</h2>
-<p>你的起始專案只放操作規則（語言、uv、圖檔、筆記、不要做的事）。下面這份多了「數學程式的規矩」，是把工作坊學到的事寫回去之後的樣子，可以照自己抓到的問題調整：</p>
+<p>你的起始專案只放操作規則（語言、uv、圖檔、筆記、不要做的事）。下面這份多了「數學程式的規矩」和一條設定檔規則，幾條也寫得更細，是把工作坊學到的事寫回去之後的樣子，可以照自己抓到的問題調整：</p>
 <pre class="cmd" data-lang="markdown"><code># AI-Math 工作坊　專案規則
 
 ## 語言
@@ -942,16 +953,16 @@ sklearn 的版本，印出兩者的數值差異來驗證。</code></pre>
 
 ## 圖檔
 所有圖存到 `figs/`，用 `matplotlib.pyplot.savefig()`，不要用 `plt.show()`
-（這是無視窗環境，`show()` 不會有任何效果）。
+（它可能開視窗並等待關閉，程式看起來像卡住）。
 
 ## 筆記
 數學筆記寫在 `notes/` 底下的 `.md` 檔，數學式用 `$...$`（行內）與 `$$...$$`（獨立行）。
 
 ## 不要做的事
 - 不要 `git commit`、`git push`，除非我明講。
-- 不要改 `pyproject.toml` 以外的設定檔。
+- 不要改 `pyproject.toml` 以外的設定檔，除非本次練習明確要求。
 - 不要刪除 `figs/` 或 `notes/` 裡既有的檔案。</code></pre>
-<p>注意第 3 條「自己驗證」的寫法：它不只說「要驗證」，還說「<strong>必須實際執行、印出比對結果</strong>，不可以只說『應該正確』」。這個補充很關鍵。不加的話，agent 常常寫一段驗證程式碼然後直接宣稱通過，根本沒跑。</p>
+<p>注意第 3 條「自己驗證」的寫法：它不只說「要驗證」，還說「<strong>必須實際執行、印出比對結果</strong>，不可以只說『應該正確』」。不加這句，agent 可能寫了驗證程式碼卻沒跑，就宣稱通過。</p>
 <hr>
 <h2 id="section-反例-哪些寫法沒用或有反效果">8. 反例：哪些寫法沒用或有反效果</h2>
 <h3>反例 1：寫得像許願，沒有可判斷的標準</h3>
@@ -972,7 +983,7 @@ sklearn 的版本，印出兩者的數值差異來驗證。</code></pre>
 用 sklearn 做交叉驗證。</code></pre>
 <p>矛盾的規則會讓模型行為變得不可預測，它可能隨機挑一條遵守。寫完整份檔案後從頭讀一次，確認沒有打架的條文。</p>
 <h3>反例 5：以為 AGENTS.md 能強制執行</h3>
-<p>這是最重要的一個認知：AGENTS.md 是提示，<strong>不是權限控制</strong>。</p>
+<p>AGENTS.md 是提示，<strong>不是權限控制</strong>。</p>
 <p>「不要 <code>git push</code>」寫在 AGENTS.md 裡，是請求 agent 不要做；模型絕大多數時候會聽，但不保證。真正的強制要靠 <code>opencode.json</code> 的 <code>permission</code> 設定：</p>
 <pre class="cmd" data-lang="json"><code>{
   "permission": {
@@ -986,7 +997,7 @@ sklearn 的版本，印出兩者的數值差異來驗證。</code></pre>
 <p>設定完成後，用 <code>opencode agent list</code> 檢視解析後的權限。規則以樣式比對，最後一條符合的規則生效，因此一般規則放前面、特例放後面。</p>
 <p>注意上面<strong>同時寫了 <code>"git push"</code> 和 <code>"git push *"</code> 兩條</strong>。前者擋不帶參數的 <code>git push</code>，後者擋 <code>git push origin main</code> 這類帶參數的。兩種形式都明列，閱讀設定時就能看出想限制哪些動作。</p>
 <p><code>permission</code> 的可用值是 <code>"allow"</code>、<code>"ask"</code>、<code>"deny"</code>。除了 <code>bash</code>、<code>edit</code>、<code>webfetch</code>，還有 <code>read</code>、<code>glob</code>、<code>grep</code>、<code>task</code>、<code>skill</code>、<code>websearch</code>、<code>external_directory</code> 等。</p>
-<p><strong>心法：想拜託的事寫 AGENTS.md，不能出事的事寫 permission。</strong></p>
+<p><strong>簡單記：想拜託的事寫 AGENTS.md，不能出事的事寫 permission。</strong></p>
 <hr>
 <h2 id="section-怎麼驗證-agents-md-真的生效了">9. 怎麼驗證 AGENTS.md 真的生效了</h2>
 <p>不要憑感覺。有三個層次的檢查。</p>
@@ -996,6 +1007,17 @@ sklearn 的版本，印出兩者的數值差異來驗證。</code></pre>
 <pre class="cmd" data-lang="json"><code>{
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode/big-pickle",
+  "provider": {
+    "nvidia": {
+      "models": {
+        "z-ai/glm-5.3-flash": {
+          "options": {
+            "reasoningEffort": "low"
+          }
+        }
+      }
+    }
+  },
   "permission": {
     "bash": "ask",
     "edit": "ask",
@@ -1004,7 +1026,15 @@ sklearn 的版本，印出兩者的數值差異來驗證。</code></pre>
   "instructions": [
     "AGENTS.md"
   ],
-  "agent": {},
+  "agent": {
+    "plan": {
+      "permission": {
+        "edit": "deny",
+        "bash": "deny"
+      },
+      "options": {}
+    }
+  },
   "mode": {},
   "plugin": [],
   "command": {},

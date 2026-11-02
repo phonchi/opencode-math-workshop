@@ -8,10 +8,10 @@
   <h1>git：讓你敢放手讓 agent 改檔案</h1>
 </div>
 
-<p>這章不教 git 的全部，只教<strong>七個指令</strong>。目標很明確：讓你在按下 Enter 讓 agent 改你的檔案時，心裡不會怕。</p>
+<p>這章不教 git 的全部，只教<strong>七個指令</strong>。目標是讓你在按下 Enter 讓 agent 改你的檔案時，心裡不會怕。</p>
 <hr>
 <h2>1. 你在怕什麼</h2>
-<p>工作坊上多半會看到這個場景：agent 說「我來幫你改一下 <code>lab2_pca.py</code>」，然後停在權限詢問畫面，而你的手指懸在鍵盤上不敢按 <code>y</code>。</p>
+<p>工作坊上多半會看到這個場景：agent 說「我來幫你改一下 <code>lab2_pca.py</code>」，然後停在權限詢問畫面，而你的手指懸在鍵盤上不敢按 <code>Enter</code>。</p>
 <p>怕的通常是這幾件事：</p>
 <ul>
 <li>它把我熬夜寫好的東西蓋掉了怎麼辦</li>
@@ -19,10 +19,10 @@
 <li>它說「已修正」，但程式反而更壞了，我想回到原本的版本卻回不去</li>
 <li>它改對了一部分、改壞了一部分，我分不出來</li>
 </ul>
-<p>這些恐懼都是合理的。而且會導致一個很糟的結果：<strong>你為了安全，乾脆不讓 agent 動手，只讓它給你看程式碼，然後自己複製貼上。</strong> 那就等於把一個能幫你做事的工具，降級成一個比較會講話的搜尋引擎。</p>
+<p>這些擔心都合理，但會導致一個糟糕的結果：<strong>你為了安全，乾脆不讓 agent 動手，只讓它給你看程式碼，然後自己複製貼上。</strong> 那就等於把一個能幫你做事的工具，降級成一個比較會講話的搜尋引擎。</p>
 <p>git 解決的正是這件事。一句話：</p>
 <div class="box tip"><p><strong>git 讓「改壞了」這件事的代價，從「重寫一遍」變成「打一行指令」。</strong></p></div>
-<p>當還原成本趨近於零，恐懼就消失了，你才敢真的放手用。git 在這門課裡的角色不是「軟體工程規範」，是<strong>心理安全網</strong>。</p>
+<p>還原不再費力，你才敢真的放手用。在這門課裡，git 就是你的<strong>心理安全網</strong>。</p>
 <p>互動練習請逐次閱讀並確認權限，不加 <code>--auto</code>。課前的小型非互動自測是例外，使用方式見 <a href="prep.html">課前準備</a>。本章用 Git 保存與比較檔案，配合每次動手前的確認。</p>
 <hr>
 <h2>2. 不需要 GitHub 帳號</h2>
@@ -93,7 +93,7 @@ c4d5a22 初始環境</code></pre>
 <hr>
 <!--DIAGRAM:git-workflow-->
 <h2>4. 核心工作流：三步驟</h2>
-<p>這是整章的骨幹。<strong>每次叫 agent 動手之前、之後，各做一件事。</strong></p>
+<p><strong>每次叫 agent 動手之前、之後，各做一件事。</strong></p>
 <p>動手前存檔，完成後檢查差異，再決定保留或還原。下面用實際指令走一遍。</p>
 <p>先保存開始前的狀態：</p>
 <pre class="cmd" data-lang="bash"><code>git status
@@ -194,7 +194,6 @@ git commit -m "加上 .gitignore"</code></pre>
 <p><strong><code>__pycache__/</code>、<code>*.pyc</code> — 一定要排除。</strong> Python 自動產生的編譯快取，沒有保存價值。</p>
 <p><strong><code>uv.lock</code> — 要進版控。</strong> 它記錄了每個套件的精確版本，可用來重建相同的套件版本。不要把它加進 <code>.gitignore</code>。</p>
 <h3><code>figs/</code> 要不要進版控：這題沒有標準答案</h3>
-<p>這是真正需要你自己判斷的取捨。</p>
 <p><strong>支持「進版控」的理由：</strong></p>
 <ul>
 <li>圖是你作業或報告的一部分，交出去時要有</li>
@@ -252,10 +251,8 @@ opencode</code></pre>
 <p>為什麼連 commit 都不給：<strong>commit 是「我檢查過了，這個版本我認可」的意思。</strong> 如果 agent 改完自己 commit，一般的 <code>git diff</code> 就不再顯示那些修改，需要到歷史裡另行比較。先檢查再 commit，才能在每一步確認要保留什麼。</p>
 <p><strong>分工要清楚：agent 負責改，你負責檢查和存檔。</strong></p>
 <h3>用 permission 真正擋住它</h3>
-<p>AGENTS.md 是請求，不是強制。要真的擋住，用 <code>opencode.json</code> 的 <code>permission</code>：</p>
+<p>AGENTS.md 是請求，不是強制。要真的擋住，用 <code>opencode.json</code> 的 <code>permission</code>。下面只列這個區塊，請換掉檔案裡原本的 <code>permission</code>，<code>provider</code>、<code>agent</code> 等其他設定都保留：</p>
 <pre class="cmd" data-lang="json"><code>{
-  "$schema": "https://opencode.ai/config.json",
-  "model": "opencode/big-pickle",
   "permission": {
     "bash": {
       "*": "ask",
@@ -268,8 +265,7 @@ opencode</code></pre>
     },
     "edit": "ask",
     "webfetch": "ask"
-  },
-  "instructions": ["AGENTS.md"]
+  }
 }</code></pre>
 <p>存檔後用 <code>opencode agent list</code> 檢查解析後的權限規則。<code>deny</code> 規則只封鎖符合樣式的工具請求，不能把一小組字串規則當成所有刪除或外傳行為的完整防護。</p>
 <p>四個要點：</p>

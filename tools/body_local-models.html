@@ -45,7 +45,7 @@ ollama list</code></pre>
 <p>這裡有兩個需要配合的設定：</p>
 <div class="tw"><table><tr><th>設定</th><th>管哪一件事</th></tr><tr><td>Ollama 的 <code>num_ctx</code></td><td>模型實際載入多少 context 空間</td></tr><tr><td>OpenCode 的 <code>limit.context</code></td><td>告訴 OpenCode 模型能接收多少內容，以便管理對話</td></tr></table></div>
 <p>只改 OpenCode，不會替 Ollama 配好記憶體。兩邊不一致時，OpenCode 可能仍繼續送出模型放不下的內容。不要只看「沒有錯誤訊息」就判定設定成功，請看模型載入後的狀態。</p>
-<details class="bg"><summary>完整範例：用 Modelfile 固定 context，再接到 OpenCode</summary><div class="bg-body"><p>這份範例沿用 <code>qwen3.5:9b-q4_K_M</code> 與 <code>32768</code> 的 context 設定，方便逐項對照。它是設定範例，不是每台學生筆電都適合的建議；記憶體不足時請停止載入，改選較小模型。換模型時，以下名稱都要一起調整。</p>
+<details class="bg"><summary>完整範例：用 Modelfile 固定 context，再接到 OpenCode</summary><div class="bg-body"><p>這份範例用 <code>qwen3.5:9b-q4_K_M</code> 與 <code>32768</code> 的 context 設定作示範，方便逐項對照。它是設定範例，不是每台學生筆電都適合的建議；記憶體不足時請停止載入，改選較小模型。換模型時，以下名稱都要一起調整。</p>
 <h3>下載並試一段短對話</h3>
 <pre class="cmd" data-lang="bash"><code>ollama pull qwen3.5:9b-q4_K_M
 ollama run qwen3.5:9b-q4_K_M</code></pre>
@@ -60,11 +60,16 @@ PARAMETER num_ctx 32768</code></pre>
 ollama show --parameters qwen3.5-32k</code></pre>
 <p>參數輸出應有 <code>num_ctx 32768</code>。這個新名稱讓你可以保留原模型，分開使用不同 context 設定。</p>
 <h3>在專案設定中登錄 provider</h3>
-<p>先另存一份原本的 <code>opencode.json</code>，例如 <code>opencode-cloud.json.bak</code>，方便比較與還原。在原檔加入下面的 <code>provider</code> 區塊，其他既有的規則與權限保留。若你還沒加其他設定，下面是可對照的完整範例：</p>
+<p>先另存一份原本的 <code>opencode.json</code>，例如 <code>opencode-cloud.json.bak</code>，方便比較與還原。在原檔的 <code>provider</code> 裡，和 <code>nvidia</code> 並列加入 <code>ollama</code>，其他既有的規則與權限都保留。加完後 <code>provider</code> 這段長這樣：</p>
 <pre class="cmd" data-lang="json"><code>{
-  "$schema": "https://opencode.ai/config.json",
-  "model": "opencode/big-pickle",
   "provider": {
+    "nvidia": {
+      "models": {
+        "z-ai/glm-5.3-flash": {
+          "options": { "reasoningEffort": "low" }
+        }
+      }
+    },
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "Ollama (local)",
@@ -77,9 +82,7 @@ ollama show --parameters qwen3.5-32k</code></pre>
         }
       }
     }
-  },
-  "permission": { "bash": "ask", "edit": "ask", "webfetch": "ask" },
-  "instructions": ["AGENTS.md"]
+  }
 }</code></pre>
 <p><code>baseURL</code> 是 Ollama 的本機服務位址；這個相容介面的網址要包含 <code>/v1</code>。<code>models</code> 下的名稱必須與 <code>ollama list</code> 相同；<code>name</code> 只是顯示文字。</p>
 <p>這裡先保留網路模型為預設。確認設定能被讀取：</p>
@@ -111,7 +114,7 @@ uv run python local_hello.py</code></pre>
 - 任務沒有完成時，說明停在哪一步，不要補造輸出。</code></pre>
 <p>規則可以提醒模型，但不能補足所有能力差距。確認設定、縮小任務後仍做不到，就換模型或回到工作坊的網路模型，不必一直修改同一份設定。</p>
 <h2>卡住時先查這幾項</h2>
-<div class="tw"><table><tr><th>看到的情況</th><th>下一步</th></tr><tr><td>找不到 <code>ollama</code> 指令</td><td>安裝後重開終端機，再試 <code>ollama --version</code></td></tr><tr><td><code>connection refused</code></td><td>確認 Ollama 已開啟，且和 OpenCode 在同一個環境</td></tr><tr><td>找不到模型或 <code>404</code></td><td>對照 <code>ollama list</code>、設定中的模型名稱與 <code>/v1</code> 網址</td></tr><tr><td><code>does not support tools</code></td><td>用 <code>ollama show</code> 檢查能力，改選支援工具的模型</td></tr><tr><td><code>CONTEXT</code> 和設定不符</td><td>檢查 Modelfile、環境變數與實際載入的模型名稱</td></tr><tr><td>系統變得很慢</td><td>停下任務，縮小 context 或換較小模型；不要只增加等待時間</td></tr><tr><td>只印出指令或宣稱完成</td><td>查實際檔案與工具紀錄，把任務縮成一步再試</td></tr><tr><td>忘記先前的要求</td><td>將重點寫進 <code>notes/progress.md</code>，換新對話重讀；參考 <a href="agent-workflows.html">需求與續作</a></td></tr></table></div>
+<div class="tw"><table><tr><th>看到的情況</th><th>下一步</th></tr><tr><td>找不到 <code>ollama</code> 指令</td><td>安裝後重開終端機，再試 <code>ollama --version</code></td></tr><tr><td><code>connection refused</code></td><td>確認 Ollama 已開啟，且和 OpenCode 在同一個環境</td></tr><tr><td>找不到模型或 <code>404</code></td><td>對照 <code>ollama list</code>、設定中的模型名稱與 <code>/v1</code> 網址</td></tr><tr><td><code>does not support tools</code></td><td>用 <code>ollama show</code> 檢查能力，改選支援工具的模型</td></tr><tr><td><code>CONTEXT</code> 和設定不符</td><td>檢查 Modelfile、環境變數與實際載入的模型名稱</td></tr><tr><td>系統變得很慢</td><td>停下任務，縮小 context 或換較小模型；不要只增加等待時間</td></tr><tr><td>只印出指令或宣稱完成</td><td>查實際檔案與工具紀錄，把任務縮成一步再試</td></tr><tr><td>忘記先前的要求</td><td>將重點寫進 <code>notes/progress.md</code>，換新對話重讀；參考 <a href="agent-workflows.html">讓 agent 把工作做完整</a></td></tr></table></div>
 <h2>接著怎麼用</h2>
 <p>成功後，把自己的模型名稱、設定方式和成功指令記在 <code>notes/</code>。不要把自己的速度或記憶體用量當成同學電腦也能達到的結果。</p>
 <h2>參考資料</h2>

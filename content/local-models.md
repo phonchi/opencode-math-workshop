@@ -80,7 +80,7 @@ Context 是模型一次能讀到的內容，包括你的需求、對話、檔案
 
 :::bg 完整範例：用 Modelfile 固定 context，再接到 OpenCode
 
-這份範例沿用 `qwen3.5:9b-q4_K_M` 與 `32768` 的 context 設定，方便逐項對照。它是設定範例，不是每台學生筆電都適合的建議；記憶體不足時請停止載入，改選較小模型。換模型時，以下名稱都要一起調整。
+這份範例用 `qwen3.5:9b-q4_K_M` 與 `32768` 的 context 設定作示範，方便逐項對照。它是設定範例，不是每台學生筆電都適合的建議；記憶體不足時請停止載入，改選較小模型。換模型時，以下名稱都要一起調整。
 
 ### 下載並試一段短對話
 
@@ -115,13 +115,18 @@ ollama show --parameters qwen3.5-32k
 
 ### 在專案設定中登錄 provider
 
-先另存一份原本的 `opencode.json`，例如 `opencode-cloud.json.bak`，方便比較與還原。在原檔加入下面的 `provider` 區塊，其他既有的規則與權限保留。若你還沒加其他設定，下面是可對照的完整範例：
+先另存一份原本的 `opencode.json`，例如 `opencode-cloud.json.bak`，方便比較與還原。在原檔的 `provider` 裡，和 `nvidia` 並列加入 `ollama`，其他既有的規則與權限都保留。加完後 `provider` 這段長這樣：
 
 ```json
 {
-  "$schema": "https://opencode.ai/config.json",
-  "model": "opencode/big-pickle",
   "provider": {
+    "nvidia": {
+      "models": {
+        "z-ai/glm-5.3-flash": {
+          "options": { "reasoningEffort": "low" }
+        }
+      }
+    },
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "Ollama (local)",
@@ -134,9 +139,7 @@ ollama show --parameters qwen3.5-32k
         }
       }
     }
-  },
-  "permission": { "bash": "ask", "edit": "ask", "webfetch": "ask" },
-  "instructions": ["AGENTS.md"]
+  }
 }
 ```
 
@@ -216,7 +219,7 @@ uv run python local_hello.py
 | `CONTEXT` 和設定不符 | 檢查 Modelfile、環境變數與實際載入的模型名稱 |
 | 系統變得很慢 | 停下任務，縮小 context 或換較小模型；不要只增加等待時間 |
 | 只印出指令或宣稱完成 | 查實際檔案與工具紀錄，把任務縮成一步再試 |
-| 忘記先前的要求 | 將重點寫進 `notes/progress.md`，換新對話重讀；參考 [需求與續作](agent-workflows.html) |
+| 忘記先前的要求 | 將重點寫進 `notes/progress.md`，換新對話重讀；參考 [讓 agent 把工作做完整](agent-workflows.html) |
 
 ## 接著怎麼用
 

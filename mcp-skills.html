@@ -820,12 +820,8 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <p>下面是一個選修的外部工具例子。先完成本機的 skill 與 reviewer 練習也可以，不必先設定 MCP。</p>
 <p><strong>問題</strong>：<code>opencode/big-pickle</code> 和所有模型一樣，知識有時間截止點。你問它 scikit-learn 某個參數怎麼用，它可能給你一個兩年前的 API，跑起來噴 <code>TypeError</code>。你也可以叫它用 <code>webfetch</code> 去抓文件，但那是抓整頁 HTML，又慢又雜。</p>
 <p>Context7 可以替 agent 提供套件文件查詢；查到後仍要確認文件版本與本專案相符。官方安裝與使用條件見 <a class="ext" href="https://github.com/upstash/context7" target="_blank" rel="noopener">Context7 官方說明</a>。</p>
-<p>在專案根目錄的 <code>opencode.json</code> 加上 <code>mcp</code> 區塊：</p>
+<p>在專案根目錄的 <code>opencode.json</code> 加上 <code>mcp</code> 區塊，和 <code>model</code>、<code>permission</code> 並列，其他設定都保留：</p>
 <pre class="cmd" data-lang="json"><code>{
-  "$schema": "https://opencode.ai/config.json",
-  "model": "opencode/big-pickle",
-  "permission": { "bash": "ask", "edit": "ask", "webfetch": "ask" },
-  "instructions": ["AGENTS.md"],
   "mcp": {
     "context7": {
       "type": "remote",
@@ -926,7 +922,7 @@ general (subagent)</code></pre>
 <p><strong>檔名就是 agent 的名字。</strong> <code>math-reviewer.md</code> 會產生一個叫 <code>math-reviewer</code> 的 agent。專案層優先於全域。</p>
 <p>本課程統一用專案內的 <code>.opencode/agents/</code>，讓設定跟著練習檔案一起保存。</p>
 <h3>什麼情況值得做</h3>
-<p>老實說，<strong>大部分情況不值得</strong>。你在 AGENTS.md 裡多寫一條規則，通常就解決了。</p>
+<p><strong>大部分情況不值得</strong>。你在 AGENTS.md 裡多寫一條規則，通常就解決了。</p>
 <p>值得做的是這種情形：<strong>你需要一個權限跟主 agent 不同的角色。</strong> 這是 AGENTS.md 做不到的。AGENTS.md 是全專案共用的提示，而 agent 可以有自己的權限設定。</p>
 <p>最典型的例子就是「<strong>只做數學驗證的 reviewer</strong>」：你想要一個看得到你的程式、並關閉本練習會用到的編輯、執行指令與再委派入口的審查員。</p>
 <h3>完整範例：數學驗證 reviewer</h3>
@@ -976,14 +972,14 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 { "permission": "bash", "action": "deny", "pattern": "*" }
 { "permission": "task", "action": "deny", "pattern": "*" }
 { "permission": "external_directory", "action": "deny", "pattern": "*" }</code></pre>
-<p><strong>這就是自訂 agent 相對於 AGENTS.md 的關鍵優勢</strong>：<code>edit: deny</code> 是機制上的封鎖，不是口頭請求。這份設定拒絕本練習的編輯、執行指令與再委派入口；若日後加入其他工具，也要檢查那些工具的權限。</p>
+<p><strong>這是自訂 agent 勝過 AGENTS.md 的地方</strong>：<code>edit: deny</code> 是機制上的封鎖，不是口頭請求。這份設定拒絕本練習的編輯、執行指令與再委派入口；若日後加入其他工具，也要檢查那些工具的權限。</p>
 <h3>怎麼用它</h3>
 <p>在 opencode 對話裡用 <code>@</code> 呼叫：</p>
 <pre class="out"><code>@math-reviewer 檢查 lab2_pca.py 的手刻 PCA 有沒有問題</code></pre>
 <p>主 agent 也可能根據 <code>description</code> 自動判斷要不要叫它，所以 <code>description</code> 要寫清楚這個 agent 適合做什麼。</p>
 <h3>frontmatter 可用的欄位</h3>
-<div class="tw"><table><tr><th>欄位</th><th>說明</th></tr><tr><td><code>description</code></td><td>這個 agent 做什麼。<strong>主 agent 靠它判斷要不要呼叫</strong>，要寫清楚</td></tr><tr><td><code>mode</code></td><td><code>subagent</code>（被呼叫）或 <code>primary</code>（Tab 切換）</td></tr><tr><td><code>model</code></td><td>指定模型。<strong>這門課請省略</strong>，省略就沿用 <code>opencode/big-pickle</code></td></tr><tr><td><code>temperature</code></td><td>0 到 1。驗證、審查類的工作用低值（0.1），創意類用高值</td></tr><tr><td><code>prompt</code></td><td>用 <code>{file:./prompts/xxx.txt}</code> 從外部檔案讀系統提示</td></tr><tr><td><code>permission</code></td><td>權限覆寫，會蓋過全域設定</td></tr><tr><td><code>disable</code></td><td>設 <code>true</code> 暫時停用</td></tr></table></div>
-<div class="box tip"><p><strong>關於 <code>model</code> 欄位的提醒</strong>：官方文件和中文教學站的範例幾乎都寫 <code>model: anthropic/claude-sonnet-4-...</code>。<strong>照抄會壞掉</strong>，因為這門課只用 <code>opencode/big-pickle</code>（本工作坊選用的免費模型）。<strong>直接把 <code>model</code> 那行刪掉</strong>，agent 就會沿用你在 <code>opencode.json</code> 設的模型。上面的範例就是這樣寫的。</p></div>
+<div class="tw"><table><tr><th>欄位</th><th>說明</th></tr><tr><td><code>description</code></td><td>這個 agent 做什麼。<strong>主 agent 靠它判斷要不要呼叫</strong>，要寫清楚</td></tr><tr><td><code>mode</code></td><td><code>subagent</code>（被呼叫）或 <code>primary</code>（Tab 切換）</td></tr><tr><td><code>model</code></td><td>指定模型。<strong>這門課請省略</strong>，省略就沿用目前選的模型</td></tr><tr><td><code>temperature</code></td><td>0 到 1。驗證、審查類的工作用低值（0.1），創意類用高值</td></tr><tr><td><code>prompt</code></td><td>不用寫在這裡：<code>.md</code> agent 的系統提示就是 frontmatter 下方的正文。要用 <code>{file:./prompts/xxx.txt}</code> 讀外部檔案，請改寫在 <code>opencode.json</code> 的 agent 設定</td></tr><tr><td><code>permission</code></td><td>權限覆寫，會蓋過全域設定</td></tr><tr><td><code>disable</code></td><td>設 <code>true</code> 暫時停用</td></tr></table></div>
+<div class="box tip"><p><strong>關於 <code>model</code> 欄位的提醒</strong>：官方文件和中文教學站的範例幾乎都寫 <code>model: anthropic/claude-sonnet-4-...</code>。<strong>照抄會壞掉</strong>，因為那些模型需要付費帳號，這門課用的是免費模型。<strong>直接把 <code>model</code> 那行刪掉</strong>，agent 就會沿用你在 <code>opencode.json</code> 設的模型。上面的範例就是這樣寫的。</p></div>
 <h3>也可以寫在 opencode.json 裡</h3>
 <p>不想開新檔案的話，也可以定義在 <code>opencode.json</code> 的 <code>agent</code> 區塊：</p>
 <pre class="cmd" data-lang="json"><code>{
@@ -1423,7 +1419,7 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 <h2 id="section-subagent-task-什麼時候該拆子任務">4. subagent / task：什麼時候該拆子任務</h2>
 <h3>這是什麼</h3>
 <p>主 agent 可以把一件工作丟給 subagent，subagent 在<strong>自己獨立的對話脈絡</strong>裡完成，只把結果回報給主 agent。</p>
-<p>關鍵在於<strong>脈絡隔離</strong>：subagent 翻了二十個檔案，那二十個檔案的內容<strong>不會</strong>塞進你的主對話。回到主對話的只有結論。</p>
+<p>這叫<strong>脈絡隔離</strong>：subagent 翻了二十個檔案，那二十個檔案的內容<strong>不會</strong>塞進你的主對話。回到主對話的只有結論。</p>
 <h3>為什麼這件事重要</h3>
 <p>模型的 context（一次能看的內容量）是有限的。當對話塞滿雜訊（你為了找一個函式而讓它印出的一堆檔案內容），真正重要的東西就會被擠掉或稀釋：你的 AGENTS.md 規則、你的需求、你正在寫的程式。</p>
 <p>你會觀察到的症狀：<strong>對話進行到後面，agent 開始忘記規則、開始用 <code>python</code> 而不是 <code>uv run python</code>、開始用英文回你。</strong> 這通常不是模型變笨，是 context 被雜訊淹沒了。</p>
@@ -1511,7 +1507,7 @@ description: 根據本專案已完成的數學實驗與輸出整理學習筆記�
         ↓
       → 那就是提示要寫清楚一點。這是最常見的答案。</code></pre>
 <p><strong>最後這一條請認真看待。</strong> 初學者最常見的狀況是：結果不如預期 → 以為要加工具 → 裝了一堆 MCP 和自訂 agent → 結果更亂。</p>
-<p>先把需求、輸出與完成判準講清楚。 先改你的提示，再改你的 AGENTS.md，都沒用了才考慮這章的東西。</p>
+<p>先把需求、輸出與完成判準講清楚：先改提示，再改 AGENTS.md，都沒用了才考慮這章的東西。</p>
 <hr>
 <h2 id="section-本章重點">7. 本章重點</h2>
 <ol>
@@ -1522,7 +1518,7 @@ description: 根據本專案已完成的數學實驗與輸出整理學習筆記�
 <li><code>opencode mcp list</code> 確認連線後，還要實際查一次文件。</li>
 <li>自訂 agent 放 <code>.opencode/agents/&lt;名字&gt;.md</code>，用 <code>opencode debug agent &lt;名字&gt;</code> 驗證。</li>
 <li>自訂 agent 的關鍵價值是<strong>權限隔離</strong>（<code>edit: deny</code> 是機制封鎖，不是口頭請求），這是 AGENTS.md 做不到的。</li>
-<li><strong>範例裡的 <code>model</code> 欄位要刪掉</strong>，這門課只用 <code>opencode/big-pickle</code>。</li>
+<li><strong>範例裡的 <code>model</code> 欄位要刪掉</strong>，省略就沿用目前選的模型。</li>
 <li>skill 保存重複流程；subagent 用在「翻很多東西、結論很短」的工作，保持主對話乾淨。</li>
 <li>加東西之前先問：<strong>是不是我的提示沒講清楚？</strong> 通常是。</li>
 </ol>

@@ -45,14 +45,10 @@ MCP（Model Context Protocol）是一套標準協定，讓 agent 能連上外部
 
 Context7 可以替 agent 提供套件文件查詢；查到後仍要確認文件版本與本專案相符。官方安裝與使用條件見 [Context7 官方說明](https://github.com/upstash/context7)。
 
-在專案根目錄的 `opencode.json` 加上 `mcp` 區塊：
+在專案根目錄的 `opencode.json` 加上 `mcp` 區塊，和 `model`、`permission` 並列，其他設定都保留：
 
 ```json
 {
-  "$schema": "https://opencode.ai/config.json",
-  "model": "opencode/big-pickle",
-  "permission": { "bash": "ask", "edit": "ask", "webfetch": "ask" },
-  "instructions": ["AGENTS.md"],
   "mcp": {
     "context7": {
       "type": "remote",
@@ -215,7 +211,7 @@ general (subagent)
 
 ### 什麼情況值得做
 
-老實說，**大部分情況不值得**。你在 AGENTS.md 裡多寫一條規則，通常就解決了。
+**大部分情況不值得**。你在 AGENTS.md 裡多寫一條規則，通常就解決了。
 
 值得做的是這種情形：**你需要一個權限跟主 agent 不同的角色。** 這是 AGENTS.md 做不到的。AGENTS.md 是全專案共用的提示，而 agent 可以有自己的權限設定。
 
@@ -289,7 +285,7 @@ opencode debug agent math-reviewer     # 看解析後的完整設定
 { "permission": "external_directory", "action": "deny", "pattern": "*" }
 ```
 
-**這就是自訂 agent 相對於 AGENTS.md 的關鍵優勢**：`edit: deny` 是機制上的封鎖，不是口頭請求。這份設定拒絕本練習的編輯、執行指令與再委派入口；若日後加入其他工具，也要檢查那些工具的權限。
+**這是自訂 agent 勝過 AGENTS.md 的地方**：`edit: deny` 是機制上的封鎖，不是口頭請求。這份設定拒絕本練習的編輯、執行指令與再委派入口；若日後加入其他工具，也要檢查那些工具的權限。
 
 ### 怎麼用它
 
@@ -307,13 +303,13 @@ opencode debug agent math-reviewer     # 看解析後的完整設定
 |---|---|
 | `description` | 這個 agent 做什麼。**主 agent 靠它判斷要不要呼叫**，要寫清楚 |
 | `mode` | `subagent`（被呼叫）或 `primary`（Tab 切換） |
-| `model` | 指定模型。**這門課請省略**，省略就沿用 `opencode/big-pickle` |
+| `model` | 指定模型。**這門課請省略**，省略就沿用目前選的模型 |
 | `temperature` | 0 到 1。驗證、審查類的工作用低值（0.1），創意類用高值 |
-| `prompt` | 用 `{file:./prompts/xxx.txt}` 從外部檔案讀系統提示 |
+| `prompt` | 不用寫在這裡：`.md` agent 的系統提示就是 frontmatter 下方的正文。要用 `{file:./prompts/xxx.txt}` 讀外部檔案，請改寫在 `opencode.json` 的 agent 設定 |
 | `permission` | 權限覆寫，會蓋過全域設定 |
 | `disable` | 設 `true` 暫時停用 |
 
-> **關於 `model` 欄位的提醒**：官方文件和中文教學站的範例幾乎都寫 `model: anthropic/claude-sonnet-4-...`。**照抄會壞掉**，因為這門課只用 `opencode/big-pickle`（本工作坊選用的免費模型）。**直接把 `model` 那行刪掉**，agent 就會沿用你在 `opencode.json` 設的模型。上面的範例就是這樣寫的。
+> **關於 `model` 欄位的提醒**：官方文件和中文教學站的範例幾乎都寫 `model: anthropic/claude-sonnet-4-...`。**照抄會壞掉**，因為那些模型需要付費帳號，這門課用的是免費模型。**直接把 `model` 那行刪掉**，agent 就會沿用你在 `opencode.json` 設的模型。上面的範例就是這樣寫的。
 
 ### 也可以寫在 opencode.json 裡
 
@@ -356,7 +352,7 @@ opencode agent create
 
 主 agent 可以把一件工作丟給 subagent，subagent 在**自己獨立的對話脈絡**裡完成，只把結果回報給主 agent。
 
-關鍵在於**脈絡隔離**：subagent 翻了二十個檔案，那二十個檔案的內容**不會**塞進你的主對話。回到主對話的只有結論。
+這叫**脈絡隔離**：subagent 翻了二十個檔案，那二十個檔案的內容**不會**塞進你的主對話。回到主對話的只有結論。
 
 ### 為什麼這件事重要
 
@@ -494,7 +490,7 @@ opencode debug skill
 
 **最後這一條請認真看待。** 初學者最常見的狀況是：結果不如預期 → 以為要加工具 → 裝了一堆 MCP 和自訂 agent → 結果更亂。
 
-先把需求、輸出與完成判準講清楚。 先改你的提示，再改你的 AGENTS.md，都沒用了才考慮這章的東西。
+先把需求、輸出與完成判準講清楚：先改提示，再改 AGENTS.md，都沒用了才考慮這章的東西。
 
 ---
 
@@ -507,7 +503,7 @@ opencode debug skill
 5. `opencode mcp list` 確認連線後，還要實際查一次文件。
 6. 自訂 agent 放 `.opencode/agents/<名字>.md`，用 `opencode debug agent <名字>` 驗證。
 7. 自訂 agent 的關鍵價值是**權限隔離**（`edit: deny` 是機制封鎖，不是口頭請求），這是 AGENTS.md 做不到的。
-8. **範例裡的 `model` 欄位要刪掉**，這門課只用 `opencode/big-pickle`。
+8. **範例裡的 `model` 欄位要刪掉**，省略就沿用目前選的模型。
 9. skill 保存重複流程；subagent 用在「翻很多東西、結論很短」的工作，保持主對話乾淨。
 10. 加東西之前先問：**是不是我的提示沒講清楚？** 通常是。
 

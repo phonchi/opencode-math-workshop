@@ -24,8 +24,8 @@
 <div class="bg-body">
 <p>
 每張手寫數字圖是 64 維向量。但這 64 個像素並<strong>不獨立</strong>。
-左上角那個像素幾乎永遠是 0，中間幾個像素則高度相關（筆畫是連著的）。
-換句話說，資料實際上只「住」在一個<strong>維度低得多的子空間附近</strong>。
+左上角那個像素永遠是 0，中間幾個像素則高度相關（筆畫是連著的）。
+所以資料實際上只「住」在一個<strong>維度低得多的子空間附近</strong>。
 </p>
 <p>
 PCA 要做的就是找出那個子空間：在 $\mathbb{R}^{64}$ 裡找 $K$ 個互相正交的方向，
@@ -79,11 +79,11 @@ $$\text{第 }j\text{ 個主成分的解釋變異比例}=\frac{\lambda_j}{\sum_{m
 <p>
 意思是「整體變異裡，有百分之幾是由這個方向貢獻的」。
 在這份資料中，第一個主成分約占 <strong>14.89%</strong>，前十個加起來約 <strong>73%</strong>。
-換句話說，用 10 個數字就能保留原本 64 個數字約七成三的變異。
+也就是用 10 個數字就能保留原本 64 個數字約七成三的變異。
 </p>
 <p style="margin-bottom:0">
 注意這是個<strong>比例</strong>。待會會看到，正因為它是比例，
-分母上的常數會被約掉。那個驗證盲點就是這麼來的。
+分母上的常數會被約掉，驗證的盲點就從這裡來。
 </p>
 </div>
 </details>
@@ -145,7 +145,7 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 
 <div class="step" data-n="2">
 <h3>想：先預測，再看答案</h3>
-<p>下面四個錯誤是<strong>講師設計後注入</strong>的，不是 AI 犯的。目的不是抓 AI 的錯，而是測它的驗證：如果程式真的錯了，它抓得到嗎？用你剛才列的檢查，先填表：每一格會 PASS 還是 FAIL？</p>
+<p>下面四個錯誤是<strong>講師設計後注入</strong>的，不是 AI 犯的。要測的是它的驗證：如果程式真的錯了，它抓得到嗎？用你剛才列的檢查，先填表：每一格會 PASS 還是 FAIL？</p>
 <div class="tw"><table>
 <tr><th>錯誤（講師注入）</th><th>意思</th></tr>
 <tr><td>比例分母只用前 10 個</td><td>解釋變異比例除以前 10 個特徵值的和，而不是全部</td></tr>
@@ -221,9 +221,9 @@ $$Cv=\lambda v\;\Longrightarrow\;C'v=(c\lambda)v$$
 <pre class="cmd"><code>照剛才確認的清單實作，存成 lab2_pca.py，用 uv run python 執行，
 印出每項檢查的實際數值與 PASS/FAIL。不要增減清單裡的檢查。</code></pre>
 <div class="box warn">
-<div class="bt">Plan 模式的價值不在模式本身</div>
+<div class="bt">Plan 模式要搭配你的判斷才有用</div>
 <p style="margin-bottom:0">
-如果你不知道該看什麼，Plan 只是多等一輪。它的價值是把「驗什麼」攤開來，讓你在它動手前有機會改。檔案有沒有被動，也要看畫面確認。
+如果你不知道該看什麼，Plan 只是多等一輪。它把「驗什麼」先攤開來，讓你在它動手前有機會改。檔案有沒有被動，也要看畫面確認。
 </p>
 </div>
 <!--EVIDENCE:plan-->
@@ -240,7 +240,7 @@ $$Cv=\lambda v\;\Longrightarrow\;C'v=(c\lambda)v$$
 <p>用三句話寫下這份 PCA 的結論，不要只寫「驗證通過」。例如：</p>
 <ul>
 <li><strong>主張</strong>：在 digits 前 10 個主成分上，我的手刻 PCA 與 sklearn（<code>svd_solver='full'</code>）在容差內沒有差異。</li>
-<li><strong>證據</strong>：比例、$|\cos|$、重建與特徵值的差都小於門檻；四種注入錯誤都至少被一項抓到。</li>
+<li><strong>證據</strong>：比例、$|\cos|$、重建與特徵值的差都小於門檻；對這份程式重跑四種注入錯誤，都至少被一項抓到（沒重跑或沒抓到，就照實寫，這句不能沿用第 3 步的表）。</li>
 <li><strong>限制</strong>：只針對這份資料與這四種錯誤。sklearn 是對照組，不是真理，兩邊共同的假設問題比不出來。</li>
 </ul>
 </div>
