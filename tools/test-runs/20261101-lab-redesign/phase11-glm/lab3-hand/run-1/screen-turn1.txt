@@ -1,0 +1,40 @@
+  ┃   46 # ---------- 實驗 B：log-loss 不變，grad 乘 2 ----------                                                       
+  ┃   47 def loss_log(w):                                                                                               
+  ┃   48     p = sigmoid(X @ w)                                                                                         
+  ┃   49     eps = 1e-12                                                                                                
+  ┃   50     return -np.mean(y * np.log(p + eps) + (1 - y) * np.log(1 - p + eps))                                       
+  ┃   51                                                                                                                
+  ┃   52 def grad_log_double(w):                                                                                        
+  ┃   53     return 2 * X.T @ (sigmoid(X @ w) - y) / n                                                                  
+  ┃   54                                                                                                                
+  ┃   55 err_A = grad_check(loss_mse, grad_mse)                                                                         
+  ┃   56 err_B = grad_check(loss_log, grad_log_double)                                                                  
+  ┃   57 report("A (MSE loss + 正確梯度)", err_A)                                                                       
+  ┃   58 report("B (log-loss + grad 乘 2)", err_B)                                                                      
+  ┃   59                                                                                                                
+  ┃                                                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  $ uv run python lab3_grad_check_experiments.py                                                                     
+  ┃                                                                                                                     
+  ┃  A (MSE loss + 正確梯度): max abs grad error = 5.323e-12 -> PASS                                                    
+  ┃  B (log-loss + grad 乘 2): max abs grad error = 5.717e-01 -> FAIL                                                   
+  ┃                                                                                                                     
+                                                                                                                        
+     結果存在 lab3_grad_check_experiments.py，原本的 lab3_logistic.py 未動：                                            
+                                                                                                                        
+     - A（MSE loss + 正確梯度）：最大誤差 5.32e-12 → PASS                                                               
+     - B（log-loss + grad 乘 2）：最大誤差 5.72e-01 → FAIL                                                              
+                                                                                                                        
+     A 顯示只要梯度跟著 loss 一起換對，檢查就會過；B 之所以失敗，是因為數值梯度來自原始 log-loss，而解析梯度被放大 2    
+     倍，兩者差一倍，正好驗證這段檢查能抓出 loss 與 grad 不一致的錯誤。                                                 
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 44.0s                                                                                   
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase11-glm/lab3-hand-1/project               18.7K (2%)  ctrl+p commands  
+                                                                                                                        

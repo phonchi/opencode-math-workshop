@@ -1,0 +1,40 @@
+                                                                                                                        
+     1. 特徵選擇                                                                                                        
+                                                                                                                        
+     - line_modes.csv 有 8 欄。firmware_ver（全部 3.0）與 sample_period_s（全部 0.5）沒有變異，對分群無資訊量，剔除。   
+     - 剩下 6 個數值感測欄位：temp_c, vibration_mm_s, pressure_kpa, flow_lpm, current_a, speed_rpm。                    
+     - line_channels.csv（11 通道）和 line_faults.csv（含 fault 標籤）與本用途（批次追蹤）無關，不使用——fault           
+       是事後標籤，拿來分群會洩漏。                                                                                     
+                                                                                                                        
+     2. 演算法與前處理                                                                                                  
+                                                                                                                        
+     - 用 KMeans（n_init=20, random_state=0），資料先做 StandardScaler 標準化——6 個特徵量綱差很大（溫度幾十、           
+       壓力幾百），不標準化會讓壓力獨宰距離。                                                                           
+                                                                                                                        
+     3. k 的選法（不碰批次檔）                                                                                          
+                                                                                                                        
+     - 掃 k=2~12，看 inertia elbow 與 silhouette（圖存於 figs/k_selection.png）：                                       
+       - Silhouette 最高在 k=9（0.794），k=10 為 0.725。                                                                
+     - 純資料驅動的答案原本是 9。                                                                                       
+                                                                                                                        
+     4. 用批次檔「檢查」（這是唯一用到它的地方）                                                                        
+                                                                                                                        
+     - k=9 時，批次 2~10 各自完美落在自己的群，但 批次 1（73 筆）和批次 10（86                                          
+       筆）被併成同一群——違反你「批次不能合併」的硬性需求，所以 改成 k=10。                                             
+     - k=10 時 10 個批次幾乎一一對應，只剩 3 筆跨界：1 筆批次 1 落入批次 10 的群、2 筆批次 10 落入批次 1 的群。         
+       這是因為這兩個批次在感測值空間本來就高度重疊，KMeans 無法完美切開，屬資料本身的極限。                            
+                                                                                                                        
+     5. 給你的提醒                                                                                                      
+                                                                                                                        
+     - 若嚴格要求「每筆讀數的批次归属零錯誤」，光靠這 6 個感測欄位做不到，批次 1 和 10 的邊界筆（那 3                   
+       筆附近）需要額外資訊（例如時間順序）才能仲裁；k=10 已是此特徵集下最好的分法。                                    
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 1m 33s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase11b-glm/lab1-goal-open-1/project         22.1K (2%)  ctrl+p commands  
+                                                                                                                        

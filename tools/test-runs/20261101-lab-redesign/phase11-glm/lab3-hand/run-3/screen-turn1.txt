@@ -1,0 +1,40 @@
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  ← Edit lab3_grad_experiments.py                                                                                    
+  ┃                                                                                                                     
+  ┃    1 - from lab3_logistic import X, y, n, d, sigmoid, check_gradients                                               
+  ┃    1 + import numpy as np                                                                                           
+  ┃    2 + from lab3_logistic import X, y, n, sigmoid, check_gradients                                                  
+  ┃    3                                                                                                                
+  ┃    4   # 實驗 A：均方誤差損失 mean((σ(z)-y)^2) 與其正確梯度                                                         
+  ┃    5   # L = (1/n) Σ (σ(z_i) - y_i)^2                                                                               
+  ┃    6   # dL/dz_i = (2/n)(σ(z_i) - y_i) σ(z_i)(1 - σ(z_i))                                                           
+  ┃                                                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  $ uv run python lab3_grad_experiments.py                                                                           
+  ┃                                                                                                                     
+  ┃  [logistic] max |analytic - numeric| = 1.256e-11                                                                    
+  ┃  [logistic] PASS                                                                                                    
+  ┃  [A: MSE] max |analytic - numeric| = 4.890e-12                                                                      
+  ┃  [A: MSE] PASS                                                                                                      
+  ┃  [B: grad x2] max |analytic - numeric| = 4.211e-01                                                                  
+  ┃  [B: grad x2] FAIL                                                                                                  
+  ┃                                                                                                                     
+                                                                                                                        
+     兩個實驗完成，放在 lab3_grad_experiments.py（原 lab3_logistic.py 的 loss/grad 未動，只把梯度檢查包成               
+     check_gradients() 共用）：                                                                                         
+                                                                                                                        
+     - A（MSE）：$L=\frac{1}{n}\sum(\sigma(z_i)-y_i)^2$，梯度 $\frac{2}{n}X^\top[(s-y)\,s(1-s)]$ → 誤差 4.890e-12，     
+       PASS                                                                                                             
+     - B（grad ×2）：與數值梯度差了整整一倍 → 誤差 4.211e-01，FAIL（符合預期，因為數值梯度跟著原始 loss 走）            
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 1m 21s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase11-glm/lab3-hand-3/project               19.5K (2%)  ctrl+p commands  
+                                                                                                                        

@@ -1,0 +1,40 @@
+  ┃                                                                                                                     
+  ┃  $ uv run python lab3_logistic.py                                                                                   
+  ┃                                                                                                                     
+  ┃  資料筆數: 900, 特徵數: 6                                                                                           
+  ┃                                                                                                                     
+  ┃  === 訓練結果 ===                                                                                                   
+  ┃             temp_c: +2.626883                                                                                       
+  ┃     vibration_mm_s: -1.676317                                                                                       
+  ┃       pressure_kpa: +1.191749                                                                                       
+  ┃           flow_lpm: -0.150469                                                                                       
+  ┃          current_a: -0.181997                                                                                       
+  ┃          speed_rpm: +0.668292                                                                                       
+  ┃          intercept: -5.238040                                                                                       
+  ┃  …                                                                                                                  
+  ┃                                                                                                                     
+  ┃  Click to expand                                                                                                    
+  ┃                                                                                                                     
+                                                                                                                        
+     已完成 lab3_logistic.py，執行結果：                                                                                
+                                                                                                                        
+     - 訓練：900 筆、6 特徵標準化後加截距欄，梯度下降 5000 epochs，最終 loss 0.1215，訓練準確率 0.948                   
+     - 梯度檢查：PASS，最大絕對誤差 9.0e-13                                                                             
+                                                                                                                        
+     檢查點與步長的理由：                                                                                               
+                                                                                                                        
+     - 檢查點：零向量 + 兩個不同尺度（std 0.1、1.0）的隨機點。只查單一點可能僥倖通過（例如 sigmoid 碰巧在線性區），     
+       涵蓋飽和與非飽和區比較可靠。                                                                                     
+     - 步長：掃 eps = 1e-4 ~ 1e-7。中央差分誤差是 $O(\epsilon^2)$ 的截斷誤差加上 $O(\epsilon_{\text{mach}}/\epsilon)$   
+       的浮點相消誤差，兩者拉鋸，掃一輪取誤差最小值最穩，不賭單一步長。判定用掃描後的最佳誤差（9.0e-13）對容差 1e-6，   
+       結果 PASS。                                                                                                      
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 1m 38s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase11-glm/lab3-hand-2/project               18.2K (2%)  ctrl+p commands  
+                                                                                                                        

@@ -1,0 +1,40 @@
+  ┃   52     X = add_intercept((X_raw - mu) / sd)                                                                       
+  ┃   53                                                                                                                
+  ┃   54     run("A: MSE loss + MSE 正確梯度", loss_mse, grad_mse, X, y)                                                
+  ┃   55     run("B: log loss + grad 乘 2", loss, grad_doubled, X, y)                                                   
+  ┃   56                                                                                                                
+  ┃   57                                                                                                                
+  ┃   58 if __name__ == "__main__":                                                                                     
+  ┃   59     main()                                                                                                     
+  ┃   60                                                                                                                
+  ┃                                                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  $ uv run python lab3_experiments.py                                                                                
+  ┃                                                                                                                     
+  ┃  === 實驗 A: MSE loss + MSE 正確梯度 ===                                                                            
+  ┃    最大絕對誤差（eps 掃描後最佳）: 3.561e-12                                                                        
+  ┃    梯度檢查: PASS（容差 1.0e-06）                                                                                   
+  ┃                                                                                                                     
+  ┃  === 實驗 B: log loss + grad 乘 2 ===                                                                               
+  ┃    最大絕對誤差（eps 掃描後最佳）: 4.211e-01                                                                        
+  ┃    梯度檢查: FAIL（容差 1.0e-06）                                                                                   
+  ┃                                                                                                                     
+                                                                                                                        
+     完成，原本的 loss 和 grad 沒動，實驗寫在 lab3_experiments.py，用同一套檢查點（零向量 + 兩個隨機點）和 eps          
+     掃描（1e-4 ~ 1e-7）：                                                                                              
+                                                                                                                        
+     - 實驗 A（MSE loss + 對應梯度 $2/n \cdot X^T(\sigma(z)-y)\sigma(z)(1-\sigma(z))$）：最大誤差 3.6e-12，PASS —       
+       梯度確實是 MSE 的正確導數                                                                                        
+     - 實驗 B（log loss + grad×2）：最大誤差 4.2e-01，FAIL — 梯度被放大 2 倍，和 log loss 的中央差分差約一倍，          
+       正好暴露不一致                                                                                                   
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 35.2s                                                                                   
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase11-glm/lab3-hand-2/project               19.4K (2%)  ctrl+p commands  
+                                                                                                                        

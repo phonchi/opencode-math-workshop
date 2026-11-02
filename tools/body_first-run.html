@@ -150,7 +150,7 @@ ls</code></pre>
 <h3>4.5 順便說 agent 模式</h3>
 <p>按 <code>Tab</code> 可以在兩個 agent 之間切換，畫面左下角的 <code>Build · Big Pickle</code> 會跟著變成 <code>Plan · Big Pickle</code>。</p>
 <div class="tw"><table><tr><th>agent</th><th>用來做什麼</th></tr><tr><td><code>Build</code></td><td>預設。可以讀、可以改、可以跑指令。工作坊多半用這個</td></tr><tr><td><code>Plan</code></td><td>先討論與規劃，不動檔案。本專案的 <code>opencode.json</code> 已設定 Plan 不能編輯、不能跑指令</td></tr></table></div>
-<p>切到 Plan 試一句：<code>請執行 ls，列出目前資料夾的檔案。</code>，再看它用了什麼工具。講師實測兩個模型各 3 次，都列出了檔案，但用的是讀取或搜尋工具，不是 <code>bash</code>；其中 1 次列完檔後還試了 <code>bash</code>，被擋下才作答。權限能擋住特定工具，agent 仍可能換一條路達成目的，所以要看畫面。試完按 <code>Tab</code> 切回 Build，確認左下角的標示。</p>
+<details class="bg"><summary>課後試試：Plan 模式會怎麼處理 <code>ls</code></summary><div class="bg-body"><p>切到 Plan 試一句：<code>請執行 ls，列出目前資料夾的檔案。</code>，再看它用了什麼工具。講師實測兩個模型各 3 次，都列出了檔案，但用的是讀取或搜尋工具，不是 <code>bash</code>；其中 1 次列完檔後還試了 <code>bash</code>，被擋下才作答。權限能擋住特定工具，agent 仍可能換一條路達成目的，所以要看畫面。試完按 <code>Tab</code> 切回 Build，確認左下角的標示。</p></div></details>
 <p>Plan 的限制來自設定，不是模式名稱。如果設定檔只寫 <code>"edit": "ask"</code>，這條會蓋掉 Plan 內建的禁止，它就只是問你。所以起始專案特別加了 <code>agent.plan.permission</code>，可以用 <code>opencode debug agent plan</code> 查實際結果。</p>
 <h3>4.6 開場練習：它不知道的時候</h3>
 <p>這門課貫穿一個問題：<strong>AI 這麼強，為什麼還要自己想、自己驗證？</strong>先試一次。貼上這句，<strong>如果跳出權限要求就選 <code>Reject</code></strong>：</p>

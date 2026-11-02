@@ -1030,7 +1030,15 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 </div>
 <p>下載故障標籤。它只用來檢查降維結果。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
 <pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/line_channels_fault.csv -o data/line_channels_fault.csv</code></pre>
-<p>先預測：保留幾個主成分就分得出故障？如果照建議丟掉 <code>ch09</code>～<code>ch11</code> 呢？再請 AI 算。你要自己說清楚比較什麼；下面是參考程式的結果（<code>reference/lab2_pca.py</code>，標準化後，AUC 用 5 折交叉驗證，標準化、PCA 和分類器都只在訓練折擬合，0.5 約等於亂猜，1 是完全分開）：</p>
+<p>先預測，再寫下這張卡。<strong>AUC</strong> 是用來衡量分不分得出故障的分數：0.5 約等於亂猜，1 是完全分開。</p>
+<div class="box warn">
+<div class="bt">驗收卡</div>
+<p style="margin-bottom:0">我主張＿＿就夠；要比較＿＿；如果出現＿＿，我會撤回主張。</p>
+</div>
+<p>用這張卡自己寫 prompt 請 AI 算。提醒它前處理和 PCA 只能在訓練折擬合，也告訴它不要替你改主張。</p>
+<details class="bg"><summary>算完再打開：參考結果</summary>
+<div class="bg-body">
+<p>參考程式（<code>reference/lab2_pca.py</code>，標準化後取主成分分數，用 logistic 迴歸做 5 折交叉驗證）：</p>
 <div class="tw"><table>
 <tr><th>保留內容</th><th>累積變異</th><th>辨識故障的 AUC</th></tr>
 <tr><td>前 3 個主成分</td><td>69.0%</td><td>0.588</td></tr>
@@ -1040,6 +1048,9 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <tr><td>原始尺度只留 1 個主成分</td><td>約 100%</td><td>0.503</td></tr>
 </table></div>
 <p>第 4 個主成分幾乎就是 <code>ch09</code>、<code>ch10</code>，第 5 個幾乎只有和故障無關的 <code>ch11</code>。<strong>解釋變異比例量的是「變化多大」，不是「對你多重要」。</strong>這不是說 90% 這類門檻不能用，而是用之前要先知道用途。標準化也不是萬用解：它救回了弱通道，也把 <code>ch11</code> 這種和故障無關的欄位放大了。</p>
+<p>這張表只看主成分分數。講師實測兩個模型各 3 次，都判定「4 個就夠」成立；有幾次自己加了監控常用的 Q 殘差統計量，只留 3 個時也能達到約 0.999，因為故障訊號跑到被丟掉的部分。所以「3 個不夠」也有條件：要看你的監控怎麼用這些主成分。</p>
+</div>
+</details>
 </div>
 </details>
 </div>
@@ -1051,7 +1062,7 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 
 <div class="step" data-n="4">
 <h3>規劃：手刻，並先說清楚怎麼驗</h3>
-<p>輸入 <code>/new</code>，自己寫 prompt，至少交代：只能用 numpy 的 <code>eigh</code> 手刻；每欄先<strong>除以標準差但不減平均</strong>，中心化留給 PCA 本身；取前 4 個主成分；sklearn（<code>svd_solver='full'</code>）只當對照組；檔名 <code>lab2_pca.py</code>；每項檢查印出實際數值和 PASS/FAIL。</p>
+<p>輸入 <code>/new</code>，依你的驗收卡自己寫 prompt，至少交代：只能用 numpy 的 <code>eigh</code> 手刻；每欄先<strong>除以標準差但不減平均</strong>，中心化留給 PCA 本身；取前 4 個主成分；sklearn（<code>svd_solver='full'</code>）只當對照組；檔名 <code>lab2_pca.py</code>；每項檢查印出實際數值和 PASS/FAIL。</p>
 <p>跑完後打開程式，<strong>找出通過條件到底比了哪些量</strong>，列在 <code>notes/</code> 或紙上。有印出來不代表有列入判定。</p>
 </div>
 
@@ -1145,7 +1156,7 @@ $WW^\top\approx I$ 確實不需要對照組，但它只證明「這 $K$ 個向�
 <ul class="ckl">
 <li><input type="checkbox" id="l2a"><label for="l2a">我做過摘要、畫面、檔案的三欄對照，也自己重跑過一次</label></li>
 <li><input type="checkbox" id="l2b"><label for="l2b">揭曉前，我寫下了「夠」的門檻是誰定的、還缺什麼資訊</label></li>
-<li><input type="checkbox" id="l2c"><label for="l2c">我能解釋為什麼 84% 的變異能辨識故障，69% 卻不行</label></li>
+<li><input type="checkbox" id="l2c"><label for="l2c">我寫了驗收卡，並能解釋為什麼解釋變異比例高，不等於保留了我要的訊號</label></li>
 <li><input type="checkbox" id="l2d"><label for="l2d">看結果之前，我寫下了「檢查 × 錯誤」的預測</label></li>
 <li><input type="checkbox" id="l2e"><label for="l2e">我的表有實際數值；AI 沒有修掉注入的錯誤，也沒有改門檻</label></li>
 <li><input type="checkbox" id="l2f"><label for="l2f">我能說明為什麼「分母用 n」只有直接比特徵值才抓得到（$c$ 被約掉）</label></li>

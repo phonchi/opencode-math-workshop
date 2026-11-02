@@ -1,0 +1,40 @@
+  ┃    75 + check("transform 投影分數（對齊正負號）", T_hand * sign[None, :], T_sk)                                     
+  ┃    76                                                                                                               
+  ┃    77   # 檢查 4：解释變異比例                                                                                      
+  ┃    78   evr_hand = pca_hand.explained_variance_ / np.sum(                                                           
+  ┃    79       np.linalg.eigvalsh((X - X.mean(axis=0)).T @ (X - X.mean(axis=0)) / (n - 1))                             
+  ┃                                                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  $ uv run python lab2_pca.py                                                                                        
+  ┃                                                                                                                     
+  ┃  資料形狀: 800 x 11（已除以欄標準差，未減平均）                                                                     
+  ┃                                                                                                                     
+  ┃  [PASS] explained_variance_: 實際最大誤差 = 5.329e-15（容許 1.0e-08）                                               
+  ┃  [PASS] components_（對齊正負號）: 實際最大誤差 = 1.561e-15（容許 1.0e-08）                                         
+  ┃  [PASS] transform 投影分數（對齊正負號）: 實際最大誤差 = 1.499e-14（容許 1.0e-08）                                  
+  ┃  [PASS] explained_variance_ratio_: 實際最大誤差 = 1.388e-16（容許 1.0e-08）                                         
+  ┃                                                                                                                     
+  ┃  前 4 個主成分解释變異比例（手刻版）:                                                                               
+  ┃    PC1: 0.319510                                                                                                    
+  ┃    PC2: 0.205183                                                                                                    
+  ┃  …                                                                                                                  
+  ┃                                                                                                                     
+  ┃  Click to expand                                                                                                    
+  ┃                                                                                                                     
+                                                                                                                        
+     完成，四項檢查全數 PASS（誤差都在 1e-14 量級）。                                                                   
+                                                                                                                        
+     - lab2_pca.py：HandPCA 中心化後建共變異矩陣，np.linalg.eigh 取前 4 主成分；前處理只除欄標準差（lab2_pca.py:20）。  
+     - 對照 sklearn svd_solver='full'，逐項印出最大誤差與 PASS/FAIL；特徵向量正負號不定，比較前先對齊。                 
+     - 前 4 主成分解釋變異比例合計約 83.9%（PC1 0.3195、PC2 0.2052、PC3 0.1655、PC4 0.1486）。                          
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 3m 1s                                                                                   
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase11-glm/lab2-hand-3/project               19.5K (2%)  ctrl+p commands  
+                                                                                                                        

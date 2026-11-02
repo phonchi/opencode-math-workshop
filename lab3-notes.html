@@ -702,6 +702,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a class="chapter-link" href="lab3-notes.html" aria-current="page">Lab 3 · 分類與筆記</a>
 <ul class="section-nav" aria-label="本章內容">
 <li><a href="#section-任務">任務</a></li>
+<li><a href="#threshold-title">先動手：門檻是誰決定的？</a></li>
 <li><a href="#section-動手">動手</a></li>
 <li><a href="#section-手刻並檢查梯度">手刻並檢查梯度</a></li>
 <li><a href="#section-最後-把它變成一份筆記">最後：把它變成一份筆記</a></li>
@@ -752,6 +753,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a class="chapter-link" href="lab3-notes.html" aria-current="page">Lab 3 · 分類與筆記</a>
 <ul class="section-nav" aria-label="本章內容">
 <li><a href="#section-任務">任務</a></li>
+<li><a href="#threshold-title">先動手：門檻是誰決定的？</a></li>
 <li><a href="#section-動手">動手</a></li>
 <li><a href="#section-手刻並檢查梯度">手刻並檢查梯度</a></li>
 <li><a href="#section-最後-把它變成一份筆記">最後：把它變成一份筆記</a></li>
@@ -912,6 +914,100 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 </details>
 </section>
 
+<section class="threshold-explorer" aria-labelledby="threshold-title">
+<h2 id="threshold-title">先動手：門檻是誰決定的？</h2>
+<p>logistic 迴歸把輸入特徵 $x$ 算成分數 $z=wx+b$，再用 $p=\sigma(z)=\frac{1}{1+e^{-z}}$ 壓成 0 到 1 的機率。機率超過<strong>門檻</strong>就發警報。下面是 60 筆<strong>合成資料</strong>，不是產線資料：8 筆故障（紅），52 筆正常（灰）。模型已經訓練好，不會再變。</p>
+<p><strong>先猜：把門檻調低，抓到的故障和誤報各會怎麼變？準確率呢？</strong>猜完再拖。</p>
+<div class="threshold-panel">
+  <div class="threshold-controls">
+    <label for="threshold-t">門檻 <output id="threshold-t-value" for="threshold-t">0.50</output><span class="threshold-note">常見預設是 0.5</span></label>
+    <input id="threshold-t" type="range" min="0.02" max="0.98" step="0.01" value="0.5">
+    <label for="threshold-cap">複查上限 <output id="threshold-cap-value" for="threshold-cap">10</output> 件</label>
+    <input id="threshold-cap" type="range" min="1" max="30" step="1" value="10">
+  </div>
+  <figure>
+    <svg id="threshold-plot" viewBox="0 0 680 420" role="img" aria-labelledby="threshold-svg-title threshold-svg-desc">
+      <title id="threshold-svg-title">機率曲線與門檻</title>
+      <desc id="threshold-svg-desc">橫軸是輸入特徵，曲線是故障機率。垂直線是目前門檻對應的位置，線右邊的點都會發警報。</desc>
+      <rect id="threshold-zone" y="24" height="358" fill="#b8503c" opacity=".08"/>
+      <line x1="50" y1="230" x2="650" y2="230" stroke="#7d7a72"/>
+      <line x1="50" y1="24" x2="50" y2="230" stroke="#7d7a72"/>
+      <text x="42" y="32" text-anchor="end" font-size="16" fill="#5f5c55">1</text>
+      <text x="42" y="236" text-anchor="end" font-size="16" fill="#5f5c55">0</text>
+      <text x="44" y="258" text-anchor="end" font-size="15" fill="#b8503c">故障</text>
+      <text x="44" y="292" text-anchor="end" font-size="15" fill="#5f5c55">正常</text>
+      <text x="350" y="408" text-anchor="middle" font-size="16" fill="#5f5c55">輸入特徵 x（越右邊越像故障）</text>
+      <path id="threshold-curve" fill="none" stroke="#2a3c78" stroke-width="3"/>
+      <g id="threshold-points"></g>
+      <line id="threshold-line" y1="24" y2="382" stroke="#b8503c" stroke-width="3"/>
+    </svg>
+    <figcaption>曲線：故障機率　紅色點：故障　灰色點：正常　淡紅區：會發警報的範圍</figcaption>
+  </figure>
+  <dl class="threshold-readouts">
+    <div><dt>警報</dt><dd><output id="threshold-alarms">—</output></dd></div>
+    <div><dt>抓到故障</dt><dd><output id="threshold-caught">—</output></dd></div>
+    <div><dt>漏掉故障</dt><dd><output id="threshold-missed">—</output></dd></div>
+    <div><dt>誤報</dt><dd><output id="threshold-false">—</output></dd></div>
+    <div><dt>準確率</dt><dd><output id="threshold-acc">—</output></dd></div>
+  </dl>
+  <p id="threshold-status" class="threshold-status" role="status"></p>
+  <p class="threshold-base">對照：永遠猜「沒故障」，準確率也有 86.7%，但一個故障都抓不到。</p>
+</div>
+<div class="box warn">
+<div class="bt">操作完回答</div>
+<ul style="margin-bottom:0">
+<li>模型有重新訓練嗎？為什麼判定還是變了？</li>
+<li>你猜對了嗎？準確率最高的門檻，是你想要的門檻嗎？</li>
+<li>把複查上限改成 5 或 20，你的選擇會變嗎？<strong>要選門檻，你還需要知道什麼？模型會知道嗎？</strong></li>
+</ul>
+</div>
+<noscript><p>此互動需要 JavaScript。重點是：模型沒變，調門檻就會改變抓到與誤報的數量，該選哪個要看漏報代價和人力。</p></noscript>
+</section>
+<style>
+.threshold-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
+.threshold-controls{display:grid;grid-template-columns:1fr 1fr;gap:.2rem 1.5rem;align-items:center}
+.threshold-controls label{font-weight:600;grid-row:1}.threshold-controls label output{color:var(--link);font-variant-numeric:tabular-nums;margin:0 .3rem}.threshold-note{font-weight:400;font-size:.8rem;color:var(--ink-2);margin-left:.4rem}
+.threshold-controls input{grid-row:2;width:100%;min-width:0;accent-color:var(--link);min-height:44px}
+.threshold-controls input:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+.threshold-panel figure{margin:1rem 0}.threshold-panel svg{display:block;width:100%;height:auto}.threshold-panel figcaption{font-size:.82rem;color:var(--ink-2);text-align:center}
+.threshold-readouts{display:flex;gap:1.6rem;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:1rem;margin:0}.threshold-readouts dt{font-size:.86rem;color:var(--ink-2)}.threshold-readouts dd{margin:0;font-size:1.5rem;color:var(--link);font-variant-numeric:tabular-nums}
+.threshold-status{font-weight:600;margin:.8rem 0 0;min-height:1.6em}.threshold-status.over{color:#b8503c}.threshold-base{font-size:.86rem;color:var(--ink-2);margin:.3rem 0 0}
+@media(max-width:600px){.threshold-controls{display:block}.threshold-panel figcaption{text-align:left}}
+@media print{.threshold-controls input{display:none}}
+</style>
+<script>
+(function(){
+  'use strict';
+  const NORMAL=[1.04,-3.56,-.58,-1.57,-1.45,-1.22,-3.02,-1.23,-1.87,2.32,-.77,-1.35,-1.28,-1.67,-2.06,-1.39,-.52,-1.24,-.04,-1.2,-.98,.55,-.45,-1.51,-1.18,-.46,.94,-1.27,-1.24,0,-1.89,-1.29,-.12,-.42,-.91,-.33,-3.83,.02,-1.96,-2.67,-.72,-.3,-1.44,-2.08,-.97,-1.05,.41,-.25,-.81,.11,-1.21,-1.93];
+  const FAULT=[1.83,1.82,1.11,.6,1.51,-.94,1.92,1.74];
+  const W=1.76,B=-2.082;
+  const prob=x=>1/(1+Math.exp(-(W*x+B)));
+  const root=document.querySelector('.threshold-explorer');
+  const ns='http://www.w3.org/2000/svg';
+  const el=id=>document.getElementById('threshold-'+id);
+  const sx=x=>50+(x+4.2)/(7)*600,sy=p=>230-p*206;
+  const shape=(tag,attrs,parent)=>{const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);parent.appendChild(n);return n;};
+  let d='';for(let x=-4.2;x<=2.8;x+=.1)d+=(d?'L':'M')+sx(x).toFixed(1)+' '+sy(prob(x)).toFixed(1);
+  el('curve').setAttribute('d',d);
+  const place=(xs,fill,base)=>{const used=[];xs.forEach(x=>{const cx=sx(x);let row=0;while(used.some(u=>u.row===row&&Math.abs(u.cx-cx)<10))row++;used.push({cx,row});shape('circle',{cx,cy:base+row*10,r:4.5,fill},el('points'));});};
+  place(FAULT,'#b8503c',253);place(NORMAL,'#8a867c',287);
+  function draw(){
+    const t=Number(el('t').value),cap=Number(el('cap').value);
+    const caught=FAULT.filter(x=>prob(x)>=t).length,falseAlarm=NORMAL.filter(x=>prob(x)>=t).length;
+    const missed=FAULT.length-caught,alarms=caught+falseAlarm,acc=(caught+NORMAL.length-falseAlarm)/(FAULT.length+NORMAL.length);
+    const cut=(Math.log(t/(1-t))-B)/W,x=Math.min(650,Math.max(50,sx(cut)));
+    el('line').setAttribute('x1',x);el('line').setAttribute('x2',x);el('zone').setAttribute('x',x);el('zone').setAttribute('width',650-x);
+    el('t-value').value=t.toFixed(2);el('cap-value').value=String(cap);
+    el('alarms').value=String(alarms);el('caught').value=String(caught);el('missed').value=String(missed);el('false').value=String(falseAlarm);el('acc').value=(acc*100).toFixed(1)+'%';
+    const over=alarms>cap,s=el('status');s.textContent=over?`警報 ${alarms} 件，超過複查上限 ${cap} 件，現場做不完。`:`警報 ${alarms} 件，在複查上限 ${cap} 件之內。還漏掉 ${missed} 個故障。`;s.classList.toggle('over',over);
+    Object.assign(root.dataset,{t:String(t),cap:String(cap),alarms:String(alarms),caught:String(caught),missed:String(missed),falseAlarm:String(falseAlarm),accuracy:String(acc),over:String(over)});
+  }
+  el('t').addEventListener('input',draw);el('cap').addEventListener('input',draw);
+  draw();
+})();
+</script>
+
+
 <section>
 <h2 id="section-動手">動手</h2>
 
@@ -927,8 +1023,9 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <p>先別追問，寫下你接受、保留或拒絕它的結論，並查三件事：</p>
 <ul>
 <li><strong>門檻</strong>：它用哪個門檻？誰決定的？</li>
-<li><strong>欄位</strong>：<code>record_id</code> 有沒有當特徵？按 <code>!</code> 用 <code>grep -rn record_id --include=*.py .</code> 查，再看摘要有沒有寫。</li>
+<li><strong>欄位</strong>：<code>record_id</code> 有沒有當特徵？按 <code>!</code> 用 <code>grep -rn record_id --include=*.py .</code> 查；沒有 <code>.py</code> 檔就看工具紀錄。再看摘要有沒有寫。</li>
 <li><strong>數字</strong>：永遠猜「沒故障」的準確率是多少？和它報的比起來呢？</li>
+<li><strong>來源</strong>：它讀了哪些檔？（看工具紀錄）建議或不建議上線的理由，哪些是你能核對的數字，哪些是推測？</li>
 </ul>
 <details class="bg"><summary>寫完判斷再打開：講師實測</summary>
 <div class="bg-body">
@@ -940,6 +1037,7 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <li>但只有 1 次在摘要提到 <code>record_id</code>，另外 5 次要讀程式或它寫的筆記才知道。</li>
 <li>結論從「不建議直接上線」到「可以作為輔助預警」都有，報出的 recall 從 27% 到 93% 都有，取決於它自己挑的模型和門檻。</li>
 <li>其中 1 次提到要依停機和維修成本調門檻，但 6 次都在沒問你的情況下先給了結論。</li>
+<li>有 1 次拿 Lab 1 的 <code>data/line_modes.csv</code> 當理由，說轉速「超出訓練分布」，講得很肯定；但那份資料和這題的關係，它其實不知道。</li>
 </ul>
 <p style="margin-bottom:0"><code>big-pickle</code> 當天額度用完，還沒有這一題的紀錄。</p>
 </div>
@@ -962,7 +1060,15 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 </div>
 <p>在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
 <pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/line_faults_new_batch.csv -o data/line_faults_new_batch.csv</code></pre>
-<p>先預測：如果把 <code>record_id</code> 放進模型，測試集和下一批的 recall 各會如何？該用哪個門檻？再請 AI 算給你看。下面是手刻模型的參考結果（<code>reference/lab3_logistic.py</code>，切 30% 當測試集，並用訓練集的平均和標準差做標準化）：</p>
+<p>先預測，再寫下這張卡，用它自己寫 prompt 請 AI 計算：</p>
+<div class="box warn">
+<div class="bt">決策卡</div>
+<p style="margin-bottom:0">我優先避免＿＿；複查上限＿＿；我預測降低門檻會＿＿。請計算核對，<strong>不要替我選。</strong></p>
+</div>
+<p>也告訴它不要用哪些欄位、用哪份資料檢查，以及要列出哪些數字（例如各門檻的警報、抓到、漏掉、誤報）。</p>
+<details class="bg"><summary>算完再打開：參考結果</summary>
+<div class="bg-body">
+<p>下面是手刻模型的參考結果（<code>reference/lab3_logistic.py</code>，切 30% 當測試集，並用訓練集的平均和標準差做標準化）。實測 <code>GLM-5.3-Flash</code> 3 次都列出了表，也都把決定留給你，但有 1 次仍點出 0.2 是唯一符合條件的門檻；用 sklearn 預設值時數字會差一點（例如門檻 0.5 時警報 11 件）。<code>Gemini 3.5 Flash Lite</code> 當天額度用完，還沒有這一題的紀錄。</p>
 <div class="tw"><table>
 <tr><th>模型</th><th>測試集準確率</th><th>測試集 recall</th><th>下一批 recall</th></tr>
 <tr><td>永遠猜「沒故障」</td><td>0.922</td><td>0</td><td>0</td></tr>
@@ -980,7 +1086,8 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <tr><td>0.05</td><td>68（超過 40）</td><td>13</td><td>0</td><td>55</td></tr>
 </table></div>
 <p>你會選哪一個？為什麼？下一批只有 13 個故障，少一兩個就差很多，這句話也要寫進結論。如果 AI 已經提醒你要看成本，那很好，但成本的數字還是要你提供。</p>
-<p><strong>接下來要開新對話，它會看不到這些。</strong>先自己把需求卡、你選的門檻和理由寫進 <code>notes/decision.md</code>。</p>
+</div>
+</details>
 </div>
 </details>
 </div>
@@ -1003,7 +1110,7 @@ $$L(w)=\frac1n\sum_i\Bigl[\log\bigl(1+e^{z_i}\bigr)-y_iz_i\Bigr],
 <div class="bt">中央差分</div>
 $$\frac{\partial L}{\partial w_i}\;\approx\;\frac{L(w+h\mathbf{e}_i)-L(w-h\mathbf{e}_i)}{2h}$$
 </div>
-<p>輸入 <code>/new</code>，自己寫 prompt。它回答後，記下底部的 context 用量（例如 <code>30.5K (15%)</code>）。至少交代：用 numpy 手刻，存成 <code>lab3_logistic.py</code>；使用全部 900 筆；<strong>不用 <code>record_id</code></strong>；特徵標準化，最後加一欄 1；<code>loss</code>、<code>grad</code> 用本頁公式；不加正則化。</p>
+<p>先自己把需求卡、你選的門檻和理由寫進 <code>notes/decision.md</code>：新對話不會自動帶入剛才的討論，但檔案還在。接著輸入 <code>/new</code>，自己寫 prompt。它回答後，記下底部的 context 用量（例如 <code>30.5K (15%)</code>）。至少交代：用 numpy 手刻，存成 <code>lab3_logistic.py</code>；使用全部 900 筆；<strong>不用 <code>record_id</code></strong>；特徵標準化，最後加一欄 1；<code>loss</code>、<code>grad</code> 用本頁公式；不加正則化。</p>
 <p>再決定：<strong>檢查幾個維度？在哪個點檢查？用哪些步長？怎樣算過關？</strong>寫完貼給它，看它有沒有照做。</p>
 <details class="bg"><summary>寫完再對照：一份參考結果</summary>
 <div class="bg-body">
@@ -1068,7 +1175,7 @@ B. loss 不變，只把 grad 乘以 2
 
 <section>
 <h2 id="section-收尾-回答開場的問題">收尾：回答開場的問題</h2>
-<p class="path-note">時間不夠或用備案模型時，第 5 步和下面的規則測試可以擇一。</p>
+<p class="path-note">時間不夠或用備案模型時，動手的第 5 步和下面的規則測試可以擇一。</p>
 <p>回到開場那句：<strong>AI 這麼強，為什麼還要自己想、自己驗證？</strong></p>
 <p>先看今天的結果：<strong>它算的數字多半是對的，也常常處理得不錯。</strong>注入的錯誤也是我們故意放的。所以答案不是「AI 很爛」，而是：</p>
 <ul>
@@ -1076,6 +1183,7 @@ B. loss 不變，只把 grad 乘以 2
 <li>它說「夠了」「通過」，要問夠做什麼、抓不抓得到錯（Lab 2）</li>
 <li>該由你決定的事，它可能已經替你決定了（Lab 3）</li>
 </ul>
+<p>但你也看到了：<strong>把目標和限制說清楚，它回答的就更接近你要的。</strong>今天你從事後補救（目標卡），到事先定驗收（驗收卡），再到自己拍板（決策卡），這就是你帶走的能力。</p>
 <p>今天你也親眼看過 agent 怎麼運作：</p>
 <div class="tw"><table>
 <tr><th>agent 的機制</th><th>你親眼看到的地方</th></tr>
@@ -1102,11 +1210,13 @@ B. loss 不變，只把 grad 乘以 2
 <pre class="cmd"><code># 例子，請換成你自己遇到的問題
 ## 回報規則
 - 最後的摘要要寫出沒被要求、由你自己做的決定，例如前處理、切分資料、移除哪些欄位。
-- 資訊不足以回答問題時，先問我，不要自己假設。</code></pre>
+- 開始分析前，先列出「我缺的資訊」和「我打算假設的值」各至少兩項，然後停下等我確認，不要先跑程式。</code></pre>
 <p><code>/new</code> 後，把 Lab 3 第一句再問一次，<strong>逐條檢查它有沒有照做</strong>，再和鄰座比較。</p>
 <div class="box tip">
-<div class="bt">講師實測：上面這兩條規則</div>
-<p style="margin-bottom:0">2026-11-02，兩個模型各 3 次。6 次的摘要都列出了它自己做的決定，也都提到 <code>record_id</code>；沒有這條規則時，只有 1 次提到。但 <strong>6 次都沒有先問，就直接訓練並下結論</strong>。規則有用，但不是每條都會被遵守，所以寫完要測。</p>
+<div class="bt">講師實測：上面這兩條規則（分開測，兩條一起用還沒測）</div>
+<p>2026-11-02。「摘要要寫出決定」這條，兩個模型各 3 次都照做，也都提到 <code>record_id</code>；沒有這條時只有 1 次提到。</p>
+<p>另一條我們改過寫法。原本寫「資訊不足先問我，不要自己假設」，兩個模型各 3 次<strong>都沒有先問</strong>，直接訓練並下結論。改成上面這種可以檢查的停止點後，<code>GLM-5.3-Flash</code> 3 次都停下來列出缺的資訊和假設（其中 1 次先用指令看了資料檔）；<code>Gemini 3.5 Flash Lite</code> 當天額度用完，還沒有這一條的紀錄。</p>
+<p style="margin-bottom:0">所以規則有用，但寫法有差，也不保證每次遵守，寫完要測。</p>
 </div>
 <p>想多練習，看 <a href="agents-md.html">AGENTS.md 專案規則</a>。</p>
 </div>
@@ -1116,7 +1226,7 @@ B. loss 不變，只把 grad 乘以 2
 <h2 id="section-檢查清單">檢查清單</h2>
 <ul class="ckl">
 <li><input type="checkbox" id="l3a"><label for="l3a">揭曉前，我查過門檻、<code>record_id</code>，也算過永遠猜「沒故障」的準確率</label></li>
-<li><input type="checkbox" id="l3b"><label for="l3b">我選了一個門檻，並能用需求卡說明理由</label></li>
+<li><input type="checkbox" id="l3b"><label for="l3b">我寫了決策卡，自己選了一個門檻，並能說明理由</label></li>
 <li><input type="checkbox" id="l3c"><label for="l3c">我能說明含 <code>record_id</code> 的模型為什麼測試成績好，換一批就失效</label></li>
 <li><input type="checkbox" id="l3d"><label for="l3d">梯度檢查是我規劃的；我也親眼看到 <code>loss</code>、<code>grad</code> 一起換成 MSE 仍然 PASS</label></li>
 <li><input type="checkbox" id="l3e"><label for="l3e"><code>notes/logistic.md</code> 寫了觀察、決定、不能證明什麼，而且我讀過每一句</label></li>

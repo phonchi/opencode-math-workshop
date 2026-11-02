@@ -75,6 +75,8 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 </details>
 </section>
 
+<!--INCLUDE:tools/kmeans-explorer.html-->
+
 <section>
 <h2>動手</h2>
 
@@ -90,9 +92,11 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <p>看完回答，<strong>先別追問</strong>。在 <code>notes/</code> 或紙上寫下：</p>
 <ul>
 <li>你會接受、保留，還是拒絕這個答案？</li>
-<li>它替你做了哪些決定？資料有沒有處理、用了什麼方法和指標、比了哪些 k？</li>
-<li>還缺什麼資訊，你才敢把這個答案交給別人用？</li>
+<li>它用的方法你學過嗎？它做了哪些你沒要求的事（標準化、寫檔、畫圖）？</li>
+<li>它說的「可信」「明確」，是對什麼而言？還缺什麼資訊，你才敢把答案交給別人用？</li>
 </ul>
+<p>如果它用了你沒學過的方法，不必硬著頭皮相信，可以追問：</p>
+<pre class="cmd"><code>請只用 k-means 和 silhouette 重算，列出你替我做的每個決定，先不要下結論。</code></pre>
 <p>和鄰座對一下答案。如果它先問你要拿來做什麼，那很好：回答它，再看建議怎麼變。</p>
 <details class="bg"><summary>寫完判斷再打開：講師實測</summary>
 <div class="bg-body">
@@ -104,7 +108,7 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <tr><td><code>Gemini 3.5 Flash Lite</code>（3 次）</td><td>4 種（另提可細分為 6 種）、9 種、4 種（另提可細分為 5 至 6 種）</td></tr>
 <tr><td><code>GLM-5.3-Flash</code>（3 次）</td><td>9 種、7 種、9 種</td></tr>
 </table></div>
-<p>6 次都給了明確的群數，沒有一次先問要拿來做什麼。其中一次寫「BIC 明確指向 9，可信度較高」，另一次寫「證實是 7 個完全分離的緊密群」。</p>
+<p>6 次都直接給了群數（2 次附帶可細分的備選），沒有一次先問要拿來做什麼。其中一次寫「BIC 明確指向 9，可信度較高」，另一次寫「證實是 7 個完全分離的緊密群」。</p>
 <p style="margin-bottom:0">這裡的數字多半算得對，只是每次的決定不同。<code>big-pickle</code> 當天額度用完，還沒有這一題的紀錄。樣本很少，所以這不是模型排名，你那次也可能不一樣。</p>
 </div>
 </div>
@@ -122,6 +126,7 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <li>這 723 筆來自 <strong>10 個生產批次</strong>。批次 1 和批次 10 的設定相近。</li>
 <li><strong>任務 A</strong>：整理巡檢手冊，相近的狀態可以合併。</li>
 <li><strong>任務 B</strong>：追蹤每筆讀數來自哪個批次，出問題時要能回查。</li>
+<li>批次紀錄可以拿來算 <strong>ARI</strong>：分群和批次分組完全一致時為 1，亂分約為 0。silhouette 則不看批次，只看幾何上分不分得開。</li>
 </ul>
 </div>
 <p>下載批次紀錄。它只用來檢查，選 k 時不能用。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
@@ -132,9 +137,27 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 </div>
 
 <div class="step" data-n="4">
-<h3>規劃：自己把問題改好</h3>
-<p>挑一個任務，把第一句改到它不用猜：<strong>要回答什麼、資料怎麼處理、比哪些 k、用什麼指標、什麼不能用、結果存到哪。</strong>程式存成 <code>lab1_cluster.py</code>，圖存到 <code>figs/lab1_k_selection.png</code>。</p>
-<p>再加一個你自己想試的變化，例如換指標或拿掉一欄，和鄰座比較。</p>
+<h3>規劃：寫目標卡，再問一次</h3>
+<p>和鄰座各挑一個不同的任務。先在 <code>notes/</code> 或紙上填好，互相指出對方一個還模糊的詞：</p>
+<div class="box warn">
+<div class="bt">目標卡</div>
+<p style="margin-bottom:0">我的用途是＿＿；可以合併／不能合併的情況是＿＿；我用＿＿證據判斷。</p>
+</div>
+<p>再用目標卡改寫第一句，<code>/new</code> 後貼上。也要交代它列出替你做的決定。程式存成 <code>lab1_cluster.py</code>，圖存到 <code>figs/lab1_k_selection.png</code>。比較兩人的選擇和理由。答案不一定不同，任務 A 也可能選 10；要看的是它是否符合各自的用途。</p>
+<details class="bg"><summary>問完再打開：講師實測</summary>
+<div class="bg-body">
+<div class="box tip">
+<div class="bt">講師實測：目標寫清楚之後</div>
+<p>2026-11-02，<code>GLM-5.3-Flash</code> 3 次，prompt 只說明要追蹤批次、不能合併、批次紀錄只能檢查，不能用來選 k，沒有說幾批，也沒有限定 k。</p>
+<ul>
+<li><strong>3 次都建議 k=10</strong>，也都列出它替你做的決定（模糊問時，同一個模型答 9、7、9）。</li>
+<li><strong>但 3 次都是先看到 silhouette 最高是 9，再用批次紀錄淘汰 9、改選 10。</strong>你說不能用它選 k，它也說只拿來檢查，實際上這就是用它選了 k。結果對，不代表照你的規則做。讀它列出的決定，才看得出來。</li>
+</ul>
+<p>另一組 prompt 寫得更具體（共 10 批，只比 k=9 和 k=10，用 ARI 判斷），兩個模型各 3 次也都答 k=10。其中 2 次 Gemini 保留了兩個常數欄；標準化後它們都變成 0，不影響距離和分群。<code>Gemini 3.5 Flash Lite</code> 只有這組紀錄，上面那組當天額度用完。</p>
+<p style="margin-bottom:0">把目標說清楚有幫助，但不代表不用驗。</p>
+</div>
+</div>
+</details>
 <p>你應該能回答這三個問題：</p>
 <ul>
 <li>原始尺度和標準化，選出的 k 一樣嗎？</li>
@@ -309,7 +332,7 @@ $$\text{ARI}=\frac{\sum_{ij}\binom{n_{ij}}{2}-\dfrac{AB}{M}}{\dfrac{1}{2}(A+B)-\
 <h2>檢查清單</h2>
 <ul class="ckl">
 <li><input type="checkbox" id="l1a"><label for="l1a">看到揭曉前，我寫下了接受、保留或拒絕，以及它替我做的決定</label></li>
-<li><input type="checkbox" id="l1b"><label for="l1b">我自己改寫了問題，並打開 <code>lab1_cluster.py</code> 看過</label></li>
+<li><input type="checkbox" id="l1b"><label for="l1b">我寫了目標卡，用它改寫問題，並打開 <code>lab1_cluster.py</code> 看過</label></li>
 <li><input type="checkbox" id="l1c"><label for="l1c"><code>figs/lab1_k_selection.png</code> 存在，我看得懂它在比什麼</label></li>
 <li><input type="checkbox" id="l1d"><label for="l1d">我能把結論改寫成帶條件的句子，說清楚資料怎麼處理、用什麼指標、回答哪個任務</label></li>
 <li><input type="checkbox" id="l1e"><label for="l1e">我知道 silhouette 不看批次、ARI 要看批次，也能說明兩者為什麼可能選不同的 k</label></li>
@@ -319,6 +342,7 @@ $$\text{ARI}=\frac{\sum_{ij}\binom{n_{ij}}{2}-\dfrac{AB}{M}}{\dfrac{1}{2}(A+B)-\
 <section>
 <h2>如果還有時間</h2>
 <ul>
+<li>挑一個自己想試的變化，例如換指標或拿掉一欄，和鄰座比較。</li>
 <li>請它列出每群包含各批次的筆數，自己找出哪兩個批次被併在一起。</li>
 <li>用不同 <code>random_state</code> 重跑，看 k=9 和 k=10 的排序穩不穩定。</li>
 <li>問它：<strong>「inertia 為什麼隨 k 遞減？用數學證明給我看。」</strong>再自己檢查：k-means 找到的是局部解，實務上偶爾會不單調。</li>

@@ -1,0 +1,92 @@
+<section class="threshold-explorer" aria-labelledby="threshold-title">
+<h2 id="threshold-title">先動手：門檻是誰決定的？</h2>
+<p>logistic 迴歸把輸入特徵 $x$ 算成分數 $z=wx+b$，再用 $p=\sigma(z)=\frac{1}{1+e^{-z}}$ 壓成 0 到 1 的機率。機率超過<strong>門檻</strong>就發警報。下面是 60 筆<strong>合成資料</strong>，不是產線資料：8 筆故障（紅），52 筆正常（灰）。模型已經訓練好，不會再變。</p>
+<p><strong>先猜：把門檻調低，抓到的故障和誤報各會怎麼變？準確率呢？</strong>猜完再拖。</p>
+<div class="threshold-panel">
+  <div class="threshold-controls">
+    <label for="threshold-t">門檻 <output id="threshold-t-value" for="threshold-t">0.50</output><span class="threshold-note">常見預設是 0.5</span></label>
+    <input id="threshold-t" type="range" min="0.02" max="0.98" step="0.01" value="0.5">
+    <label for="threshold-cap">複查上限 <output id="threshold-cap-value" for="threshold-cap">10</output> 件</label>
+    <input id="threshold-cap" type="range" min="1" max="30" step="1" value="10">
+  </div>
+  <figure>
+    <svg id="threshold-plot" viewBox="0 0 680 420" role="img" aria-labelledby="threshold-svg-title threshold-svg-desc">
+      <title id="threshold-svg-title">機率曲線與門檻</title>
+      <desc id="threshold-svg-desc">橫軸是輸入特徵，曲線是故障機率。垂直線是目前門檻對應的位置，線右邊的點都會發警報。</desc>
+      <rect id="threshold-zone" y="24" height="358" fill="#b8503c" opacity=".08"/>
+      <line x1="50" y1="230" x2="650" y2="230" stroke="#7d7a72"/>
+      <line x1="50" y1="24" x2="50" y2="230" stroke="#7d7a72"/>
+      <text x="42" y="32" text-anchor="end" font-size="16" fill="#5f5c55">1</text>
+      <text x="42" y="236" text-anchor="end" font-size="16" fill="#5f5c55">0</text>
+      <text x="44" y="258" text-anchor="end" font-size="15" fill="#b8503c">故障</text>
+      <text x="44" y="292" text-anchor="end" font-size="15" fill="#5f5c55">正常</text>
+      <text x="350" y="408" text-anchor="middle" font-size="16" fill="#5f5c55">輸入特徵 x（越右邊越像故障）</text>
+      <path id="threshold-curve" fill="none" stroke="#2a3c78" stroke-width="3"/>
+      <g id="threshold-points"></g>
+      <line id="threshold-line" y1="24" y2="382" stroke="#b8503c" stroke-width="3"/>
+    </svg>
+    <figcaption>曲線：故障機率　紅色點：故障　灰色點：正常　淡紅區：會發警報的範圍</figcaption>
+  </figure>
+  <dl class="threshold-readouts">
+    <div><dt>警報</dt><dd><output id="threshold-alarms">—</output></dd></div>
+    <div><dt>抓到故障</dt><dd><output id="threshold-caught">—</output></dd></div>
+    <div><dt>漏掉故障</dt><dd><output id="threshold-missed">—</output></dd></div>
+    <div><dt>誤報</dt><dd><output id="threshold-false">—</output></dd></div>
+    <div><dt>準確率</dt><dd><output id="threshold-acc">—</output></dd></div>
+  </dl>
+  <p id="threshold-status" class="threshold-status" role="status"></p>
+  <p class="threshold-base">對照：永遠猜「沒故障」，準確率也有 86.7%，但一個故障都抓不到。</p>
+</div>
+<div class="box warn">
+<div class="bt">操作完回答</div>
+<ul style="margin-bottom:0">
+<li>模型有重新訓練嗎？為什麼判定還是變了？</li>
+<li>你猜對了嗎？準確率最高的門檻，是你想要的門檻嗎？</li>
+<li>把複查上限改成 5 或 20，你的選擇會變嗎？<strong>要選門檻，你還需要知道什麼？模型會知道嗎？</strong></li>
+</ul>
+</div>
+<noscript><p>此互動需要 JavaScript。重點是：模型沒變，調門檻就會改變抓到與誤報的數量，該選哪個要看漏報代價和人力。</p></noscript>
+</section>
+<style>
+.threshold-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
+.threshold-controls{display:grid;grid-template-columns:1fr 1fr;gap:.2rem 1.5rem;align-items:center}
+.threshold-controls label{font-weight:600;grid-row:1}.threshold-controls label output{color:var(--link);font-variant-numeric:tabular-nums;margin:0 .3rem}.threshold-note{font-weight:400;font-size:.8rem;color:var(--ink-2);margin-left:.4rem}
+.threshold-controls input{grid-row:2;width:100%;min-width:0;accent-color:var(--link);min-height:44px}
+.threshold-controls input:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+.threshold-panel figure{margin:1rem 0}.threshold-panel svg{display:block;width:100%;height:auto}.threshold-panel figcaption{font-size:.82rem;color:var(--ink-2);text-align:center}
+.threshold-readouts{display:flex;gap:1.6rem;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:1rem;margin:0}.threshold-readouts dt{font-size:.86rem;color:var(--ink-2)}.threshold-readouts dd{margin:0;font-size:1.5rem;color:var(--link);font-variant-numeric:tabular-nums}
+.threshold-status{font-weight:600;margin:.8rem 0 0;min-height:1.6em}.threshold-status.over{color:#b8503c}.threshold-base{font-size:.86rem;color:var(--ink-2);margin:.3rem 0 0}
+@media(max-width:600px){.threshold-controls{display:block}.threshold-panel figcaption{text-align:left}}
+@media print{.threshold-controls input{display:none}}
+</style>
+<script>
+(function(){
+  'use strict';
+  const NORMAL=[1.04,-3.56,-.58,-1.57,-1.45,-1.22,-3.02,-1.23,-1.87,2.32,-.77,-1.35,-1.28,-1.67,-2.06,-1.39,-.52,-1.24,-.04,-1.2,-.98,.55,-.45,-1.51,-1.18,-.46,.94,-1.27,-1.24,0,-1.89,-1.29,-.12,-.42,-.91,-.33,-3.83,.02,-1.96,-2.67,-.72,-.3,-1.44,-2.08,-.97,-1.05,.41,-.25,-.81,.11,-1.21,-1.93];
+  const FAULT=[1.83,1.82,1.11,.6,1.51,-.94,1.92,1.74];
+  const W=1.76,B=-2.082;
+  const prob=x=>1/(1+Math.exp(-(W*x+B)));
+  const root=document.querySelector('.threshold-explorer');
+  const ns='http://www.w3.org/2000/svg';
+  const el=id=>document.getElementById('threshold-'+id);
+  const sx=x=>50+(x+4.2)/(7)*600,sy=p=>230-p*206;
+  const shape=(tag,attrs,parent)=>{const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);parent.appendChild(n);return n;};
+  let d='';for(let x=-4.2;x<=2.8;x+=.1)d+=(d?'L':'M')+sx(x).toFixed(1)+' '+sy(prob(x)).toFixed(1);
+  el('curve').setAttribute('d',d);
+  const place=(xs,fill,base)=>{const used=[];xs.forEach(x=>{const cx=sx(x);let row=0;while(used.some(u=>u.row===row&&Math.abs(u.cx-cx)<10))row++;used.push({cx,row});shape('circle',{cx,cy:base+row*10,r:4.5,fill},el('points'));});};
+  place(FAULT,'#b8503c',253);place(NORMAL,'#8a867c',287);
+  function draw(){
+    const t=Number(el('t').value),cap=Number(el('cap').value);
+    const caught=FAULT.filter(x=>prob(x)>=t).length,falseAlarm=NORMAL.filter(x=>prob(x)>=t).length;
+    const missed=FAULT.length-caught,alarms=caught+falseAlarm,acc=(caught+NORMAL.length-falseAlarm)/(FAULT.length+NORMAL.length);
+    const cut=(Math.log(t/(1-t))-B)/W,x=Math.min(650,Math.max(50,sx(cut)));
+    el('line').setAttribute('x1',x);el('line').setAttribute('x2',x);el('zone').setAttribute('x',x);el('zone').setAttribute('width',650-x);
+    el('t-value').value=t.toFixed(2);el('cap-value').value=String(cap);
+    el('alarms').value=String(alarms);el('caught').value=String(caught);el('missed').value=String(missed);el('false').value=String(falseAlarm);el('acc').value=(acc*100).toFixed(1)+'%';
+    const over=alarms>cap,s=el('status');s.textContent=over?`警報 ${alarms} 件，超過複查上限 ${cap} 件，現場做不完。`:`警報 ${alarms} 件，在複查上限 ${cap} 件之內。還漏掉 ${missed} 個故障。`;s.classList.toggle('over',over);
+    Object.assign(root.dataset,{t:String(t),cap:String(cap),alarms:String(alarms),caught:String(caught),missed:String(missed),falseAlarm:String(falseAlarm),accuracy:String(acc),over:String(over)});
+  }
+  el('t').addEventListener('input',draw);el('cap').addEventListener('input',draw);
+  draw();
+})();
+</script>

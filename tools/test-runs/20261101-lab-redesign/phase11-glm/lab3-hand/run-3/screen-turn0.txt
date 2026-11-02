@@ -1,0 +1,40 @@
+  ┃   43 w0 = np.zeros(d)                                                                                               
+  ┃   44 h = 1e-5                                                                                                       
+  ┃   45 g = grad(w0)                                                                                                   
+  ┃   46 g_num = np.zeros(d)                                                                                            
+  ┃   47 for j in range(d):                                                                                             
+  ┃   48     wp, wm = w0.copy(), w0.copy()                                                                              
+  ┃   49     wp[j] += h                                                                                                 
+  ┃   50     wm[j] -= h                                                                                                 
+  ┃   51     g_num[j] = (loss(wp) - loss(wm)) / (2 * h)                                                                 
+  ┃   52                                                                                                                
+  ┃   53 max_err = np.max(np.abs(g - g_num))                                                                            
+  ┃   54 tol = 1e-6                                                                                                     
+  ┃   55 print(f"max |analytic - numeric| = {max_err:.3e}")                                                             
+  ┃   56 print("PASS" if max_err < tol else "FAIL")                                                                     
+  ┃   57                                                                                                                
+  ┃                                                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  $ uv run python lab3_logistic.py                                                                                   
+  ┃                                                                                                                     
+  ┃  max |analytic - numeric| = 1.256e-11                                                                               
+  ┃  PASS                                                                                                               
+  ┃                                                                                                                     
+                                                                                                                        
+     完成 lab3_logistic.py，梯度檢查 PASS（最大絕對誤差 1.256e-11）。                                                   
+                                                                                                                        
+     - 900 筆全用，6 個特徵標準化後加截距欄，共 7 維                                                                    
+     - 檢查點 $w_0 = 0$：資料已標準化，各維量級一致，sigmoid 在 0 附近最活躍，是梯度檢查最穩定的點                      
+     - 步長 $h = 10^{-5}$：中央差分截斷誤差 $O(h^2) \sim 10^{-10}$，捨入誤差 $\sim \varepsilon/h \sim 10^{-11}$，       
+       兩者皆遠低於 $10^{-6}$ 容差，太大會截斷誤差主導、太小會被浮點捨入淹沒                                            
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 1m 41s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase11-glm/lab3-hand-3/project               17.2K (2%)  ctrl+p commands  
+                                                                                                                        

@@ -1,0 +1,40 @@
+  ┃   62 acc = np.mean((sigmoid(X @ w) >= 0.5) == (y == 1))                                                             
+  ┃   63 print("train accuracy =", acc)                                                                                 
+  ┃   64                                                                                                                
+  ┃                                                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  $ uv run python lab3_logistic.py                                                                                   
+  ┃                                                                                                                     
+  ┃  max abs grad error = 9.747758156208874e-12                                                                         
+  ┃  PASS                                                                                                               
+  ┃  iter     0  loss = 0.673919                                                                                        
+  ┃  iter  5000  loss = 0.121492                                                                                        
+  ┃  iter 10000  loss = 0.121092                                                                                        
+  ┃  iter 15000  loss = 0.121072                                                                                        
+  ┃  final loss = 0.12107097787528652                                                                                   
+  ┃  weights = [ 2.8749 -1.8321  1.3128 -0.15   -0.1907  0.7241 -5.6512]                                                
+  ┃  train accuracy = 0.9477777777777778                                                                                
+  ┃                                                                                                                     
+                                                                                                                        
+     已存成 lab3_logistic.py，執行結果：                                                                                
+                                                                                                                        
+     - 梯度檢查：最大絕對誤差 9.75e-12 → PASS                                                                           
+     - 訓練：全批次 GD（lr=0.1, 20000 迭代），final loss ≈ 0.1211，train accuracy ≈ 94.8%                               
+                                                                                                                        
+     梯度檢查設計理由：                                                                                                 
+                                                                                                                        
+     - 檢查點：用 rng.normal(scale=0.5) 的隨機非零 w（seed=0），因為全零時所有樣本 p=0.5，梯度太平凡，                  
+       測不出尺度上的錯誤。                                                                                             
+     - 步長 h=1e-5：中央差分截斷誤差 O(h²)≈1e-10，浮點捨入誤差約 eps/h≈1e-11/2e-5 量級，兩者在 1e-5                     
+       附近平衡；更小會被捨入主導，更大會有截斷偏誤。容忍度取 1e-6。                                                    
+                                                                                                                        
+     ▣  Build · GLM-5.3-Flash · 1m 34s                                                                                  
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · GLM-5.3-Flash Nvidia                                                                                       
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase11-glm/lab3-hand-1/project               17.5K (2%)  ctrl+p commands  
+                                                                                                                        

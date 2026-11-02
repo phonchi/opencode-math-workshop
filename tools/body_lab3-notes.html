@@ -128,6 +128,8 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 </details>
 </section>
 
+<!--INCLUDE:tools/threshold-explorer.html-->
+
 <section>
 <h2>動手</h2>
 
@@ -143,8 +145,9 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <p>先別追問，寫下你接受、保留或拒絕它的結論，並查三件事：</p>
 <ul>
 <li><strong>門檻</strong>：它用哪個門檻？誰決定的？</li>
-<li><strong>欄位</strong>：<code>record_id</code> 有沒有當特徵？按 <code>!</code> 用 <code>grep -rn record_id --include=*.py .</code> 查，再看摘要有沒有寫。</li>
+<li><strong>欄位</strong>：<code>record_id</code> 有沒有當特徵？按 <code>!</code> 用 <code>grep -rn record_id --include=*.py .</code> 查；沒有 <code>.py</code> 檔就看工具紀錄。再看摘要有沒有寫。</li>
 <li><strong>數字</strong>：永遠猜「沒故障」的準確率是多少？和它報的比起來呢？</li>
+<li><strong>來源</strong>：它讀了哪些檔？（看工具紀錄）建議或不建議上線的理由，哪些是你能核對的數字，哪些是推測？</li>
 </ul>
 <details class="bg"><summary>寫完判斷再打開：講師實測</summary>
 <div class="bg-body">
@@ -156,6 +159,7 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <li>但只有 1 次在摘要提到 <code>record_id</code>，另外 5 次要讀程式或它寫的筆記才知道。</li>
 <li>結論從「不建議直接上線」到「可以作為輔助預警」都有，報出的 recall 從 27% 到 93% 都有，取決於它自己挑的模型和門檻。</li>
 <li>其中 1 次提到要依停機和維修成本調門檻，但 6 次都在沒問你的情況下先給了結論。</li>
+<li>有 1 次拿 Lab 1 的 <code>data/line_modes.csv</code> 當理由，說轉速「超出訓練分布」，講得很肯定；但那份資料和這題的關係，它其實不知道。</li>
 </ul>
 <p style="margin-bottom:0"><code>big-pickle</code> 當天額度用完，還沒有這一題的紀錄。</p>
 </div>
@@ -178,7 +182,15 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 </div>
 <p>在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
 <pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/line_faults_new_batch.csv -o data/line_faults_new_batch.csv</code></pre>
-<p>先預測：如果把 <code>record_id</code> 放進模型，測試集和下一批的 recall 各會如何？該用哪個門檻？再請 AI 算給你看。下面是手刻模型的參考結果（<code>reference/lab3_logistic.py</code>，切 30% 當測試集，並用訓練集的平均和標準差做標準化）：</p>
+<p>先預測，再寫下這張卡，用它自己寫 prompt 請 AI 計算：</p>
+<div class="box warn">
+<div class="bt">決策卡</div>
+<p style="margin-bottom:0">我優先避免＿＿；複查上限＿＿；我預測降低門檻會＿＿。請計算核對，<strong>不要替我選。</strong></p>
+</div>
+<p>也告訴它不要用哪些欄位、用哪份資料檢查，以及要列出哪些數字（例如各門檻的警報、抓到、漏掉、誤報）。</p>
+<details class="bg"><summary>算完再打開：參考結果</summary>
+<div class="bg-body">
+<p>下面是手刻模型的參考結果（<code>reference/lab3_logistic.py</code>，切 30% 當測試集，並用訓練集的平均和標準差做標準化）。實測 <code>GLM-5.3-Flash</code> 3 次都列出了表，也都把決定留給你，但有 1 次仍點出 0.2 是唯一符合條件的門檻；用 sklearn 預設值時數字會差一點（例如門檻 0.5 時警報 11 件）。<code>Gemini 3.5 Flash Lite</code> 當天額度用完，還沒有這一題的紀錄。</p>
 <div class="tw"><table>
 <tr><th>模型</th><th>測試集準確率</th><th>測試集 recall</th><th>下一批 recall</th></tr>
 <tr><td>永遠猜「沒故障」</td><td>0.922</td><td>0</td><td>0</td></tr>
@@ -196,7 +208,8 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <tr><td>0.05</td><td>68（超過 40）</td><td>13</td><td>0</td><td>55</td></tr>
 </table></div>
 <p>你會選哪一個？為什麼？下一批只有 13 個故障，少一兩個就差很多，這句話也要寫進結論。如果 AI 已經提醒你要看成本，那很好，但成本的數字還是要你提供。</p>
-<p><strong>接下來要開新對話，它會看不到這些。</strong>先自己把需求卡、你選的門檻和理由寫進 <code>notes/decision.md</code>。</p>
+</div>
+</details>
 </div>
 </details>
 </div>
@@ -219,7 +232,7 @@ $$L(w)=\frac1n\sum_i\Bigl[\log\bigl(1+e^{z_i}\bigr)-y_iz_i\Bigr],
 <div class="bt">中央差分</div>
 $$\frac{\partial L}{\partial w_i}\;\approx\;\frac{L(w+h\mathbf{e}_i)-L(w-h\mathbf{e}_i)}{2h}$$
 </div>
-<p>輸入 <code>/new</code>，自己寫 prompt。它回答後，記下底部的 context 用量（例如 <code>30.5K (15%)</code>）。至少交代：用 numpy 手刻，存成 <code>lab3_logistic.py</code>；使用全部 900 筆；<strong>不用 <code>record_id</code></strong>；特徵標準化，最後加一欄 1；<code>loss</code>、<code>grad</code> 用本頁公式；不加正則化。</p>
+<p>先自己把需求卡、你選的門檻和理由寫進 <code>notes/decision.md</code>：新對話不會自動帶入剛才的討論，但檔案還在。接著輸入 <code>/new</code>，自己寫 prompt。它回答後，記下底部的 context 用量（例如 <code>30.5K (15%)</code>）。至少交代：用 numpy 手刻，存成 <code>lab3_logistic.py</code>；使用全部 900 筆；<strong>不用 <code>record_id</code></strong>；特徵標準化，最後加一欄 1；<code>loss</code>、<code>grad</code> 用本頁公式；不加正則化。</p>
 <p>再決定：<strong>檢查幾個維度？在哪個點檢查？用哪些步長？怎樣算過關？</strong>寫完貼給它，看它有沒有照做。</p>
 <details class="bg"><summary>寫完再對照：一份參考結果</summary>
 <div class="bg-body">
@@ -284,7 +297,7 @@ B. loss 不變，只把 grad 乘以 2
 
 <section>
 <h2>收尾：回答開場的問題</h2>
-<p class="path-note">時間不夠或用備案模型時，第 5 步和下面的規則測試可以擇一。</p>
+<p class="path-note">時間不夠或用備案模型時，動手的第 5 步和下面的規則測試可以擇一。</p>
 <p>回到開場那句：<strong>AI 這麼強，為什麼還要自己想、自己驗證？</strong></p>
 <p>先看今天的結果：<strong>它算的數字多半是對的，也常常處理得不錯。</strong>注入的錯誤也是我們故意放的。所以答案不是「AI 很爛」，而是：</p>
 <ul>
@@ -292,6 +305,7 @@ B. loss 不變，只把 grad 乘以 2
 <li>它說「夠了」「通過」，要問夠做什麼、抓不抓得到錯（Lab 2）</li>
 <li>該由你決定的事，它可能已經替你決定了（Lab 3）</li>
 </ul>
+<p>但你也看到了：<strong>把目標和限制說清楚，它回答的就更接近你要的。</strong>今天你從事後補救（目標卡），到事先定驗收（驗收卡），再到自己拍板（決策卡），這就是你帶走的能力。</p>
 <p>今天你也親眼看過 agent 怎麼運作：</p>
 <div class="tw"><table>
 <tr><th>agent 的機制</th><th>你親眼看到的地方</th></tr>
@@ -318,11 +332,13 @@ B. loss 不變，只把 grad 乘以 2
 <pre class="cmd"><code># 例子，請換成你自己遇到的問題
 ## 回報規則
 - 最後的摘要要寫出沒被要求、由你自己做的決定，例如前處理、切分資料、移除哪些欄位。
-- 資訊不足以回答問題時，先問我，不要自己假設。</code></pre>
+- 開始分析前，先列出「我缺的資訊」和「我打算假設的值」各至少兩項，然後停下等我確認，不要先跑程式。</code></pre>
 <p><code>/new</code> 後，把 Lab 3 第一句再問一次，<strong>逐條檢查它有沒有照做</strong>，再和鄰座比較。</p>
 <div class="box tip">
-<div class="bt">講師實測：上面這兩條規則</div>
-<p style="margin-bottom:0">2026-11-02，兩個模型各 3 次。6 次的摘要都列出了它自己做的決定，也都提到 <code>record_id</code>；沒有這條規則時，只有 1 次提到。但 <strong>6 次都沒有先問，就直接訓練並下結論</strong>。規則有用，但不是每條都會被遵守，所以寫完要測。</p>
+<div class="bt">講師實測：上面這兩條規則（分開測，兩條一起用還沒測）</div>
+<p>2026-11-02。「摘要要寫出決定」這條，兩個模型各 3 次都照做，也都提到 <code>record_id</code>；沒有這條時只有 1 次提到。</p>
+<p>另一條我們改過寫法。原本寫「資訊不足先問我，不要自己假設」，兩個模型各 3 次<strong>都沒有先問</strong>，直接訓練並下結論。改成上面這種可以檢查的停止點後，<code>GLM-5.3-Flash</code> 3 次都停下來列出缺的資訊和假設（其中 1 次先用指令看了資料檔）；<code>Gemini 3.5 Flash Lite</code> 當天額度用完，還沒有這一條的紀錄。</p>
+<p style="margin-bottom:0">所以規則有用，但寫法有差，也不保證每次遵守，寫完要測。</p>
 </div>
 <p>想多練習，看 <a href="agents-md.html">AGENTS.md 專案規則</a>。</p>
 </div>
@@ -332,7 +348,7 @@ B. loss 不變，只把 grad 乘以 2
 <h2>檢查清單</h2>
 <ul class="ckl">
 <li><input type="checkbox" id="l3a"><label for="l3a">揭曉前，我查過門檻、<code>record_id</code>，也算過永遠猜「沒故障」的準確率</label></li>
-<li><input type="checkbox" id="l3b"><label for="l3b">我選了一個門檻，並能用需求卡說明理由</label></li>
+<li><input type="checkbox" id="l3b"><label for="l3b">我寫了決策卡，自己選了一個門檻，並能說明理由</label></li>
 <li><input type="checkbox" id="l3c"><label for="l3c">我能說明含 <code>record_id</code> 的模型為什麼測試成績好，換一批就失效</label></li>
 <li><input type="checkbox" id="l3d"><label for="l3d">梯度檢查是我規劃的；我也親眼看到 <code>loss</code>、<code>grad</code> 一起換成 MSE 仍然 PASS</label></li>
 <li><input type="checkbox" id="l3e"><label for="l3e"><code>notes/logistic.md</code> 寫了觀察、決定、不能證明什麼，而且我讀過每一句</label></li>

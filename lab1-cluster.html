@@ -698,6 +698,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a class="chapter-link" href="lab1-cluster.html" aria-current="page">Lab 1 · 分群</a>
 <ul class="section-nav" aria-label="本章內容">
 <li><a href="#section-這一關的資料">這一關的資料</a></li>
+<li><a href="#kmeans-title">先動手：k-means 怎麼分群？</a></li>
 <li><a href="#section-動手">動手</a></li>
 <li><a href="#section-誰錯了">誰錯了</a></li>
 <li><a href="#section-檢查清單">檢查清單</a></li>
@@ -746,6 +747,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a class="chapter-link" href="lab1-cluster.html" aria-current="page">Lab 1 · 分群</a>
 <ul class="section-nav" aria-label="本章內容">
 <li><a href="#section-這一關的資料">這一關的資料</a></li>
+<li><a href="#kmeans-title">先動手：k-means 怎麼分群？</a></li>
 <li><a href="#section-動手">動手</a></li>
 <li><a href="#section-誰錯了">誰錯了</a></li>
 <li><a href="#section-檢查清單">檢查清單</a></li>
@@ -855,6 +857,124 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 </details>
 </section>
 
+<section class="kmeans-explorer" aria-labelledby="kmeans-title">
+<h2 id="kmeans-title">先動手：k-means 怎麼分群？</h2>
+<p>這些是 44 個<strong>合成的平面點</strong>，不是產線資料。<strong>先猜：你會分成幾群？為什麼？</strong>猜完再操作。</p>
+<p>k-means 只做兩件事：把每個點分給最近的中心，再把中心移到該群的平均位置，反覆到不再變動。按「走一步」看它怎麼做。</p>
+<div class="kmeans-panel">
+  <div class="kmeans-controls" role="group" aria-label="k-means 操作">
+    <span class="kmeans-k" role="group" aria-label="群數 k"><button type="button" data-k="2">k=2</button><button type="button" data-k="3" aria-pressed="true">k=3</button><button type="button" data-k="4">k=4</button></span>
+    <button type="button" id="kmeans-step">走一步</button>
+    <button type="button" id="kmeans-run">跑到底</button>
+    <button type="button" id="kmeans-seed">換起點</button>
+  </div>
+  <figure>
+    <svg id="kmeans-plot" viewBox="0 0 680 390" role="img" aria-labelledby="kmeans-svg-title kmeans-svg-desc">
+      <title id="kmeans-svg-title">k-means 分群過程</title>
+      <desc id="kmeans-svg-desc">圓點是資料，顏色表示目前歸屬，叉號是各群中心，虛線連到所屬中心。</desc>
+      <g id="kmeans-links" stroke-dasharray="3 5" stroke-width="1"></g>
+      <g id="kmeans-points"></g>
+      <g id="kmeans-centers" stroke-width="5" stroke-linecap="round"></g>
+    </svg>
+    <figcaption>圓點：資料　叉號：中心　虛線：連到所屬中心。這裡刻意隨機挑點當起點；實際工具常用 k-means++ 和多次起點（<code>n_init</code>），不要反推 AI 的 k-means 不穩。</figcaption>
+  </figure>
+  <dl class="kmeans-readouts">
+    <div><dt>距離平方和 J（越小越緊）</dt><dd><output id="kmeans-j">—</output></dd></div>
+    <div><dt>silhouette（越大越分得開）</dt><dd><output id="kmeans-sil">—</output></dd></div>
+    <div><dt>狀態</dt><dd class="kmeans-status"><output id="kmeans-state">—</output></dd></div>
+  </dl>
+</div>
+<p>把 k=2、3、4 都跑到底，記下 J 和 silhouette，再多按幾次「換起點」。</p>
+<div class="box warn">
+<div class="bt">操作完回答</div>
+<ul style="margin-bottom:0">
+<li>k 變大，J 怎麼變（起點差時可能例外）？silhouette 選了幾群？它把哪兩團併在一起？</li>
+<li><strong>距離變小或分數變高，就是你的目標嗎？</strong>如果靠近的兩團是兩種不同的東西呢？</li>
+<li>剛才的 k、指標和起點，是誰選的？之後 AI 替你跑的時候，又是誰選的？</li>
+</ul>
+</div>
+<noscript><p>此互動需要 JavaScript。重點是：k 越大距離越小，但指標選的不一定是你要的分法。</p></noscript>
+</section>
+<style>
+.kmeans-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
+.kmeans-controls{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.kmeans-k{display:inline-flex;gap:.25rem;margin-right:.5rem}
+.kmeans-controls button{font:inherit;font-size:.86rem;min-height:44px;min-width:44px;padding:.4rem .8rem;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
+.kmeans-controls button:hover{border-color:var(--link);color:var(--link)}
+.kmeans-controls button[aria-pressed="true"]{background:var(--link);border-color:var(--link);color:var(--paper)}
+.kmeans-controls button:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+.kmeans-panel figure{margin:1rem 0}.kmeans-panel svg{display:block;width:100%;height:auto}.kmeans-panel figcaption{font-size:.82rem;color:var(--ink-2)}
+.kmeans-readouts{display:flex;gap:2rem;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:1rem;margin:0}.kmeans-readouts dt{font-size:.86rem;color:var(--ink-2)}.kmeans-readouts dd{margin:0;font-size:1.5rem;color:var(--link);font-variant-numeric:tabular-nums}.kmeans-readouts dd.kmeans-status{font-size:1rem;color:var(--ink)}
+@media print{.kmeans-controls{display:none}}
+</style>
+<script>
+(function(){
+  'use strict';
+  const X=[[-3,-.02],[-2.82,.42],[-3.16,-.81],[-3.53,-.27],[-3.27,-1.14],[-3.59,-.77],[-2.96,-1.11],[-2.2,-.14],[-3.3,-.76],[-3.37,.16],[-2.71,.09],[-2.79,-.11],[-2.94,-1.51],[-3.56,-.32],[-1.23,.16],[-1.13,.95],[-2.12,1.72],[-1.49,-.03],[-1.79,1.42],[-1.69,.97],[-.56,.52],[-1.68,2.1],[-1.22,1.36],[-.67,.18],[-1.55,.94],[-1.27,1.25],[-1.13,.79],[-1.16,1.31],[2.95,-.32],[3.47,-.07],[4.01,.88],[2.53,.48],[3.14,-.23],[2.68,-.26],[3.09,-.18],[2.17,1.07],[2.59,-.3],[2.86,-.21],[3.63,.25],[3.8,-.08],[2.07,-.14],[2.44,-.78],[3.45,-.01],[1.61,-.31]];
+  const COLORS=['#2a3c78','#b8503c','#2f7d5b','#a8740f'];
+  const root=document.querySelector('.kmeans-explorer');
+  const ns='http://www.w3.org/2000/svg';
+  const el=id=>document.getElementById('kmeans-'+id);
+  const px=([x,y])=>[340+x*68,205-y*68];
+  const shape=(tag,attrs,parent)=>{const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);parent.appendChild(n);return n;};
+  const dots=X.map(p=>{const [cx,cy]=px(p);return shape('circle',{cx,cy,r:6,fill:'#7d7a72'},el('points'));});
+  const links=X.map(()=>shape('line',{},el('links')));
+  const d2=(a,b)=>(a[0]-b[0])**2+(a[1]-b[1])**2;
+  let k=3,seed=1,centers=[],labels=[],phase='init';
+  function pick(){ // 由 seed 決定的固定亂數，可重現
+    let s=(seed*2654435761)>>>0;const next=()=>(s=(Math.imul(s,1664525)+1013904223)>>>0)/4294967296;
+    const idx=[...X.keys()];
+    for(let i=idx.length-1;i>0;i--){const j=Math.floor(next()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
+    return idx.slice(0,k).map(i=>X[i].slice());
+  }
+  const assign=()=>X.map(p=>{let b=0;for(let j=1;j<k;j++)if(d2(p,centers[j])<d2(p,centers[b]))b=j;return b;});
+  function update(){ // 空群保留原中心
+    return centers.map((c,j)=>{const g=X.filter((_,i)=>labels[i]===j);return g.length?[g.reduce((s,p)=>s+p[0],0)/g.length,g.reduce((s,p)=>s+p[1],0)/g.length]:c;});
+  }
+  const inertia=()=>X.reduce((s,p,i)=>s+d2(p,centers[labels[i]]),0);
+  function silhouette(){
+    const used=[...new Set(labels)];if(used.length<2)return NaN;
+    let total=0;
+    X.forEach((p,i)=>{
+      const mean=j=>{let sum=0,n=0;X.forEach((q,m)=>{if(labels[m]===j&&m!==i){sum+=Math.sqrt(d2(p,q));n++;}});return n?sum/n:null;};
+      const a=mean(labels[i]);if(a===null)return;
+      const b=Math.min(...used.filter(j=>j!==labels[i]).map(j=>{let sum=0,n=0;X.forEach((q,m)=>{if(labels[m]===j){sum+=Math.sqrt(d2(p,q));n++;}});return sum/n;}));
+      total+=(b-a)/Math.max(a,b);
+    });
+    return total/X.length;
+  }
+  function draw(){
+    el('centers').replaceChildren();
+    centers.forEach((c,j)=>{const [x,y]=px(c),r=11;shape('line',{x1:x-r,y1:y-r,x2:x+r,y2:y+r,stroke:COLORS[j]},el('centers'));shape('line',{x1:x-r,y1:y+r,x2:x+r,y2:y-r,stroke:COLORS[j]},el('centers'));});
+    X.forEach((p,i)=>{
+      const has=labels.length>0,c=has?COLORS[labels[i]]:'#7d7a72';dots[i].setAttribute('fill',c);
+      if(has){const [a,b]=px(p),[e,f]=px(centers[labels[i]]);for(const [n,v] of Object.entries({x1:a,y1:b,x2:e,y2:f,stroke:c,opacity:.45}))links[i].setAttribute(n,v);}
+      else links[i].setAttribute('opacity',0);
+    });
+    const J=labels.length?inertia():null,S=phase==='done'?silhouette():null;
+    el('j').value=J===null?'—':J.toFixed(2);el('sil').value=S===null?'跑到底才算':S.toFixed(3);
+    el('state').value={init:'起點已選，還沒分配',assigned:'剛把點分給最近的中心',updated:'剛把中心移到平均位置',done:'不再變動，停下來了'}[phase];
+    Object.assign(root.dataset,{k:String(k),seed:String(seed),phase,j:J===null?'':String(J),silhouette:S===null?'':String(S),labels:JSON.stringify(labels)});
+  }
+  function start(){centers=pick();labels=[];phase='init';draw();}
+  function step(){
+    if(phase==='done')return;
+    if(phase==='init'||phase==='updated'){
+      const next=assign();
+      if(phase==='updated'&&next.every((v,i)=>v===labels[i])){phase='done';draw();return;}
+      labels=next;phase='assigned';
+    }else{centers=update();phase='updated';}
+    draw();
+  }
+  el('step').addEventListener('click',step);
+  el('run').addEventListener('click',()=>{let guard=0;while(phase!=='done'&&guard++<400)step();});
+  el('seed').addEventListener('click',()=>{seed++;start();});
+  root.querySelectorAll('[data-k]').forEach(b=>b.addEventListener('click',()=>{k=Number(b.dataset.k);root.querySelectorAll('[data-k]').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));start();}));
+  start();
+})();
+</script>
+
+
 <section>
 <h2 id="section-動手">動手</h2>
 
@@ -870,9 +990,11 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <p>看完回答，<strong>先別追問</strong>。在 <code>notes/</code> 或紙上寫下：</p>
 <ul>
 <li>你會接受、保留，還是拒絕這個答案？</li>
-<li>它替你做了哪些決定？資料有沒有處理、用了什麼方法和指標、比了哪些 k？</li>
-<li>還缺什麼資訊，你才敢把這個答案交給別人用？</li>
+<li>它用的方法你學過嗎？它做了哪些你沒要求的事（標準化、寫檔、畫圖）？</li>
+<li>它說的「可信」「明確」，是對什麼而言？還缺什麼資訊，你才敢把答案交給別人用？</li>
 </ul>
+<p>如果它用了你沒學過的方法，不必硬著頭皮相信，可以追問：</p>
+<pre class="cmd"><code>請只用 k-means 和 silhouette 重算，列出你替我做的每個決定，先不要下結論。</code></pre>
 <p>和鄰座對一下答案。如果它先問你要拿來做什麼，那很好：回答它，再看建議怎麼變。</p>
 <details class="bg"><summary>寫完判斷再打開：講師實測</summary>
 <div class="bg-body">
@@ -884,7 +1006,7 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <tr><td><code>Gemini 3.5 Flash Lite</code>（3 次）</td><td>4 種（另提可細分為 6 種）、9 種、4 種（另提可細分為 5 至 6 種）</td></tr>
 <tr><td><code>GLM-5.3-Flash</code>（3 次）</td><td>9 種、7 種、9 種</td></tr>
 </table></div>
-<p>6 次都給了明確的群數，沒有一次先問要拿來做什麼。其中一次寫「BIC 明確指向 9，可信度較高」，另一次寫「證實是 7 個完全分離的緊密群」。</p>
+<p>6 次都直接給了群數（2 次附帶可細分的備選），沒有一次先問要拿來做什麼。其中一次寫「BIC 明確指向 9，可信度較高」，另一次寫「證實是 7 個完全分離的緊密群」。</p>
 <p style="margin-bottom:0">這裡的數字多半算得對，只是每次的決定不同。<code>big-pickle</code> 當天額度用完，還沒有這一題的紀錄。樣本很少，所以這不是模型排名，你那次也可能不一樣。</p>
 </div>
 </div>
@@ -902,6 +1024,7 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <li>這 723 筆來自 <strong>10 個生產批次</strong>。批次 1 和批次 10 的設定相近。</li>
 <li><strong>任務 A</strong>：整理巡檢手冊，相近的狀態可以合併。</li>
 <li><strong>任務 B</strong>：追蹤每筆讀數來自哪個批次，出問題時要能回查。</li>
+<li>批次紀錄可以拿來算 <strong>ARI</strong>：分群和批次分組完全一致時為 1，亂分約為 0。silhouette 則不看批次，只看幾何上分不分得開。</li>
 </ul>
 </div>
 <p>下載批次紀錄。它只用來檢查，選 k 時不能用。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
@@ -912,9 +1035,27 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 </div>
 
 <div class="step" data-n="4">
-<h3>規劃：自己把問題改好</h3>
-<p>挑一個任務，把第一句改到它不用猜：<strong>要回答什麼、資料怎麼處理、比哪些 k、用什麼指標、什麼不能用、結果存到哪。</strong>程式存成 <code>lab1_cluster.py</code>，圖存到 <code>figs/lab1_k_selection.png</code>。</p>
-<p>再加一個你自己想試的變化，例如換指標或拿掉一欄，和鄰座比較。</p>
+<h3>規劃：寫目標卡，再問一次</h3>
+<p>和鄰座各挑一個不同的任務。先在 <code>notes/</code> 或紙上填好，互相指出對方一個還模糊的詞：</p>
+<div class="box warn">
+<div class="bt">目標卡</div>
+<p style="margin-bottom:0">我的用途是＿＿；可以合併／不能合併的情況是＿＿；我用＿＿證據判斷。</p>
+</div>
+<p>再用目標卡改寫第一句，<code>/new</code> 後貼上。也要交代它列出替你做的決定。程式存成 <code>lab1_cluster.py</code>，圖存到 <code>figs/lab1_k_selection.png</code>。比較兩人的選擇和理由。答案不一定不同，任務 A 也可能選 10；要看的是它是否符合各自的用途。</p>
+<details class="bg"><summary>問完再打開：講師實測</summary>
+<div class="bg-body">
+<div class="box tip">
+<div class="bt">講師實測：目標寫清楚之後</div>
+<p>2026-11-02，<code>GLM-5.3-Flash</code> 3 次，prompt 只說明要追蹤批次、不能合併、批次紀錄只能檢查，不能用來選 k，沒有說幾批，也沒有限定 k。</p>
+<ul>
+<li><strong>3 次都建議 k=10</strong>，也都列出它替你做的決定（模糊問時，同一個模型答 9、7、9）。</li>
+<li><strong>但 3 次都是先看到 silhouette 最高是 9，再用批次紀錄淘汰 9、改選 10。</strong>你說不能用它選 k，它也說只拿來檢查，實際上這就是用它選了 k。結果對，不代表照你的規則做。讀它列出的決定，才看得出來。</li>
+</ul>
+<p>另一組 prompt 寫得更具體（共 10 批，只比 k=9 和 k=10，用 ARI 判斷），兩個模型各 3 次也都答 k=10。其中 2 次 Gemini 保留了兩個常數欄；標準化後它們都變成 0，不影響距離和分群。<code>Gemini 3.5 Flash Lite</code> 只有這組紀錄，上面那組當天額度用完。</p>
+<p style="margin-bottom:0">把目標說清楚有幫助，但不代表不用驗。</p>
+</div>
+</div>
+</details>
 <p>你應該能回答這三個問題：</p>
 <ul>
 <li>原始尺度和標準化，選出的 k 一樣嗎？</li>
@@ -1089,7 +1230,7 @@ $$\text{ARI}=\frac{\sum_{ij}\binom{n_{ij}}{2}-\dfrac{AB}{M}}{\dfrac{1}{2}(A+B)-\
 <h2 id="section-檢查清單">檢查清單</h2>
 <ul class="ckl">
 <li><input type="checkbox" id="l1a"><label for="l1a">看到揭曉前，我寫下了接受、保留或拒絕，以及它替我做的決定</label></li>
-<li><input type="checkbox" id="l1b"><label for="l1b">我自己改寫了問題，並打開 <code>lab1_cluster.py</code> 看過</label></li>
+<li><input type="checkbox" id="l1b"><label for="l1b">我寫了目標卡，用它改寫問題，並打開 <code>lab1_cluster.py</code> 看過</label></li>
 <li><input type="checkbox" id="l1c"><label for="l1c"><code>figs/lab1_k_selection.png</code> 存在，我看得懂它在比什麼</label></li>
 <li><input type="checkbox" id="l1d"><label for="l1d">我能把結論改寫成帶條件的句子，說清楚資料怎麼處理、用什麼指標、回答哪個任務</label></li>
 <li><input type="checkbox" id="l1e"><label for="l1e">我知道 silhouette 不看批次、ARI 要看批次，也能說明兩者為什麼可能選不同的 k</label></li>
@@ -1099,6 +1240,7 @@ $$\text{ARI}=\frac{\sum_{ij}\binom{n_{ij}}{2}-\dfrac{AB}{M}}{\dfrac{1}{2}(A+B)-\
 <section>
 <h2 id="section-如果還有時間">如果還有時間</h2>
 <ul>
+<li>挑一個自己想試的變化，例如換指標或拿掉一欄，和鄰座比較。</li>
 <li>請它列出每群包含各批次的筆數，自己找出哪兩個批次被併在一起。</li>
 <li>用不同 <code>random_state</code> 重跑，看 k=9 和 k=10 的排序穩不穩定。</li>
 <li>問它：<strong>「inertia 為什麼隨 k 遞減？用數學證明給我看。」</strong>再自己檢查：k-means 找到的是局部解，實務上偶爾會不單調。</li>

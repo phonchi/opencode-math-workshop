@@ -88,7 +88,7 @@ def one(case, n, out, timeout):
     (proj / 'AGENTS.md').write_text((ROOT / 'starter' / 'AGENTS.md').read_text(encoding='utf-8') + case.get('agents_extra', ''), encoding='utf-8'); (proj / 'notes').mkdir(); (proj / 'figs').mkdir()
     if case.get('data'):
         (proj / 'data').mkdir()
-        for f in case['data']: shutil.copy(ROOT / 'assets' / 'data' / f, proj / 'data' / f)
+        for f in case['data']: shutil.copy(ROOT / 'assets' / 'data' / f, proj / 'data' / Path(f).name)
     sp.run(['uv', 'sync', '--quiet'], cwd=proj, env=e, capture_output=True)
     envargs = [x for k in ['HOME','XDG_DATA_HOME','XDG_CONFIG_HOME','XDG_STATE_HOME','XDG_CACHE_HOME','UV_CACHE_DIR','UV_PYTHON_INSTALL_DIR','TERM'] for x in ('-e', f'{k}={e[k]}')]
     if os.environ.get('GOOGLE_GENERATIVE_AI_API_KEY'): envargs += ['-e', 'GOOGLE_GENERATIVE_AI_API_KEY=' + os.environ['GOOGLE_GENERATIVE_AI_API_KEY']]

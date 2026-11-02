@@ -221,6 +221,31 @@ async function interactionChecks(){
       await page.click('details.bg > summary');
       expect(!await page.$eval('details.bg',node=>node.open),'Background did not close');return {expandedAndClosed:true};
     });
+    await scenario('kmeans-explorer-steps',async page=>{
+      await load(page,fileURL('lab1-cluster'));
+      const read=()=>page.$eval('.kmeans-explorer',node=>({...node.dataset}));
+      await page.click('[data-k="2"]');await page.click('#kmeans-run');
+      const two=await read();
+      expect(two.phase==='done'&&Math.abs(Number(two.j)-59.08)<0.01&&Math.abs(Number(two.silhouette)-0.717)<0.001,'k-means k=2 mismatch',two);
+      await page.click('[data-k="3"]');await page.click('#kmeans-step');
+      expect((await read()).phase==='assigned','k-means step failed');
+      await page.click('#kmeans-run');
+      const three=await read();
+      expect(Math.abs(Number(three.j)-23.44)<0.01&&Math.abs(Number(three.silhouette)-0.662)<0.001,'k-means k=3 mismatch',three);
+      await page.click('#kmeans-seed');
+      expect((await read()).seed==='2','k-means seed failed');
+      return {two:two.silhouette,three:three.silhouette};
+    });
+    await scenario('threshold-explorer-readouts',async page=>{
+      await load(page,fileURL('lab3-notes'));
+      const set=async(id,v)=>page.$eval(id,(i,x)=>{i.value=x;i.dispatchEvent(new Event('input',{bubbles:true}));},String(v));
+      const read=()=>page.$eval('.threshold-explorer',node=>({...node.dataset}));
+      const expected=[[0.5,6,5,3,1],[0.3,9,6,2,3],[0.2,12,7,1,5],[0.1,16,7,1,9]];
+      for(const [t,a,c,m,f] of expected){await set('#threshold-t',t);const d=await read();expect(+d.alarms===a&&+d.caught===c&&+d.missed===m&&+d.falseAlarm===f,'Threshold readout mismatch',d);}
+      await set('#threshold-cap',20);
+      expect((await read()).over==='false','Review cap did not update');
+      return {rows:expected.length};
+    });
     await scenario('pca-reference-buttons-keyboard',async page=>{
       await load(page,fileURL('lab2-pca'));
       const reference=JSON.parse(fs.readFileSync(path.join(ROOT,'tools/test-runs/20260912-workshop-refresh/wsl/math/pca-browser-reference.json'),'utf8'));
