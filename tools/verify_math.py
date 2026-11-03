@@ -28,10 +28,14 @@ def main():
         print(f"RUN {name}")
 
     l1 = scopes["lab1_cluster"]
-    assert max(l1["raw"], key=lambda k: l1["raw"][k][1]) == 3
+    assert max(l1["raw"], key=lambda k: l1["raw"][k][1]) == 2
     assert max(l1["std"], key=lambda k: l1["std"][k][1]) == 9
     assert l1["std"][9][1] - l1["std"][10][1] > 0.05
     assert l1["std"][10][2] > l1["std"][9][2] + 0.05
+
+    l2 = scopes["lab2_pca"]
+    assert l2["k90"] == 5  # 標準化後 90% 門檻選 5 個
+    assert l2["np"].argsort(-abs(l2["vecs"][:, 3]))[:2].tolist() in ([8, 9], [9, 8])  # 客訴訊號在 PC4
 
     b = scopes["lab2_pca_bugs"]
     table = {bug: b["checks"](bug) for bug in b["NAMES"]}

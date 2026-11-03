@@ -942,7 +942,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <tr><td><code>high demand</code>、<code>way too hot</code></td>
     <td>Google 暫時過載，OpenCode 會自動重試。等超過一分鐘還沒恢復，就換下一個模型。</td></tr>
 <tr><td><code>Quota exceeded for metric</code></td>
-    <td>先看後面寫的是哪種額度。每日請求（per day）用完就換下一個模型；每分鐘的上限等一下再試。Gemini 請選 <code>Gemini 3.5 Flash Lite</code>，<code>Gemini 3.6 Flash</code> 實測每天只有 20 個請求。</td></tr>
+    <td>先看後面寫的是哪種額度。每日請求（per day）用完就換下一個模型；每分鐘的上限等一下再試。Gemini 請選 <code>Gemini 3.5 Flash Lite</code>，<code>Gemini 3.6 Flash</code> 每天只有約 20 個請求。</td></tr>
 <tr><td><code>API key is missing</code></td>
     <td>這個模型的 key 還沒連好。用 <code>/connect</code> 貼上 key，或換回備案順序裡已連好的模型。</td></tr>
 <tr><td><code>Error: Internal server error</code></td>
@@ -974,12 +974,12 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 
 <section>
 <h2 id="section-三張卡">三張卡</h2>
-<p>問 AI 之前先寫下來。空格要你自己填，它沒辦法替你決定。</p>
+<p>問 AI 之前先寫下來。這些問題要你自己回答，它沒辦法替你決定。每關都有填好的範例可以對照。</p>
 <div class="tw"><table>
 <tr><th>卡</th><th>內容</th></tr>
-<tr><td><strong>目標卡</strong></td><td>我的用途是＿＿；可以合併／不能合併的情況是＿＿；我用＿＿證據判斷。</td></tr>
-<tr><td><strong>驗收卡</strong></td><td>我主張＿＿就夠；要比較＿＿；如果出現＿＿，我會撤回主張。</td></tr>
-<tr><td><strong>決策卡</strong></td><td>我優先避免＿＿；複查上限＿＿；我預測降低門檻會＿＿。請計算核對，不要替我選。</td></tr>
+<tr><td><strong>目標卡</strong><br>（問之前，說清楚要什麼）</td><td>用途：結果要拿去做什麼？<br>合併規則：什麼可以算同一群、什麼絕對不行？<br>判斷證據：看什麼決定；哪些資料只能檢查、不能拿來選？</td></tr>
+<tr><td><strong>驗收卡</strong><br>（看結果前，先定怎樣算夠）</td><td>主張：我認為多少就夠？<br>比較：要比哪幾種、用什麼分數？<br>撤回條件：出現什麼結果，我就承認不成立？</td></tr>
+<tr><td><strong>決策卡</strong><br>（AI 算數字，你來拍板）</td><td>優先避免：漏報和誤報，哪個比較不能接受？<br>限制：人力、時間上限是多少？<br>預測：調門檻會怎麼變？請 AI 計算核對，不要替我選。</td></tr>
 </table></div>
 
 <h2 id="section-下指令的五個習慣">下指令的五個習慣</h2>
@@ -987,7 +987,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <div class="tw"><table>
 <tr><th>習慣</th><th>差別</th></tr>
 <tr><td><strong>先說要做什麼</strong></td>
-    <td>「看有幾種模式」→ 它會自己假設用途。<br>「要追蹤批次，請比較……」→ 它回答的才是你的問題。</td></tr>
+    <td>「看有幾種店」→ 它會自己假設用途。<br>「要回查每家店，請比較……」→ 它回答的才是你的問題。</td></tr>
 <tr><td><strong>說清楚存到哪</strong></td>
     <td>「畫個圖」→ 你不知道它存去哪了。<br>「畫成兩張並排的圖存到 <code>figs/lab1.png</code>」→ 你找得到。</td></tr>
 <tr><td><strong>要求印出中間結果</strong></td>
@@ -1004,15 +1004,15 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <p>下面是課程設定下的參考結果。先核對資料、參數與比較方式；浮點數用容差比對，不要求每一位都相同。</p>
 <div class="tw"><table>
 <tr><th>Lab</th><th>項目</th><th>參考值</th></tr>
-<tr><td rowspan="3">1</td><td>silhouette 最高的 k（原始尺度／標準化）</td><td>3（0.7416）／9（0.7943）</td></tr>
+<tr><td rowspan="3">1</td><td>silhouette 最高的 k（原始尺度／標準化）</td><td>2（0.8140）／9（0.7942）</td></tr>
 <tr><td>k=10（標準化）的 silhouette</td><td>0.7252</td></tr>
-<tr><td>對 10 個批次的 ARI（k=9／k=10）</td><td>0.881／0.990</td></tr>
-<tr><td rowspan="3">2</td><td>標準化後前 5 個解釋變異比例</td><td>0.3195　0.2052　0.1655　0.1486　0.0907</td></tr>
+<tr><td>對 10 家分店的 ARI（k=9／k=10）</td><td>0.881／0.990</td></tr>
+<tr><td rowspan="3">2</td><td>標準化後前 5 個解釋變異比例</td><td>0.3196　0.2050　0.1655　0.1486　0.0907</td></tr>
 <tr><td>保留 3／4／5 個主成分的累積變異</td><td>69.0%／83.9%／92.9%</td></tr>
-<tr><td>保留 3／4 個主成分辨識故障的 AUC</td><td>0.588／1.000</td></tr>
-<tr><td rowspan="3">3</td><td>永遠猜「沒故障」的準確率</td><td>0.922</td></tr>
-<tr><td>含 <code>record_id</code>：測試集／下一批 recall</td><td>0.952／0.000</td></tr>
-<tr><td>不含 <code>record_id</code>，門檻 0.5：測試集／下一批 recall</td><td>0.476／0.462</td></tr>
+<tr><td>保留 3／4 個主成分辨識客訴的 AUC</td><td>0.588／1.000</td></tr>
+<tr><td rowspan="3">3</td><td>永遠猜「不會逾期」的準確率</td><td>0.922</td></tr>
+<tr><td>含 <code>case_no</code>：測試集／下一批 recall</td><td>0.952／0.000</td></tr>
+<tr><td>不含 <code>case_no</code>，門檻 0.5：測試集／下一批 recall</td><td>0.476／0.538</td></tr>
 </table></div>
 </section>
 

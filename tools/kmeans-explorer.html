@@ -1,116 +1,227 @@
 <section class="kmeans-explorer" aria-labelledby="kmeans-title">
-<h2 id="kmeans-title">先動手：k-means 怎麼分群？</h2>
-<p>這些是 44 個<strong>合成的平面點</strong>，不是產線資料。<strong>先猜：你會分成幾群？為什麼？</strong>猜完再操作。</p>
-<p>k-means 只做兩件事：把每個點分給最近的中心，再把中心移到該群的平均位置，反覆到不再變動。按「走一步」看它怎麼做。</p>
-<div class="kmeans-panel">
-  <div class="kmeans-controls" role="group" aria-label="k-means 操作">
-    <span class="kmeans-k" role="group" aria-label="群數 k"><button type="button" data-k="2">k=2</button><button type="button" data-k="3" aria-pressed="true">k=3</button><button type="button" data-k="4">k=4</button></span>
-    <button type="button" id="kmeans-step">走一步</button>
-    <button type="button" id="kmeans-run">跑到底</button>
-    <button type="button" id="kmeans-seed">換起點</button>
+<h2 id="kmeans-title">先玩一次：k-means 怎麼分群？</h2>
+<p>下面是 60 筆<strong>示範紀錄</strong>，和正文資料一樣沒寫店名，只畫兩欄：營業額和等候時間。跟著步驟按「下一步」，每一步先讀說明再操作。</p>
+<div class="km-panel">
+  <div class="km-head">
+    <span class="km-count" id="kmeans-count">第 1／6 步</span>
+    <strong class="km-title" id="kmeans-step-title">先猜</strong>
+  </div>
+  <p class="km-say" id="kmeans-say" aria-live="polite"></p>
+  <div class="km-controls" id="kmeans-controls" role="group" aria-label="這一步的操作">
+    <span class="km-group" data-for="0" role="group" aria-label="你猜幾家店"><span class="km-label">我猜有</span><button type="button" data-guess="2">2</button><button type="button" data-guess="3">3</button><button type="button" data-guess="4">4</button><button type="button" data-guess="5">5</button><span class="km-label">家店</span></span>
+    <span class="km-group" data-for="3" role="group" aria-label="群數 k"><span class="km-label">分成</span><button type="button" data-k="2">2</button><button type="button" data-k="3" aria-pressed="true">3</button><button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><span class="km-label">群</span></span>
+    <span class="km-group" data-for="3"><button type="button" id="kmeans-step">走一步</button><button type="button" id="kmeans-run">自動跑完</button><button type="button" id="kmeans-seed">換起點</button></span>
   </div>
   <figure>
-    <svg id="kmeans-plot" viewBox="0 0 680 390" role="img" aria-labelledby="kmeans-svg-title kmeans-svg-desc">
-      <title id="kmeans-svg-title">k-means 分群過程</title>
-      <desc id="kmeans-svg-desc">圓點是資料，顏色表示目前歸屬，叉號是各群中心，虛線連到所屬中心。</desc>
-      <g id="kmeans-links" stroke-dasharray="3 5" stroke-width="1"></g>
+    <svg id="kmeans-plot" viewBox="0 0 680 402" role="img" aria-labelledby="kmeans-svg-title kmeans-svg-desc">
+      <title id="kmeans-svg-title">分店營業紀錄散布圖</title>
+      <desc id="kmeans-svg-desc">每個點是某家店某一天的紀錄，橫軸營業額、縱軸等候時間。</desc>
+      <g id="kmeans-axes" class="km-axes"></g>
+      <ellipse id="kmeans-pair" class="km-pair" rx="0" ry="0"/>
+      <g id="kmeans-links"></g>
       <g id="kmeans-points"></g>
-      <g id="kmeans-centers" stroke-width="5" stroke-linecap="round"></g>
+      <g id="kmeans-centers"></g>
     </svg>
-    <figcaption>圓點：資料　叉號：中心　虛線：連到所屬中心。這裡刻意隨機挑點當起點；實際工具常用 k-means++ 和多次起點（<code>n_init</code>），不要反推 AI 的 k-means 不穩。</figcaption>
   </figure>
-  <dl class="kmeans-readouts">
-    <div><dt>距離平方和 J（越小越緊）</dt><dd><output id="kmeans-j">—</output></dd></div>
-    <div><dt>silhouette（越大越分得開）</dt><dd><output id="kmeans-sil">—</output></dd></div>
-    <div><dt>狀態</dt><dd class="kmeans-status"><output id="kmeans-state">—</output></dd></div>
-  </dl>
+  <div class="km-result" id="kmeans-result" aria-live="polite"></div>
+  <div class="km-nav">
+    <button type="button" id="kmeans-prev">← 上一步</button>
+    <button type="button" id="kmeans-next" class="km-primary">下一步 →</button>
+    <button type="button" id="kmeans-reset">從頭開始</button>
+  </div>
 </div>
-<p>把 k=2、3、4 都跑到底，記下 J 和 silhouette，再多按幾次「換起點」。</p>
 <div class="box warn">
-<div class="bt">操作完回答</div>
+<div class="bt">玩完回答</div>
 <ul style="margin-bottom:0">
-<li>k 變大，J 怎麼變（起點差時可能例外）？silhouette 選了幾群？它把哪兩團併在一起？</li>
-<li><strong>距離變小或分數變高，就是你的目標嗎？</strong>如果靠近的兩團是兩種不同的東西呢？</li>
-<li>剛才的 k、指標和起點，是誰選的？之後 AI 替你跑的時候，又是誰選的？</li>
+<li>你一開始猜幾家？為什麼電腦不標準化時只分出 2 群？</li>
+<li>分數最高的 k 是 3，實際卻有 4 家店。<strong>如果要做店型手冊，3 群可以嗎？如果要回查客訴是哪家店呢？</strong></li>
+<li>剛才的 k、要不要標準化、用哪個分數，是誰決定的？之後 AI 替你跑的時候，又是誰決定的？</li>
 </ul>
 </div>
-<noscript><p>此互動需要 JavaScript。重點是：k 越大距離越小，但指標選的不一定是你要的分法。</p></noscript>
+<details class="bg"><summary>補充：為什麼「換起點」結果會不同？</summary><div class="bg-body">
+<p style="margin-bottom:0">這裡刻意隨機挑資料點當起點，有時會停在不太好的分法。sklearn 等工具會用 k-means++ 挑起點，並用 <code>n_init</code> 換好幾組起點、留下距離平方和最小的那次，所以不要因此認為 AI 跑的 k-means 不穩。</p>
+</div></details>
+<noscript><p>此互動需要 JavaScript。重點是：不標準化時距離只看營業額；標準化後分數最高的是 3 群，但實際有 4 家店，其中兩家幾乎一樣。該分幾群要看用途。</p></noscript>
 </section>
 <style>
-.kmeans-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
-.kmeans-controls{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
-.kmeans-k{display:inline-flex;gap:.25rem;margin-right:.5rem}
-.kmeans-controls button{font:inherit;font-size:.86rem;min-height:44px;min-width:44px;padding:.4rem .8rem;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
-.kmeans-controls button:hover{border-color:var(--link);color:var(--link)}
-.kmeans-controls button[aria-pressed="true"]{background:var(--link);border-color:var(--link);color:var(--paper)}
-.kmeans-controls button:focus-visible{outline:3px solid var(--link);outline-offset:3px}
-.kmeans-panel figure{margin:1rem 0}.kmeans-panel svg{display:block;width:100%;height:auto}.kmeans-panel figcaption{font-size:.82rem;color:var(--ink-2)}
-.kmeans-readouts{display:flex;gap:2rem;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:1rem;margin:0}.kmeans-readouts dt{font-size:.86rem;color:var(--ink-2)}.kmeans-readouts dd{margin:0;font-size:1.5rem;color:var(--link);font-variant-numeric:tabular-nums}.kmeans-readouts dd.kmeans-status{font-size:1rem;color:var(--ink)}
-@media print{.kmeans-controls{display:none}}
+.km-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
+.km-head{display:flex;gap:.8rem;align-items:baseline;flex-wrap:wrap}
+.km-count{font-size:.82rem;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.km-title{font-size:1.1rem;color:var(--link)}
+.km-say{margin:.5rem 0 .8rem;min-height:3.2em;line-height:1.7}
+.km-controls{display:flex;flex-wrap:wrap;gap:.6rem 1rem;align-items:center;min-height:44px}
+.km-group{display:inline-flex;flex-wrap:wrap;gap:.3rem;align-items:center}
+.km-group[hidden]{display:none}
+.km-label{font-size:.9rem;color:var(--ink-2)}
+.km-panel button{font:inherit;font-size:.9rem;min-height:44px;min-width:44px;padding:.4rem .8rem;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
+.km-panel button:hover{border-color:var(--link);color:var(--link)}
+.km-panel button[aria-pressed="true"],.km-panel button.km-primary{background:var(--link);border-color:var(--link);color:var(--paper)}
+.km-panel button:disabled{opacity:.4;cursor:default}
+.km-panel button:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+.km-panel figure{margin:1rem 0 .6rem}.km-panel svg{display:block;width:100%;height:auto}
+.km-axes line{stroke:var(--ink-3);stroke-width:1}.km-axes text{fill:var(--ink-2);font-size:14px}.km-axes .km-axis-title{fill:var(--ink);font-size:15px}
+.km-axes .km-note{fill:var(--live);font-size:15px}
+.km-pt{transition:transform .7s var(--ease)}.km-pt path{stroke:var(--paper-2);stroke-width:1}
+.km-c0{fill:var(--link);stroke:var(--link)}.km-c1{fill:var(--live);stroke:var(--live)}.km-c2{fill:var(--after);stroke:var(--after)}.km-c3{fill:var(--warn);stroke:var(--warn)}.km-c4{fill:var(--ink);stroke:var(--ink)}.km-none{fill:var(--ink-3);stroke:var(--ink-3)}
+.km-pt path.km-c0,.km-pt path.km-c1,.km-pt path.km-c2,.km-pt path.km-c3,.km-pt path.km-c4,.km-pt path.km-none{stroke:var(--paper-2)}
+#kmeans-links line{stroke-dasharray:3 5;stroke-width:1}
+.km-center{transition:transform .5s var(--ease)}.km-center line{stroke-width:5;stroke-linecap:round}.km-center text{font-size:13px;font-weight:700;fill:var(--ink)}
+.km-pair{fill:none;stroke:var(--live);stroke-width:2;stroke-dasharray:6 5;opacity:0;transition:opacity .4s}
+.km-pair.show{opacity:1}
+.km-result{border-top:1px solid var(--rule);padding-top:.8rem;min-height:2.4em}
+.km-result p{margin:.2rem 0}
+.km-bars{display:grid;grid-template-columns:auto 1fr auto;gap:.35rem .7rem;align-items:center;max-width:520px}
+.km-bar{height:16px;background:var(--rule);border-radius:3px}.km-bar span{display:block;height:100%;background:var(--ink-3);border-radius:3px}
+.km-bar.best span{background:var(--link)}
+.km-legend{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;font-size:.9rem}
+.km-legend svg{width:16px;height:16px;display:inline-block;vertical-align:-3px;margin-right:.3rem}
+.km-nav{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+@media (prefers-reduced-motion:reduce){.km-pt,.km-center,.km-pair{transition:none}}
+@media(max-width:720px){.km-say{min-height:0}.km-nav button{flex:1 1 auto}.km-axes text,.km-axes .km-axis-title,.km-axes .km-note,.km-center text{font-size:22px}.km-pt path{transform:scale(1.6)}}
+@media print{.km-controls,.km-nav{display:none}}
 </style>
 <script>
 (function(){
   'use strict';
-  const X=[[-3,-.02],[-2.82,.42],[-3.16,-.81],[-3.53,-.27],[-3.27,-1.14],[-3.59,-.77],[-2.96,-1.11],[-2.2,-.14],[-3.3,-.76],[-3.37,.16],[-2.71,.09],[-2.79,-.11],[-2.94,-1.51],[-3.56,-.32],[-1.23,.16],[-1.13,.95],[-2.12,1.72],[-1.49,-.03],[-1.79,1.42],[-1.69,.97],[-.56,.52],[-1.68,2.1],[-1.22,1.36],[-.67,.18],[-1.55,.94],[-1.27,1.25],[-1.13,.79],[-1.16,1.31],[2.95,-.32],[3.47,-.07],[4.01,.88],[2.53,.48],[3.14,-.23],[2.68,-.26],[3.09,-.18],[2.17,1.07],[2.59,-.3],[2.86,-.21],[3.63,.25],[3.8,-.08],[2.07,-.14],[2.44,-.78],[3.45,-.01],[1.61,-.31]];
-  const COLORS=['#2a3c78','#b8503c','#2f7d5b','#a8740f'];
+  // 60 天示範紀錄：[營業額（元）, 等候（分鐘）, 實際分店]。分店 0、1 開在同一捷運站兩個出口。
+  const D=[[42000,6.4,0],[42390,5.3,0],[41640,5.7,0],[40840,5.0,0],[41410,5.3,0],[40710,5.0,0],[42080,5.9,0],[43740,5.3,0],[41360,6.1,0],[41190,6.1,0],[42640,5.9,0],[42460,4.6,0],[42140,5.7,0],[40790,6.0,0],[41960,6.1,0],[40610,5.6,1],[41980,7.0,1],[41330,6.6,1],[41550,6.1,1],[43980,7.6,1],[41550,6.9,1],[42560,5.8,1],[43750,6.5,1],[41840,6.8,1],[42450,6.4,1],[42740,6.9,1],[42680,6.5,1],[41010,6.9,1],[42700,7.3,1],[44370,6.1,1],[42560,11.0,2],[41700,10.4,2],[42470,10.4,2],[40760,10.5,2],[41550,11.4,2],[42040,10.4,2],[43470,10.4,2],[43790,10.8,2],[40580,10.5,2],[41270,10.5,2],[43140,10.0,2],[39710,10.6,2],[41700,10.4,2],[42170,11.2,2],[43930,11.0,2],[51970,6.9,3],[52870,7.3,3],[51560,7.5,3],[53370,7.1,3],[51990,7.1,3],[52760,7.6,3],[50320,7.5,3],[52450,6.6,3],[49810,7.2,3],[49350,7.2,3],[51600,6.6,3],[50830,7.3,3],[52210,6.7,3],[54920,7.7,3],[50920,7.3,3]];
+  const STORE=['A 店','B 店','C 店','D 店'];
   const root=document.querySelector('.kmeans-explorer');
   const ns='http://www.w3.org/2000/svg';
   const el=id=>document.getElementById('kmeans-'+id);
-  const px=([x,y])=>[340+x*68,205-y*68];
-  const shape=(tag,attrs,parent)=>{const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);parent.appendChild(n);return n;};
-  const dots=X.map(p=>{const [cx,cy]=px(p);return shape('circle',{cx,cy,r:6,fill:'#7d7a72'},el('points'));});
-  const links=X.map(()=>shape('line',{},el('links')));
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
+  const shape=(tag,attrs,parent)=>{const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(parent)parent.appendChild(n);return n;};
+  const mean=a=>a.reduce((s,v)=>s+v,0)/a.length;
+  const sd=a=>{const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/a.length);};
+  const rev=D.map(d=>d[0]),wait=D.map(d=>d[1]);
+  const mr=mean(rev),sr=sd(rev),mw=mean(wait),sw=sd(wait);
+  const RAW=D.map(d=>[d[0],d[1]]),STD=D.map(d=>[(d[0]-mr)/sr,(d[1]-mw)/sw]);
+  // 版面：x 60..650，y 30..330
+  const X0=60,X1=650,Y0=30,Y1=330;
+  // 兩軸用同一個「每個標準差幾像素」，畫面上的距離才等於標準化後的距離。
+  const zx=STD.map(p=>p[0]),zy=STD.map(p=>p[1]);
+  const zx0=Math.min(...zx)-.3,zx1=Math.max(...zx)+.3,zy0=Math.min(...zy)-.3,zy1=Math.max(...zy)+.3;
+  const U=Math.min((X1-X0)/(zx1-zx0),(Y1-Y0)/(zy1-zy0));
+  const offX=X0+((X1-X0)-(zx1-zx0)*U)/2,offY=((Y1-Y0)-(zy1-zy0)*U)/2;
+  const sx=r=>offX+((r-mr)/sr-zx0)*U;
+  const syS=w=>Y1-offY-((w-mw)/sw-zy0)*U;
+  const RMIN=mr+zx0*sr,RMAX=mr+zx1*sr,WMIN=mw+zy0*sw,WMAX=mw+zy1*sw;
+  const pxPerYuan=U/sr,MID=(Y0+Y1)/2;
+  const syFlat=w=>MID-(w-mw)*pxPerYuan; // 1 分鐘和 1 元用同一把尺
+  const pos=(i,view)=>[sx(D[i][0]),view==='flat'?syFlat(D[i][1]):syS(D[i][1])];
+  const stdToPx=([a,b])=>[sx(mr+a*sr),syS(mw+b*sw)];
   const d2=(a,b)=>(a[0]-b[0])**2+(a[1]-b[1])**2;
-  let k=3,seed=1,centers=[],labels=[],phase='init';
-  function pick(){ // 由 seed 決定的固定亂數，可重現
-    let s=(seed*2654435761)>>>0;const next=()=>(s=(Math.imul(s,1664525)+1013904223)>>>0)/4294967296;
-    const idx=[...X.keys()];
-    for(let i=idx.length-1;i>0;i--){const j=Math.floor(next()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
-    return idx.slice(0,k).map(i=>X[i].slice());
+  const SHAPES=['M-6,0a6,6 0 1,0 12,0a6,6 0 1,0 -12,0','M-5.5,-5.5h11v11h-11z','M0,-7L6.5,5H-6.5z','M0,-7L7,0L0,7L-7,0z'];
+  // k-means 工具
+  function rng(seed){let s=(seed*2654435761)>>>0;return()=>(s=(Math.imul(s,1664525)+1013904223)>>>0)/4294967296;}
+  function pick(P,k,seed){const r=rng(seed),idx=[...P.keys()];for(let i=idx.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}return idx.slice(0,k).map(i=>P[i].slice());}
+  const assign=(P,C)=>P.map(p=>{let b=0;for(let j=1;j<C.length;j++)if(d2(p,C[j])<d2(p,C[b]))b=j;return b;});
+  const update=(P,C,L)=>C.map((c,j)=>{const g=P.filter((_,i)=>L[i]===j);return g.length?[mean(g.map(p=>p[0])),mean(g.map(p=>p[1]))]:c;});
+  const inertia=(P,C,L)=>P.reduce((s,p,i)=>s+d2(p,C[L[i]]),0);
+  function solve(P,k){let best=null;for(let seed=1;seed<=12;seed++){let C=pick(P,k,seed),L=assign(P,C);for(let t=0;t<100;t++){C=update(P,C,L);const N=assign(P,C);if(N.every((v,i)=>v===L[i]))break;L=N;}const J=inertia(P,C,L);if(!best||J<best.J)best={C,L,J};}return best;}
+  function silhouette(P,L){const used=[...new Set(L)];if(used.length<2)return NaN;let t=0;P.forEach((p,i)=>{const avg=j=>{let s=0,n=0;P.forEach((q,m)=>{if(L[m]===j&&m!==i){s+=Math.sqrt(d2(p,q));n++;}});return n?s/n:null;};const a=avg(L[i]);if(a===null)return;const b=Math.min(...used.filter(j=>j!==L[i]).map(avg));t+=(b-a)/Math.max(a,b);});return t/P.length;}
+  const RAW2=solve(RAW,2);
+  const SCORES=[2,3,4,5].map(k=>{const r=solve(STD,k);return{k,L:r.L,C:r.C,s:silhouette(STD,r.L)};});
+  const BEST=SCORES.reduce((a,b)=>b.s>a.s?b:a);
+  // SVG 物件
+  const pts=D.map(()=>{const g=shape('g',{class:'km-pt'},el('points'));const p=shape('path',{d:SHAPES[0],class:'km-none'},g);return{g,p};});
+  const links=D.map(()=>{const l=shape('line',{x1:0,y1:0,x2:0,y2:0},el('links'));l.style.opacity='0';return l;});
+  function drawAxes(view){
+    const g=el('axes');g.replaceChildren();
+    shape('line',{x1:X0,y1:Y1+10,x2:X1,y2:Y1+10},g);shape('line',{x1:X0-10,y1:Y0,x2:X0-10,y2:Y1+10},g);
+    const text=(x,y,t,attrs={})=>{const n=shape('text',{x,y,...attrs},g);n.textContent=t;return n;};
+    if(view==='std'){
+      for(const z of [-2,-1,0,1,2]){const x=sx(mr+z*sr);if(x>=X0&&x<=X1){shape('line',{x1:x,y1:Y1+10,x2:x,y2:Y1+16},g);text(x,Y1+32,String(z).replace('-','−'),{'text-anchor':'middle'});}}
+      for(const z of [-2,-1,0,1,2]){const y=syS(mw+z*sw);if(y>=Y0&&y<=Y1){shape('line',{x1:X0-16,y1:y,x2:X0-10,y2:y},g);text(X0-20,y+5,String(z).replace('-','−'),{'text-anchor':'end'});}}
+      text((X0+X1)/2,Y1+62,'營業額（比平均高幾個標準差）',{'text-anchor':'middle',class:'km-axis-title'});
+      text(X0,Y0-12,'等候（比平均高幾個標準差）',{class:'km-axis-title'});
+    }else{
+      for(const r of [40000,45000,50000,55000].filter(r=>r>=RMIN&&r<=RMAX)){const x=sx(r);shape('line',{x1:x,y1:Y1+10,x2:x,y2:Y1+16},g);text(x,Y1+32,(r/10000)+' 萬',{'text-anchor':'middle'});}
+      text((X0+X1)/2,Y1+62,'營業額（元）',{'text-anchor':'middle',class:'km-axis-title'});
+      if(view==='flat'){text(X0,Y0-12,'等候（分鐘），和營業額用同一把尺',{class:'km-axis-title'});text((X0+X1)/2,MID-40,'等候差 5 分鐘，在這把尺上只等於營業額差 5 元',{'text-anchor':'middle',class:'km-note'});}
+      else{for(const w of [4,6,8,10,12].filter(w=>w>=WMIN&&w<=WMAX)){const y=syS(w);shape('line',{x1:X0-16,y1:y,x2:X0-10,y2:y},g);text(X0-20,y+5,String(w),{'text-anchor':'end'});}text(X0,Y0-12,'等候（分鐘）',{class:'km-axis-title'});}
+    }
   }
-  const assign=()=>X.map(p=>{let b=0;for(let j=1;j<k;j++)if(d2(p,centers[j])<d2(p,centers[b]))b=j;return b;});
-  function update(){ // 空群保留原中心
-    return centers.map((c,j)=>{const g=X.filter((_,i)=>labels[i]===j);return g.length?[g.reduce((s,p)=>s+p[0],0)/g.length,g.reduce((s,p)=>s+p[1],0)/g.length]:c;});
+  // 狀態
+  let step=0,guess=null,k=3,seed=1,C=[],L=[],phase='init',timer=null;
+  const TITLES=['先猜','電腦怎麼量距離？','標準化：各欄換成同一把尺','一步一步跑 k-means','讓分數挑 k','揭曉：到底有幾家店？'];
+  function setPoints(view,labels,storeShapes){
+    D.forEach((d,i)=>{const [x,y]=pos(i,view);pts[i].g.style.transform=`translate(${x}px,${y}px)`;
+      pts[i].p.setAttribute('d',storeShapes?SHAPES[d[2]]:SHAPES[0]);
+      pts[i].p.setAttribute('class',labels?('km-c'+labels[i]):(storeShapes?'km-c'+d[2]:'km-none'));});
   }
-  const inertia=()=>X.reduce((s,p,i)=>s+d2(p,centers[labels[i]]),0);
-  function silhouette(){
-    const used=[...new Set(labels)];if(used.length<2)return NaN;
-    let total=0;
-    X.forEach((p,i)=>{
-      const mean=j=>{let sum=0,n=0;X.forEach((q,m)=>{if(labels[m]===j&&m!==i){sum+=Math.sqrt(d2(p,q));n++;}});return n?sum/n:null;};
-      const a=mean(labels[i]);if(a===null)return;
-      const b=Math.min(...used.filter(j=>j!==labels[i]).map(j=>{let sum=0,n=0;X.forEach((q,m)=>{if(labels[m]===j){sum+=Math.sqrt(d2(p,q));n++;}});return sum/n;}));
-      total+=(b-a)/Math.max(a,b);
-    });
-    return total/X.length;
+  function setLinks(labels,centersPx){
+    D.forEach((_,i)=>{const l=links[i];if(!labels){l.style.opacity='0';return;}l.style.opacity='.45';const [x,y]=pos(i,'std'),[cx,cy]=centersPx[labels[i]];for(const [a,v] of Object.entries({x1:x,y1:y,x2:cx,y2:cy,class:'km-c'+labels[i]}))l.setAttribute(a,v);});
   }
-  function draw(){
-    el('centers').replaceChildren();
-    centers.forEach((c,j)=>{const [x,y]=px(c),r=11;shape('line',{x1:x-r,y1:y-r,x2:x+r,y2:y+r,stroke:COLORS[j]},el('centers'));shape('line',{x1:x-r,y1:y+r,x2:x+r,y2:y-r,stroke:COLORS[j]},el('centers'));});
-    X.forEach((p,i)=>{
-      const has=labels.length>0,c=has?COLORS[labels[i]]:'#7d7a72';dots[i].setAttribute('fill',c);
-      if(has){const [a,b]=px(p),[e,f]=px(centers[labels[i]]);for(const [n,v] of Object.entries({x1:a,y1:b,x2:e,y2:f,stroke:c,opacity:.45}))links[i].setAttribute(n,v);}
-      else links[i].setAttribute('opacity',0);
-    });
-    const J=labels.length?inertia():null,S=phase==='done'?silhouette():null;
-    el('j').value=J===null?'—':J.toFixed(2);el('sil').value=S===null?'跑到底才算':S.toFixed(3);
-    el('state').value={init:'起點已選，還沒分配',assigned:'剛把點分給最近的中心',updated:'剛把中心移到平均位置',done:'不再變動，停下來了'}[phase];
-    Object.assign(root.dataset,{k:String(k),seed:String(seed),phase,j:J===null?'':String(J),silhouette:S===null?'':String(S),labels:JSON.stringify(labels)});
+  function setCenters(centersPx){
+    const g=el('centers');
+    while(g.children.length>centersPx.length)g.lastChild.remove();
+    centersPx.forEach(([x,y],j)=>{let c=g.children[j];if(!c){c=shape('g',{class:'km-center'},g);shape('line',{x1:-10,y1:-10,x2:10,y2:10},c);shape('line',{x1:-10,y1:10,x2:10,y2:-10},c);shape('text',{x:13,y:-9},c);}
+      c.querySelectorAll('line').forEach(n=>n.setAttribute('class','km-c'+j));c.querySelector('text').textContent=String(j+1);c.style.transform=`translate(${x}px,${y}px)`;});
   }
-  function start(){centers=pick();labels=[];phase='init';draw();}
-  function step(){
+  const say=t=>{el('say').textContent=t;};
+  const result=html=>{el('result').innerHTML=html;};
+  function startKmeans(){stop();C=pick(STD,k,seed);L=[];phase='init';renderKmeans();}
+  function kmStep(){
     if(phase==='done')return;
-    if(phase==='init'||phase==='updated'){
-      const next=assign();
-      if(phase==='updated'&&next.every((v,i)=>v===labels[i])){phase='done';draw();return;}
-      labels=next;phase='assigned';
-    }else{centers=update();phase='updated';}
-    draw();
+    if(phase==='init'||phase==='updated'){const N=assign(STD,C);if(phase==='updated'&&N.every((v,i)=>v===L[i])){phase='done';renderKmeans();return;}L=N;phase='assigned';}
+    else{C=update(STD,C,L);phase='updated';}
+    renderKmeans();
   }
-  el('step').addEventListener('click',step);
-  el('run').addEventListener('click',()=>{let guard=0;while(phase!=='done'&&guard++<400)step();});
-  el('seed').addEventListener('click',()=>{seed++;start();});
-  root.querySelectorAll('[data-k]').forEach(b=>b.addEventListener('click',()=>{k=Number(b.dataset.k);root.querySelectorAll('[data-k]').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));start();}));
-  start();
+  function stop(){if(timer){clearInterval(timer);timer=null;}}
+  function renderKmeans(){
+    const cpx=C.map(stdToPx);
+    setPoints('std',L.length?L:null,false);setLinks(L.length?L:null,cpx);setCenters(cpx);
+    say({init:`隨機挑了 ${k} 個點當起點（×）。按「走一步」：每個點會被分給離它最近的 ×。`,assigned:'每個點都分給了最近的 ×（虛線連到它的 ×）。再按一次：每個 × 會移到自己這組所有點的平均位置。',updated:'× 移到了平均位置。再按一次，看有沒有點要換組。',done:'沒有點換組了，k-means 停下來。試試別的 k，或按「換起點」。'}[phase]);
+    result(L.length?`<p>距離平方和（越小越緊）：<strong>${inertia(STD,C,L).toFixed(1)}</strong></p>`:'<p>還沒分組。</p>');
+    el('step').disabled=phase==='done';el('run').disabled=phase==='done';
+    Object.assign(root.dataset,{k:String(k),seed:String(seed),phase,labels:JSON.stringify(L)});
+  }
+  function render(){
+    stop();
+    el('count').textContent=`第 ${step+1}／${TITLES.length} 步`;el('step-title').textContent=TITLES[step];
+    root.querySelectorAll('.km-group').forEach(g=>g.hidden=Number(g.dataset.for)!==step);
+    el('prev').disabled=step===0;el('next').disabled=step===TITLES.length-1;
+    el('pair').classList.remove('show');
+    if(step===0){
+      drawAxes('spread');setPoints('spread',null,false);setLinks(null);setCenters([]);
+      say('每個點是某家店某一天的紀錄。你覺得這 60 筆紀錄來自幾家店？先選一個數字，再按「下一步」。');
+      result(guess?`<p>你的猜測：<strong>${guess} 家</strong></p>`:'<p>你的猜測：還沒選</p>');
+    }else if(step===1){
+      drawAxes('flat');setPoints('flat',RAW2.L,false);setLinks(null);setCenters([]);
+      say('k-means 用距離判斷誰跟誰近，而距離公式把 1 元和 1 分鐘當成一樣大。營業額差上千元，等候差幾分鐘幾乎不算數，所以在電腦眼裡，點全擠在一條線上。讓它自己挑 k，它只分出 2 群：營業額高、營業額低。');
+      result('<p>不標準化時，分數最高的是 <strong>k=2</strong>。等候時間完全沒被用到。</p>');
+    }else if(step===2){
+      drawAxes('std');setPoints('std',null,false);setLinks(null);setCenters([]);
+      say('標準化：每一欄減掉平均、除以標準差，數字變成「比平常高或低幾個標準差」。兩欄的單位不見了，站在同一把尺上，點又散開了。你在第 1 步看的圖，用的就是這種比例。');
+      result('<p>點回到和第 1 步一樣的位置。變的是<strong>座標軸的單位</strong>，也就是距離怎麼算。</p>');
+    }else if(step===3){
+      drawAxes('std');startKmeans();
+    }else if(step===4){
+      drawAxes('std');const cpx=BEST.C.map(stdToPx);setPoints('std',BEST.L,false);setLinks(BEST.L,cpx);setCenters(cpx);
+      say('要分幾群，常用 silhouette 分數來挑：每個點問「我離同組的人近，還是離隔壁組的人近？」越接近 1 表示分得越開。下面每個 k 都已經跑過好幾組起點。');
+      const max=Math.max(...SCORES.map(s=>s.s));
+      result('<div class="km-bars">'+SCORES.map(s=>`<span>k=${s.k}</span><span class="km-bar${s===BEST?' best':''}"><span style="width:${(s.s/max*100).toFixed(1)}%"></span></span><span>${s.s.toFixed(2)}${s===BEST?'　最高':''}</span>`).join('')+'</div>');
+      root.dataset.best=String(BEST.k);
+    }else{
+      drawAxes('std');setPoints('std',null,true);setLinks(null);setCenters([]);
+      const pair=[0,1].flatMap(s=>D.map((d,i)=>d[2]===s?pos(i,'std'):null).filter(Boolean));
+      const xs=pair.map(p=>p[0]),ys=pair.map(p=>p[1]);
+      for(const [a,v] of Object.entries({cx:(Math.min(...xs)+Math.max(...xs))/2,cy:(Math.min(...ys)+Math.max(...ys))/2,rx:(Math.max(...xs)-Math.min(...xs))/2+16,ry:(Math.max(...ys)-Math.min(...ys))/2+16}))el('pair').setAttribute(a,v);
+      el('pair').classList.add('show');
+      say(`答案是 4 家店（用形狀區分）。A 店和 B 店開在同一個捷運站的兩個出口，樣貌幾乎一樣（虛線圈），所以分數最高的 3 群把它們併成一群。${guess?`你猜的是 ${guess} 家。`:''}`);
+      result('<div class="km-legend">'+STORE.map((n,s)=>`<span><svg viewBox="-8 -8 16 16" aria-hidden="true"><path d="${SHAPES[s]}" class="km-c${s}"/></svg>${n}</span>`).join('')+'</div><p>店型手冊可以接受 3 群。客訴要回查是哪家店，3 群一定不行；就算分成 4 群，A、B 兩店重疊的那幾天還是可能分錯，最好的辦法是補回店別紀錄。<strong>分數不知道你要做哪一件事。</strong></p>');
+    }
+    Object.assign(root.dataset,{step:String(step),guess:guess===null?'':String(guess)});
+  }
+  root.querySelectorAll('[data-guess]').forEach(b=>b.addEventListener('click',()=>{guess=Number(b.dataset.guess);root.querySelectorAll('[data-guess]').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));render();}));
+  root.querySelectorAll('[data-k]').forEach(b=>b.addEventListener('click',()=>{k=Number(b.dataset.k);root.querySelectorAll('[data-k]').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));startKmeans();}));
+  el('step').addEventListener('click',()=>{stop();kmStep();});
+  el('run').addEventListener('click',()=>{stop();if(reduce.matches){let g=0;while(phase!=='done'&&g++<400)kmStep();return;}timer=setInterval(()=>{kmStep();if(phase==='done')stop();},650);});
+  el('seed').addEventListener('click',()=>{seed++;startKmeans();});
+  el('prev').addEventListener('click',()=>{if(step>0){step--;render();}});
+  el('next').addEventListener('click',()=>{if(step<TITLES.length-1){step++;render();}});
+  el('reset').addEventListener('click',()=>{step=0;guess=null;k=3;seed=1;root.querySelectorAll('[data-guess]').forEach(o=>o.setAttribute('aria-pressed','false'));root.querySelectorAll('[data-k]').forEach(o=>o.setAttribute('aria-pressed',String(o.dataset.k==='3')));render();});
+  render();
 })();
 </script>

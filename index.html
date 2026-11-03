@@ -792,8 +792,13 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
     <a class="action-secondary" href="first-run.html">已準備好，開始第一次對話 <span aria-hidden="true">→</span></a>
   </div>
   <figure class="data-preview">
-    <picture><source media="(max-width: 720px)" srcset="assets/figures/line-preview-mobile.svg"><img src="assets/figures/line-preview.svg" alt="一條產線前 40 筆感測讀數標準化後的熱圖，縱軸是溫度、振動、壓力、流量、電流、轉速。" width="1200" height="312"></picture>
-    <figcaption>三關都用同一條產線的感測資料。這是講師設計的資料，AI 沒見過，答案也不在檔案裡。</figcaption>
+    <div class="tw"><table>
+    <tr><th>關卡</th><th>資料</th><th>每一列是</th></tr>
+    <tr><td>Lab 1 分群</td><td>手搖飲連鎖的營業紀錄，漏了店名</td><td>某家分店的某一天</td></tr>
+    <tr><td>Lab 2 降維</td><td>校園外送平台的訂單，11 欄</td><td>一張外送訂單</td></tr>
+    <tr><td>Lab 3 分類</td><td>圖書館的借閱紀錄</td><td>一筆借閱，最後有沒有逾期</td></tr>
+    </table></div>
+    <figcaption>三份都是為這堂課造的資料，AI 沒見過，答案也不在檔案裡。不需要任何領域知識或資料分析經驗。</figcaption>
   </figure>
 </div>
 </header>
@@ -803,9 +808,9 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <h2 id="section-這場工作坊在做什麼">這場工作坊在做什麼</h2>
 <p class="lead">真實工作中，你接到的多半是 AI 沒見過的資料。它算得出數字，但不知道你要什麼，還是可能給你一個肯定的答案。這門課練三件事：<strong>不盲目依賴 AI、自己規劃和驗證，並把問題目標說清楚</strong>。</p>
 <div class="box tip">
-<div class="bt">一個實測案例</div>
-<p>我們給 AI 一份產線資料，問：「幫我看有幾種運作模式。」資料裡沒有寫答案，也沒有說要拿來做什麼。</p>
-<p style="margin-bottom:0">同一句話跑 9 次，答案是 <strong>4、9、4、9、7、9、9、9、9</strong>，都講得很肯定，沒有一次先問要拿來做什麼（2026-11-02、03，OpenCode 1.19.5，三個模型各 3 次）。最後 3 次是課堂預設的 <code>big-pickle</code>，答案一致也很穩定。數字多半算得對，問題是它還不知道你要做什麼。把用途說清楚後，同一個模型 3 次都給了符合用途的群數，但也有不照規則來的地方，所以還是要驗。這不代表每次都會這樣，而且 AI 主動追問或答得好時，這堂課一樣學得到東西。</p>
+<div class="bt">一個例子</div>
+<p>我們給 AI 一份手搖飲連鎖的營業紀錄，問：「幫我看有幾種店。」資料裡沒有寫答案，也沒有說要拿來做什麼。</p>
+<p style="margin-bottom:0">AI 常常直接給一個群數，講得很肯定，很少先問要拿來做什麼。換個模型、甚至同一個模型再問一次，答案也可能不同。數字多半算得對，問題是它還不知道你要做什麼。把用途說清楚後，它給的答案就接近你要的，但仍可能不照你的規則來，所以還是要驗。AI 主動追問或答得好時，這堂課一樣學得到東西。</p>
 </div>
 <p>看得懂少量 Python、接觸過一些微積分或線性代數，就可以從課前準備開始。每一關都走同樣的節奏：先問、自己判斷、揭曉現場資訊、自己改問題、實際驗證，最後寫一句帶條件的結論。</p>
 <div class="lab-preview" aria-label="三個實作與你要判斷的問題">
@@ -827,7 +832,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
     <td class="d">先動手看 k-means，再丟一句模糊的問題，判斷答案，揭曉現場資訊後寫目標卡重問。</td></tr>
 <tr><td class="t">00:43</td><td class="n">休息</td><td class="d"></td></tr>
 <tr><td class="t">00:48</td><td class="n"><a href="lab2-pca.html">Lab 2 · 降維</a> <span class="badge live">現場</span></td>
-    <td class="d">「夠了」是夠做什麼？揭曉用途後寫驗收卡，再手刻 PCA，放入講師設計的錯誤審查驗證。</td></tr>
+    <td class="d">「夠了」是夠做什麼？揭曉用途後寫驗收卡，再手刻 PCA，故意放進錯誤，審查它的驗證。</td></tr>
 <tr><td class="t">01:20</td><td class="n"><a href="lab3-notes.html">Lab 3 · 分類與筆記</a> <span class="badge live">現場</span></td>
     <td class="d">先動手調門檻，揭曉現場限制後寫決策卡，規劃梯度檢查，寫一份短筆記核對 AI 的結論。</td></tr>
 <tr><td class="t">01:48</td><td class="n">收尾</td>
@@ -866,17 +871,16 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 
 <section class="sample-section">
 <h2 id="section-從一段回答練習追問">從一段回答練習追問</h2>
-<p>下面是 AI 的實際回答節錄（2026-11-02，<code>GLM-5.3-Flash</code>）。讀到這段，你會接著問什麼？</p>
+<p>下面是 AI 的實際回答節錄。讀到這段，你會接著問什麼？</p>
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">OpenCode · 實際回答節錄</span></div>
-  <div class="term-body"><div class="u">data/line_modes.csv 是產線感測讀數，幫我看有幾種運作模式。</div>
+  <div class="term-body"><div class="u">data/shops_daily.csv 是手搖飲連鎖的每日營業紀錄，幫我看有幾種店。</div>
 <div class="sp"></div>
-<div class="c">CSV 裡沒有標籤欄位（……），所以我對六個感測特徵做標準化後用 GMM 分群：
-BIC 在 k = 9 時最低（k=10 起又回升），判定為 9 種運作模式。
-附註：……GMM BIC 明確指向 9，可信度較高。</div>
+<div class="c">資料沒有店名欄位；把營業指標標準化後做聚類，BIC 最小與 silhouette 最高都落在 9，
+且 9 群跨隨機種子完全一致，所以約有 9 種店。</div>
 </div>
 </div>
-<p>例如：它為什麼標準化？「可信度較高」是對什麼而言？如果要拿這個答案做別的用途，9 還夠嗎？<a href="lab1-cluster.html">Lab 1</a> 會帶你查清楚。</p>
+<p>BIC 和 silhouette 都是幫忙挑群數的分數。例如：它為什麼標準化？「完全一致」能證明什麼？如果要拿這個答案回查每家店，9 還夠嗎？<a href="lab1-cluster.html">Lab 1</a> 會帶你查清楚。</p>
 </section>
 
 <section>
@@ -886,7 +890,7 @@ BIC 在 k = 9 時最低（k=10 起又回升），判定為 9 種運作模式。
 <p><strong>一、免費模型會看你送過去的東西。</strong>
 本工作坊用的 <code>opencode/big-pickle</code> 是限時免費的試用模型，
 官方明講資料可能被用於改進模型。所以：<strong>不要把還沒發表的研究資料、
-個人隱私資料、或任何機密內容丟進去</strong>。課堂用的都是講師設計的合成資料。額度用完時可改用其他免費模型，例如 <code>beam-free</code>，它的資料會保留 30 天，同樣不要放機密內容；<a href="prep.html#backup-keys">Gemini 和 NVIDIA 備案</a>的免費服務也可能用你送出的內容改進產品。</p>
+個人隱私資料、或任何機密內容丟進去</strong>。課堂用的都是為這堂課造的合成資料。額度用完時可改用其他免費模型，例如 <code>beam-free</code>，它的資料會保留 30 天，同樣不要放機密內容；<a href="prep.html#backup-keys">Gemini 和 NVIDIA 備案</a>的免費服務也可能用你送出的內容改進產品。</p>
 <p style="margin-bottom:0"><strong>二、agent 會動你的檔案。</strong>
 它真的會寫檔、刪檔、執行指令。這不是聊天機器人。
 先看過<a href="git-safety.html">Git 安全網</a>，或至少在動手前把重要的東西備份一份。</p>

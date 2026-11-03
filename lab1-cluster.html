@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lab 1 · 分群｜OpenCode × AI-Math 工作坊</title>
-<meta name="description" content="接到一份沒見過的產線資料，問 AI 有幾種運作模式。它會給你肯定的答案，但它不知道你要拿來做什麼。">
+<meta name="description" content="一份沒寫店名的手搖飲營業紀錄，問 AI 有幾種店。它會給你肯定的答案，但它不知道你要拿來做什麼。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2213%22%20fill%3D%22%23191922%22%2F%3E%3Cpath%20d%3D%22M16%2020l12%2012-12%2012%22%20fill%3D%22none%22%20stroke%3D%22%23e3c273%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Crect%20x%3D%2233%22%20y%3D%2240%22%20width%3D%2217%22%20height%3D%226%22%20rx%3D%223%22%20fill%3D%22%23b8503c%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -698,7 +698,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a class="chapter-link" href="lab1-cluster.html" aria-current="page">Lab 1 · 分群</a>
 <ul class="section-nav" aria-label="本章內容">
 <li><a href="#section-這一關的資料">這一關的資料</a></li>
-<li><a href="#kmeans-title">先動手：k-means 怎麼分群？</a></li>
+<li><a href="#kmeans-title">先玩一次：k-means 怎麼分群？</a></li>
 <li><a href="#section-動手">動手</a></li>
 <li><a href="#section-誰錯了">誰錯了</a></li>
 <li><a href="#section-檢查清單">檢查清單</a></li>
@@ -747,7 +747,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a class="chapter-link" href="lab1-cluster.html" aria-current="page">Lab 1 · 分群</a>
 <ul class="section-nav" aria-label="本章內容">
 <li><a href="#section-這一關的資料">這一關的資料</a></li>
-<li><a href="#kmeans-title">先動手：k-means 怎麼分群？</a></li>
+<li><a href="#kmeans-title">先玩一次：k-means 怎麼分群？</a></li>
 <li><a href="#section-動手">動手</a></li>
 <li><a href="#section-誰錯了">誰錯了</a></li>
 <li><a href="#section-檢查清單">檢查清單</a></li>
@@ -787,190 +787,295 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 
 <div class="pagehead">
   <div class="kicker"><span>Lab 1</span><span>·</span><span class="badge live">現場 25 分</span><span>·</span><span>AI 的風險：不知道你要什麼，還是給了答案</span></div>
-  <h1>分群：它說有 9 種，你要相信嗎？</h1>
+  <h1>分群：它說有 9 種店，你要相信嗎？</h1>
   <p class="lead">
-    你接到一份沒見過的產線資料，AI 也沒見過。它算得出數字，也會給你肯定的群數，但它不知道你要拿這個答案做什麼。
-    你要帶走的能力：判斷 AI 的結論，是否回答了你真正想問的問題。
+    你拿到一家手搖飲連鎖的營業紀錄，但匯出時漏了「哪一家店」這一欄。AI 算得出數字，也會給你肯定的群數，可是它不知道你要拿這個答案做什麼。
+    你要帶走的能力：判斷 AI 的結論，有沒有回答你真正想問的問題。
   </p>
 </div>
 
-<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#section-這一關的資料">看資料</a></li><li><a href="#section-動手">問、判斷、揭曉、改問題</a></li><li><a href="#section-誰錯了">判讀結果</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
+<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#section-這一關的資料">看資料</a></li><li><a href="#kmeans-title">玩一次分群</a></li><li><a href="#section-動手">問、判斷、揭曉、改問題</a></li><li><a href="#section-誰錯了">判讀結果</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
 
 <section>
 <h2 id="section-這一關的資料">這一關的資料</h2>
-<p>課前你已把 <code>data/line_modes.csv</code> 下載到專案裡：一條產線的 723 筆感測讀數，有溫度、振動、壓力、流量、電流、轉速，另外兩欄是韌體版本和取樣週期。檔案裡<strong>沒有</strong>答案欄。</p>
+<p>課前你已把 <code>data/shops_daily.csv</code> 下載到專案裡。它是一家手搖飲連鎖的營業紀錄：<strong>每一列是「某家分店的某一天」</strong>，共 723 列。系統匯出時漏了店名，所以檔案裡看不出每列是哪一家店。</p>
+<div class="tw"><table>
+<tr><th>欄位</th><th>意思</th><th>單位</th><th>第一列</th></tr>
+<tr><td><code>revenue_ntd</code></td><td>當天營業額</td><td>元</td><td>30458</td></tr>
+<tr><td><code>cups_sold</code></td><td>賣出杯數</td><td>杯</td><td>587</td></tr>
+<tr><td><code>topping_share</code></td><td>有加料的杯數占比</td><td>0 到 1</td><td>0.272</td></tr>
+<tr><td><code>wait_min</code></td><td>平均等候時間</td><td>分鐘</td><td>5.40</td></tr>
+<tr><td><code>delivery_share</code></td><td>外送訂單占比</td><td>0 到 1</td><td>0.315</td></tr>
+<tr><td><code>rating</code></td><td>當天平均評分</td><td>1 到 5 顆星</td><td>4.407</td></tr>
+<tr><td><code>open_hours</code></td><td>營業時數（全連鎖都一樣）</td><td>小時</td><td>12</td></tr>
+<tr><td><code>menu_version</code></td><td>菜單版本（全連鎖都一樣）</td><td>版</td><td>3</td></tr>
+</table></div>
 <div class="box tip">
-<div class="bt">這是講師設計的資料</div>
-<p style="margin-bottom:0">真實工作上，你拿到的資料多半沒有名氣，AI 也沒看過，背後的情況只有現場的人知道。這份資料就是用來模擬這件事。它不是用來證明 AI 很差，AI 算的數字多半是對的，你要看的是它缺資訊時怎麼處理。</p>
+<div class="bt">AI 沒看過這份資料</div>
+<p style="margin-bottom:0">這份資料是為這堂課造的，網路上找不到，背後的故事只有總部的人知道。工作上拿到的資料多半也是這樣。它不是用來證明 AI 很差：AI 算的數字多半是對的，你要看的是它缺少資訊時怎麼處理。</p>
 </div>
-<p><strong>分群</strong>是先不看答案，依資料的相似程度把樣本分組。每筆讀數是一個樣本，也是空間中的一個點：6 個感測值就是 $\mathbb{R}^6$ 中的向量。兩筆讀數的相似程度，可以用歐氏距離來量。</p>
-<details class="bg"><summary>什麼是「分群」？跟「分類」差在哪？</summary>
+
+<h3>分群是什麼</h3>
+<p>把每一列看成一個點：6 個數字就是 6 維空間 $\mathbb{R}^6$ 裡的一個向量。<strong>分群</strong>就是在<strong>不知道答案</strong>的情況下，把距離近的點分在同一組。如果同一家店每天的營業樣貌差不多，同一家店的點就會聚成一團。</p>
+<p>兩個點有多近，用你熟悉的歐氏距離 $\|\mathbf{x}-\mathbf{y}\|$ 量。問題來了：營業額動輒幾萬元，評分只在 4 點多，直接算距離，營業額差 1000 元就壓過評分差 0.3 顆星。所以常先做<strong>標準化</strong>：每一欄減掉平均、再除以標準差，換成「比平常高或低幾個標準差」，各欄才站在同一個起跑點。</p>
+<p>這一關會用最常見的分群方法 <strong>k-means</strong>：你先指定要分成 $k$ 群，它會自己找出每群的中心。下面先玩一次，再去問 AI。</p>
+
+<details class="bg"><summary>分群跟「分類」差在哪？</summary>
 <div class="bg-body">
-<p>這是機器學習裡最基本的一組區分：</p>
 <div class="tw"><table>
 <tr><th></th><th>分類（classification）</th><th>分群（clustering）</th></tr>
 <tr><td>你有什麼</td><td>資料 <strong>＋ 正確答案</strong></td><td><strong>只有資料</strong></td></tr>
-<tr><td>在做什麼</td><td>學一個規則，看到新資料能說出它屬於哪一類</td><td>看資料自己長成幾坨，把靠近的歸在一起</td></tr>
+<tr><td>在做什麼</td><td>學一個規則，看到新資料能說出它屬於哪一類</td><td>看資料自己長成幾團，把靠近的歸在一起</td></tr>
 <tr><td>術語</td><td>監督式（supervised）</td><td>非監督式（unsupervised）</td></tr>
 <tr><td>本工作坊</td><td>Lab 3</td><td><strong>Lab 1（現在這關）</strong></td></tr>
 </table></div>
-<p>
-<strong>分群演算法看不到答案</strong>。
-這份資料的批次紀錄要到揭曉時才給，k-means 全程看不到。
-它只看得到每筆感測讀數，得自己決定誰跟誰是一夥的。
-</p>
-<p style="margin-bottom:0">
-所以就算資料來自幾個批次，演算法也<strong>不會知道</strong>。它能告訴你的，只有幾何上怎麼分比較開。
-</p>
+<p style="margin-bottom:0">k-means 全程看不到「哪一家店」。就算資料真的來自 10 家店，它也<strong>不會知道</strong>，只能告訴你幾何上怎麼分比較開。</p>
 </div>
 </details>
 
-<details class="bg"><summary>k-means 到底在做什麼？（三行講完）</summary>
+<details class="bg"><summary>k-means 在最小化什麼？（微積分版）</summary>
 <div class="bg-body">
-<p>給定你想分幾群（那個 $k$），演算法先挑起點，再反覆做兩件事，直到不變為止：</p>
+<p>給定 $k$，先挑 $k$ 個起點當中心 $\boldsymbol{\mu}_1,\dots,\boldsymbol{\mu}_k$，再反覆做兩件事，直到沒有點換群：</p>
 <ol>
-<li>隨機挑 $k$ 個點當「中心」$\boldsymbol{\mu}_1,\dots,\boldsymbol{\mu}_k$</li>
-<li><strong>指派</strong>：每個資料點歸到離它最近的那個中心</li>
-<li><strong>更新</strong>：每個中心移動到自己那群所有點的平均位置</li>
+<li><strong>指派</strong>：每個點歸到離它最近的中心</li>
+<li><strong>更新</strong>：每個中心移到自己那群所有點的平均位置</li>
 </ol>
-<p>然後回到第 2 步，直到沒有點再換群為止。</p>
-<h4>它在最小化什麼</h4>
 <p>整個過程在最小化這個量，sklearn 把它叫做 <code>inertia_</code>：</p>
 $$J=\sum_{i=1}^{n}\bigl\|\mathbf{x}_i-\boldsymbol{\mu}_{c(i)}\bigr\|^2$$
-<p>
-（$c(i)$ 是第 $i$ 個點被分到哪一群。）白話：<strong>每個點到自己那群中心的距離平方，全部加起來</strong>。
-</p>
-<p>
-第 3 步「取平均」不是隨便定的。它是微積分算出來的：
-固定分群之後，對 $\boldsymbol{\mu}$ 微分並令其為零，
+<p>$c(i)$ 是第 $i$ 個點被分到哪一群。白話：<strong>每個點到自己那群中心的距離平方，全部加起來</strong>。</p>
+<p>「移到平均」不是隨便定的：固定分群後對 $\boldsymbol{\mu}_j$ 微分並令其為零，
 $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\boldsymbol{\mu}_j)=0$，
-解出來就是 $\boldsymbol{\mu}_j=\frac{1}{|C_j|}\sum_{i\in C_j}\mathbf{x}_i$，也就是群內平均。
-<strong>這就是你在微積分課上做的「令導數為零求極值」。</strong>
-</p>
-<p style="margin-bottom:0">
-順帶一提：每一步不會讓 $J$ 變大；實作會在分群不再改變、變化小於容差，或達到最大迭代次數時停止。
-但停下來的地方<strong>不保證是全域最小</strong>。所以才要設
-<code>n_init=10</code>（跑 10 次不同起點取最好的），以及為什麼要固定
-<code>random_state</code> 才能重現結果。
-</p>
+解出 $\boldsymbol{\mu}_j=\frac{1}{|C_j|}\sum_{i\in C_j}\mathbf{x}_i$，就是群內平均。<strong>這就是微積分課的「令導數為零求極值」。</strong></p>
+<p style="margin-bottom:0">每一步都不會讓 $J$ 變大，但停下來的地方<strong>不保證是全域最小</strong>。所以實務上會設 <code>n_init=10</code>（換 10 組起點取最好的），並固定 <code>random_state</code> 讓結果可以重現。</p>
 </div>
 </details>
 </section>
 
 <section class="kmeans-explorer" aria-labelledby="kmeans-title">
-<h2 id="kmeans-title">先動手：k-means 怎麼分群？</h2>
-<p>這些是 44 個<strong>合成的平面點</strong>，不是產線資料。<strong>先猜：你會分成幾群？為什麼？</strong>猜完再操作。</p>
-<p>k-means 只做兩件事：把每個點分給最近的中心，再把中心移到該群的平均位置，反覆到不再變動。按「走一步」看它怎麼做。</p>
-<div class="kmeans-panel">
-  <div class="kmeans-controls" role="group" aria-label="k-means 操作">
-    <span class="kmeans-k" role="group" aria-label="群數 k"><button type="button" data-k="2">k=2</button><button type="button" data-k="3" aria-pressed="true">k=3</button><button type="button" data-k="4">k=4</button></span>
-    <button type="button" id="kmeans-step">走一步</button>
-    <button type="button" id="kmeans-run">跑到底</button>
-    <button type="button" id="kmeans-seed">換起點</button>
+<h2 id="kmeans-title">先玩一次：k-means 怎麼分群？</h2>
+<p>下面是 60 筆<strong>示範紀錄</strong>，和正文資料一樣沒寫店名，只畫兩欄：營業額和等候時間。跟著步驟按「下一步」，每一步先讀說明再操作。</p>
+<div class="km-panel">
+  <div class="km-head">
+    <span class="km-count" id="kmeans-count">第 1／6 步</span>
+    <strong class="km-title" id="kmeans-step-title">先猜</strong>
+  </div>
+  <p class="km-say" id="kmeans-say" aria-live="polite"></p>
+  <div class="km-controls" id="kmeans-controls" role="group" aria-label="這一步的操作">
+    <span class="km-group" data-for="0" role="group" aria-label="你猜幾家店"><span class="km-label">我猜有</span><button type="button" data-guess="2">2</button><button type="button" data-guess="3">3</button><button type="button" data-guess="4">4</button><button type="button" data-guess="5">5</button><span class="km-label">家店</span></span>
+    <span class="km-group" data-for="3" role="group" aria-label="群數 k"><span class="km-label">分成</span><button type="button" data-k="2">2</button><button type="button" data-k="3" aria-pressed="true">3</button><button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><span class="km-label">群</span></span>
+    <span class="km-group" data-for="3"><button type="button" id="kmeans-step">走一步</button><button type="button" id="kmeans-run">自動跑完</button><button type="button" id="kmeans-seed">換起點</button></span>
   </div>
   <figure>
-    <svg id="kmeans-plot" viewBox="0 0 680 390" role="img" aria-labelledby="kmeans-svg-title kmeans-svg-desc">
-      <title id="kmeans-svg-title">k-means 分群過程</title>
-      <desc id="kmeans-svg-desc">圓點是資料，顏色表示目前歸屬，叉號是各群中心，虛線連到所屬中心。</desc>
-      <g id="kmeans-links" stroke-dasharray="3 5" stroke-width="1"></g>
+    <svg id="kmeans-plot" viewBox="0 0 680 402" role="img" aria-labelledby="kmeans-svg-title kmeans-svg-desc">
+      <title id="kmeans-svg-title">分店營業紀錄散布圖</title>
+      <desc id="kmeans-svg-desc">每個點是某家店某一天的紀錄，橫軸營業額、縱軸等候時間。</desc>
+      <g id="kmeans-axes" class="km-axes"></g>
+      <ellipse id="kmeans-pair" class="km-pair" rx="0" ry="0"/>
+      <g id="kmeans-links"></g>
       <g id="kmeans-points"></g>
-      <g id="kmeans-centers" stroke-width="5" stroke-linecap="round"></g>
+      <g id="kmeans-centers"></g>
     </svg>
-    <figcaption>圓點：資料　叉號：中心　虛線：連到所屬中心。這裡刻意隨機挑點當起點；實際工具常用 k-means++ 和多次起點（<code>n_init</code>），不要反推 AI 的 k-means 不穩。</figcaption>
   </figure>
-  <dl class="kmeans-readouts">
-    <div><dt>距離平方和 J（越小越緊）</dt><dd><output id="kmeans-j">—</output></dd></div>
-    <div><dt>silhouette（越大越分得開）</dt><dd><output id="kmeans-sil">—</output></dd></div>
-    <div><dt>狀態</dt><dd class="kmeans-status"><output id="kmeans-state">—</output></dd></div>
-  </dl>
+  <div class="km-result" id="kmeans-result" aria-live="polite"></div>
+  <div class="km-nav">
+    <button type="button" id="kmeans-prev">← 上一步</button>
+    <button type="button" id="kmeans-next" class="km-primary">下一步 →</button>
+    <button type="button" id="kmeans-reset">從頭開始</button>
+  </div>
 </div>
-<p>把 k=2、3、4 都跑到底，記下 J 和 silhouette，再多按幾次「換起點」。</p>
 <div class="box warn">
-<div class="bt">操作完回答</div>
+<div class="bt">玩完回答</div>
 <ul style="margin-bottom:0">
-<li>k 變大，J 怎麼變（起點差時可能例外）？silhouette 選了幾群？它把哪兩團併在一起？</li>
-<li><strong>距離變小或分數變高，就是你的目標嗎？</strong>如果靠近的兩團是兩種不同的東西呢？</li>
-<li>剛才的 k、指標和起點，是誰選的？之後 AI 替你跑的時候，又是誰選的？</li>
+<li>你一開始猜幾家？為什麼電腦不標準化時只分出 2 群？</li>
+<li>分數最高的 k 是 3，實際卻有 4 家店。<strong>如果要做店型手冊，3 群可以嗎？如果要回查客訴是哪家店呢？</strong></li>
+<li>剛才的 k、要不要標準化、用哪個分數，是誰決定的？之後 AI 替你跑的時候，又是誰決定的？</li>
 </ul>
 </div>
-<noscript><p>此互動需要 JavaScript。重點是：k 越大距離越小，但指標選的不一定是你要的分法。</p></noscript>
+<details class="bg"><summary>補充：為什麼「換起點」結果會不同？</summary><div class="bg-body">
+<p style="margin-bottom:0">這裡刻意隨機挑資料點當起點，有時會停在不太好的分法。sklearn 等工具會用 k-means++ 挑起點，並用 <code>n_init</code> 換好幾組起點、留下距離平方和最小的那次，所以不要因此認為 AI 跑的 k-means 不穩。</p>
+</div></details>
+<noscript><p>此互動需要 JavaScript。重點是：不標準化時距離只看營業額；標準化後分數最高的是 3 群，但實際有 4 家店，其中兩家幾乎一樣。該分幾群要看用途。</p></noscript>
 </section>
 <style>
-.kmeans-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
-.kmeans-controls{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
-.kmeans-k{display:inline-flex;gap:.25rem;margin-right:.5rem}
-.kmeans-controls button{font:inherit;font-size:.86rem;min-height:44px;min-width:44px;padding:.4rem .8rem;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
-.kmeans-controls button:hover{border-color:var(--link);color:var(--link)}
-.kmeans-controls button[aria-pressed="true"]{background:var(--link);border-color:var(--link);color:var(--paper)}
-.kmeans-controls button:focus-visible{outline:3px solid var(--link);outline-offset:3px}
-.kmeans-panel figure{margin:1rem 0}.kmeans-panel svg{display:block;width:100%;height:auto}.kmeans-panel figcaption{font-size:.82rem;color:var(--ink-2)}
-.kmeans-readouts{display:flex;gap:2rem;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:1rem;margin:0}.kmeans-readouts dt{font-size:.86rem;color:var(--ink-2)}.kmeans-readouts dd{margin:0;font-size:1.5rem;color:var(--link);font-variant-numeric:tabular-nums}.kmeans-readouts dd.kmeans-status{font-size:1rem;color:var(--ink)}
-@media print{.kmeans-controls{display:none}}
+.km-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
+.km-head{display:flex;gap:.8rem;align-items:baseline;flex-wrap:wrap}
+.km-count{font-size:.82rem;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.km-title{font-size:1.1rem;color:var(--link)}
+.km-say{margin:.5rem 0 .8rem;min-height:3.2em;line-height:1.7}
+.km-controls{display:flex;flex-wrap:wrap;gap:.6rem 1rem;align-items:center;min-height:44px}
+.km-group{display:inline-flex;flex-wrap:wrap;gap:.3rem;align-items:center}
+.km-group[hidden]{display:none}
+.km-label{font-size:.9rem;color:var(--ink-2)}
+.km-panel button{font:inherit;font-size:.9rem;min-height:44px;min-width:44px;padding:.4rem .8rem;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
+.km-panel button:hover{border-color:var(--link);color:var(--link)}
+.km-panel button[aria-pressed="true"],.km-panel button.km-primary{background:var(--link);border-color:var(--link);color:var(--paper)}
+.km-panel button:disabled{opacity:.4;cursor:default}
+.km-panel button:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+.km-panel figure{margin:1rem 0 .6rem}.km-panel svg{display:block;width:100%;height:auto}
+.km-axes line{stroke:var(--ink-3);stroke-width:1}.km-axes text{fill:var(--ink-2);font-size:14px}.km-axes .km-axis-title{fill:var(--ink);font-size:15px}
+.km-axes .km-note{fill:var(--live);font-size:15px}
+.km-pt{transition:transform .7s var(--ease)}.km-pt path{stroke:var(--paper-2);stroke-width:1}
+.km-c0{fill:var(--link);stroke:var(--link)}.km-c1{fill:var(--live);stroke:var(--live)}.km-c2{fill:var(--after);stroke:var(--after)}.km-c3{fill:var(--warn);stroke:var(--warn)}.km-c4{fill:var(--ink);stroke:var(--ink)}.km-none{fill:var(--ink-3);stroke:var(--ink-3)}
+.km-pt path.km-c0,.km-pt path.km-c1,.km-pt path.km-c2,.km-pt path.km-c3,.km-pt path.km-c4,.km-pt path.km-none{stroke:var(--paper-2)}
+#kmeans-links line{stroke-dasharray:3 5;stroke-width:1}
+.km-center{transition:transform .5s var(--ease)}.km-center line{stroke-width:5;stroke-linecap:round}.km-center text{font-size:13px;font-weight:700;fill:var(--ink)}
+.km-pair{fill:none;stroke:var(--live);stroke-width:2;stroke-dasharray:6 5;opacity:0;transition:opacity .4s}
+.km-pair.show{opacity:1}
+.km-result{border-top:1px solid var(--rule);padding-top:.8rem;min-height:2.4em}
+.km-result p{margin:.2rem 0}
+.km-bars{display:grid;grid-template-columns:auto 1fr auto;gap:.35rem .7rem;align-items:center;max-width:520px}
+.km-bar{height:16px;background:var(--rule);border-radius:3px}.km-bar span{display:block;height:100%;background:var(--ink-3);border-radius:3px}
+.km-bar.best span{background:var(--link)}
+.km-legend{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;font-size:.9rem}
+.km-legend svg{width:16px;height:16px;display:inline-block;vertical-align:-3px;margin-right:.3rem}
+.km-nav{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+@media (prefers-reduced-motion:reduce){.km-pt,.km-center,.km-pair{transition:none}}
+@media(max-width:720px){.km-say{min-height:0}.km-nav button{flex:1 1 auto}.km-axes text,.km-axes .km-axis-title,.km-axes .km-note,.km-center text{font-size:22px}.km-pt path{transform:scale(1.6)}}
+@media print{.km-controls,.km-nav{display:none}}
 </style>
 <script>
 (function(){
   'use strict';
-  const X=[[-3,-.02],[-2.82,.42],[-3.16,-.81],[-3.53,-.27],[-3.27,-1.14],[-3.59,-.77],[-2.96,-1.11],[-2.2,-.14],[-3.3,-.76],[-3.37,.16],[-2.71,.09],[-2.79,-.11],[-2.94,-1.51],[-3.56,-.32],[-1.23,.16],[-1.13,.95],[-2.12,1.72],[-1.49,-.03],[-1.79,1.42],[-1.69,.97],[-.56,.52],[-1.68,2.1],[-1.22,1.36],[-.67,.18],[-1.55,.94],[-1.27,1.25],[-1.13,.79],[-1.16,1.31],[2.95,-.32],[3.47,-.07],[4.01,.88],[2.53,.48],[3.14,-.23],[2.68,-.26],[3.09,-.18],[2.17,1.07],[2.59,-.3],[2.86,-.21],[3.63,.25],[3.8,-.08],[2.07,-.14],[2.44,-.78],[3.45,-.01],[1.61,-.31]];
-  const COLORS=['#2a3c78','#b8503c','#2f7d5b','#a8740f'];
+  // 60 天示範紀錄：[營業額（元）, 等候（分鐘）, 實際分店]。分店 0、1 開在同一捷運站兩個出口。
+  const D=[[42000,6.4,0],[42390,5.3,0],[41640,5.7,0],[40840,5.0,0],[41410,5.3,0],[40710,5.0,0],[42080,5.9,0],[43740,5.3,0],[41360,6.1,0],[41190,6.1,0],[42640,5.9,0],[42460,4.6,0],[42140,5.7,0],[40790,6.0,0],[41960,6.1,0],[40610,5.6,1],[41980,7.0,1],[41330,6.6,1],[41550,6.1,1],[43980,7.6,1],[41550,6.9,1],[42560,5.8,1],[43750,6.5,1],[41840,6.8,1],[42450,6.4,1],[42740,6.9,1],[42680,6.5,1],[41010,6.9,1],[42700,7.3,1],[44370,6.1,1],[42560,11.0,2],[41700,10.4,2],[42470,10.4,2],[40760,10.5,2],[41550,11.4,2],[42040,10.4,2],[43470,10.4,2],[43790,10.8,2],[40580,10.5,2],[41270,10.5,2],[43140,10.0,2],[39710,10.6,2],[41700,10.4,2],[42170,11.2,2],[43930,11.0,2],[51970,6.9,3],[52870,7.3,3],[51560,7.5,3],[53370,7.1,3],[51990,7.1,3],[52760,7.6,3],[50320,7.5,3],[52450,6.6,3],[49810,7.2,3],[49350,7.2,3],[51600,6.6,3],[50830,7.3,3],[52210,6.7,3],[54920,7.7,3],[50920,7.3,3]];
+  const STORE=['A 店','B 店','C 店','D 店'];
   const root=document.querySelector('.kmeans-explorer');
   const ns='http://www.w3.org/2000/svg';
   const el=id=>document.getElementById('kmeans-'+id);
-  const px=([x,y])=>[340+x*68,205-y*68];
-  const shape=(tag,attrs,parent)=>{const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);parent.appendChild(n);return n;};
-  const dots=X.map(p=>{const [cx,cy]=px(p);return shape('circle',{cx,cy,r:6,fill:'#7d7a72'},el('points'));});
-  const links=X.map(()=>shape('line',{},el('links')));
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
+  const shape=(tag,attrs,parent)=>{const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(parent)parent.appendChild(n);return n;};
+  const mean=a=>a.reduce((s,v)=>s+v,0)/a.length;
+  const sd=a=>{const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/a.length);};
+  const rev=D.map(d=>d[0]),wait=D.map(d=>d[1]);
+  const mr=mean(rev),sr=sd(rev),mw=mean(wait),sw=sd(wait);
+  const RAW=D.map(d=>[d[0],d[1]]),STD=D.map(d=>[(d[0]-mr)/sr,(d[1]-mw)/sw]);
+  // 版面：x 60..650，y 30..330
+  const X0=60,X1=650,Y0=30,Y1=330;
+  // 兩軸用同一個「每個標準差幾像素」，畫面上的距離才等於標準化後的距離。
+  const zx=STD.map(p=>p[0]),zy=STD.map(p=>p[1]);
+  const zx0=Math.min(...zx)-.3,zx1=Math.max(...zx)+.3,zy0=Math.min(...zy)-.3,zy1=Math.max(...zy)+.3;
+  const U=Math.min((X1-X0)/(zx1-zx0),(Y1-Y0)/(zy1-zy0));
+  const offX=X0+((X1-X0)-(zx1-zx0)*U)/2,offY=((Y1-Y0)-(zy1-zy0)*U)/2;
+  const sx=r=>offX+((r-mr)/sr-zx0)*U;
+  const syS=w=>Y1-offY-((w-mw)/sw-zy0)*U;
+  const RMIN=mr+zx0*sr,RMAX=mr+zx1*sr,WMIN=mw+zy0*sw,WMAX=mw+zy1*sw;
+  const pxPerYuan=U/sr,MID=(Y0+Y1)/2;
+  const syFlat=w=>MID-(w-mw)*pxPerYuan; // 1 分鐘和 1 元用同一把尺
+  const pos=(i,view)=>[sx(D[i][0]),view==='flat'?syFlat(D[i][1]):syS(D[i][1])];
+  const stdToPx=([a,b])=>[sx(mr+a*sr),syS(mw+b*sw)];
   const d2=(a,b)=>(a[0]-b[0])**2+(a[1]-b[1])**2;
-  let k=3,seed=1,centers=[],labels=[],phase='init';
-  function pick(){ // 由 seed 決定的固定亂數，可重現
-    let s=(seed*2654435761)>>>0;const next=()=>(s=(Math.imul(s,1664525)+1013904223)>>>0)/4294967296;
-    const idx=[...X.keys()];
-    for(let i=idx.length-1;i>0;i--){const j=Math.floor(next()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
-    return idx.slice(0,k).map(i=>X[i].slice());
+  const SHAPES=['M-6,0a6,6 0 1,0 12,0a6,6 0 1,0 -12,0','M-5.5,-5.5h11v11h-11z','M0,-7L6.5,5H-6.5z','M0,-7L7,0L0,7L-7,0z'];
+  // k-means 工具
+  function rng(seed){let s=(seed*2654435761)>>>0;return()=>(s=(Math.imul(s,1664525)+1013904223)>>>0)/4294967296;}
+  function pick(P,k,seed){const r=rng(seed),idx=[...P.keys()];for(let i=idx.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}return idx.slice(0,k).map(i=>P[i].slice());}
+  const assign=(P,C)=>P.map(p=>{let b=0;for(let j=1;j<C.length;j++)if(d2(p,C[j])<d2(p,C[b]))b=j;return b;});
+  const update=(P,C,L)=>C.map((c,j)=>{const g=P.filter((_,i)=>L[i]===j);return g.length?[mean(g.map(p=>p[0])),mean(g.map(p=>p[1]))]:c;});
+  const inertia=(P,C,L)=>P.reduce((s,p,i)=>s+d2(p,C[L[i]]),0);
+  function solve(P,k){let best=null;for(let seed=1;seed<=12;seed++){let C=pick(P,k,seed),L=assign(P,C);for(let t=0;t<100;t++){C=update(P,C,L);const N=assign(P,C);if(N.every((v,i)=>v===L[i]))break;L=N;}const J=inertia(P,C,L);if(!best||J<best.J)best={C,L,J};}return best;}
+  function silhouette(P,L){const used=[...new Set(L)];if(used.length<2)return NaN;let t=0;P.forEach((p,i)=>{const avg=j=>{let s=0,n=0;P.forEach((q,m)=>{if(L[m]===j&&m!==i){s+=Math.sqrt(d2(p,q));n++;}});return n?s/n:null;};const a=avg(L[i]);if(a===null)return;const b=Math.min(...used.filter(j=>j!==L[i]).map(avg));t+=(b-a)/Math.max(a,b);});return t/P.length;}
+  const RAW2=solve(RAW,2);
+  const SCORES=[2,3,4,5].map(k=>{const r=solve(STD,k);return{k,L:r.L,C:r.C,s:silhouette(STD,r.L)};});
+  const BEST=SCORES.reduce((a,b)=>b.s>a.s?b:a);
+  // SVG 物件
+  const pts=D.map(()=>{const g=shape('g',{class:'km-pt'},el('points'));const p=shape('path',{d:SHAPES[0],class:'km-none'},g);return{g,p};});
+  const links=D.map(()=>{const l=shape('line',{x1:0,y1:0,x2:0,y2:0},el('links'));l.style.opacity='0';return l;});
+  function drawAxes(view){
+    const g=el('axes');g.replaceChildren();
+    shape('line',{x1:X0,y1:Y1+10,x2:X1,y2:Y1+10},g);shape('line',{x1:X0-10,y1:Y0,x2:X0-10,y2:Y1+10},g);
+    const text=(x,y,t,attrs={})=>{const n=shape('text',{x,y,...attrs},g);n.textContent=t;return n;};
+    if(view==='std'){
+      for(const z of [-2,-1,0,1,2]){const x=sx(mr+z*sr);if(x>=X0&&x<=X1){shape('line',{x1:x,y1:Y1+10,x2:x,y2:Y1+16},g);text(x,Y1+32,String(z).replace('-','−'),{'text-anchor':'middle'});}}
+      for(const z of [-2,-1,0,1,2]){const y=syS(mw+z*sw);if(y>=Y0&&y<=Y1){shape('line',{x1:X0-16,y1:y,x2:X0-10,y2:y},g);text(X0-20,y+5,String(z).replace('-','−'),{'text-anchor':'end'});}}
+      text((X0+X1)/2,Y1+62,'營業額（比平均高幾個標準差）',{'text-anchor':'middle',class:'km-axis-title'});
+      text(X0,Y0-12,'等候（比平均高幾個標準差）',{class:'km-axis-title'});
+    }else{
+      for(const r of [40000,45000,50000,55000].filter(r=>r>=RMIN&&r<=RMAX)){const x=sx(r);shape('line',{x1:x,y1:Y1+10,x2:x,y2:Y1+16},g);text(x,Y1+32,(r/10000)+' 萬',{'text-anchor':'middle'});}
+      text((X0+X1)/2,Y1+62,'營業額（元）',{'text-anchor':'middle',class:'km-axis-title'});
+      if(view==='flat'){text(X0,Y0-12,'等候（分鐘），和營業額用同一把尺',{class:'km-axis-title'});text((X0+X1)/2,MID-40,'等候差 5 分鐘，在這把尺上只等於營業額差 5 元',{'text-anchor':'middle',class:'km-note'});}
+      else{for(const w of [4,6,8,10,12].filter(w=>w>=WMIN&&w<=WMAX)){const y=syS(w);shape('line',{x1:X0-16,y1:y,x2:X0-10,y2:y},g);text(X0-20,y+5,String(w),{'text-anchor':'end'});}text(X0,Y0-12,'等候（分鐘）',{class:'km-axis-title'});}
+    }
   }
-  const assign=()=>X.map(p=>{let b=0;for(let j=1;j<k;j++)if(d2(p,centers[j])<d2(p,centers[b]))b=j;return b;});
-  function update(){ // 空群保留原中心
-    return centers.map((c,j)=>{const g=X.filter((_,i)=>labels[i]===j);return g.length?[g.reduce((s,p)=>s+p[0],0)/g.length,g.reduce((s,p)=>s+p[1],0)/g.length]:c;});
+  // 狀態
+  let step=0,guess=null,k=3,seed=1,C=[],L=[],phase='init',timer=null;
+  const TITLES=['先猜','電腦怎麼量距離？','標準化：各欄換成同一把尺','一步一步跑 k-means','讓分數挑 k','揭曉：到底有幾家店？'];
+  function setPoints(view,labels,storeShapes){
+    D.forEach((d,i)=>{const [x,y]=pos(i,view);pts[i].g.style.transform=`translate(${x}px,${y}px)`;
+      pts[i].p.setAttribute('d',storeShapes?SHAPES[d[2]]:SHAPES[0]);
+      pts[i].p.setAttribute('class',labels?('km-c'+labels[i]):(storeShapes?'km-c'+d[2]:'km-none'));});
   }
-  const inertia=()=>X.reduce((s,p,i)=>s+d2(p,centers[labels[i]]),0);
-  function silhouette(){
-    const used=[...new Set(labels)];if(used.length<2)return NaN;
-    let total=0;
-    X.forEach((p,i)=>{
-      const mean=j=>{let sum=0,n=0;X.forEach((q,m)=>{if(labels[m]===j&&m!==i){sum+=Math.sqrt(d2(p,q));n++;}});return n?sum/n:null;};
-      const a=mean(labels[i]);if(a===null)return;
-      const b=Math.min(...used.filter(j=>j!==labels[i]).map(j=>{let sum=0,n=0;X.forEach((q,m)=>{if(labels[m]===j){sum+=Math.sqrt(d2(p,q));n++;}});return sum/n;}));
-      total+=(b-a)/Math.max(a,b);
-    });
-    return total/X.length;
+  function setLinks(labels,centersPx){
+    D.forEach((_,i)=>{const l=links[i];if(!labels){l.style.opacity='0';return;}l.style.opacity='.45';const [x,y]=pos(i,'std'),[cx,cy]=centersPx[labels[i]];for(const [a,v] of Object.entries({x1:x,y1:y,x2:cx,y2:cy,class:'km-c'+labels[i]}))l.setAttribute(a,v);});
   }
-  function draw(){
-    el('centers').replaceChildren();
-    centers.forEach((c,j)=>{const [x,y]=px(c),r=11;shape('line',{x1:x-r,y1:y-r,x2:x+r,y2:y+r,stroke:COLORS[j]},el('centers'));shape('line',{x1:x-r,y1:y+r,x2:x+r,y2:y-r,stroke:COLORS[j]},el('centers'));});
-    X.forEach((p,i)=>{
-      const has=labels.length>0,c=has?COLORS[labels[i]]:'#7d7a72';dots[i].setAttribute('fill',c);
-      if(has){const [a,b]=px(p),[e,f]=px(centers[labels[i]]);for(const [n,v] of Object.entries({x1:a,y1:b,x2:e,y2:f,stroke:c,opacity:.45}))links[i].setAttribute(n,v);}
-      else links[i].setAttribute('opacity',0);
-    });
-    const J=labels.length?inertia():null,S=phase==='done'?silhouette():null;
-    el('j').value=J===null?'—':J.toFixed(2);el('sil').value=S===null?'跑到底才算':S.toFixed(3);
-    el('state').value={init:'起點已選，還沒分配',assigned:'剛把點分給最近的中心',updated:'剛把中心移到平均位置',done:'不再變動，停下來了'}[phase];
-    Object.assign(root.dataset,{k:String(k),seed:String(seed),phase,j:J===null?'':String(J),silhouette:S===null?'':String(S),labels:JSON.stringify(labels)});
+  function setCenters(centersPx){
+    const g=el('centers');
+    while(g.children.length>centersPx.length)g.lastChild.remove();
+    centersPx.forEach(([x,y],j)=>{let c=g.children[j];if(!c){c=shape('g',{class:'km-center'},g);shape('line',{x1:-10,y1:-10,x2:10,y2:10},c);shape('line',{x1:-10,y1:10,x2:10,y2:-10},c);shape('text',{x:13,y:-9},c);}
+      c.querySelectorAll('line').forEach(n=>n.setAttribute('class','km-c'+j));c.querySelector('text').textContent=String(j+1);c.style.transform=`translate(${x}px,${y}px)`;});
   }
-  function start(){centers=pick();labels=[];phase='init';draw();}
-  function step(){
+  const say=t=>{el('say').textContent=t;};
+  const result=html=>{el('result').innerHTML=html;};
+  function startKmeans(){stop();C=pick(STD,k,seed);L=[];phase='init';renderKmeans();}
+  function kmStep(){
     if(phase==='done')return;
-    if(phase==='init'||phase==='updated'){
-      const next=assign();
-      if(phase==='updated'&&next.every((v,i)=>v===labels[i])){phase='done';draw();return;}
-      labels=next;phase='assigned';
-    }else{centers=update();phase='updated';}
-    draw();
+    if(phase==='init'||phase==='updated'){const N=assign(STD,C);if(phase==='updated'&&N.every((v,i)=>v===L[i])){phase='done';renderKmeans();return;}L=N;phase='assigned';}
+    else{C=update(STD,C,L);phase='updated';}
+    renderKmeans();
   }
-  el('step').addEventListener('click',step);
-  el('run').addEventListener('click',()=>{let guard=0;while(phase!=='done'&&guard++<400)step();});
-  el('seed').addEventListener('click',()=>{seed++;start();});
-  root.querySelectorAll('[data-k]').forEach(b=>b.addEventListener('click',()=>{k=Number(b.dataset.k);root.querySelectorAll('[data-k]').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));start();}));
-  start();
+  function stop(){if(timer){clearInterval(timer);timer=null;}}
+  function renderKmeans(){
+    const cpx=C.map(stdToPx);
+    setPoints('std',L.length?L:null,false);setLinks(L.length?L:null,cpx);setCenters(cpx);
+    say({init:`隨機挑了 ${k} 個點當起點（×）。按「走一步」：每個點會被分給離它最近的 ×。`,assigned:'每個點都分給了最近的 ×（虛線連到它的 ×）。再按一次：每個 × 會移到自己這組所有點的平均位置。',updated:'× 移到了平均位置。再按一次，看有沒有點要換組。',done:'沒有點換組了，k-means 停下來。試試別的 k，或按「換起點」。'}[phase]);
+    result(L.length?`<p>距離平方和（越小越緊）：<strong>${inertia(STD,C,L).toFixed(1)}</strong></p>`:'<p>還沒分組。</p>');
+    el('step').disabled=phase==='done';el('run').disabled=phase==='done';
+    Object.assign(root.dataset,{k:String(k),seed:String(seed),phase,labels:JSON.stringify(L)});
+  }
+  function render(){
+    stop();
+    el('count').textContent=`第 ${step+1}／${TITLES.length} 步`;el('step-title').textContent=TITLES[step];
+    root.querySelectorAll('.km-group').forEach(g=>g.hidden=Number(g.dataset.for)!==step);
+    el('prev').disabled=step===0;el('next').disabled=step===TITLES.length-1;
+    el('pair').classList.remove('show');
+    if(step===0){
+      drawAxes('spread');setPoints('spread',null,false);setLinks(null);setCenters([]);
+      say('每個點是某家店某一天的紀錄。你覺得這 60 筆紀錄來自幾家店？先選一個數字，再按「下一步」。');
+      result(guess?`<p>你的猜測：<strong>${guess} 家</strong></p>`:'<p>你的猜測：還沒選</p>');
+    }else if(step===1){
+      drawAxes('flat');setPoints('flat',RAW2.L,false);setLinks(null);setCenters([]);
+      say('k-means 用距離判斷誰跟誰近，而距離公式把 1 元和 1 分鐘當成一樣大。營業額差上千元，等候差幾分鐘幾乎不算數，所以在電腦眼裡，點全擠在一條線上。讓它自己挑 k，它只分出 2 群：營業額高、營業額低。');
+      result('<p>不標準化時，分數最高的是 <strong>k=2</strong>。等候時間完全沒被用到。</p>');
+    }else if(step===2){
+      drawAxes('std');setPoints('std',null,false);setLinks(null);setCenters([]);
+      say('標準化：每一欄減掉平均、除以標準差，數字變成「比平常高或低幾個標準差」。兩欄的單位不見了，站在同一把尺上，點又散開了。你在第 1 步看的圖，用的就是這種比例。');
+      result('<p>點回到和第 1 步一樣的位置。變的是<strong>座標軸的單位</strong>，也就是距離怎麼算。</p>');
+    }else if(step===3){
+      drawAxes('std');startKmeans();
+    }else if(step===4){
+      drawAxes('std');const cpx=BEST.C.map(stdToPx);setPoints('std',BEST.L,false);setLinks(BEST.L,cpx);setCenters(cpx);
+      say('要分幾群，常用 silhouette 分數來挑：每個點問「我離同組的人近，還是離隔壁組的人近？」越接近 1 表示分得越開。下面每個 k 都已經跑過好幾組起點。');
+      const max=Math.max(...SCORES.map(s=>s.s));
+      result('<div class="km-bars">'+SCORES.map(s=>`<span>k=${s.k}</span><span class="km-bar${s===BEST?' best':''}"><span style="width:${(s.s/max*100).toFixed(1)}%"></span></span><span>${s.s.toFixed(2)}${s===BEST?'　最高':''}</span>`).join('')+'</div>');
+      root.dataset.best=String(BEST.k);
+    }else{
+      drawAxes('std');setPoints('std',null,true);setLinks(null);setCenters([]);
+      const pair=[0,1].flatMap(s=>D.map((d,i)=>d[2]===s?pos(i,'std'):null).filter(Boolean));
+      const xs=pair.map(p=>p[0]),ys=pair.map(p=>p[1]);
+      for(const [a,v] of Object.entries({cx:(Math.min(...xs)+Math.max(...xs))/2,cy:(Math.min(...ys)+Math.max(...ys))/2,rx:(Math.max(...xs)-Math.min(...xs))/2+16,ry:(Math.max(...ys)-Math.min(...ys))/2+16}))el('pair').setAttribute(a,v);
+      el('pair').classList.add('show');
+      say(`答案是 4 家店（用形狀區分）。A 店和 B 店開在同一個捷運站的兩個出口，樣貌幾乎一樣（虛線圈），所以分數最高的 3 群把它們併成一群。${guess?`你猜的是 ${guess} 家。`:''}`);
+      result('<div class="km-legend">'+STORE.map((n,s)=>`<span><svg viewBox="-8 -8 16 16" aria-hidden="true"><path d="${SHAPES[s]}" class="km-c${s}"/></svg>${n}</span>`).join('')+'</div><p>店型手冊可以接受 3 群。客訴要回查是哪家店，3 群一定不行；就算分成 4 群，A、B 兩店重疊的那幾天還是可能分錯，最好的辦法是補回店別紀錄。<strong>分數不知道你要做哪一件事。</strong></p>');
+    }
+    Object.assign(root.dataset,{step:String(step),guess:guess===null?'':String(guess)});
+  }
+  root.querySelectorAll('[data-guess]').forEach(b=>b.addEventListener('click',()=>{guess=Number(b.dataset.guess);root.querySelectorAll('[data-guess]').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));render();}));
+  root.querySelectorAll('[data-k]').forEach(b=>b.addEventListener('click',()=>{k=Number(b.dataset.k);root.querySelectorAll('[data-k]').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));startKmeans();}));
+  el('step').addEventListener('click',()=>{stop();kmStep();});
+  el('run').addEventListener('click',()=>{stop();if(reduce.matches){let g=0;while(phase!=='done'&&g++<400)kmStep();return;}timer=setInterval(()=>{kmStep();if(phase==='done')stop();},650);});
+  el('seed').addEventListener('click',()=>{seed++;startKmeans();});
+  el('prev').addEventListener('click',()=>{if(step>0){step--;render();}});
+  el('next').addEventListener('click',()=>{if(step<TITLES.length-1){step++;render();}});
+  el('reset').addEventListener('click',()=>{step=0;guess=null;k=3;seed=1;root.querySelectorAll('[data-guess]').forEach(o=>o.setAttribute('aria-pressed','false'));root.querySelectorAll('[data-k]').forEach(o=>o.setAttribute('aria-pressed',String(o.dataset.k==='3')));render();});
+  render();
 })();
 </script>
 
@@ -981,8 +1086,8 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <div class="step" data-n="1">
 <h3>先照平常的方式問</h3>
 <p>如果已在 OpenCode 裡，先輸入 <code>/new</code>；還沒啟動就在專案資料夾輸入 <code>opencode</code>。左下角應顯示 <code>Build · Big Pickle</code>。貼上這句，不要補充任何條件：</p>
-<pre class="cmd"><code>data/line_modes.csv 是產線感測讀數，幫我看有幾種運作模式。</code></pre>
-<p>等它回答時，每個權限要求都讀一下，看它實際跑了什麼。</p>
+<pre class="cmd"><code>data/shops_daily.csv 是手搖飲連鎖的每日營業紀錄，幫我看有幾種店。</code></pre>
+<p>等它回答時，每個權限要求都讀一下，看它實際跑了什麼。如果它因為缺套件（例如 <code>pandas</code>）停下來、沒給答案，就回它：<code>請改用 numpy，或用 uv add 安裝後繼續。</code></p>
 </div>
 
 <div class="step" data-n="2">
@@ -990,46 +1095,35 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <p>看完回答，<strong>先別追問</strong>。在 <code>notes/</code> 或紙上寫下：</p>
 <ul>
 <li>你會接受、保留，還是拒絕這個答案？</li>
-<li>它用的方法你學過嗎？它做了哪些你沒要求的事（標準化、寫檔、畫圖）？</li>
-<li>它說的「可信」「明確」，是對什麼而言？還缺什麼資訊，你才敢把答案交給別人用？</li>
+<li>它用的方法你學過嗎？它做了哪些你沒要求的事，例如標準化、刪欄位、寫檔、畫圖？</li>
+<li>它說的「明確」「可信」，是對什麼而言？還缺什麼資訊，你才敢把答案交給別人用？</li>
 </ul>
 <p>如果它用了你沒學過的方法，不必硬著頭皮相信，可以追問：</p>
 <pre class="cmd"><code>請只用 k-means 和 silhouette 重算，列出你替我做的每個決定，先不要下結論。</code></pre>
 <p>和鄰座對一下答案。答案一樣也先別放心：這只表示做法相近，不表示符合你的用途。如果它先問你要拿來做什麼，那很好：回答它，再看建議怎麼變。</p>
-<details class="bg"><summary>寫完判斷再打開：講師實測</summary>
+<details class="bg"><summary>寫完判斷再打開：AI 常見的反應</summary>
 <div class="bg-body">
-<div class="box tip">
-<div class="bt">講師實測：同一句 prompt</div>
-<p>2026-11-02、03，OpenCode 1.19.5 互動模式，每次都是新對話。</p>
-<div class="tw"><table>
-<tr><th>模型</th><th>它給的答案</th></tr>
-<tr><td><code>big-pickle</code>（3 次，課堂預設）</td><td>9 種、9 種、9 種</td></tr>
-<tr><td><code>Gemini 3.5 Flash Lite</code>（3 次）</td><td>4 種（另提可細分為 6 種）、9 種、4 種（另提可細分為 5 至 6 種）</td></tr>
-<tr><td><code>GLM-5.3-Flash</code>（3 次）</td><td>9 種、7 種、9 種</td></tr>
-</table></div>
-<p>9 次都直接給了群數（2 次附帶可細分的備選），沒有一次先問要拿來做什麼。其中一次寫「BIC 明確指向 9，可信度較高」，另一次寫「證實是 7 個完全分離的緊密群」。</p>
-<p style="margin-bottom:0">這裡的數字多半算得對，差別在它替你做的決定。<code>big-pickle</code> 3 次都用了 GMM 和 BIC，也換隨機種子確認過很穩定。穩定只表示同樣的做法會得到同樣的結果，還回答不了這個答案夠不夠你用。樣本很少，所以這不是模型排名，你那次也可能不一樣。</p>
-</div>
+<p style="margin-bottom:0">同一句話問 AI，它常直接報一個群數（例如 9 或 10），還會說「跨隨機種子完全一致」，沒有先問你要拿來做什麼。數字通常算得對，也會換起點確認很穩定；但穩定只表示同樣的做法得到同樣的結果，回答不了「這個答案夠不夠你用」。</p>
 </div>
 </details>
 </div>
 
 <div class="step" data-n="3">
-<h3>揭曉：現場的人知道什麼</h3>
-<details class="bg"><summary>寫完判斷再打開：需求卡與結果</summary>
+<h3>揭曉：總部知道什麼</h3>
+<details class="bg"><summary>寫完判斷再打開：需求卡</summary>
 <div class="bg-body">
-<p>寫完判斷再往下看。這是資料管理員後來補給你的資訊：</p>
+<p>這是總部後來補給你的資訊：</p>
 <div class="box warn">
 <div class="bt">需求卡</div>
 <ul style="margin-bottom:0">
-<li>這 723 筆來自 <strong>10 個生產批次</strong>。批次 1 和批次 10 的設定相近。</li>
-<li><strong>任務 A</strong>：整理巡檢手冊，相近的狀態可以合併。</li>
-<li><strong>任務 B</strong>：追蹤每筆讀數來自哪個批次，出問題時要能回查。</li>
-<li>批次紀錄可以拿來算 <strong>ARI</strong>：分群和批次分組完全一致時為 1，亂分約為 0。silhouette 則不看批次，只看幾何上分不分得開。</li>
+<li>這 723 列來自 <strong>10 家分店</strong>。第 1 家和第 10 家開在<strong>同一個捷運站的兩個出口</strong>，菜單、價位、客群幾乎一樣。</li>
+<li><strong>任務 A</strong>：總部要寫「店型手冊」，營運方式相近的店可以歸成同一型。</li>
+<li><strong>任務 B</strong>：有食安客訴，要能回查某天的紀錄來自哪一家店，<strong>不同店不能混在一起</strong>。</li>
+<li>店別紀錄可以拿來算 <strong>ARI</strong>：分群結果和真正的店別完全一致時為 1，亂分約為 0。silhouette 則不看店別，只看幾何上分不分得開。</li>
 </ul>
 </div>
-<p>下載批次紀錄。它只用來檢查，選 k 時不能用。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
-<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/line_modes_batches.csv -o data/line_modes_batches.csv</code></pre>
+<p>下載店別紀錄。這個檔只有一欄 <code>store</code>，第 N 列就是 <code>shops_daily.csv</code> 第 N 列的店別。它只用來檢查，選 k 時不能用。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
+<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/shops_daily_store.csv -o data/shops_daily_store.csv</code></pre>
 <p>先想：AI 的答案對任務 A 夠用嗎？對任務 B 呢？如果它說的不是 10，算它錯嗎？</p>
 </div>
 </details>
@@ -1037,31 +1131,43 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 
 <div class="step" data-n="4">
 <h3>規劃：寫目標卡，再問一次</h3>
-<p>和鄰座各挑一個不同的任務。先在 <code>notes/</code> 或紙上填好，互相指出對方一個還模糊的詞：</p>
+<p>第 1 步的問題只有資料，沒有用途。AI 只好自己猜你要什麼。<strong>目標卡就是把「只有你知道的事」先寫下來</strong>，再把它放進 prompt，讓 AI 回答的是你的問題。</p>
+<p>和鄰座各挑一個任務（一人 A、一人 B），在 <code>notes/</code> 或紙上回答三個問題：</p>
 <div class="box warn">
 <div class="bt">目標卡</div>
-<p style="margin-bottom:0">我的用途是＿＿；可以合併／不能合併的情況是＿＿；我用＿＿證據判斷。</p>
+<ol style="margin-bottom:0">
+<li><strong>用途</strong>：分好的群要拿去做什麼？</li>
+<li><strong>合併規則</strong>：什麼情況可以算同一群？什麼情況絕對不行？</li>
+<li><strong>判斷證據</strong>：我看哪些數字或紀錄來決定 k？哪些資料只能拿來檢查、不能拿來選 k？</li>
+</ol>
 </div>
-<p>再用目標卡改寫第一句，<code>/new</code> 後貼上。也要交代它列出替你做的決定。程式存成 <code>lab1_cluster.py</code>，圖存到 <code>figs/lab1_k_selection.png</code>。比較兩人的選擇和理由。答案不一定不同，任務 A 也可能選 10；要看的是它是否符合各自的用途。</p>
-<details class="bg"><summary>問完再打開：講師實測</summary>
+<p>寫完互相讀一次，指出對方一個還模糊的詞，例如「差不多」「比較好」是什麼意思。</p>
+<details class="bg"><summary>寫完再對照：目標卡範例</summary>
 <div class="bg-body">
-<div class="box tip">
-<div class="bt">講師實測：目標寫清楚之後</div>
-<p>2026-11-02，<code>GLM-5.3-Flash</code> 3 次，prompt 只說明要追蹤批次、不能合併、批次紀錄只能檢查，不能用來選 k，沒有說幾批，也沒有限定 k。</p>
-<ul>
-<li><strong>3 次都建議 k=10</strong>，也都列出它替你做的決定（模糊問時，同一個模型答 9、7、9）。</li>
-<li><strong>但 3 次都是先看到 silhouette 最高是 9，再用批次紀錄淘汰 9、改選 10。</strong>你說不能用它選 k，它也說只拿來檢查，實際上這就是用它選了 k。結果對，不代表照你的規則做。讀它列出的決定，才看得出來。</li>
-</ul>
-<p>另一組 prompt 寫得更具體（共 10 批，只比 k=9 和 k=10，用 ARI 判斷），兩個模型各 3 次也都答 k=10。其中 2 次 Gemini 保留了兩個常數欄；標準化後它們都變成 0，不影響距離和分群。<code>Gemini 3.5 Flash Lite</code> 只有這組紀錄，上面那組當天額度用完。</p>
-<p>回頭看模糊問的那 3 次 <code>big-pickle</code>：它答 9 種，最大的一群有 159 筆，正好是批次 1 的 73 筆加批次 10 的 86 筆。其中 1 次還看到 gap statistic 偏好 k=10，判定 k=10「只是把最大的一群（159 筆）硬拆成兩群」。對任務 A 這樣可能夠用，對任務 B 就把要分開追蹤的兩批併掉了。它不知道任務，再穩定也判斷不了。</p>
-<p style="margin-bottom:0">把目標說清楚有幫助，但不代表不用驗。</p>
+<div class="tw"><table>
+<tr><th></th><th>任務 A：店型手冊</th><th>任務 B：客訴回查</th></tr>
+<tr><td>用途</td><td>把營運方式相近的店歸成同一型，每型寫一套做法</td><td>看到一筆紀錄，要能判斷它來自哪一家店</td></tr>
+<tr><td>合併規則</td><td>營業樣貌幾乎一樣的店<strong>可以</strong>合併；但每型的做法要講得出差別</td><td>不同店<strong>一律不能</strong>合併，就算樣貌很像也一樣</td></tr>
+<tr><td>判斷證據</td><td>標準化後的 silhouette，加上每群大小是否合理</td><td>用 silhouette 挑候選 k；店別紀錄只用來算 ARI 檢查，<strong>不能</strong>用來選 k</td></tr>
+</table></div>
+<p>把任務 B 的卡改寫成 prompt，大概是這樣：</p>
+<pre class="cmd"><code>data/shops_daily.csv 是手搖飲 10 家分店的每日營業紀錄。我的用途是客訴回查：要分辨每列來自哪一家店，不同店不能合併。
+請用 k-means，先處理欄位尺度，用 silhouette 挑 k。data/shops_daily_store.csv 是店別紀錄，只能在選好 k 之後拿來算 ARI 檢查，不能用來選 k。
+列出你替我做的每個決定，最後回答我的用途該用幾群。</code></pre>
+<p style="margin-bottom:0">範例只是參考，你的卡寫得不一樣也沒關係，重點是三格都有寫到。</p>
 </div>
+</details>
+<p>用你的目標卡改寫第一句，<code>/new</code> 後貼上。程式存成 <code>lab1_cluster.py</code>，圖存到 <code>figs/lab1_k_selection.png</code>。比較兩人的選擇和理由。答案不一定不同，任務 A 也可能選 10；要看的是它是否符合各自的用途。</p>
+<details class="bg"><summary>問完再打開：AI 常見的反應</summary>
+<div class="bg-body">
+<p>把用途寫清楚之後，AI 多半會改選 k=10，也會列出它替你做的決定。但要讀那些決定：它常常是先看到 silhouette 最高是 9，再拿店別紀錄淘汰 9、改選 10。你說店別紀錄不能用來選 k，它也說只拿來檢查，實際上卻是用它選了 k。結果對，不代表照你的規則做。</p>
+<p style="margin-bottom:0">模糊地問時，AI 答 9 種，最大的一群正好是第 1 家加第 10 家。對任務 A 這可能夠用，對任務 B 就把要分開回查的兩家店併掉了。它不知道任務，再穩定也判斷不了。</p>
 </div>
 </details>
 <p>你應該能回答這三個問題：</p>
 <ul>
 <li>原始尺度和標準化，選出的 k 一樣嗎？</li>
-<li>silhouette 最高的 k，和批次 ARI 最高的 k，是同一個嗎？</li>
+<li>silhouette 最高的 k，和店別 ARI 最高的 k，是同一個嗎？</li>
 <li>那你會怎麼回答任務 A 和任務 B？</li>
 </ul>
 </div>
@@ -1069,28 +1175,29 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 
 <section>
 <h2 id="section-誰錯了">誰錯了</h2>
-<p>做完第 4 步再往下讀。下面是講師用參考程式算的結果（<code>reference/lab1_cluster.py</code>，<code>random_state=0</code>、<code>n_init=10</code>）。你的方法不同，數字也可能不同。</p>
+<p>做完第 4 步再往下讀。下面是參考程式算的結果（<code>reference/lab1_cluster.py</code>，<code>random_state=0</code>、<code>n_init=10</code>）。你的方法不同，數字也可能不同。</p>
 <div class="tw"><table>
-<tr><th>做法</th><th>silhouette 最高的 k</th><th>分數</th><th>這個 k 對 10 個批次的 ARI</th></tr>
-<tr><td>原始尺度</td><td><strong>3</strong></td><td>0.7416</td><td>0.261</td></tr>
-<tr><td>標準化</td><td><strong>9</strong></td><td>0.7943</td><td>0.881</td></tr>
+<tr><th>做法</th><th>silhouette 最高的 k</th><th>分數</th><th>這個 k 對 10 家店的 ARI</th></tr>
+<tr><td>原始尺度</td><td><strong>2</strong></td><td>0.8140</td><td>0.204</td></tr>
+<tr><td>標準化</td><td><strong>9</strong></td><td>0.7942</td><td>0.881</td></tr>
 <tr><td>標準化，直接指定 k=10</td><td>10（不是最高）</td><td>0.7252</td><td><strong>0.990</strong></td></tr>
 </table></div>
 <figure class="teaching-figure">
-<picture><source media="(max-width: 720px)" srcset="assets/figures/lab1-k-selection-mobile.svg"><img src="assets/figures/lab1-k-selection.svg" alt="k 從 2 到 12 的兩張圖。上圖 silhouette：原始尺度在 k=3 最高，標準化在 k=9 最高。下圖對 10 個批次的 ARI：標準化在 k=10 最高。" width="900" height="840"></picture>
-<figcaption>上圖不看批次，下圖揭曉後才算得出來。<a href="assets/figures/lab1-k-selection.csv">查看曲線數據</a></figcaption>
+<picture><source media="(max-width: 720px)" srcset="assets/figures/lab1-k-selection-mobile.svg"><img src="assets/figures/lab1-k-selection.svg" alt="k 從 2 到 12 的兩張圖。上圖 silhouette：原始尺度在 k=2 最高，標準化在 k=9 最高。下圖對 10 家分店的 ARI：標準化在 k=10 最高。" width="900" height="840"></picture>
+<figcaption>上圖不看店別，下圖揭曉後才算得出來。<a href="assets/figures/lab1-k-selection.csv">查看曲線數據</a></figcaption>
 </figure>
-<p>k=9 把批次 1 和批次 10 併成一群，其他批次都分得開。對任務 A，這可能正好合適；對任務 B，就是把兩個批次混在一起。</p>
-<p>所以 AI 說 9 並沒有算錯。<strong>問題在於它還不知道你要做什麼，就給了答案。</strong>如果它沒說自己標準化了，你也不會知道為什麼你的同學算出 3。</p>
+<p>原始尺度時，距離幾乎只看營業額，所以只分成「營業額高、低」兩群。標準化後，k=9 把第 1 家和第 10 家併成一群，其他店都分得開。對任務 A，這可能正好合適；對任務 B，就是把兩家店混在一起。</p>
+<p>所以 AI 說 9 並沒有算錯。<strong>問題在於它還不知道你要做什麼，就給了答案。</strong>如果它沒說自己標準化了，你也不會知道為什麼你的同學算出 2。</p>
 
 <h3>silhouette 在量什麼</h3>
-<p>對每個點 $i$，設 $a(i)$ 是它到<em>同群</em>其他點的平均距離，$b(i)$ 是它到<em>最近的其他群</em>所有點的平均距離，則</p>
+<p>白話：每個點問自己「我離同組的人近，還是離隔壁組的人近？」離同組近得多，分數接近 1；在兩組交界，接近 0；離隔壁組反而比較近，就是負的。全部點平均起來就是整體分數。</p>
 <div class="box math">
 <div class="bt">silhouette</div>
+<p>設 $a(i)$ 是點 $i$ 到<em>同群</em>其他點的平均距離，$b(i)$ 是它到<em>最近的其他群</em>所有點的平均距離，則</p>
 $$s(i)=\frac{b(i)-a(i)}{\max\{a(i),\,b(i)\}},\qquad s(i)\in[-1,1]$$
-<p style="margin-bottom:0">整體分數是所有 $s(i)$ 的平均。它衡量<strong>群內夠不夠緊、群間夠不夠開</strong>，完全沒有用到批次紀錄。</p>
+<p style="margin-bottom:0">它衡量<strong>群內夠不夠緊、群間夠不夠開</strong>，完全沒有用到店別紀錄。</p>
 </div>
-<p><strong>ARI</strong>（adjusted Rand index）則要拿分群結果和批次紀錄比，分數 1 表示分組完全一致，和群的編號無關。</p>
+<p><strong>ARI</strong>（adjusted Rand index）則要拿分群結果和店別紀錄比：任兩列「是不是同一家店」和「是不是被分在同一群」一致的程度，再扣掉亂分也會碰巧一致的部分。1 表示分組完全一致，和群的編號無關。</p>
 <details class="bg"><summary>silhouette 詳解：公式怎麼來、分數怎麼讀</summary>
 <div class="bg-body">
 <h4>$a(i)$ 與 $b(i)$ 的完整定義</h4>
@@ -1135,7 +1242,7 @@ $$S=\frac{1}{n}\sum_{i=1}^{n}s(i)$$
 <h4>沒用真實標籤，但有用分群標籤</h4>
 <ul>
 <li><strong>分群標籤</strong>：演算法產生的群編號。計算 $a(i)$、$b(i)$ 需要它</li>
-<li><strong>真實標籤</strong>：資料原本的類別，例如這份資料的批次。silhouette 用不到它</li>
+<li><strong>真實標籤</strong>：資料原本的類別，例如這份資料的店別。silhouette 用不到它</li>
 </ul>
 <p>所以 silhouette 是<strong>內部驗證指標</strong>。下一節的 ARI 要和真實標籤或另一組分群比較，屬於<strong>外部驗證指標</strong>。</p>
 
@@ -1144,7 +1251,7 @@ $$S=\frac{1}{n}\sum_{i=1}^{n}s(i)$$
 <li>某群只有一個點時，$a(i)$ 的分母是 $0$，scikit-learn 的慣例是把這個點的分數定為 $0$</li>
 <li>計算整體分數時，群數 $k$ 要滿足 $2\le k\le n-1$</li>
 </ul>
-<p style="margin-bottom:0">回到本 Lab：標準化後最高分 0.7943，k=10 也有 0.7252，兩者都不低。分數高只表示幾何上分得開，不代表它回答了你的問題。</p>
+<p style="margin-bottom:0">回到本 Lab：標準化後最高分 0.7942，k=10 也有 0.7252，兩者都不低。分數高只表示幾何上分得開，不代表它回答了你的問題。</p>
 </div>
 </details>
 
@@ -1223,7 +1330,7 @@ $$\text{ARI}=\frac{\sum_{ij}\binom{n_{ij}}{2}-\dfrac{AB}{M}}{\dfrac{1}{2}(A+B)-\
 <div class="box danger">
 <div class="bt">這一關真正要你帶走的</div>
 <p style="margin-bottom:0">
-<strong>AI 不知道你要什麼時，還是可能給你一個肯定的答案。</strong>往後每次看到「判定為」「建議」，先找出它做了哪些你沒要求的決定，再把結論改寫成帶條件的句子，例如：「標準化後以 silhouette 比較 k=2 到 12 時，k=9 最高；若要追蹤批次，k=10 較合適。」
+<strong>AI 不知道你要什麼時，還是可能給你一個肯定的答案。</strong>往後每次看到「判定為」「建議」，先找出它做了哪些你沒要求的決定，再把結論改寫成帶條件的句子，例如：「標準化後以 silhouette 比較 k=2 到 12 時，k=9 最高；若要回查每家店，k=10 最接近，但仍有少數紀錄分錯，最好補回店別紀錄。」
 </p>
 </div>
 </section>
@@ -1232,34 +1339,34 @@ $$\text{ARI}=\frac{\sum_{ij}\binom{n_{ij}}{2}-\dfrac{AB}{M}}{\dfrac{1}{2}(A+B)-\
 <h2 id="section-檢查清單">檢查清單</h2>
 <ul class="ckl">
 <li><input type="checkbox" id="l1a"><label for="l1a">看到揭曉前，我寫下了接受、保留或拒絕，以及它替我做的決定</label></li>
-<li><input type="checkbox" id="l1b"><label for="l1b">我寫了目標卡，用它改寫問題，並打開 <code>lab1_cluster.py</code> 看過</label></li>
+<li><input type="checkbox" id="l1b"><label for="l1b">我寫了目標卡的三格（用途、合併規則、判斷證據），用它改寫問題，並打開 <code>lab1_cluster.py</code> 看過</label></li>
 <li><input type="checkbox" id="l1c"><label for="l1c"><code>figs/lab1_k_selection.png</code> 存在，我看得懂它在比什麼</label></li>
 <li><input type="checkbox" id="l1d"><label for="l1d">我能把結論改寫成帶條件的句子，說清楚資料怎麼處理、用什麼指標、回答哪個任務</label></li>
-<li><input type="checkbox" id="l1e"><label for="l1e">我知道 silhouette 不看批次、ARI 要看批次，也能說明兩者為什麼可能選不同的 k</label></li>
+<li><input type="checkbox" id="l1e"><label for="l1e">我知道 silhouette 不看店別、ARI 要看店別，也能說明兩者為什麼可能選不同的 k</label></li>
 </ul>
 </section>
 
 <section>
 <h2 id="section-如果還有時間">如果還有時間</h2>
 <ul>
-<li>挑一個自己想試的變化，例如換指標或拿掉一欄，和鄰座比較。</li>
-<li>請它列出每群包含各批次的筆數，自己找出哪兩個批次被併在一起。</li>
+<li>挑一個自己想試的變化，例如拿掉一欄或換一種指標，和鄰座比較。</li>
+<li>請它列出每群包含各家店的天數，自己找出哪兩家店被併在一起。</li>
 <li>用不同 <code>random_state</code> 重跑，看 k=9 和 k=10 的排序穩不穩定。</li>
 <li>問它：<strong>「inertia 為什麼隨 k 遞減？用數學證明給我看。」</strong>再自己檢查：k-means 找到的是局部解，實務上偶爾會不單調。</li>
 </ul>
 <details class="bg"><summary>寫完再對照：一份參考的清楚版 prompt</summary>
 <div class="bg-body">
-<pre class="cmd"><code>用 data/line_modes.csv 做 k-means 分群。先拿掉標準差為 0 的欄位，再標準化。
+<pre class="cmd"><code>用 data/shops_daily.csv 做 k-means 分群。先拿掉標準差為 0 的欄位，再標準化。
 
 掃過 k = 2 到 12，每個 k 都記錄 silhouette，也算一次不標準化的結果做對照，
 逐項印出數值，並把兩條曲線畫到 figs/lab1_k_selection.png。
 
 要求：
-- 選 k 時不可以使用 data/line_modes_batches.csv
+- 選 k 時不可以使用 data/shops_daily_store.csv
 - random_state 固定為 0，n_init=10
 - 寫成 lab1_cluster.py，用 uv run python 執行
-- 選好 k 之後，再用批次紀錄算 k=9、k=10 的 ARI，並列出每群包含哪些批次
-- 最後分別回答：巡檢手冊適合幾群？追蹤批次適合幾群？</code></pre>
+- 選好 k 之後，再用店別紀錄算 k=9、k=10 的 ARI，並列出每群包含哪些店
+- 最後分別回答：店型手冊適合幾群？客訴回查適合幾群？</code></pre>
 </div>
 </details>
 </section>

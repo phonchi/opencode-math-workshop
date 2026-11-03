@@ -1,6 +1,6 @@
-"""Lab 1 參考程式：同一份感測資料，前處理不同，silhouette 選出的 k 就不同。
+"""Lab 1 參考程式：同一份分店營業資料，前處理不同，silhouette 選出的 k 就不同。
 
-line_modes.csv 是講師設計的資料。批次標籤只在揭曉時使用，選 k 時不看。
+shops_daily.csv 是為工作坊設計的合成資料。分店標籤只在揭曉時使用，選 k 時不看。
 """
 from pathlib import Path
 
@@ -10,8 +10,8 @@ from sklearn.metrics import adjusted_rand_score, silhouette_score
 from sklearn.preprocessing import StandardScaler
 
 DATA = Path(__file__).resolve().parents[1] / "assets" / "data"
-X = np.genfromtxt(DATA / "line_modes.csv", delimiter=",", skip_header=1)
-batch = np.genfromtxt(DATA / "reveal" / "line_modes_batches.csv", delimiter=",", skip_header=1)
+X = np.genfromtxt(DATA / "shops_daily.csv", delimiter=",", skip_header=1)
+store = np.genfromtxt(DATA / "reveal" / "shops_daily_store.csv", delimiter=",", skip_header=1)
 print(f"資料形狀 X={X.shape}；標準差為 0 的欄位索引 = {np.flatnonzero(X.std(0) == 0).tolist()}")
 
 
@@ -19,7 +19,7 @@ def sweep(Z):
     out = {}
     for k in range(2, 13):
         km = KMeans(n_clusters=k, n_init=10, random_state=0).fit(Z)
-        out[k] = (km.inertia_, silhouette_score(Z, km.labels_), adjusted_rand_score(batch, km.labels_))
+        out[k] = (km.inertia_, silhouette_score(Z, km.labels_), adjusted_rand_score(store, km.labels_))
     return out
 
 

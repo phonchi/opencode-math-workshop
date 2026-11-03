@@ -957,10 +957,10 @@ cd ai-math-lab
 mkdir notes
 mkdir figs
 mkdir data</code></pre>
-<p>接著下載三份練習資料，它們是講師設計的產線資料：</p>
-<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/line_modes.csv -o data/line_modes.csv
-curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/line_channels.csv -o data/line_channels.csv
-curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/line_faults.csv -o data/line_faults.csv</code></pre>
+<p>接著下載三份練習資料，它們是為這堂課造的生活化資料：手搖飲分店營業紀錄、校園外送訂單、圖書館借閱紀錄。</p>
+<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/shops_daily.csv -o data/shops_daily.csv
+curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/orders.csv -o data/orders.csv
+curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/loans.csv -o data/loans.csv</code></pre>
 </div>
 
 <div class="step" data-n="2">
@@ -1004,7 +1004,7 @@ dependencies = [
   },
   "instructions": ["AGENTS.md"]
 }</code></pre>
-<p>中間的 <code>provider</code> 只在你切到備案模型 GLM-5.3-Flash 時才有作用。少了它，這個模型會推理很久：同一題實測從 22 秒變成 12 分鐘。</p>
+<p>中間的 <code>provider</code> 只在你切到備案模型 GLM-5.3-Flash 時才有作用。少了它，這個模型會推理很久，同一題可能從幾十秒拖到十幾分鐘。</p>
 <div class="box tip">
 <div class="bt">為什麼放在專案裡而不是全域設定</div>
 <p style="margin-bottom:0">
@@ -1172,13 +1172,13 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <ul style="margin-bottom:0">
 <li><code>high demand</code> 或 <code>way too hot</code>：Google 暫時過載，OpenCode 會自動重試，先等一下。等超過一分鐘還沒恢復，就換下一個模型。</li>
 <li><code>Quota exceeded for metric</code>：先看後面寫的是哪種額度。每日請求（per day）用完就換下一個模型；每分鐘的上限等一下再試。</li>
-<li>Gemini 模型請選 <code>Gemini 3.5 Flash Lite</code>。<code>Gemini 3.6 Flash</code> 實測每天只有 20 個請求，一堂課不夠用。</li>
+<li>Gemini 模型請選 <code>Gemini 3.5 Flash Lite</code>。<code>Gemini 3.6 Flash</code> 每天只有約 20 個請求，一堂課不夠用。</li>
 <li>畫面底部的 <code>$0.01</code> 是估算的費用。只要沒有設定帳單，就不會收費。</li>
 <li>Gemini 偶爾會把英文思考過程混進回答，這不影響程式執行。</li>
 </ul>
 </div>
 
-<p style="font-size:.88rem;color:var(--ink-3)">講師實測（2026-11-02，OpenCode 1.19.5，一次跑一人）：兩個備案都能完成讀檔、寫檔和執行。Gemini 3.5 Flash Lite 同一天免費層每天上限 500 個請求（Google 回傳的額度），每人用自己的專案；GLM-5.3-Flash 的開場和三個 Lab 各跑 3 次。全班同時使用的情況還沒測過，額度也可能變動。</p>
+<p style="font-size:.88rem;color:var(--ink-3)">兩個備案都能完成讀檔、寫檔和執行。Gemini 3.5 Flash Lite 同一天免費層每天上限 500 個請求（Google 回傳的額度），每人用自己的專案；GLM-5.3-Flash 的開場和三個 Lab 各跑 3 次。全班同時使用的情況還沒測過，額度也可能變動。</p>
 
 <ul class="ckl">
 <li><input type="checkbox" id="p8"><label for="p8">Gemini 3.5 Flash Lite 回答了問題</label></li>
@@ -1241,7 +1241,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <p style="margin-bottom:0">
 <code>opencode/big-pickle</code> 是限時免費的試用模型，官方明講資料可能被用於改進模型；Gemini 和 NVIDIA 的免費服務也一樣。
 <strong>不要把未發表的研究資料、個人隱私資料或任何機密內容丟進去。</strong>
-課堂用的都是講師設計的合成資料，沒有這個問題。
+課堂用的都是為這堂課造的合成資料，沒有這個問題。
 </p>
 </div>
 </section>

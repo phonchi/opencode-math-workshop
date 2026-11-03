@@ -222,48 +222,63 @@ async function interactionChecks(){
       expect(!await page.$eval('details.bg',node=>node.open),'Background did not close');return {expandedAndClosed:true};
     });
     await scenario('kmeans-explorer-steps',async page=>{
+      await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
       await load(page,fileURL('lab1-cluster'));
       const read=()=>page.$eval('.kmeans-explorer',node=>({...node.dataset}));
-      await page.click('[data-k="2"]');await page.click('#kmeans-run');
-      const two=await read();
-      expect(two.phase==='done'&&Math.abs(Number(two.j)-59.08)<0.01&&Math.abs(Number(two.silhouette)-0.717)<0.001,'k-means k=2 mismatch',two);
-      await page.click('[data-k="3"]');await page.click('#kmeans-step');
+      await page.click('[data-guess="3"]');
+      expect((await read()).guess==='3','k-means guess not recorded');
+      for(let i=0;i<3;i++)await page.click('#kmeans-next');
+      expect((await read()).step==='3','k-means did not reach the k-means step');
+      await page.click('[data-k="2"]');await page.click('#kmeans-step');
       expect((await read()).phase==='assigned','k-means step failed');
       await page.click('#kmeans-run');
-      const three=await read();
-      expect(Math.abs(Number(three.j)-23.44)<0.01&&Math.abs(Number(three.silhouette)-0.662)<0.001,'k-means k=3 mismatch',three);
+      const two=await read();
+      expect(two.phase==='done'&&JSON.parse(two.labels).length===60,'k-means k=2 did not finish',two);
       await page.click('#kmeans-seed');
       expect((await read()).seed==='2','k-means seed failed');
-      return {two:two.silhouette,three:three.silhouette};
+      await page.click('#kmeans-next');
+      expect((await read()).best==='3','Silhouette should pick k=3 on the standardized demo data');
+      await page.click('#kmeans-next');
+      expect(await page.$eval('#kmeans-pair',n=>n.classList.contains('show')),'Reveal step did not mark the near-identical stores');
+      await page.click('#kmeans-reset');
+      expect((await read()).step==='0','k-means reset failed');
+      return {k2:two.phase,best:3};
     });
     await scenario('threshold-explorer-readouts',async page=>{
       await load(page,fileURL('lab3-notes'));
       const set=async(id,v)=>page.$eval(id,(i,x)=>{i.value=x;i.dispatchEvent(new Event('input',{bubbles:true}));},String(v));
       const read=()=>page.$eval('.threshold-explorer',node=>({...node.dataset}));
+      expect((await read()).alarms==='0','Step 1 should not alarm anyone yet');
+      await page.click('#threshold-next');
       const expected=[[0.5,6,5,3,1],[0.3,9,6,2,3],[0.2,12,7,1,5],[0.1,16,7,1,9]];
       for(const [t,a,c,m,f] of expected){await set('#threshold-t',t);const d=await read();expect(+d.alarms===a&&+d.caught===c&&+d.missed===m&&+d.falseAlarm===f,'Threshold readout mismatch',d);}
+      await page.click('#threshold-next');await page.click('#threshold-next');
       await set('#threshold-cap',20);
-      expect((await read()).over==='false','Review cap did not update');
+      expect((await read()).over==='false','Capacity did not update');
+      await set('#threshold-cap',8);
+      expect((await read()).over==='true'&&await page.$$eval('.th-queue li.over',n=>n.length)===8,'Over-capacity alarms not marked');
       return {rows:expected.length};
     });
-    await scenario('pca-reference-buttons-keyboard',async page=>{
+    await scenario('pca-explorer-steps-keyboard',async page=>{
       await load(page,fileURL('lab2-pca'));
-      const reference=JSON.parse(fs.readFileSync(path.join(ROOT,'tools/test-runs/20260912-workshop-refresh/wsl/math/pca-browser-reference.json'),'utf8'));
-      const checks=[];
-      for(const expected of reference){
-        if(expected===reference.at(-1))await page.click('#projection-principal');
-        else await page.$eval('#projection-angle',(input,angle)=>{input.value=String(angle);input.dispatchEvent(new Event('input',{bubbles:true}));},expected.angle);
-        const actual=await page.$eval('.pca-explorer',node=>({...node.dataset}));
-        for(const key of ['angle','variance','error'])expect(Math.abs(Number(actual[key])-expected[key])<=1e-10,'PCA reference mismatch',{key,actual,expected});
-        checks.push({expected,actual});
-      }
+      const read=()=>page.$eval('.pca-explorer',node=>({...node.dataset}));
+      await page.click('#projection-next');
+      await page.click('#projection-principal');
+      const first=await read();
+      expect(Number(first.kept)>0.96,'First principal direction should keep about 96% of the variance',first);
       await screenshot(page,'interaction-pca-principal',false);
-      await page.click('#projection-reset');
-      expect(await page.$eval('#projection-angle',input=>input.value)==='0','PCA reset failed');
+      await page.click('#projection-next');await page.click('#projection-next');
+      await page.click('#projection-second');
+      const second=await read();
+      expect(Number(second.kept)<0.05,'Second principal direction should keep under 5%',second);
+      await page.click('#projection-next');await page.click('[data-unit="m"]');
+      expect((await read()).unit==='m','Unit toggle failed');
+      await page.click('#projection-reset');await page.click('#projection-next');
+      const before=Number((await read()).angle);
       await page.focus('#projection-angle');await page.keyboard.press('ArrowRight');
-      const keyboard=await page.$eval('.pca-explorer',node=>({...node.dataset}));
-      expect(Number(keyboard.angle)>0&&Number.isFinite(Number(keyboard.variance)),'PCA keyboard change failed',keyboard);
-      return {tolerance:1e-10,checks,keyboard};
+      const keyboard=await read();
+      expect(Number(keyboard.angle)!==before&&Number.isFinite(Number(keyboard.kept)),'PCA keyboard change failed',keyboard);
+      return {first:first.kept,second:second.kept};
     });
   }
 }

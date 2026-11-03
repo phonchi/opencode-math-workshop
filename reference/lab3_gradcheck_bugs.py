@@ -1,13 +1,13 @@
-"""Lab 3 講師備援：梯度檢查能證明什麼，不能證明什麼。
+"""Lab 3 參考程式：梯度檢查能證明什麼，不能證明什麼。
 
-所有錯誤都是講師注入，不是 AI 自己犯的。
+所有錯誤都是故意放進去的，不是 AI 自己犯的。
 """
 from pathlib import Path
 
 import numpy as np
 
 DATA = Path(__file__).resolve().parents[1] / "assets" / "data"
-D = np.genfromtxt(DATA / "line_faults.csv", delimiter=",", skip_header=1)
+D = np.genfromtxt(DATA / "loans.csv", delimiter=",", skip_header=1)
 A = D[:, 1:-1]
 A = (A - A.mean(0)) / A.std(0)
 t = D[:, -1]
@@ -41,7 +41,7 @@ def check(L, G, h=1e-5):
     return np.abs(G(w0) - fd).max()
 
 
-print(f"{'情境（講師注入）':<30}{'最大絕對誤差':>14}  判定（門檻 1e-8）")
+print(f"{'情境（故意放的錯誤）':<30}{'最大絕對誤差':>14}  判定（門檻 1e-8）")
 for name, L, G in [("正確的 loss 與 grad", loss, grad),
                    ("loss、grad 一起換成 MSE", mse, mse_grad),
                    ("只把 grad 乘 2", loss, lambda w: 2 * grad(w))]:

@@ -1,82 +1,201 @@
 <section class="pca-explorer" aria-labelledby="projection-title">
-<h2 id="projection-title">先轉一轉：把平面上的點投影到一條線</h2>
-<p>假設每個點代表一筆只有兩個特徵的資料。現在只准用一個數字描述它：把點垂直投影到藍線，記下沿線的位置。<strong>你會把線轉向哪裡，讓投影後的點盡量分散？</strong></p>
-<div class="projection-panel">
-  <div class="projection-controls">
-    <label for="projection-angle">投影方向 <output id="projection-angle-value" for="projection-angle">0.0°</output></label>
-    <input id="projection-angle" type="range" min="0" max="180" step="any" value="0" aria-describedby="projection-help">
-    <div class="projection-actions"><button type="button" id="projection-principal">轉到主成分方向</button><button type="button" id="projection-reset">重設</button></div>
+<h2 id="projection-title">先玩一次：只准記一個數字，要記哪個？</h2>
+<p>下面是 60 張<strong>示範外送訂單</strong>，只畫兩欄：距離和騎乘時間。PCA 要做的事，就是用比較少的數字描述每一筆資料。跟著步驟按「下一步」。</p>
+<div class="pc-panel">
+  <div class="pc-head">
+    <span class="pc-count" id="projection-count">第 1／6 步</span>
+    <strong class="pc-title" id="projection-step-title">看資料</strong>
   </div>
-  <figure>
-    <svg id="projection-plot" viewBox="0 0 680 390" role="img" aria-labelledby="projection-svg-title projection-svg-desc">
-      <title id="projection-svg-title">二維資料與一維投影</title>
-      <desc id="projection-svg-desc">圓點是原始資料，方框是垂直投影到藍線後的位置。轉動藍線，比較投影後的分散程度與點到線的距離。</desc>
-      <g id="projection-grid" stroke="#ded6c6" stroke-width="1"></g>
-      <line x1="36" y1="195" x2="644" y2="195" stroke="#7d7a72"/>
-      <line x1="340" y1="28" x2="340" y2="362" stroke="#7d7a72"/>
-      <line id="projection-axis" stroke="#2a3c78" stroke-width="3"/>
-      <g id="projection-drops" stroke="#7d7a72" stroke-dasharray="4 5" stroke-width="1.5"></g>
-      <g id="projection-originals" fill="#1b1b2b"></g>
-      <g id="projection-projected" fill="#fffdf8" stroke="#b8503c" stroke-width="2"></g>
+  <p class="pc-say" id="projection-say" aria-live="polite"></p>
+  <div class="pc-controls" role="group" aria-label="這一步的操作">
+    <span class="pc-group pc-slider" data-for="1 3">
+      <label for="projection-angle">投影方向</label>
+      <input id="projection-angle" type="range" min="0" max="180" step="1" value="0">
+    </span>
+    <span class="pc-group" data-for="1"><button type="button" id="projection-principal">轉到 PCA 選的方向</button></span>
+    <span class="pc-group" data-for="3"><button type="button" id="projection-second">改看第 2 主成分</button><button type="button" id="projection-first">回到第 1 主成分</button></span>
+    <span class="pc-group" data-for="4" role="group" aria-label="距離的單位"><span class="pc-label">距離用</span><button type="button" data-unit="km" aria-pressed="true">公里</button><button type="button" data-unit="m">公尺</button><span class="pc-label">記錄</span></span>
+  </div>
+  <figure id="projection-figure">
+    <svg id="projection-plot" viewBox="0 0 680 450" role="img" aria-labelledby="projection-svg-title projection-svg-desc">
+      <title id="projection-svg-title">外送訂單的距離與騎乘時間，以及投影到一條線後的位置</title>
+      <desc id="projection-svg-desc">上方散布圖的每個點是一張訂單；藍線是投影方向，虛線連到投影位置。下方的帶子是每張訂單只記一個數字時的位置。</desc>
+      <g id="projection-axes" class="pc-axes"></g>
+      <defs><clipPath id="projection-clip"><rect x="56" y="20" width="584" height="285"/></clipPath></defs>
+      <g clip-path="url(#projection-clip)"><line id="projection-axis" class="pc-line"/>
+      <g id="projection-drops"></g></g>
+      <g id="projection-points"></g>
+      <g id="projection-strip" class="pc-strip-g"></g>
     </svg>
-    <figcaption>實心圓：原始資料　空心方框：投影與重建的位置　虛線：重建的偏差</figcaption>
   </figure>
-  <dl class="projection-readouts">
-    <div><dt>投影變異</dt><dd><output id="projection-variance">—</output></dd></div>
-    <div><dt>平均重建平方距離</dt><dd><output id="projection-error">—</output></dd></div>
-  </dl>
-  <p id="projection-help">先拖曳滑桿，觀察投影變異與重建距離怎麼變；也可用鍵盤方向鍵調整。找到你認為最好的方向後，按「轉到主成分方向」比較。按「重設」可回到起點。</p>
+  <div class="pc-result" id="projection-result" aria-live="polite"></div>
+  <div class="pc-nav">
+    <button type="button" id="projection-prev">← 上一步</button>
+    <button type="button" id="projection-next" class="pc-primary">下一步 →</button>
+    <button type="button" id="projection-reset">從頭開始</button>
+  </div>
 </div>
-<p>主成分方向保留最多變異，也讓重建的平方距離總和最小。這裡的「重建」是把線上的位置放回平面：它仍在投影線上，通常不會回到原來的點。</p>
+<div class="box warn">
+<div class="bt">玩完回答</div>
+<ul style="margin-bottom:0">
+<li>第 1 主成分留下了 96% 的變化，為什麼還是分不出客訴？</li>
+<li>距離改用公尺記，PCA 選的方向為什麼就變了？這和資料本身有關嗎？</li>
+<li><strong>「保留 90% 的變化就夠」是誰定的？夠做什麼？</strong>AI 替你降維時，它知道你要拿來做什麼嗎？</li>
+</ul>
+</div>
 <details class="bg"><summary>把剛才看到的圖寫成公式</summary><div class="bg-body">
-<p>這組固定點雲的平均為零。令單位方向 $u=(\cos\theta,\sin\theta)^\top$，第 $i$ 點投影的位置是 $z_i=x_i^\top u$，重建為 $\hat x_i=z_i u$。</p>
-<p>上方分別顯示樣本變異 $\sum_i z_i^2/(n-1)$ 與平均平方距離 $\sum_i\|x_i-\hat x_i\|^2/n$。兩者分母不同，不能直接相加；方向最佳化的結論不受這兩個固定分母影響。</p>
-<p>把方向反過來，$u$ 換成 $-u$，投影座標會變號，但重建位置與這兩個指標都不變。稍後比對兩種 PCA 實作時，這點很有用。</p>
+<p>先把兩欄都標準化，點雲的平均為零。令單位方向 $u=(\cos\theta,\sin\theta)^\top$，第 $i$ 筆投影後記下的數字是 $z_i=x_i^\top u$，放回平面的位置是 $\hat x_i=z_i u$。</p>
+<p>「留下的變化」是 $\sum_i z_i^2\big/\sum_i\|x_i\|^2$。使它最大的 $u$ 就是共變異數矩陣最大特徵值的特徵向量，也就是第 1 主成分；它同時讓虛線長度的平方和 $\sum_i\|x_i-\hat x_i\|^2$ 最小。</p>
+<p style="margin-bottom:0">把方向反過來，$u$ 換成 $-u$，$z_i$ 會變號，但投影位置與留下的變化都不變。稍後比對兩種 PCA 實作時，這點很有用。</p>
 </div></details>
-<noscript><p>此互動需要 JavaScript。也可以用下方公式：沿點雲較長的方向投影，保留的變異較大；垂直偏差較小。</p></noscript>
+<noscript><p>此互動需要 JavaScript。重點是：第 1 主成分留下最多變化，但客訴訂單只在變化很小的第 2 主成分上分得開；換單位也會改變 PCA 選的方向。</p></noscript>
 </section>
 <style>
-.projection-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
-.projection-controls{display:grid;grid-template-columns:1fr auto;gap:.6rem 1.5rem;align-items:center}
-.projection-controls label{font-weight:600}.projection-controls label output{color:var(--link);font-variant-numeric:tabular-nums;margin-left:.6rem}
-.projection-controls input{grid-column:1;min-width:0;width:100%;accent-color:var(--link);min-height:44px}
-.projection-actions{grid-column:2;grid-row:1 / 3;display:flex;gap:.5rem;flex-wrap:wrap}
-.projection-actions button{font:inherit;font-size:.86rem;min-height:44px;padding:.4rem .8rem;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
-.projection-actions button:hover{border-color:var(--link);color:var(--link)}.projection-actions button:focus-visible,.projection-controls input:focus-visible{outline:3px solid var(--link);outline-offset:3px}
-.projection-panel figure{margin:1rem 0}.projection-panel svg{display:block;width:100%;height:auto}.projection-panel figcaption{font-size:.82rem;color:var(--ink-2);text-align:center}
-.projection-readouts{display:flex;gap:2.5rem;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:1rem}.projection-readouts dt{font-size:.86rem;color:var(--ink-2)}.projection-readouts dd{margin:0;font-size:1.65rem;color:var(--link);font-variant-numeric:tabular-nums}.projection-panel #projection-help{font-size:.86rem;color:var(--ink-2);margin:.8rem 0 0}
-@media(max-width:600px){.projection-controls{display:block}.projection-actions{margin-top:.5rem}.projection-readouts{gap:1.2rem}.projection-panel figcaption{text-align:left}}
-@media print{.projection-controls input,.projection-actions{display:none}}
+.pc-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
+.pc-head{display:flex;gap:.8rem;align-items:baseline;flex-wrap:wrap}
+.pc-count{font-size:.82rem;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.pc-title{font-size:1.1rem;color:var(--link)}
+.pc-say{margin:.5rem 0 .8rem;min-height:3.2em;line-height:1.7}
+.pc-controls{display:flex;flex-wrap:wrap;gap:.6rem 1rem;align-items:center;min-height:44px}
+.pc-group{display:inline-flex;flex-wrap:wrap;gap:.3rem;align-items:center}
+.pc-group[hidden]{display:none}
+.pc-slider{flex:1 1 260px;gap:.6rem}.pc-slider label{font-weight:600}
+.pc-slider input{flex:1;min-width:0;min-height:44px;accent-color:var(--link)}
+.pc-label{font-size:.9rem;color:var(--ink-2)}
+.pc-panel button{font:inherit;font-size:.9rem;min-height:44px;min-width:44px;padding:.4rem .8rem;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
+.pc-panel button:hover{border-color:var(--link);color:var(--link)}
+.pc-panel button[aria-pressed="true"],.pc-panel button.pc-primary{background:var(--link);border-color:var(--link);color:var(--paper)}
+.pc-panel button:disabled{opacity:.4;cursor:default}
+.pc-panel button:focus-visible,.pc-slider input:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+.pc-panel figure{margin:1rem 0 .6rem}.pc-panel figure[hidden]{display:none}.pc-panel svg{display:block;width:100%;height:auto}
+.pc-axes line{stroke:var(--ink-3);stroke-width:1}.pc-axes text{fill:var(--ink-2);font-size:14px}.pc-axes .pc-axis-title{fill:var(--ink);font-size:15px}
+.pc-line{stroke:var(--link);stroke-width:3;transition:all .5s var(--ease)}
+#projection-drops line{stroke:var(--ink-3);stroke-dasharray:3 4;stroke-width:1}
+.pc-pt{fill:var(--ink-3)}.pc-pt.bad{fill:var(--live)}
+.pc-strip-line{stroke:var(--ink-3);stroke-width:1}.pc-strip-g text{fill:var(--ink-2);font-size:14px}
+.pc-mark{fill:var(--link);fill-opacity:.75}.pc-mark.bad{fill:var(--live)}.pc-mark.gray{fill:var(--ink-3)}
+.pc-result{border-top:1px solid var(--rule);padding-top:.8rem;min-height:2.4em}
+.pc-result p{margin:.2rem 0}
+.pc-big{font-size:1.5rem;color:var(--link);font-variant-numeric:tabular-nums}
+.pc-bars{display:grid;grid-template-columns:auto 1fr auto;gap:.3rem .7rem;align-items:center;max-width:560px;margin:.4rem 0 .8rem}
+.pc-bar{height:14px;background:var(--rule);border-radius:3px;position:relative}.pc-bar span{display:block;height:100%;background:var(--ink-3);border-radius:3px}
+.pc-bar.keep span{background:var(--link)}.pc-bar.sig span{background:var(--live)}
+.pc-bar i{position:absolute;top:-3px;bottom:-3px;left:90%;border-left:2px dashed var(--warn)}
+.pc-tag{font-size:.82rem;color:var(--live);font-weight:600}
+.pc-nav{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+@media (prefers-reduced-motion:reduce){.pc-line{transition:none}}
+@media(max-width:720px){.pc-say{min-height:0}.pc-nav button{flex:1 1 auto}.pc-axes text,.pc-axes .pc-axis-title,.pc-strip-g text{font-size:24px}}
+@media print{.pc-controls,.pc-nav{display:none}}
 </style>
 <script>
 (function(){
   'use strict';
-  const points=[[-3,-1],[-2.5,-1.6],[-2,-.6],[-1.5,-1.2],[-1,-.2],[-.5,-.8],[.5,.8],[1,.2],[1.5,1.2],[2,.6],[2.5,1.6],[3,1]];
+  // 60 張示範訂單：[距離 km, 騎乘分鐘, 是否客訴]。客訴訂單比同距離的訂單慢很多。
+  const D=[[0.95,11.3,1],[2.25,14.1,1],[2.61,11.8,0],[0.6,4.8,0],[1.02,6.6,0],[3.75,14.6,0],[0.75,6.2,0],[0.95,6.5,0],[3.82,15.1,0],[2.68,12.0,0],[1.79,9.6,0],[2.29,11.6,0],[2.82,10.9,0],[1.46,8.3,0],[0.98,6.5,0],[3.26,13.4,0],[2.85,11.4,0],[2.29,11.2,0],[3.36,12.9,0],[2.42,11.1,0],[3.93,16.5,0],[1.22,5.8,0],[2.44,10.6,0],[2.19,9.1,0],[1.74,8.7,0],[2.57,12.3,0],[1.32,8.6,0],[3.31,16.8,1],[3.54,13.9,0],[0.95,6.5,0],[2.13,10.9,0],[1.47,8.0,0],[0.79,5.0,0],[3.64,14.9,0],[2.0,9.4,0],[1.02,6.1,0],[2.86,11.6,0],[1.21,7.1,0],[3.66,14.9,0],[1.26,7.0,0],[0.62,4.8,0],[1.2,5.9,0],[1.71,8.1,0],[2.14,10.7,0],[3.67,14.6,0],[2.94,11.4,0],[1.69,9.3,0],[0.56,5.2,0],[1.06,7.9,0],[3.99,20.3,1],[2.11,9.4,0],[2.92,11.3,0],[0.69,6.1,0],[0.62,6.8,0],[3.46,13.5,0],[2.56,10.7,0],[1.58,8.5,0],[1.61,12.1,1],[0.81,5.4,0],[1.1,6.3,0]];
+  // 正文資料 orders.csv 標準化後 11 個主成分的解釋變異比例（reference/lab2_pca.py 同一份結果）
+  const RATIO=[0.3196,0.205,0.1655,0.1486,0.0907,0.0333,0.0156,0.0084,0.0066,0.0047,0.0022];
   const root=document.querySelector('.pca-explorer');
   const ns='http://www.w3.org/2000/svg';
   const el=id=>document.getElementById('projection-'+id);
-  const xy=(x,y)=>[340+x*70,195-y*70];
-  function shape(tag,attrs,parent){const node=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))node.setAttribute(k,v);parent.appendChild(node);return node;}
-  for(let x=-4;x<=4;x++){const [px]=xy(x,0);shape('line',{x1:px,y1:30,x2:px,y2:360},el('grid'));}
-  for(let y=-2;y<=2;y++){const [,py]=xy(0,y);shape('line',{x1:40,y1:py,x2:640,y2:py},el('grid'));}
-  const originals=points.map(([x,y])=>{const [cx,cy]=xy(x,y);return shape('circle',{cx,cy,r:5},el('originals'));});
-  const drops=points.map(()=>shape('line',{},el('drops')));
-  const projected=points.map(()=>shape('rect',{width:8,height:8},el('projected')));
-  function draw(){
-    const degrees=Number(el('angle').value),t=degrees*Math.PI/180,ux=Math.cos(t),uy=Math.sin(t);
-    // Intersect the direction with the drawing bounds, preserving the data scale.
-    const length=Math.min(300/Math.max(Math.abs(ux),1e-12),160/Math.max(Math.abs(uy),1e-12));
-    for(const [k,v] of Object.entries({x1:340-length*ux,y1:195+length*uy,x2:340+length*ux,y2:195-length*uy}))el('axis').setAttribute(k,v);
-    let ss=0,error=0;
-    points.forEach(([x,y],i)=>{const z=x*ux+y*uy,rx=z*ux,ry=z*uy;ss+=z*z;error+=(x-rx)**2+(y-ry)**2;const [px,py]=xy(rx,ry),[ox,oy]=xy(x,y);for(const [k,v] of Object.entries({x1:ox,y1:oy,x2:px,y2:py}))drops[i].setAttribute(k,v);projected[i].setAttribute('x',px-4);projected[i].setAttribute('y',py-4);});
-    const variance=ss/(points.length-1),mse=error/points.length;
-    el('angle-value').value=degrees.toFixed(1)+'°';el('variance').value=variance.toFixed(4);el('error').value=mse.toFixed(4);
-    root.dataset.angle=String(degrees);root.dataset.variance=String(variance);root.dataset.error=String(mse);
-    el('angle').setAttribute('aria-valuetext',degrees.toFixed(1)+' 度');
+  const shape=(tag,attrs,parent)=>{const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(parent)parent.appendChild(n);return n;};
+  const mean=a=>a.reduce((s,v)=>s+v,0)/a.length,sd=a=>{const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/a.length);};
+  const md=mean(D.map(d=>d[0])),sdd=sd(D.map(d=>d[0])),mr=mean(D.map(d=>d[1])),sdr=sd(D.map(d=>d[1]));
+  const S=D.map(d=>[(d[0]-md)/sdd,(d[1]-mr)/sdr]);
+  const CX=340,CY=204,U=56; // 標準化座標每單位 56px
+  const toPx=([a,b])=>[CX+a*U,CY-b*U];
+  const TRI='M0,-6L5.5,4.5H-5.5z',DOT='M-4.5,0a4.5,4.5 0 1,0 9,0a4.5,4.5 0 1,0 -9,0';
+  function pcaAngle(P){let xx=0,yy=0,xy=0;for(const [x,y] of P){xx+=x*x;yy+=y*y;xy+=x*y;}let a=Math.atan2(2*xy,xx-yy)*90/Math.PI;if(a<0)a+=180;return a;}
+  const PC1=pcaAngle(S),PC2=(PC1+90)%180;
+  // 公尺記錄時，在原始單位（公尺、分鐘）下的第 1 主成分方向幾乎就是距離軸。
+  const M=D.map(d=>[(d[0]-md)*1000,d[1]-mr]);const PCm=pcaAngle(M);
+  const keptM=(()=>{const t=PCm*Math.PI/180,u=[Math.cos(t),Math.sin(t)];let a=0,b=0;M.forEach(p=>{const z=p[0]*u[0]+p[1]*u[1];a+=z*z;b+=p[0]**2+p[1]**2;});return a/b;})();
+  function axes(){
+    const g=el('axes');g.replaceChildren();
+        const text=(x,y,t,a={})=>{const n=shape('text',{x,y,...a},g);n.textContent=t;};
+    shape('line',{x1:60,y1:305,x2:620,y2:305},g);shape('line',{x1:55,y1:20,x2:55,y2:305},g);
+    for(const km of [1,2,3,4]){const [x]=toPx([(km-md)/sdd,0]);shape('line',{x1:x,y1:305,x2:x,y2:311},g);text(x,326,String(km),{'text-anchor':'middle'});}
+    for(const m of [5,10,15,20]){const [,y]=toPx([0,(m-mr)/sdr]);if(y<20||y>305)continue;shape('line',{x1:49,y1:y,x2:55,y2:y},g);text(45,y+5,String(m),{'text-anchor':'end'});}
+    text(630,326,'距離（公里）',{'text-anchor':'end',class:'pc-axis-title'});text(62,16,'騎乘時間（分鐘）',{class:'pc-axis-title'});
   }
-  el('angle').addEventListener('input',draw);
-  el('principal').addEventListener('click',()=>{let xx=0,yy=0,xy=0;for(const [x,y]of points){xx+=x*x;yy+=y*y;xy+=x*y;}let angle=Math.atan2(2*xy,xx-yy)*90/Math.PI;if(angle<0)angle+=180;el('angle').value=String(angle);draw();});
-  el('reset').addEventListener('click',()=>{el('angle').value='0';draw();});
-  draw();
+  axes();
+  const pts=S.map((p,i)=>{const [x,y]=toPx(p);return shape('path',{d:DOT,transform:`translate(${x},${y})`,class:'pc-pt'},el('points'));});
+  const drops=S.map(()=>shape('line',{},el('drops')));
+  // 下方的帶子
+  const SY=402,SX0=70,SX1=610,SU=(SX1-SX0)/7;
+  shape('line',{x1:SX0,y1:SY,x2:SX1,y2:SY,class:'pc-strip-line'},el('strip'));
+  const stripLabel=shape('text',{x:SX0,y:SY+24},el('strip'));
+  const marks=S.map(()=>shape('path',{d:DOT,class:'pc-mark'},el('strip')));
+  let step=0,unit='km',showBad=false,touched=false;
+  const TITLES=['看資料','只准記一個數字','揭曉：哪些訂單被客訴？','變化小的方向','換個單位','回到 11 欄的真實資料'];
+  function kept(angle){const t=angle*Math.PI/180,u=[Math.cos(t),Math.sin(t)];let a=0;S.forEach(p=>{a+=(p[0]*u[0]+p[1]*u[1])**2;});return a/S.length/2;}
+  function draw(){
+    const angle=Number(el('angle').value),t=angle*Math.PI/180,u=[Math.cos(t),Math.sin(t)];
+    const onLine=step>=1&&step<=4;
+    const L=420;el('axis').setAttribute('x1',CX-L*u[0]);el('axis').setAttribute('y1',CY+L*u[1]);el('axis').setAttribute('x2',CX+L*u[0]);el('axis').setAttribute('y2',CY-L*u[1]);
+    el('axis').style.opacity=onLine?'1':'0';
+    const zs=S.map(p=>p[0]*u[0]+p[1]*u[1]);
+    S.forEach((p,i)=>{
+      const bad=showBad&&D[i][2]===1;
+      pts[i].setAttribute('d',bad?TRI:DOT);pts[i].setAttribute('class','pc-pt'+(bad?' bad':''));
+      const [ox,oy]=toPx(p),[px,py]=toPx([zs[i]*u[0],zs[i]*u[1]]);
+      for(const [a,v] of Object.entries({x1:ox,y1:oy,x2:px,y2:py}))drops[i].setAttribute(a,v);
+      drops[i].style.opacity=onLine?'1':'0';
+      const sx=SX0+(zs[i]+3.5)*SU,jit=((i*37)%11)*3.2; // 固定的上下錯開，避免點完全重疊
+      marks[i].setAttribute('d',bad?TRI:DOT);marks[i].setAttribute('class','pc-mark'+(bad?' bad':showBad?' gray':''));
+      marks[i].setAttribute('transform',`translate(${sx},${SY-7-jit})`);marks[i].style.opacity=onLine?'1':'0';
+    });
+    stripLabel.textContent=onLine?'每張訂單只記一個數字：在藍線上的位置':'';
+    const k=kept(angle);el('angle').setAttribute('aria-valuetext',`${angle} 度，留下 ${(k*100).toFixed(1)}% 的變化`);
+    Object.assign(root.dataset,{step:String(step),angle:String(angle),kept:String(k),unit});
+    return k;
+  }
+  const say=t=>{el('say').textContent=t;},result=h=>{el('result').innerHTML=h;};
+  function keptLine(k,extra=''){return `<p>留下的變化：<span class="pc-big">${(k*100).toFixed(1)}%</span>${extra}</p>`;}
+  function render(){
+    el('count').textContent=`第 ${step+1}／${TITLES.length} 步`;el('step-title').textContent=TITLES[step];
+    root.querySelectorAll('.pc-group').forEach(g=>g.hidden=!g.dataset.for.split(' ').includes(String(step)));
+    el('prev').disabled=step===0;el('next').disabled=step===TITLES.length-1;
+    el('figure').hidden=step===5;
+    showBad=step===2||step===3;
+    if(step===0){
+      el('angle').value='0';draw();
+      say('每個點是一張外送訂單：橫軸是距離，縱軸是騎乘時間。越遠騎越久，所以點沿著一條斜線排。圖已經把兩欄換成同一把尺（標準化），距離和時間的單位不會影響形狀。');
+      result('<p>兩欄高度相關：知道距離，大概就猜得到騎多久。</p>');
+    }else if(step===1){
+      if(!touched)el('angle').value='0';
+      const k=draw();
+      say('如果每張訂單只准記一個數字，可以把點垂直投影到藍線上，記下它在線上的位置（下方的帶子）。拖動滑桿轉方向，讓帶子上的點盡量散開，也就是留下最多變化。');
+      result(keptLine(k,Math.abs(Number(el('angle').value)-Math.round(PC1))<=1?'　這就是 PCA 選的方向：<strong>第 1 主成分</strong>。':''));
+    }else if(step===2){
+      el('angle').value=String(Math.round(PC1));const k=draw();
+      say('現在揭曉：紅色三角形是事後被客訴的訂單。在第 1 主成分的帶子上，它們混在其他訂單中間，分不出來。');
+      result(keptLine(k,'　卻分不出客訴。'));
+    }else if(step===3){
+      const k=draw();
+      say('按「改看第 2 主成分」，換到和第 1 主成分垂直的方向。這個方向的意思是「比同樣距離的訂單慢多少」。');
+      result(keptLine(k,Math.abs(Number(el('angle').value)-Math.round(PC2))<=1?'　只留下這麼一點變化，卻正好把客訴訂單分了出來。<strong>變化小，不代表不重要。</strong>':''));
+    }else if(step===4){
+      showBad=false;
+      el('angle').value=String(unit==='m'?Math.round(PCm):Math.round(PC1));draw();
+      if(unit==='m'){say('如果不標準化，直接用原始數字做 PCA，而且距離用公尺記，數字一下子大了 1000 倍。PCA 是照「數字變化多大」挑方向的，於是它幾乎只看距離，騎乘時間被當成雜訊。訂單沒變，只是換了單位、少了標準化。');
+        result(`<p>不標準化、距離用公尺時，PCA 選的方向幾乎只看距離，留下 <span class="pc-big">${(keptM*100).toFixed(1)}%</span> 的變化。</p><p>先標準化的話，換成公尺也不會影響結果，因為每欄都會先換成「比平均高幾個標準差」。但標準化也會把和目標無關、只是數字大的欄位一起放大。</p>`);}
+      else{say('到目前為止，兩欄都先標準化了。PCA 只看數字變化多大，所以不標準化時單位很重要。按「公尺」，看看不標準化、又換了單位會發生什麼事。');result(keptLine(kept(Math.round(PC1)),'　（兩欄都標準化）'));}
+    }else{
+      let cum=0;
+      const rows=RATIO.map((r,i)=>{cum+=r;const n=i+1;return `<span>PC${n}</span><span class="pc-bar${n<=5?' keep':''}"><span style="width:${(r/RATIO[0]*100).toFixed(1)}%"></span></span><span>${(r*100).toFixed(1)}%　累積 ${(cum*100).toFixed(1)}%${n===5?'　<b class="pc-tag">累積超過 90%</b>':''}</span>`;}).join('');
+      say('正文的 orders.csv 有 11 欄。標準化後做 PCA，每根長條是一個主成分留下的變化。照「累積到 90% 就夠」的習慣，會留下前 5 個。');
+      result(`<div class="pc-bars">${rows}</div><p>剛才的小例子裡，客訴訊號藏在變化很小的方向。這 11 欄裡，它會在哪一個主成分？只看這張圖答不出來，要等正文揭曉用途、拿到客訴標籤，再用你的驗收卡檢查。</p><p><strong>90% 這個門檻回答的是「變化留了多少」，回答不了「你要的訊號留了沒有」。</strong></p>`);
+      Object.assign(root.dataset,{step:String(step)});
+    }
+  }
+  el('angle').addEventListener('input',()=>{touched=true;render();});
+  el('principal').addEventListener('click',()=>{el('angle').value=String(Math.round(PC1));touched=true;render();});
+  el('second').addEventListener('click',()=>{el('angle').value=String(Math.round(PC2));render();});
+  el('first').addEventListener('click',()=>{el('angle').value=String(Math.round(PC1));render();});
+  root.querySelectorAll('[data-unit]').forEach(b=>b.addEventListener('click',()=>{unit=b.dataset.unit;root.querySelectorAll('[data-unit]').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));render();}));
+  el('prev').addEventListener('click',()=>{if(step>0){step--;render();}});
+  el('next').addEventListener('click',()=>{if(step<TITLES.length-1){step++;render();}});
+  el('reset').addEventListener('click',()=>{step=0;unit='km';touched=false;root.querySelectorAll('[data-unit]').forEach(o=>o.setAttribute('aria-pressed',String(o.dataset.unit==='km')));render();});
+  render();
 })();
 </script>

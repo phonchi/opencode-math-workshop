@@ -1,0 +1,40 @@
+  ┃  from sklearn.calibration import CalibratedClassifierCV                                                             
+  ┃  from sklearn.metrics import roc_auc_score, average_precision_score, brier_score_loss                               
+  ┃  rows=list(csv.DictReader(open('data/loans.csv')))                                                                  
+  ┃  names=['pages','past_ontime_pct','past_avg_days','commute_min','account_age_days','book_age_years']                
+  ┃  X=np.array([[float(r[n]) for n in names] for r in rows]); y=np.array([int(r['overdue']) for r in rows])            
+  ┃  aucs=[];prs=[];briers=[]                                                                                           
+  ┃  for s in range(10):                                                                                                
+  ┃      Xtr,Xte,ytr,yte=train_test_split(X,y,test_size=0.25,stratify=y,random_state=s)                                 
+  ┃      cal=CalibratedClassifierCV(Pipeline([('sc',StandardScaler()),('m',LogisticRegression(class_weight='balanced',  
+  ┃  max_iter=1000))]), method='isotonic', cv=5)                                                                        
+  ┃      cal.fit(Xtr,ytr); p=cal.predict_proba(Xte)[:,1]                                                                
+  ┃      aucs.append(roc_auc_score(yte,p)); prs.append(average_precision_score(yte,p)); briers.append(                  
+  ┃  brier_score_loss(yte,p))                                                                                           
+  ┃  print("AUC mean/std",round(np.mean(aucs),3),round(np.std(aucs),3))                                                 
+  ┃  print("PR  mean/std",round(np.mean(prs),3),round(np.std(prs),3))                                                   
+  ┃  print("Brier mean/std",round(np.mean(briers),4),round(np.std(briers),4))                                           
+  ┃  PY                                                                                                                 
+  ┃  uv run python /tmp/scratchpad/seed.py                                                                              
+  ┃                                                                                                                     
+  ┃  AUC mean/std 0.952 0.018                                                                                           
+  ┃  PR  mean/std 0.706 0.054                                                                                           
+  ┃  Brier mean/std 0.0415 0.0042                                                                                       
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 4.3s                                                                                                    
+                                                                                                                        
+     可上線作「逾期風險排序/提醒優先級」，不可作自動懲處。必須先移除 case_no（含洩漏，含它 PR-AUC=1.0）；僅用 6         
+     個業務特徵的校準 Logistic Regression：CV ROC-AUC 0.95±0.02、PR-AUC 0.71±0.05（基準 0.079）、Brier 0.04。提醒場景   
+     threshold≈0.1 可達 recall 0.94/precision 0.43；高 precision 場景 threshold≈0.2 為 recall 0.78/precision 0.56。     
+     上線前仍需前瞻性驗證與漂移監控。                                                                                   
+                                                                                                                        
+     ▣  Build · Beam Free · 1m 12s                                                                                      
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Beam Free OpenCode                                                                                         
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/live-beam/lab3-vague-2/project                25.1K (2%)  ctrl+p commands  
+                                                                                                                        

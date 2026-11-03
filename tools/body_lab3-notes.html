@@ -1,5 +1,5 @@
 <!--TITLE:Lab 3 · 分類與筆記-->
-<!--DESC:AI 訓練好模型，告訴你能不能上線。門檻是誰決定的？它需要哪些只有你才知道的資訊？再用梯度檢查，分清楚 PASS 能證明什麼。-->
+<!--DESC:用借閱紀錄預測誰會逾期，AI 訓練好模型，告訴你能不能上線。門檻是誰決定的？它需要哪些只有你才知道的資訊？再用梯度檢查，分清楚 PASS 能證明什麼。-->
 
 <div class="container narrow">
 
@@ -7,7 +7,7 @@
   <div class="kicker"><span>Lab 3</span><span>·</span><span class="badge live">現場 28 分</span><span>·</span><span>AI 的風險：替你決定了該由你決定的事</span></div>
   <h1>分類與筆記：它說可以上線，誰來決定？</h1>
   <p class="lead">
-    AI 會訓練好模型、挑好門檻，再告訴你能不能用。但能不能用，取決於漏掉一次故障有多貴、現場有多少人能複查，這些它都不知道。
+    AI 會訓練好模型、挑好門檻，再告訴你能不能用。但能不能用，取決於漏掉一次逾期有多糟、館員有多少時間寄提醒，這些它都不知道。
     你要帶走的能力：說清楚一個數字能證明什麼、不能證明什麼，以及哪些決定要由你來做。
   </p>
 </div>
@@ -16,18 +16,29 @@
 
 <section>
 <h2>任務</h2>
-<p><code>data/line_faults.csv</code> 是 900 筆產線紀錄，同樣是<strong>講師設計的資料</strong>：6 個感測值、一欄 <code>record_id</code>、一欄 <code>fault</code>（1 表示故障）。故障只占約 7.9%。</p>
-<p><strong>二元分類</strong>是從兩個答案中選一個。模型先給出機率，再依<strong>門檻</strong>判斷類別。<strong>損失函數</strong>用一個數字表示預測和答案差多少，訓練就是尋找讓它變小的參數。<strong>梯度</strong>記錄損失對各個參數的變化率，幫我們決定參數往哪邊調。</p>
-<p>兩個數字待會會用到。<strong>準確率</strong>是猜對的比例。<strong>recall</strong> 是真的故障中抓到幾成。</p>
+<p>學校圖書館想在借書時就預測「這筆會不會逾期」，對風險高的同學先寄提醒。<code>data/loans.csv</code> 是 900 筆過去的借閱紀錄。每一列是一筆借閱，<code>overdue</code> 是答案（1 表示最後逾期了），只占約 7.9%。</p>
+<div class="tw"><table>
+<tr><th>欄位</th><th>意思</th><th>單位</th><th>第一列</th></tr>
+<tr><td><code>case_no</code></td><td>紀錄編號</td><td>號</td><td>24</td></tr>
+<tr><td><code>pages</code></td><td>書的頁數</td><td>頁</td><td>518</td></tr>
+<tr><td><code>past_ontime_pct</code></td><td>這位同學過去準時還書的比例</td><td>%</td><td>85.6</td></tr>
+<tr><td><code>past_avg_days</code></td><td>過去平均借多久才還</td><td>天</td><td>22.6</td></tr>
+<tr><td><code>commute_min</code></td><td>住處到圖書館的通勤時間</td><td>分鐘</td><td>33.7</td></tr>
+<tr><td><code>account_age_days</code></td><td>借書證辦了多久</td><td>天</td><td>799</td></tr>
+<tr><td><code>book_age_years</code></td><td>書的出版年數</td><td>年</td><td>18.9</td></tr>
+<tr><td><code>overdue</code></td><td>最後有沒有逾期（答案）</td><td>0 或 1</td><td>1</td></tr>
+</table></div>
+<p>這種「從兩個答案中選一個」的問題叫<strong>二元分類</strong>。模型先替每筆借閱算出一個 0 到 1 的分數（逾期的機率），再看分數有沒有超過<strong>門檻</strong>，決定要不要寄提醒。訓練模型時，用<strong>損失函數</strong>這一個數字表示預測和答案差多少，訓練就是找讓它變小的參數；<strong>梯度</strong>告訴我們每個參數往哪邊調，損失會降得最快。</p>
+<p>兩個數字待會會用到。<strong>準確率</strong>是判斷對的比例。<strong>recall</strong> 是真的逾期中抓到幾成。</p>
 <details class="bg"><summary>「二元分類」在做什麼？logistic 迴歸為什麼長那樣？</summary>
 <div class="bg-body">
 <p>
-跟 Lab 1 的分群不同，這次<strong>我們有答案</strong>：每筆紀錄都知道有沒有故障。
-目標是學一個規則，看到新的讀數能判斷有沒有故障。這叫<strong>監督式學習</strong>。
+跟 Lab 1 的分群不同，這次<strong>我們有答案</strong>：每筆紀錄都知道有沒有逾期。
+目標是學一個規則，看到新的借閱能判斷會不會逾期。這叫<strong>監督式學習</strong>。
 </p>
 <h4>最直覺的想法，以及它的問題</h4>
 <p>
-最簡單的規則是「算一個加權總和 $z=\mathbf{w}^\top\mathbf{x}+b$，$z>0$ 說故障，否則說正常」。
+最簡單的規則是「算一個加權總和 $z=\mathbf{w}^\top\mathbf{x}+b$，$z>0$ 說會逾期，否則說不會」。
 這就是一個超平面把空間切兩半，完全是線代的東西。
 </p>
 <p>
@@ -35,7 +46,7 @@
 而且它不連續，沒辦法微分，也就沒辦法用微積分找最佳的 $\mathbf{w}$。
 </p>
 <h4>sigmoid：把實數壓成機率</h4>
-<p>所以改成先算 $z$，再用一個函數把它壓到 $(0,1)$ 當成「故障的機率」：</p>
+<p>所以改成先算 $z$，再用一個函數把它壓到 $(0,1)$ 當成「逾期的機率」：</p>
 $$\sigma(z)=\frac{1}{1+e^{-z}}$$
 <p>這個函數有幾個剛好合用的性質：</p>
 <ul>
@@ -54,9 +65,9 @@ $$\sigma(z)=\frac{1}{1+e^{-z}}$$
 <details class="bg"><summary>什麼是「概似」？為什麼要取 log？</summary>
 <div class="bg-body">
 <p>
-模型說「第 $i$ 筆是故障的機率是 $p_i=\sigma(z_i)$」。
-如果它的真實答案 $y_i=1$（故障），模型給的機率就是 $p_i$；
-如果 $y_i=0$（正常），模型給的機率是 $1-p_i$。兩種情況可以合寫成
+模型說「第 $i$ 筆逾期的機率是 $p_i=\sigma(z_i)$」。
+如果它的真實答案 $y_i=1$（逾期），模型給的機率就是 $p_i$；
+如果 $y_i=0$（準時），模型給的機率是 $1-p_i$。兩種情況可以合寫成
 </p>
 $$P(y_i\mid\mathbf{x}_i)=p_i^{\,y_i}(1-p_i)^{1-y_i}$$
 <p>
@@ -136,85 +147,85 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <div class="step" data-n="1">
 <h3>先照平常的方式問</h3>
 <p>輸入 <code>/new</code> 開新對話，貼上這句：</p>
-<pre class="cmd"><code>data/line_faults.csv 是產線紀錄，fault 是故障標籤。幫我訓練模型預測故障，告訴我能不能上線用。</code></pre>
+<pre class="cmd"><code>data/loans.csv 是圖書館的借閱紀錄，overdue 是逾期標籤。幫我訓練模型預測逾期，告訴我能不能上線用。</code></pre>
 <p>每個權限要求都讀一下。</p>
 </div>
 
 <div class="step" data-n="2">
 <h3>判斷：哪些決定是它替你做的？</h3>
-<p>先別追問，寫下你接受、保留或拒絕它的結論，並查三件事：</p>
+<p>先別追問，寫下你接受、保留或拒絕它的結論，並查四件事：</p>
 <ul>
 <li><strong>門檻</strong>：它用哪個門檻？誰決定的？</li>
-<li><strong>欄位</strong>：<code>record_id</code> 有沒有當特徵？按 <code>!</code> 用 <code>grep -rn record_id --include=*.py .</code> 查；沒有 <code>.py</code> 檔就看工具紀錄。再看摘要有沒有寫。</li>
-<li><strong>數字</strong>：永遠猜「沒故障」的準確率是多少？和它報的比起來呢？</li>
+<li><strong>欄位</strong>：<code>case_no</code> 有沒有當特徵？按 <code>!</code> 用 <code>grep -rn case_no --include=*.py .</code> 查；沒有 <code>.py</code> 檔就看工具紀錄。再看摘要有沒有寫。</li>
+<li><strong>數字</strong>：永遠猜「不會逾期」的準確率是多少？和它報的比起來呢？</li>
 <li><strong>來源</strong>：它讀了哪些檔？（看工具紀錄）建議或不建議上線的理由，哪些是你能核對的數字，哪些是推測？</li>
 </ul>
-<details class="bg"><summary>寫完判斷再打開：講師實測</summary>
+<details class="bg"><summary>寫完判斷再打開：AI 常見的反應</summary>
 <div class="bg-body">
-<div class="box tip">
-<div class="bt">講師實測：同一句 prompt</div>
-<p>2026-11-02、03，OpenCode 1.19.5 互動模式，每個模型各 3 次。先看課堂預設的 <code>big-pickle</code>：</p>
-<ul>
-<li><strong>3 次都直接說不能上線，也都在摘要點出故障全擠在 <code>record_id</code> 小的區段</strong>，判定是洩漏。AI 做對了很重要的一件事，這也是好結果。</li>
-<li>它們都把 <code>record_id</code> 當成時間，沒有問過這個編號怎麼來的；有的還往下推，說這是「同一次事件」或「暖機」階段。</li>
-<li>回答裡沒有提到漏報代價或複查人力，也沒有先問你。其中 1 次拿 Lab 1 的 <code>data/line_modes.csv</code> 當理由，說模型無法轉移到其他運轉模式。</li>
-</ul>
-<p><code>Gemini 3.5 Flash Lite</code> 與 <code>GLM-5.3-Flash</code>：</p>
-<ul>
-<li><strong>6 次的最終模型都沒有用 <code>record_id</code></strong>，5 次在回答裡報了 recall，1 次只寫在筆記。AI 這裡多半做得不錯。其中 1 次還主動指出它與故障相關，是洩漏風險。</li>
-<li>但只有 1 次在摘要提到 <code>record_id</code>，另外 5 次要讀程式或它寫的筆記才知道。</li>
-<li>結論從「不建議直接上線」到「可以作為輔助預警」都有，報出的 recall 從 27% 到 93% 都有，取決於它自己挑的模型和門檻。</li>
-<li>其中 1 次提到要依停機和維修成本調門檻，但 6 次都在沒問你的情況下先給了結論。</li>
-<li>有 1 次拿 Lab 1 的 <code>data/line_modes.csv</code> 當理由，說轉速「超出訓練分布」，講得很肯定；但那份資料和這題的關係，它其實不知道。</li>
-</ul>
-<p style="margin-bottom:0">所以你那次可能完全不同。不論它有沒有抓到，都照上面四項查一次。</p>
-</div>
+<p>AI 常做對一件很重要的事：發現逾期全擠在編號小的那一段，判定是「洩漏」（答案透過不該用的欄位偷偷混進特徵），不把編號當特徵。這是好結果。但它很少問這個編號是怎麼來的，就直接建議「依時間切分驗證」這類做法。也可能默默不用編號、摘要卻沒提，所以要讀程式確認。</p>
+<p style="margin-bottom:0">它報的 recall 和結論，取決於它自己挑的模型和門檻（同一句話問三次，它挑過 0.1、0.5、0.7 當門檻）；很少先問你漏掉一次逾期有多糟、館員能寄幾封提醒，就先給了「可以」或「不行」。它也可能去讀專案裡別關的資料檔。不論它有沒有抓到，都照上面四項查一次。</p>
 </div>
 </details>
 </div>
 
 <div class="step" data-n="3">
-<h3>揭曉：現場的人知道什麼</h3>
+<h3>揭曉：館員知道什麼</h3>
 <details class="bg"><summary>寫完判斷再打開：需求卡與結果</summary>
 <div class="bg-body">
 <div class="box warn">
 <div class="bt">需求卡</div>
 <ul style="margin-bottom:0">
-<li><strong>漏掉一次故障</strong>會讓整條線停工，代價很高。</li>
-<li><strong>每 300 筆，現場最多只能複查 40 件。</strong></li>
-<li><code>record_id</code> 是人工登錄時給的，異常案例通常先登錄。</li>
-<li>下一批 300 筆資料已經有結果了。</li>
+<li><strong>漏掉一次逾期</strong>代價很高：期末的指定用書被壓住，排隊預約的同學都借不到。</li>
+<li><strong>每 300 筆借閱，館員最多只能個別寄 40 封提醒。</strong>寄太多，同學也會把提醒當垃圾信。</li>
+<li><code>case_no</code> 是把舊紙本紀錄補進系統時給的；館員先補已知逾期的案件，所以逾期的編號多半比較小。</li>
+<li>下一批 300 筆借閱已經有結果了。</li>
 </ul>
 </div>
-<p>比對一下：它對 <code>record_id</code> 的解釋和建議，符合現場說的嗎？它說不能上線，有根據你的複查上限嗎？</p>
+<p>比對一下：它對 <code>case_no</code> 的解釋和建議，符合館員說的嗎？它說能或不能上線，有根據你的人力上限嗎？</p>
 <p>在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
-<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/line_faults_new_batch.csv -o data/line_faults_new_batch.csv</code></pre>
-<p>先預測，再寫下這張卡，用它自己寫 prompt 請 AI 計算：</p>
+<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/loans_new_batch.csv -o data/loans_new_batch.csv</code></pre>
+<p>選門檻是取捨：門檻低，抓到的逾期多，白提醒也多；門檻高則相反。這個取捨要由知道代價的人來做。<strong>決策卡就是先寫下你的優先順序和限制，再請 AI 只負責算數字</strong>，最後由你拍板。</p>
 <div class="box warn">
 <div class="bt">決策卡</div>
-<p style="margin-bottom:0">我優先避免＿＿；複查上限＿＿；我預測降低門檻會＿＿。請計算核對，<strong>不要替我選。</strong></p>
+<ol style="margin-bottom:0">
+<li><strong>優先避免</strong>：漏掉逾期和白提醒，我比較不能接受哪一個？為什麼？</li>
+<li><strong>限制</strong>：每 300 筆最多能寄幾封提醒？</li>
+<li><strong>預測</strong>：門檻調低，提醒數、抓到、漏掉會怎麼變？</li>
+</ol>
 </div>
-<p>也告訴它不要用哪些欄位、用哪份資料檢查，以及要列出哪些數字（例如各門檻的警報、抓到、漏掉、誤報）。</p>
+<details class="bg"><summary>寫完再對照：決策卡範例與 prompt</summary>
+<div class="bg-body">
+<ul>
+<li>優先避免：<strong>漏掉逾期</strong>，因為指定用書被壓住會影響一整排預約的同學。</li>
+<li>限制：每 300 筆最多 40 封。</li>
+<li>預測：門檻從 0.5 降到 0.2，抓到會變多，但提醒數會逼近 40。</li>
+</ul>
+<pre class="cmd"><code>不要用 case_no 當特徵。用 data/loans.csv 訓練 logistic 迴歸，再用 data/loans_new_batch.csv 檢查。
+我優先避免漏掉逾期，每 300 筆最多寄 40 封提醒。
+請列出門檻 0.5、0.3、0.2、0.1、0.05 在新一批的提醒數、抓到、漏掉、白提醒，不要替我選。</code></pre>
+<p style="margin-bottom:0">你也可以優先避免白提醒，只要說得出理由。</p>
+</div>
+</details>
 <details class="bg"><summary>算完再打開：參考結果</summary>
 <div class="bg-body">
-<p>下面是手刻模型的參考結果（<code>reference/lab3_logistic.py</code>，切 30% 當測試集，並用訓練集的平均和標準差做標準化）。實測 <code>GLM-5.3-Flash</code> 3 次都列出了表，也都把決定留給你，但有 1 次仍點出 0.2 是唯一符合條件的門檻；用 sklearn 預設值時數字會差一點（例如門檻 0.5 時警報 11 件）。<code>Gemini 3.5 Flash Lite</code> 當天額度用完，還沒有這一題的紀錄。</p>
+<p>下面是手刻模型的參考結果（<code>reference/lab3_logistic.py</code>，切 30% 當測試集，只用其餘 630 筆訓練，並用訓練集的平均和標準差做標準化）。你若用全部 900 筆訓練，數字會略有不同。AI 用的模型設定不同時，數字會差一點。即使你說了「不要替我選」，它有時仍會點名一個門檻，這也要看出來。</p>
 <div class="tw"><table>
 <tr><th>模型</th><th>測試集準確率</th><th>測試集 recall</th><th>下一批 recall</th></tr>
-<tr><td>永遠猜「沒故障」</td><td>0.922</td><td>0</td><td>0</td></tr>
-<tr><td>含 <code>record_id</code></td><td>0.993</td><td><strong>0.952</strong></td><td><strong>0.000</strong></td></tr>
-<tr><td>不含 <code>record_id</code>，門檻 0.5</td><td>0.933</td><td>0.476</td><td>0.462</td></tr>
+<tr><td>永遠猜「不會逾期」</td><td>0.922</td><td>0</td><td>0</td></tr>
+<tr><td>含 <code>case_no</code></td><td>0.993</td><td><strong>0.952</strong></td><td><strong>0.000</strong></td></tr>
+<tr><td>不含 <code>case_no</code>，門檻 0.5</td><td>0.933</td><td>0.476</td><td>0.538</td></tr>
 </table></div>
-<p>含 <code>record_id</code> 的模型測試成績最好，換一批就一個故障都抓不到：它學到的是「編號小的多半是異常」，新批次的編號都很大。實測 <code>big-pickle</code> 3 次都抓到這個規律，但解釋成時間洩漏，建議補更多故障事件、改用時間切分；需求卡告訴你，這個編號其實是登錄順序。AI 看得出異常，原因要問現場。</p>
-<p>不含 <code>record_id</code> 時，門檻決定了抓到多少，也決定了要複查多少：</p>
+<p>含 <code>case_no</code> 的模型測試成績最好，換一批就一個逾期都抓不到：它學到的是「編號小的多半會逾期」，新一批的編號都很大。AI 常看得出這個規律，卻很少問編號是怎麼來的。需求卡告訴你，它其實是補登的順序：異常 AI 看得出來，原因要問館員。</p>
+<p>不含 <code>case_no</code> 時，門檻決定了抓到多少，也決定了要寄多少提醒：</p>
 <div class="tw"><table>
-<tr><th>門檻</th><th>下一批：警報數</th><th>抓到</th><th>漏掉</th><th>誤報</th></tr>
-<tr><td>0.5</td><td>15</td><td>6</td><td>7</td><td>9</td></tr>
+<tr><th>門檻</th><th>下一批：提醒數</th><th>抓到</th><th>漏掉</th><th>白提醒</th></tr>
+<tr><td>0.5</td><td>17</td><td>7</td><td>6</td><td>10</td></tr>
 <tr><td>0.3</td><td>27</td><td>10</td><td>3</td><td>17</td></tr>
 <tr><td>0.2</td><td>37</td><td>11</td><td>2</td><td>26</td></tr>
 <tr><td>0.1</td><td>49（超過 40）</td><td>11</td><td>2</td><td>38</td></tr>
-<tr><td>0.05</td><td>68（超過 40）</td><td>13</td><td>0</td><td>55</td></tr>
+<tr><td>0.05</td><td>69（超過 40）</td><td>13</td><td>0</td><td>56</td></tr>
 </table></div>
-<p>你會選哪一個？為什麼？下一批只有 13 個故障，少一兩個就差很多，這句話也要寫進結論。如果 AI 已經提醒你要看成本，那很好，但成本的數字還是要你提供。</p>
+<p>你會選哪一個？為什麼？下一批只有 13 個逾期，少一兩個就差很多，這句話也要寫進結論。如果 AI 已經提醒你要看代價，那很好，但代價有多大還是要你提供。</p>
 </div>
 </details>
 </div>
@@ -239,7 +250,7 @@ $$L(w)=\frac1n\sum_i\Bigl[\log\bigl(1+e^{z_i}\bigr)-y_iz_i\Bigr],
 <div class="bt">中央差分</div>
 $$\frac{\partial L}{\partial w_i}\;\approx\;\frac{L(w+h\mathbf{e}_i)-L(w-h\mathbf{e}_i)}{2h}$$
 </div>
-<p>先自己把需求卡、你選的門檻和理由寫進 <code>notes/decision.md</code>：新對話不會自動帶入剛才的討論，但檔案還在。接著輸入 <code>/new</code>，自己寫 prompt。它回答後，記下底部的 context 用量（例如 <code>30.5K (15%)</code>）。至少交代：用 numpy 手刻，存成 <code>lab3_logistic.py</code>；使用全部 900 筆；<strong>不用 <code>record_id</code></strong>；特徵標準化，最後加一欄 1；<code>loss</code>、<code>grad</code> 用本頁公式；不加正則化。</p>
+<p>先自己把需求卡、你的決策卡、選的門檻和理由寫進 <code>notes/decision.md</code>：新對話不會自動帶入剛才的討論，但檔案還在。接著輸入 <code>/new</code>，自己寫 prompt。它回答後，記下底部的 context 用量（例如 <code>30.5K (15%)</code>）。至少交代：用 numpy 手刻，存成 <code>lab3_logistic.py</code>；使用全部 900 筆；<strong>不用 <code>case_no</code></strong>；特徵標準化，最後加一欄 1；<code>loss</code>、<code>grad</code> 用本頁公式；不加正則化（sklearn 預設會在損失裡加一項懲罰大權重的值，這裡不要）。</p>
 <p>再決定：<strong>檢查幾個維度？在哪個點檢查？用哪些步長？怎樣算過關？</strong>寫完貼給它，看它有沒有照做。</p>
 <details class="bg"><summary>寫完再對照：一份參考結果</summary>
 <div class="bg-body">
@@ -249,9 +260,9 @@ $$\frac{\partial L}{\partial w_i}\;\approx\;\frac{L(w+h\mathbf{e}_i)-L(w-h\mathb
   <div class="term-body"><div class="o">    步長 h    最大絕對誤差   判定</div>
 <div class="o">     1e-02    1.379e-07   FAIL</div>
 <div class="o">     1e-03    1.379e-09   PASS</div>
-<div class="o">     1e-05    5.178e-12   PASS</div>
-<div class="o">     1e-07    6.218e-10   PASS</div>
-<div class="o">     1e-09    1.130e-07   FAIL</div>
+<div class="o">     1e-05    9.271e-12   PASS</div>
+<div class="o">     1e-07    6.578e-10   PASS</div>
+<div class="o">     1e-09    9.772e-08   FAIL</div>
 </div>
 </div>
 <p style="margin-bottom:0">兩頭的 FAIL，程式完全沒問題：$h$ 太大時截斷誤差大，$h$ 太小時 $L(w+h)$ 與 $L(w-h)$ 幾乎相等，相減會損失有效位數。所以看到 FAIL 的正確說法是<strong>「有不一致，要查原因」</strong>。</p>
@@ -261,28 +272,28 @@ $$\frac{\partial L}{\partial w_i}\;\approx\;\frac{L(w+h\mathbf{e}_i)-L(w-h\mathb
 
 <div class="step" data-n="5">
 <h3>驗證：PASS 到底證明了什麼？</h3>
-<p>下面兩個錯誤是<strong>講師設計後注入</strong>的，不是 AI 犯的。先預測結果，再請它跑：</p>
+<p>下面兩個錯誤是<strong>故意放進去</strong>的，不是 AI 犯的。先預測結果，再請它跑：</p>
 <pre class="cmd"><code>請做兩個實驗，不要修改原本的 loss 和 grad，完成後停止：
 A. 把 loss 和 grad 一起換成均方誤差 mean((σ(z)-y)^2) 與它正確的梯度
 B. loss 不變，只把 grad 乘以 2
 兩個都用同一段梯度檢查跑一次，印出最大絕對誤差與 PASS/FAIL。</code></pre>
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">參考程式輸出，h=1e-5，門檻 1e-8</span></div>
-  <div class="term-body"><div class="o">正確的 loss 與 grad　　　　 5.18e-12　PASS</div>
-<div class="o">loss、grad 一起換成 MSE　　 3.10e-12　PASS</div>
+  <div class="term-body"><div class="o">正確的 loss 與 grad　　　　 9.27e-12　PASS</div>
+<div class="o">loss、grad 一起換成 MSE　　 2.80e-12　PASS</div>
 <div class="e">只把 grad 乘 2　　　　　　　 4.23e-01　FAIL</div>
 </div>
 </div>
 <div class="box danger">
 <div class="bt">目標函數都換了，還是 PASS</div>
 <p style="margin-bottom:0">
-梯度檢查只證明 <code>grad</code> 和 <code>loss</code> <strong>彼此一致</strong>，不證明 <code>loss</code> 是你要的那個函數，所以上面的公式要自己核對。同樣地，準確率高也不證明模型能用：<code>record_id</code> 那個模型就是例子。
+梯度檢查只能說明：在檢查的那個點、用那幾個步長時，<code>grad</code> 和 <code>loss</code> <strong>彼此一致</strong>。它不證明 <code>loss</code> 是你要的那個函數，所以上面的公式要自己核對。同樣地，準確率高也不證明模型能用：<code>case_no</code> 那個模型就是例子。
 </p>
 </div>
 <details class="bg"><summary>深入：手刻和 sklearn 會一樣嗎？</summary>
 <div class="bg-body">
-<p>不含 <code>record_id</code> 時，手刻梯度下降（全 0 起點、<code>lr=0.5</code>、20000 次）和 <code>LogisticRegression(C=np.inf, max_iter=20000, tol=1e-10)</code> 的權重最大差約 1.4e-8，因為這個問題有唯一的有限解。</p>
-<p style="margin-bottom:0">含 <code>record_id</code> 時差距高達數百：資料幾乎被編號完全分開，權重會一直變大，兩邊只是停在不同位置。如果 AI 加了 L2 正則化，那已經是另一個模型，要寫進結論；兩邊用相同的 L2 強度、損失尺度和截距處理，並充分收斂，才適合比較權重。</p>
+<p>不含 <code>case_no</code> 時，手刻梯度下降（全 0 起點、<code>lr=0.5</code>、20000 次）和 <code>LogisticRegression(C=np.inf, max_iter=20000, tol=1e-10)</code> 的權重最大差約 1e-8，因為這個問題有唯一的有限解。</p>
+<p style="margin-bottom:0">含 <code>case_no</code> 時差距高達數百：資料幾乎被編號完全分開，權重會一直變大，兩邊只是停在不同位置。如果 AI 加了 L2 正則化，那已經是另一個模型，要寫進結論；兩邊用相同的 L2 強度、損失尺度和截距處理，並充分收斂，才適合比較權重。</p>
 </div>
 </details>
 </div>
@@ -331,7 +342,7 @@ B. loss 不變，只把 grad 乘以 2
 <div class="step" data-n="2">
 <h3>看記憶的邊界</h3>
 <p>告訴它 <code>這次的代號是海鷗-47，請記住。只回答好。</code>，輸入 <code>/new</code>，再問 <code>上一段的代號是什麼？不知道就明說。</code></p>
-<p>講師實測三個模型各 3 次，都回答不知道。所以要它記得的事，就寫進檔案。</p>
+<p>它通常會回答不知道：<code>/new</code> 之後，上一段對話不會帶過來。所以要它記得的事，就寫進檔案。</p>
 </div>
 <div class="step" data-n="3">
 <h3>把一個問題寫成規則，再測它</h3>
@@ -341,12 +352,12 @@ B. loss 不變，只把 grad 乘以 2
 - 最後的摘要要寫出沒被要求、由你自己做的決定，例如前處理、切分資料、移除哪些欄位。
 - 開始分析前，先列出「我缺的資訊」和「我打算假設的值」各至少兩項，然後停下等我確認，不要先跑程式。</code></pre>
 <p><code>/new</code> 後，把 Lab 3 第一句再問一次，<strong>逐條檢查它有沒有照做</strong>，再和鄰座比較。</p>
-<div class="box tip">
-<div class="bt">講師實測：上面這兩條規則（分開測，兩條一起用還沒測）</div>
-<p>2026-11-02、03。「摘要要寫出決定」這條，Gemini 和 GLM 各 3 次都照做，也都提到 <code>record_id</code>；沒有這條時，這兩個模型只有 1 次提到。</p>
-<p>另一條我們改過寫法。原本寫「資訊不足先問我，不要自己假設」，Gemini 和 GLM 各 3 次<strong>都沒有先問</strong>，直接訓練並下結論。<code>big-pickle</code> 只有 1 次完整紀錄，同樣先訓練完，最後才問 <code>fault</code> 是當下還是未來的故障；另 1 次跑到一半額度用完，在那之前也沒有停下來問。改成上面這種可以檢查的停止點後，<code>GLM-5.3-Flash</code> 3 次都停下來列出缺的資訊和假設（其中 1 次先用指令看了資料檔）；<code>Gemini 3.5 Flash Lite</code> 當天額度用完，還沒有這一條的紀錄。</p>
+<details class="bg"><summary>測完再打開：AI 常見的反應</summary>
+<div class="bg-body">
+<p>「摘要要寫出決定」這類規則，AI 多半做得到，也會因此在摘要提到 <code>case_no</code>。「資訊不足先問我，不要自己假設」這種寫法則常被略過，它還是直接訓練並下結論；改成上面那種可以檢查的停止點（列出幾項、停下等確認）之後，比較常真的停下來。</p>
 <p style="margin-bottom:0">所以規則有用，但寫法有差，也不保證每次遵守，寫完要測。</p>
 </div>
+</details>
 <p>想多練習，看 <a href="agents-md.html">AGENTS.md 專案規則</a>。</p>
 </div>
 </section>
@@ -354,9 +365,9 @@ B. loss 不變，只把 grad 乘以 2
 <section>
 <h2>檢查清單</h2>
 <ul class="ckl">
-<li><input type="checkbox" id="l3a"><label for="l3a">揭曉前，我查過門檻、<code>record_id</code>，也算過永遠猜「沒故障」的準確率</label></li>
-<li><input type="checkbox" id="l3b"><label for="l3b">我寫了決策卡，自己選了一個門檻，並能說明理由</label></li>
-<li><input type="checkbox" id="l3c"><label for="l3c">我能說明含 <code>record_id</code> 的模型為什麼測試成績好，換一批就失效</label></li>
+<li><input type="checkbox" id="l3a"><label for="l3a">揭曉前，我查過門檻、<code>case_no</code>，也算過永遠猜「不會逾期」的準確率</label></li>
+<li><input type="checkbox" id="l3b"><label for="l3b">我寫了決策卡的三格（優先避免、限制、預測），自己選了一個門檻，並能說明理由</label></li>
+<li><input type="checkbox" id="l3c"><label for="l3c">我能說明含 <code>case_no</code> 的模型為什麼測試成績好，換一批就失效</label></li>
 <li><input type="checkbox" id="l3d"><label for="l3d">梯度檢查是我規劃的；我也親眼看到 <code>loss</code>、<code>grad</code> 一起換成 MSE 仍然 PASS</label></li>
 <li><input type="checkbox" id="l3e"><label for="l3e"><code>notes/logistic.md</code> 寫了觀察、決定、不能證明什麼，而且我讀過每一句</label></li>
 <li><input type="checkbox" id="l3f"><label for="l3f">我寫了一條規則，<code>/new</code> 後逐條測過</label></li>
@@ -366,8 +377,8 @@ B. loss 不變，只把 grad 乘以 2
 <section>
 <h2>如果還有時間</h2>
 <ul>
-<li>改一個條件自己試：把複查上限改成 20 件，或把漏報成本改低，你的門檻會變嗎？</li>
-<li>把手刻模型換成 sklearn 的 <code>class_weight='balanced'</code>，比較警報數。</li>
+<li>改一個條件自己試：把提醒上限改成 20 封，或假設漏掉逾期沒那麼嚴重，你的門檻會變嗎？</li>
+<li>把手刻模型換成 sklearn 的 <code>class_weight='balanced'</code>，比較提醒數。</li>
 </ul>
 <details class="bg"><summary>課後練習：從概似推導損失與梯度</summary><div class="bg-body"><p>可以請 agent 陪你逐步推導，遇到不熟的符號就停下來問：</p><pre class="cmd"><code>先定義 Bernoulli 模型的成功機率，解釋為什麼把獨立樣本的機率相乘。
 從負對數概似逐步推導本頁的平均損失，再推導梯度。

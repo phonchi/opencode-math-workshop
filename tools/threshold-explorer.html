@@ -1,92 +1,146 @@
 <section class="threshold-explorer" aria-labelledby="threshold-title">
-<h2 id="threshold-title">先動手：門檻是誰決定的？</h2>
-<p>logistic 迴歸把輸入特徵 $x$ 算成分數 $z=wx+b$，再用 $p=\sigma(z)=\frac{1}{1+e^{-z}}$ 壓成 0 到 1 的機率。機率超過<strong>門檻</strong>就發警報。下面是 60 筆<strong>合成資料</strong>，不是產線資料：8 筆故障（紅），52 筆正常（灰）。模型已經訓練好，不會再變。</p>
-<p><strong>先猜：把門檻調低，抓到的故障和誤報各會怎麼變？準確率呢？</strong>猜完再拖。</p>
-<div class="threshold-panel">
-  <div class="threshold-controls">
-    <label for="threshold-t">門檻 <output id="threshold-t-value" for="threshold-t">0.50</output><span class="threshold-note">常見預設是 0.5</span></label>
-    <input id="threshold-t" type="range" min="0.02" max="0.98" step="0.01" value="0.5">
-    <label for="threshold-cap">複查上限 <output id="threshold-cap-value" for="threshold-cap">10</output> 件</label>
-    <input id="threshold-cap" type="range" min="1" max="30" step="1" value="10">
+<h2 id="threshold-title">先玩一次：要提醒哪些人？</h2>
+<p>下面是 60 筆<strong>示範借閱</strong>，不是正文資料。模型已經訓練好，不會再變：它替每筆借閱算出一個 0 到 1 的<strong>逾期風險分數</strong>。館員只要決定一件事：分數多高就寄提醒？這條線叫<strong>門檻</strong>。跟著步驟按「下一步」。</p>
+<div class="th-panel">
+  <div class="th-head">
+    <span class="th-count" id="threshold-count">第 1／6 步</span>
+    <strong class="th-title" id="threshold-step-title">排好隊</strong>
   </div>
-  <figure>
-    <svg id="threshold-plot" viewBox="0 0 680 420" role="img" aria-labelledby="threshold-svg-title threshold-svg-desc">
-      <title id="threshold-svg-title">機率曲線與門檻</title>
-      <desc id="threshold-svg-desc">橫軸是輸入特徵，曲線是故障機率。垂直線是目前門檻對應的位置，線右邊的點都會發警報。</desc>
-      <rect id="threshold-zone" y="24" height="358" fill="#b8503c" opacity=".08"/>
-      <line x1="50" y1="230" x2="650" y2="230" stroke="#7d7a72"/>
-      <line x1="50" y1="24" x2="50" y2="230" stroke="#7d7a72"/>
-      <text x="42" y="32" text-anchor="end" font-size="16" fill="#5f5c55">1</text>
-      <text x="42" y="236" text-anchor="end" font-size="16" fill="#5f5c55">0</text>
-      <text x="44" y="258" text-anchor="end" font-size="15" fill="#b8503c">故障</text>
-      <text x="44" y="292" text-anchor="end" font-size="15" fill="#5f5c55">正常</text>
-      <text x="350" y="408" text-anchor="middle" font-size="16" fill="#5f5c55">輸入特徵 x（越右邊越像故障）</text>
-      <path id="threshold-curve" fill="none" stroke="#2a3c78" stroke-width="3"/>
-      <g id="threshold-points"></g>
-      <line id="threshold-line" y1="24" y2="382" stroke="#b8503c" stroke-width="3"/>
-    </svg>
-    <figcaption>曲線：故障機率　紅色點：故障　灰色點：正常　淡紅區：會發警報的範圍</figcaption>
-  </figure>
-  <dl class="threshold-readouts">
-    <div><dt>警報</dt><dd><output id="threshold-alarms">—</output></dd></div>
-    <div><dt>抓到故障</dt><dd><output id="threshold-caught">—</output></dd></div>
-    <div><dt>漏掉故障</dt><dd><output id="threshold-missed">—</output></dd></div>
-    <div><dt>誤報</dt><dd><output id="threshold-false">—</output></dd></div>
-    <div><dt>準確率</dt><dd><output id="threshold-acc">—</output></dd></div>
+  <p class="th-say" id="threshold-say" aria-live="polite"></p>
+  <div class="th-controls" role="group" aria-label="這一步的操作">
+    <span class="th-group th-slider" data-for="1 2 3 4 5"><label for="threshold-t">門檻 <output id="threshold-t-value" for="threshold-t">0.50</output></label><input id="threshold-t" type="range" min="0.02" max="0.98" step="0.01" value="0.5"></span>
+    <span class="th-group th-slider" data-for="3 4 5"><label for="threshold-cap">人力上限 <output id="threshold-cap-value" for="threshold-cap">8</output> 人</label><input id="threshold-cap" type="range" min="1" max="30" step="1" value="8"></span>
+  </div>
+  <div class="th-queue-wrap">
+    <p class="th-ends"><span>風險最高</span><span>→ 依分數排隊 →</span><span>風險最低</span></p>
+    <ol class="th-queue" id="threshold-queue" aria-label="依風險分數排序的 60 筆借閱"></ol>
+    <p class="th-key" id="threshold-key"></p>
+  </div>
+  <dl class="th-readouts" id="threshold-readouts">
+    <div data-show="1"><dt>寄出提醒</dt><dd><output id="threshold-alarms">—</output></dd></div>
+    <div data-show="2"><dt>抓到逾期</dt><dd><output id="threshold-caught">—</output></dd></div>
+    <div data-show="2"><dt>漏掉逾期</dt><dd><output id="threshold-missed">—</output></dd></div>
+    <div data-show="2"><dt>白提醒（沒逾期）</dt><dd><output id="threshold-false">—</output></dd></div>
+    <div data-show="4"><dt>準確率</dt><dd><output id="threshold-acc">—</output></dd></div>
   </dl>
-  <p id="threshold-status" class="threshold-status" role="status"></p>
-  <p class="threshold-base">對照：永遠猜「沒故障」，準確率也有 86.7%，但一個故障都抓不到。</p>
+  <p id="threshold-status" class="th-status" role="status"></p>
+  <div class="th-nav">
+    <button type="button" id="threshold-prev">← 上一步</button>
+    <button type="button" id="threshold-next" class="th-primary">下一步 →</button>
+    <button type="button" id="threshold-reset">從頭開始</button>
+  </div>
 </div>
 <div class="box warn">
-<div class="bt">操作完回答</div>
+<div class="bt">玩完回答</div>
 <ul style="margin-bottom:0">
-<li>模型有重新訓練嗎？為什麼判定還是變了？</li>
-<li>你猜對了嗎？準確率最高的門檻，是你想要的門檻嗎？</li>
-<li>把複查上限改成 5 或 20，你的選擇會變嗎？<strong>要選門檻，你還需要知道什麼？模型會知道嗎？</strong></li>
+<li>模型有重新訓練嗎？為什麼提醒名單還是變了？</li>
+<li>準確率最高的門檻，是你想要的門檻嗎？</li>
+<li>把人力上限改成 4 或 15，你的選擇會變嗎？<strong>要選門檻，你還需要知道什麼？模型會知道嗎？</strong></li>
 </ul>
 </div>
-<noscript><p>此互動需要 JavaScript。重點是：模型沒變，調門檻就會改變抓到與誤報的數量，該選哪個要看漏報代價和人力。</p></noscript>
+<details class="bg"><summary>補充：分數是怎麼算出來的？</summary><div class="bg-body">
+<p style="margin-bottom:0">logistic 迴歸先把借閱的特徵算成一個加權總和 $z=\mathbf{w}^\top\mathbf{x}+b$，再用 $\sigma(z)=\frac{1}{1+e^{-z}}$ 壓到 0 到 1 之間，當成逾期的機率。正文的「logistic 迴歸為什麼長那樣」會一步步說明；這裡只要知道：<strong>分數是模型給的，門檻是人選的。</strong></p>
+</div></details>
+<noscript><p>此互動需要 JavaScript。重點是：模型不變，調門檻就會改變提醒人數、抓到與漏掉的逾期數；該選哪個要看漏報代價和人力，模型不知道。</p></noscript>
 </section>
 <style>
-.threshold-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
-.threshold-controls{display:grid;grid-template-columns:1fr 1fr;gap:.2rem 1.5rem;align-items:center}
-.threshold-controls label{font-weight:600;grid-row:1}.threshold-controls label output{color:var(--link);font-variant-numeric:tabular-nums;margin:0 .3rem}.threshold-note{font-weight:400;font-size:.8rem;color:var(--ink-2);margin-left:.4rem}
-.threshold-controls input{grid-row:2;width:100%;min-width:0;accent-color:var(--link);min-height:44px}
-.threshold-controls input:focus-visible{outline:3px solid var(--link);outline-offset:3px}
-.threshold-panel figure{margin:1rem 0}.threshold-panel svg{display:block;width:100%;height:auto}.threshold-panel figcaption{font-size:.82rem;color:var(--ink-2);text-align:center}
-.threshold-readouts{display:flex;gap:1.6rem;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:1rem;margin:0}.threshold-readouts dt{font-size:.86rem;color:var(--ink-2)}.threshold-readouts dd{margin:0;font-size:1.5rem;color:var(--link);font-variant-numeric:tabular-nums}
-.threshold-status{font-weight:600;margin:.8rem 0 0;min-height:1.6em}.threshold-status.over{color:#b8503c}.threshold-base{font-size:.86rem;color:var(--ink-2);margin:.3rem 0 0}
-@media(max-width:600px){.threshold-controls{display:block}.threshold-panel figcaption{text-align:left}}
-@media print{.threshold-controls input{display:none}}
+.th-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
+.th-head{display:flex;gap:.8rem;align-items:baseline;flex-wrap:wrap}
+.th-count{font-size:.82rem;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.th-title{font-size:1.1rem;color:var(--link)}
+.th-say{margin:.5rem 0 .8rem;min-height:3.2em;line-height:1.7}
+.th-controls{display:grid;grid-template-columns:1fr 1fr;gap:.2rem 1.5rem;min-height:44px}
+.th-group[hidden]{display:none}
+.th-slider{display:flex;flex-direction:column}.th-slider label{font-weight:600}.th-slider output{color:var(--link);font-variant-numeric:tabular-nums}
+.th-slider input{width:100%;min-height:44px;accent-color:var(--link)}
+.th-slider input:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+.th-queue-wrap{margin:1rem 0 .6rem}
+.th-ends{display:flex;justify-content:space-between;font-size:.82rem;color:var(--ink-2);margin:0 0 .3rem}
+.th-queue{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(20,1fr);gap:4px}
+.th-queue li{aspect-ratio:1;border-radius:4px;background:var(--rule);border:2px solid transparent;position:relative;display:flex;align-items:center;justify-content:center;font-size:.8rem;line-height:1;color:var(--paper-2);transition:background .3s,border-color .3s}
+.th-queue li.alarm{background:var(--link)}
+.th-queue li.over{background:repeating-linear-gradient(45deg,var(--warn) 0 4px,var(--paper-2) 4px 7px)}
+.th-queue li.bad::after{content:"▲";color:var(--live);font-size:.85rem}
+.th-queue li.alarm.bad::after,.th-queue li.over.bad::after{color:var(--paper-2);text-shadow:0 0 2px var(--live)}
+.th-queue li.bad{border-color:var(--live)}
+.th-key{font-size:.86rem;color:var(--ink-2);margin:.5rem 0 0;min-height:1.4em}
+.th-key i{display:inline-block;width:.9em;height:.9em;border-radius:2px;vertical-align:-1px;margin:0 .25rem 0 .6rem}
+.th-key i.k-alarm{background:var(--link)}.th-key i.k-none{background:var(--rule)}.th-key i.k-over{background:repeating-linear-gradient(45deg,var(--warn) 0 3px,var(--paper-2) 3px 5px)}
+.th-key b{color:var(--live);margin-left:.6rem}
+.th-readouts{display:flex;gap:1.6rem;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:1rem;margin:0}
+.th-readouts div[hidden]{display:none}
+.th-readouts dt{font-size:.86rem;color:var(--ink-2)}.th-readouts dd{margin:0;font-size:1.5rem;color:var(--link);font-variant-numeric:tabular-nums}
+.th-status{font-weight:600;margin:.8rem 0 0;min-height:1.6em}.th-status.over{color:var(--live)}
+.th-nav{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+.th-panel button{font:inherit;font-size:.9rem;min-height:44px;min-width:44px;padding:.4rem .8rem;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
+.th-panel button:hover{border-color:var(--link);color:var(--link)}
+.th-panel button.th-primary{background:var(--link);border-color:var(--link);color:var(--paper)}
+.th-panel button:disabled{opacity:.4;cursor:default}
+.th-panel button:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.th-queue li{transition:none}}
+@media(max-width:720px){.th-controls{grid-template-columns:1fr}.th-say{min-height:0}.th-queue{grid-template-columns:repeat(10,1fr)}.th-nav button{flex:1 1 auto}.th-readouts{gap:1rem}}
+@media print{.th-controls,.th-nav{display:none}}
 </style>
 <script>
 (function(){
   'use strict';
+  // 60 筆示範借閱：模型對每筆的線性分數輸入 x；8 筆實際逾期。分數 = σ(W·x + B)。
   const NORMAL=[1.04,-3.56,-.58,-1.57,-1.45,-1.22,-3.02,-1.23,-1.87,2.32,-.77,-1.35,-1.28,-1.67,-2.06,-1.39,-.52,-1.24,-.04,-1.2,-.98,.55,-.45,-1.51,-1.18,-.46,.94,-1.27,-1.24,0,-1.89,-1.29,-.12,-.42,-.91,-.33,-3.83,.02,-1.96,-2.67,-.72,-.3,-1.44,-2.08,-.97,-1.05,.41,-.25,-.81,.11,-1.21,-1.93];
-  const FAULT=[1.83,1.82,1.11,.6,1.51,-.94,1.92,1.74];
+  const LATE=[1.83,1.82,1.11,.6,1.51,-.94,1.92,1.74];
   const W=1.76,B=-2.082;
   const prob=x=>1/(1+Math.exp(-(W*x+B)));
+  const ITEMS=[...NORMAL.map(x=>({p:prob(x),late:false})),...LATE.map(x=>({p:prob(x),late:true}))].sort((a,b)=>b.p-a.p);
+  const N=ITEMS.length,NLATE=LATE.length;
   const root=document.querySelector('.threshold-explorer');
-  const ns='http://www.w3.org/2000/svg';
   const el=id=>document.getElementById('threshold-'+id);
-  const sx=x=>50+(x+4.2)/(7)*600,sy=p=>230-p*206;
-  const shape=(tag,attrs,parent)=>{const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);parent.appendChild(n);return n;};
-  let d='';for(let x=-4.2;x<=2.8;x+=.1)d+=(d?'L':'M')+sx(x).toFixed(1)+' '+sy(prob(x)).toFixed(1);
-  el('curve').setAttribute('d',d);
-  const place=(xs,fill,base)=>{const used=[];xs.forEach(x=>{const cx=sx(x);let row=0;while(used.some(u=>u.row===row&&Math.abs(u.cx-cx)<10))row++;used.push({cx,row});shape('circle',{cx,cy:base+row*10,r:4.5,fill},el('points'));});};
-  place(FAULT,'#b8503c',253);place(NORMAL,'#8a867c',287);
+  const cells=ITEMS.map(it=>{const li=document.createElement('li');el('queue').appendChild(li);return li;});
+  let step=0;
+  const TITLES=['排好隊','切一刀：門檻','揭曉：誰真的逾期？','人力上限','準確率陷阱','你來決定'];
+  const SAY=[
+    '每個方塊是一筆借閱，依模型給的逾期風險分數由高到低排隊（左上最高，右下最低）。你現在還不知道誰真的會逾期。',
+    '拖動門檻：分數達到門檻的借閱會收到提醒（藍色）。門檻越低，提醒越多。先猜：門檻調低，抓到的逾期和白提醒各會怎麼變？',
+    '揭曉：有 ▲ 的是真的逾期。藍色裡的 ▲ 是抓到的；灰色裡的 ▲ 是漏掉的；藍色但沒有 ▲ 的，是白提醒。再拖門檻看看四個數字怎麼變。',
+    '館員一天只寫得完有限的提醒信。超過人力上限的提醒（斜線）寄不出去，那些人裡的逾期也會被漏掉。從這一步起，下面的數字只算真正寄出的提醒。',
+    '準確率是「判斷對的比例」。逾期的人本來就少，所以全部都不提醒，準確率也很高。把門檻拉到最右邊試試。',
+    '模型給的是分數。門檻要看「漏掉一個逾期有多糟」和「人力有多少」，這兩件事模型都不知道。選一個你願意負責的門檻，寫下理由。'
+  ];
   function draw(){
     const t=Number(el('t').value),cap=Number(el('cap').value);
-    const caught=FAULT.filter(x=>prob(x)>=t).length,falseAlarm=NORMAL.filter(x=>prob(x)>=t).length;
-    const missed=FAULT.length-caught,alarms=caught+falseAlarm,acc=(caught+NORMAL.length-falseAlarm)/(FAULT.length+NORMAL.length);
-    const cut=(Math.log(t/(1-t))-B)/W,x=Math.min(650,Math.max(50,sx(cut)));
-    el('line').setAttribute('x1',x);el('line').setAttribute('x2',x);el('zone').setAttribute('x',x);el('zone').setAttribute('width',650-x);
+    let alarms=0,caught=0,falseAlarm=0;
+    const capped=step>=3; // 從人力上限那一步起，只算真正寄得出去的提醒
+    ITEMS.forEach((it,i)=>{
+      const alarm=step>=1&&it.p>=t;if(alarm)alarms++;
+      const over=alarm&&capped&&alarms>cap;
+      if(alarm&&!over){if(it.late)caught++;else falseAlarm++;}
+      const c=cells[i];c.className=(alarm?(over?'over':'alarm'):'')+(step>=2&&it.late?' bad':'');
+      c.title=`分數 ${it.p.toFixed(2)}`;
+      c.setAttribute('aria-label',`第 ${i+1} 筆，分數 ${it.p.toFixed(2)}${alarm?'，會收到提醒':''}${step>=2&&it.late?'，實際逾期':''}${over?'，超過人力':''}`);
+    });
+    const sent=caught+falseAlarm,missed=NLATE-caught,acc=(caught+(N-NLATE-falseAlarm))/N,over=alarms>cap;
     el('t-value').value=t.toFixed(2);el('cap-value').value=String(cap);
-    el('alarms').value=String(alarms);el('caught').value=String(caught);el('missed').value=String(missed);el('false').value=String(falseAlarm);el('acc').value=(acc*100).toFixed(1)+'%';
-    const over=alarms>cap,s=el('status');s.textContent=over?`警報 ${alarms} 件，超過複查上限 ${cap} 件，現場做不完。`:`警報 ${alarms} 件，在複查上限 ${cap} 件之內。還漏掉 ${missed} 個故障。`;s.classList.toggle('over',over);
-    Object.assign(root.dataset,{t:String(t),cap:String(cap),alarms:String(alarms),caught:String(caught),missed:String(missed),falseAlarm:String(falseAlarm),accuracy:String(acc),over:String(over)});
+    el('alarms').value=capped&&over?`${sent}（名單 ${alarms}）`:String(alarms);el('caught').value=String(caught);el('missed').value=String(missed);el('false').value=String(falseAlarm);el('acc').value=(acc*100).toFixed(1)+'%';
+    root.querySelectorAll('[data-show]').forEach(d=>d.hidden=step<Number(d.dataset.show));
+    const key=el('key');
+    key.innerHTML=step===0?'<i class="k-none"></i>還沒決定':`<i class="k-alarm"></i>收到提醒<i class="k-none"></i>不提醒${step>=3?'<i class="k-over"></i>超過人力，寄不出去':''}${step>=2?'<b>▲</b> 實際逾期':''}`;
+    const s=el('status');s.classList.remove('over');
+    if(step===0)s.textContent=`分數最高 ${ITEMS[0].p.toFixed(2)}，最低 ${ITEMS[N-1].p.toFixed(2)}。`;
+    else if(step===1)s.textContent=`門檻 ${t.toFixed(2)}：${alarms} 人會收到提醒。`;
+    else if(step===2)s.textContent=`8 個逾期裡抓到 ${caught} 個、漏掉 ${missed} 個；另外白提醒了 ${falseAlarm} 人。`;
+    else if(step===3){s.textContent=over?`名單有 ${alarms} 人，超過人力上限 ${cap} 封，只寄得出分數最高的 ${cap} 封；後面 ${alarms-cap} 人收不到，裡面的逾期也算漏掉。`:`要寄 ${alarms} 封，在人力上限 ${cap} 封之內。還漏掉 ${missed} 個逾期。`;s.classList.toggle('over',over);}
+    else if(step===4)s.textContent=`對照：全部都不提醒，準確率也有 ${((N-NLATE)/N*100).toFixed(1)}%，但一個逾期都沒抓到。`;
+    else s.textContent=`你的選擇：門檻 ${t.toFixed(2)}，實際寄 ${sent} 封（上限 ${cap}${over?`，名單 ${alarms} 人超出`:''}），抓到 ${caught} 個、漏掉 ${missed} 個、白提醒 ${falseAlarm} 人。`;
+    Object.assign(root.dataset,{step:String(step),t:String(t),cap:String(cap),alarms:String(alarms),sent:String(sent),caught:String(caught),missed:String(missed),falseAlarm:String(falseAlarm),accuracy:String(acc),over:String(over)});
+  }
+  function render(){
+    el('count').textContent=`第 ${step+1}／${TITLES.length} 步`;el('step-title').textContent=TITLES[step];el('say').textContent=SAY[step];
+    root.querySelectorAll('.th-group').forEach(g=>g.hidden=!g.dataset.for.split(' ').includes(String(step)));
+    el('prev').disabled=step===0;el('next').disabled=step===TITLES.length-1;
+    draw();
   }
   el('t').addEventListener('input',draw);el('cap').addEventListener('input',draw);
-  draw();
+  el('prev').addEventListener('click',()=>{if(step>0){step--;render();}});
+  el('next').addEventListener('click',()=>{if(step<TITLES.length-1){step++;render();}});
+  el('reset').addEventListener('click',()=>{step=0;el('t').value='0.5';el('cap').value='8';render();});
+  render();
 })();
 </script>

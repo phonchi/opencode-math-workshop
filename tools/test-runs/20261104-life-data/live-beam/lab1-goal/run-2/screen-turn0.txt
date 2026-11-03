@@ -1,0 +1,40 @@
+  ┃  X=np.array([[float(x[c]) for c in cols] for x in rows])                                                            
+  ┃  mask = X.std(axis=0)>0; X=X[:,mask]                                                                                
+  ┃  Xs=StandardScaler().fit_transform(X)                                                                               
+  ┃  ys=np.array([int(x) for x in open('data/shops_daily_store.csv').read().splitlines()[1:]])                          
+  ┃  for rs in [0,1,7,42,99]:                                                                                           
+  ┃      res={}                                                                                                         
+  ┃      for k in range(2,16):                                                                                          
+  ┃          km=KMeans(n_clusters=k,n_init=50,random_state=rs)                                                          
+  ┃          lab=km.fit_predict(Xs)                                                                                     
+  ┃          res[k]=(silhouette_score(Xs,lab),adjusted_rand_score(ys,lab))                                              
+  ┃      kb=max(res,key=lambda k:res[k][0])                                                                             
+  ┃      print('rs',rs,'sil peak k',kb,res[kb][0],'ARI@peak',res[kb][1],'ARI@10',res[10][1])                            
+  ┃  "                                                                                                                  
+  ┃                                                                                                                     
+  ┃  rs 0 sil peak k 9 0.7943025835029036 ARI@peak 0.8811081705458484 ARI@10 0.9902086425066071                         
+  ┃  rs 1 sil peak k 9 0.7943025835029036 ARI@peak 0.8811081705458484 ARI@10 0.9902086425066071                         
+  ┃  rs 7 sil peak k 9 0.7943025835029036 ARI@peak 0.8811081705458484 ARI@10 0.9902086425066071                         
+  ┃  rs 42 sil peak k 9 0.7943025835029036 ARI@peak 0.8811081705458484 ARI@10 0.9902086425066071                        
+  ┃  rs 99 sil peak k 9 0.7943025835029036 ARI@peak 0.8811081705458484 ARI@10 0.9902086425066071                        
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 2.1s                                                                                                    
+                                                                                                                        
+     - 欄位：丟掉常數欄 open_hours、menu_version，保留 6 個有變異欄位。                                                 
+     - 尺度：StandardScaler 標準化後再 KMeans（n_init=50，固定 random_state）。                                         
+     - 選 k：k=2..15 以 silhouette 最大值選 k=9（≈0.794），穩定 across seeds。                                          
+     - 僅事後用店別檔算 ARI：k=9 的 ARI≈0.881，混淆矩陣顯示店 1 與店 10 被合併；k=10 的 ARI≈0.990。                     
+     - 用途要求不同店不可合併，k=9 違反此約束。                                                                         
+                                                                                                                        
+     用途該用 10 群（silhouette 的數學最優 k=9 會合併店 1/10，不適用客訴回查）。                                        
+                                                                                                                        
+     ▣  Build · Beam Free · 1m 51s                                                                                      
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Beam Free OpenCode                                                                                         
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/live-beam/lab1-goal-2/project                 24.5K (2%)  ctrl+p commands  
+                                                                                                                        

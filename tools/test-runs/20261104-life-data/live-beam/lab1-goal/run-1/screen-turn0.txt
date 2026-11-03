@@ -1,0 +1,40 @@
+  ┃  'rating']] for r in rows])                                                                                         
+  ┃  Xs=StandardScaler().fit_transform(X)                                                                               
+  ┃  for seed in [0,1,7,42,99]:                                                                                         
+  ┃      best=None                                                                                                      
+  ┃      for k in range(2,21):                                                                                          
+  ┃          km=KMeans(n_clusters=k,n_init=10,random_state=seed).fit(Xs)                                                
+  ┃          sil=silhouette_score(Xs,km.labels_)                                                                        
+  ┃          if best is None or sil>best[1]: best=(k,sil)                                                               
+  ┃      print('seed',seed,'best k',best[0],'sil',round(best[1],4))                                                     
+  ┃  "                                                                                                                  
+  ┃                                                                                                                     
+  ┃  seed 0 best k 9 sil 0.7943                                                                                         
+  ┃  seed 1 best k 9 sil 0.7943                                                                                         
+  ┃  seed 7 best k 9 sil 0.7943                                                                                         
+  ┃  seed 42 best k 9 sil 0.7943                                                                                        
+  ┃  seed 99 best k 9 sil 0.7943                                                                                        
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 673ms                                                                                                   
+                                                                                                                        
+     決定：                                                                                                             
+                                                                                                                        
+     - 刪除常數欄 open_hours、menu_version（無資訊）。                                                                  
+     - 使用 6 個數值特徵，以 StandardScaler 標準化（處理 revenue/cups 與 rating/delivery 的尺度差）。                   
+     - KMeans，n_init=10、random_state=42；k 候選 2–20，以 silhouette score 選最大。                                    
+     - silhouette 穩定地在 k=9 最高（≈0.794）。                                                                         
+     - 選定 k=9 後才載入 store 標籤算 ARI≈0.881；交叉表顯示其中一群合併了店 1 與店 10。                                 
+                                                                                                                        
+     用途（客訴回查、不同店不能合併）：不建議只用這 9 群；它違反「不混店」。應以店別紀錄（10 類）為回查依據，或至少用   
+     k=10（ARI≈0.99）並接受少量誤分。                                                                                   
+                                                                                                                        
+     ▣  Build · Beam Free · 1m 13s                                                                                      
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Beam Free OpenCode                                                                                         
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/live-beam/lab1-goal-1/project                 25.4K (2%)  ctrl+p commands  
+                                                                                                                        

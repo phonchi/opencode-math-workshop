@@ -1,0 +1,40 @@
+  ┃  for b in range(200):                                                                                               
+  ┃      idx=rng.integers(0,len(y),len(y))                                                                              
+  ┃      # need both classes                                                                                            
+  ┃      if len(set(y[idx]))<2: continue                                                                                
+  ┃      # Use out-of-bag? Simpler: bootstrap metric on CV predictions? Instead bootstrap resample data and run CV      
+  ┃      Xb=X[idx]; yb=y[idx]                                                                                           
+  ┃      skf=StratifiedKFold(n_splits=5,shuffle=True,random_state=b)                                                    
+  ┃      try:                                                                                                           
+  ┃          base=Pipeline([('sc',StandardScaler()),('m',LogisticRegression(max_iter=1000,class_weight='balanced'))])   
+  ┃          cal=CalibratedClassifierCV(base,method='sigmoid',cv=3)                                                     
+  ┃          proba=cross_val_predict(cal,Xb,yb,cv=skf,method='predict_proba')[:,1]                                      
+  ┃          aucs.append(roc_auc_score(yb,proba)); aps.append(average_precision_score(yb,proba))                        
+  ┃      except Exception as e:                                                                                         
+  ┃          pass                                                                                                       
+  ┃  print('AUC bootstrap mean',round(np.mean(aucs),3),'95% CI',round(np.percentile(aucs,2.5),3),round(np.percentile(   
+  ┃  aucs,97.5),3))                                                                                                     
+  ┃  print('AP bootstrap mean',round(np.mean(aps),3),'95% CI',round(np.percentile(aps,2.5),3),round(np.percentile(aps,  
+  ┃  97.5),3),'n',len(aucs))                                                                                            
+  ┃  PY                                                                                                                 
+  ┃  uv run python /tmp/scratchpad/boot.py                                                                              
+  ┃                                                                                                                     
+  ┃  AUC bootstrap mean 0.961 95% CI 0.947 0.973                                                                        
+  ┃  AP bootstrap mean 0.715 95% CI 0.616 0.799 n 200                                                                   
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 4.1s                                                                                                    
+                                                                                                                        
+     不建議直接自動上線。case_no 有嚴重 target leakage（AUC 0.997），必須排除；排除後校準邏輯斯迴歸 CV 約 AUC 0.96 /    
+     AP 0.71 / Brier 0.039，但 positives 僅 71 筆（AP 95% CI 0.62–0.80），閾值約 0.7 時 precision 0.5、recall 0.79。    
+     另缺新借閱人冷啟動、時間切分與漂移監控驗證。可先作風險排序/提醒輔助，人工複核後再逐步自動化。                      
+                                                                                                                        
+     ▣  Build · Beam Free · 1m 33s                                                                                      
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Beam Free OpenCode                                                                                         
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/live-beam/lab3-vague-3/project                29.0K (3%)  ctrl+p commands  
+                                                                                                                        

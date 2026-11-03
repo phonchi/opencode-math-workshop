@@ -1,6 +1,6 @@
 """Lab 3 參考程式：手刻 logistic 迴歸，看準確率能證明什麼。
 
-line_faults.csv 是講師設計的資料。record_id 的產生方式與下一批資料只在揭曉時提供。
+loans.csv 是為工作坊設計的合成資料。case_no 的產生方式與下一批資料只在揭曉時提供。
 """
 from pathlib import Path
 
@@ -10,11 +10,11 @@ from sklearn.metrics import accuracy_score, confusion_matrix, recall_score
 from sklearn.model_selection import train_test_split
 
 DATA = Path(__file__).resolve().parents[1] / "assets" / "data"
-D = np.genfromtxt(DATA / "line_faults.csv", delimiter=",", skip_header=1)
-N = np.genfromtxt(DATA / "reveal" / "line_faults_new_batch.csv", delimiter=",", skip_header=1)
+D = np.genfromtxt(DATA / "loans.csv", delimiter=",", skip_header=1)
+N = np.genfromtxt(DATA / "reveal" / "loans_new_batch.csv", delimiter=",", skip_header=1)
 X, y = D[:, :-1], D[:, -1].astype(int)
 sig = lambda z: 1 / (1 + np.exp(-z))
-print(f"資料形狀 {X.shape}；故障比例 {y.mean():.4f}")
+print(f"資料形狀 {X.shape}；逾期比例 {y.mean():.4f}")
 
 
 def design(A, mu, sd):
@@ -38,8 +38,8 @@ def fit(Xb, t, lr=0.5, steps=20000):
 
 
 Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=0, stratify=y)
-print("永遠猜「沒故障」的準確率:", round(accuracy_score(yte, np.zeros_like(yte)), 3))
-for name, c in [("含 record_id", slice(0, None)), ("不含 record_id", slice(1, None))]:
+print("永遠猜「不會逾期」的準確率:", round(accuracy_score(yte, np.zeros_like(yte)), 3))
+for name, c in [("含 case_no", slice(0, None)), ("不含 case_no", slice(1, None))]:
     mu, sd = Xtr[:, c].mean(0), Xtr[:, c].std(0)
     A, B, C = design(Xtr[:, c], mu, sd), design(Xte[:, c], mu, sd), design(N[:, :-1][:, c], mu, sd)
     w = fit(A, ytr)

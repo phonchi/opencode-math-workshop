@@ -1,5 +1,5 @@
 <!--TITLE:Lab 2 · 降維-->
-<!--DESC:AI 告訴你 5 個主成分就夠，保留了 93% 的變異。夠，是夠做什麼？再用講師注入的錯誤，審查它的驗證抓得到什麼。-->
+<!--DESC:一份 11 欄的外送訂單，AI 告訴你 5 個主成分就夠，保留了 93% 的變異。夠，是夠做什麼？再故意放進幾個錯誤，看它的驗證抓不抓得到。-->
 
 <div class="container narrow">
 
@@ -7,22 +7,43 @@
   <div class="kicker"><span>Lab 2</span><span>·</span><span class="badge live">現場 32 分</span><span>·</span><span>AI 的風險：說「夠了」，沒問夠做什麼</span></div>
   <h1>降維：保留 93% 的變異，就夠了嗎？</h1>
   <p class="lead">
-    這一關 AI 多半做得不錯，也會告訴你幾個主成分就夠。你要問兩件事：夠，是夠做什麼？它的驗證，真的抓得到錯嗎？
+    11 欄的資料太多，想用少數幾個數字概括。AI 多半做得不錯，也會告訴你幾個主成分就夠。你要問兩件事：夠，是夠做什麼？它的驗證，真的抓得到錯嗎？
     你要帶走的能力：審查 AI 的門檻和驗證方式。
   </p>
 </div>
 
-<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#projection-title">轉動投影</a></li><li><a href="#section-動手">問、核對、揭曉</a></li><li><a href="#section-手刻並審查驗證">審查驗證</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
+<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#section-這一關的資料">看資料</a></li><li><a href="#projection-title">玩一次投影</a></li><li><a href="#section-動手">問、核對、揭曉</a></li><li><a href="#section-手刻並審查驗證">審查驗證</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
+
+<section>
+<h2>這一關的資料</h2>
+<p>課前下載的 <code>data/orders.csv</code> 是校園外送平台的 800 張訂單，<strong>每一列是一張訂單</strong>，有 11 欄。</p>
+<div class="tw"><table>
+<tr><th>欄位</th><th>意思</th><th>單位</th><th>第一列</th></tr>
+<tr><td><code>amount_ntd</code></td><td>餐點金額</td><td>元</td><td>249</td></tr>
+<tr><td><code>distance_km</code></td><td>店家到送達地址的距離</td><td>公里</td><td>2.37</td></tr>
+<tr><td><code>prep_min</code></td><td>店家備餐時間</td><td>分鐘</td><td>17.6</td></tr>
+<tr><td><code>ride_min</code></td><td>騎乘時間</td><td>分鐘</td><td>19.3</td></tr>
+<tr><td><code>handoff_min</code></td><td>到門口後等你來拿的時間</td><td>分鐘</td><td>2.17</td></tr>
+<tr><td><code>tip_ntd</code></td><td>小費</td><td>元</td><td>11.9</td></tr>
+<tr><td><code>package_g</code></td><td>包裝總重</td><td>公克</td><td>629</td></tr>
+<tr><td><code>shop_rating</code></td><td>店家評分</td><td>1 到 5 顆星</td><td>4.21</td></tr>
+<tr><td><code>drop_offset_km</code></td><td>實際送達點和地址差多遠</td><td>公里</td><td>0.0359</td></tr>
+<tr><td><code>pause_ratio</code></td><td>途中停住不動的時間比例</td><td>0 到 1</td><td>0.0412</td></tr>
+<tr><td><code>rider_odometer_m</code></td><td>這位騎士帳號的累積里程</td><td>公尺</td><td>1696442</td></tr>
+</table></div>
+<p>11 個數字描述一張訂單有點多，而且很多欄會一起變動：距離遠的，騎乘時間通常也長。<strong>降維</strong>就是用少數幾個「綜合數字」概括這 11 欄，盡量不丟掉資訊。最常用的方法是 <strong>PCA（主成分分析）</strong>：它找出資料變化最大的方向，叫第 1 主成分；再找和它垂直、變化第二大的方向，以此類推。每個方向都是 11 欄的加權組合。</p>
+<p>「留下多少變化」用<strong>解釋變異比例</strong>表示：例如前 3 個主成分合起來占 70%，就是用 3 個數字保留了原本 11 欄 70% 的變化。下面先在兩欄的小例子裡玩一次。</p>
+</section>
 
 <!--INCLUDE:tools/pca-explorer.html-->
 
 <section>
 <h2>從投影接到 PCA</h2>
-<p>剛才是二維變一維；這一關的 <code>data/line_channels.csv</code> 有 800 筆資料、11 個通道，通道名稱只有 <code>ch01</code> 到 <code>ch11</code>。這也是<strong>講師設計的資料</strong>。PCA 做的是「減去平均、找方向、投影」。還沒學過特徵向量也可以先跟著做，下方會補上意義。</p>
+<p>剛才是二維變一維；<code>data/orders.csv</code> 則是 11 維變幾維。做法一樣：減去平均、找方向、投影。還沒學過特徵向量也可以先跟著做，下方會補上意義。</p>
 <details class="bg"><summary>PCA 在做什麼？為什麼要降維？</summary>
 <div class="bg-body">
 <p>
-每筆資料是 11 個通道的讀數。這些通道並<strong>不獨立</strong>，有些會一起變動。
+每筆資料是 11 欄的數字。這些欄並<strong>不獨立</strong>，有些會一起變動。
 所以資料實際上只「住」在一個<strong>維度低得多的子空間附近</strong>。
 </p>
 <p>
@@ -48,13 +69,13 @@ PCA 要做的就是找出那個子空間：在 $\mathbb{R}^{11}$ 裡找 $K$ 個�
 <details class="bg"><summary>共變異數矩陣是什麼？為什麼要先中心化？</summary>
 <div class="bg-body">
 <p>
-先把每一行（每個通道）減掉它自己的平均，得到中心化的 $X_c$。
+先把每一行（每個欄位）減掉它自己的平均，得到中心化的 $X_c$。
 然後 $C=\frac{X_c^\top X_c}{n-1}$ 是一個 $11\times 11$ 的矩陣，其中
 </p>
 $$C_{jk}=\frac{1}{n-1}\sum_{i=1}^{n}(x_{ij}-\bar x_j)(x_{ik}-\bar x_k)$$
 <ul>
-<li><strong>對角線</strong> $C_{jj}$：第 $j$ 個通道自己的變異數，也就是它「變化得多劇烈」</li>
-<li><strong>非對角線</strong> $C_{jk}$：第 $j$ 與第 $k$ 個通道<strong>一起變動的程度</strong>。
+<li><strong>對角線</strong> $C_{jj}$：第 $j$ 欄自己的變異數，也就是它「變化得多劇烈」</li>
+<li><strong>非對角線</strong> $C_{jk}$：第 $j$ 與第 $k$ 欄<strong>一起變動的程度</strong>。
     正的代表「一個高另一個也傾向高」，負的代表相反，接近 0 代表線性共同變動較弱，仍可能有非線性關係</li>
 </ul>
 <h4>為什麼一定要先中心化</h4>
@@ -72,7 +93,7 @@ $$C_{jk}=\frac{1}{n-1}\sum_{i=1}^{n}(x_{ij}-\bar x_j)(x_{ik}-\bar x_k)$$
 把 $C$ 的特徵值由大到小排成 $\lambda_1\ge\lambda_2\ge\cdots$。
 每個 $\lambda_j$ 就是<strong>資料在第 $j$ 個主成分方向上的變異數</strong>。
 </p>
-<p>對稱矩陣的跡等於特徵值總和，而這個跡剛好是所有通道的變異數總和，所以</p>
+<p>對稱矩陣的跡等於特徵值總和，而這個跡剛好是所有欄位的變異數總和，所以</p>
 $$\text{第 }j\text{ 個主成分的解釋變異比例}=\frac{\lambda_j}{\sum_{m}\lambda_m}$$
 <p>
 意思是「整體變異裡，有百分之幾是由這個方向貢獻的」。
@@ -118,7 +139,7 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <div class="step" data-n="1">
 <h3>先照平常的方式問</h3>
 <p>輸入 <code>/new</code> 開新對話，貼上這句：</p>
-<pre class="cmd"><code>data/line_channels.csv 是產線感測資料，幫我降維，看幾個主成分就夠。</code></pre>
+<pre class="cmd"><code>data/orders.csv 是校園外送平台的訂單資料，幫我降維，看幾個主成分就夠。</code></pre>
 <p>它回答後，先做一張三欄對照，再相信它：</p>
 <div class="tw"><table>
 <tr><th>摘要說它做了什麼</th><th>畫面上實際出現的工具、你按了幾次 Allow</th><th><code>!</code> 用 <code>ls</code> 看到的檔案</th></tr>
@@ -132,22 +153,12 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <p>先寫下：</p>
 <ul>
 <li>「夠了」的門檻是誰定的？為什麼是這個數字？</li>
-<li>它有沒有處理資料尺度？看 <code>ch11</code> 和 <code>ch09</code> 的大小，不處理會發生什麼事？</li>
-<li>它有沒有建議丟掉哪些通道？你敢丟嗎？你還缺什麼資訊？</li>
+<li>它有沒有處理資料尺度？看 <code>rider_odometer_m</code> 和 <code>drop_offset_km</code> 的數字大小，不處理會發生什麼事？</li>
+<li>它有沒有建議丟掉哪些欄位？你敢丟嗎？你還缺什麼資訊？</li>
 </ul>
-<details class="bg"><summary>寫完判斷再打開：講師實測</summary>
+<details class="bg"><summary>寫完判斷再打開：AI 常見的反應</summary>
 <div class="bg-body">
-<div class="box tip">
-<div class="bt">講師實測：同一句 prompt</div>
-<p>2026-11-02、03，OpenCode 1.19.5 互動模式，<code>big-pickle</code>、<code>Gemini 3.5 Flash Lite</code>、<code>GLM-5.3-Flash</code> 各 3 次：</p>
-<ul>
-<li><strong>9 次都主動標準化</strong>，這步做得很好，否則 <code>ch11</code> 會獨占 100% 的變異。<strong>9 次也都沒有先問用途。</strong></li>
-<li><code>big-pickle</code> 的回答是「機台核心看 3 個、全部通道要 6 個」「4 個」「4 個」，依據包括特徵值大於 1 這類它自己選的準則。3 次都提醒只留 4 個會丟掉 <code>ch11</code>，其中 2 次寫明要看 <code>ch11</code> 重不重要。這很好，但重不重要它不知道，要由你回答。</li>
-<li>Gemini 和 GLM 都以累積變異為依據，建議 5 個左右（92.95%），也有人同時提 4 個。90% 這類門檻是它自己選的。</li>
-<li>其中一次建議「ch09、ch10、ch11 貢獻極小，可考慮剔除」。</li>
-</ul>
-<p style="margin-bottom:0">你那次可能不一樣，先看自己的。</p>
-</div>
+<p style="margin-bottom:0">AI 多半會主動標準化，這步做得很好，否則 <code>rider_odometer_m</code> 會獨占將近 100% 的變異。接著它常依累積變異 90% 或「特徵值大於 1」這類<strong>它自己選的準則</strong>建議 5 個或 4 個，很少先問你要拿來做什麼。它也會替欄位下判斷：同一欄 <code>rider_odometer_m</code>，有一次說它「具獨立訊號，建議保留」，另一次說它是雜訊。哪一欄重要，它其實不知道，要由你回答。</p>
 </div>
 </details>
 </div>
@@ -159,31 +170,46 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <div class="box warn">
 <div class="bt">需求卡</div>
 <ul style="margin-bottom:0">
-<li>降維後的結果要給<strong>故障監控</strong>用。</li>
-<li><code>ch09</code>、<code>ch10</code> 是高頻振動通道，讀數很小。<code>ch11</code> 是累積脈衝數，讀數很大，和故障無關。</li>
+<li>降維後的結果要給<strong>客訴預警</strong>用：希望在客訴發生前，先找出可能出問題的訂單。</li>
+<li><code>drop_offset_km</code>、<code>pause_ratio</code> 讀數很小，但送錯地點、途中停很久正是客訴的主因。<code>rider_odometer_m</code> 是騎士帳號用了多久，數字很大，和這張訂單會不會被客訴無關。</li>
 </ul>
 </div>
-<p>下載故障標籤。它只用來檢查降維結果。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
-<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/line_channels_fault.csv -o data/line_channels_fault.csv</code></pre>
-<p>先預測，再寫下這張卡。<strong>AUC</strong> 是用來衡量分不分得出故障的分數：0.5 約等於亂猜，1 是完全分開。</p>
+<p>下載客訴標籤。這個檔只有一欄 <code>complaint</code>（1 表示這張訂單事後被客訴），列的順序和 <code>orders.csv</code> 相同。它只用來檢查降維結果。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
+<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/orders_complaint.csv -o data/orders_complaint.csv</code></pre>
+<p>要檢查「幾個主成分夠不夠」，可以用主成分當輸入，看能不能分出客訴。分得好不好用 <strong>AUC</strong> 衡量：隨機抽一張客訴訂單和一張正常訂單，模型把客訴那張排得比較可疑的機率。0.5 約等於亂猜，1 是完全分開。</p>
+<p>「AI 說 5 個就夠」要變成你能檢查的事，得先講好怎樣算夠。<strong>驗收卡就是在看結果之前，先寫下你的主張和撤回條件</strong>，免得看到數字再改口，或任由 AI 替你改。</p>
 <div class="box warn">
 <div class="bt">驗收卡</div>
-<p style="margin-bottom:0">我主張＿＿就夠；要比較＿＿；如果出現＿＿，我會撤回主張。</p>
+<ol style="margin-bottom:0">
+<li><strong>主張</strong>：我認為保留幾個主成分就夠用來做客訴預警？</li>
+<li><strong>比較</strong>：我要比哪幾種保留方式？用什麼分數比？</li>
+<li><strong>撤回條件</strong>：出現什麼結果，我就承認主張不成立？</li>
+</ol>
 </div>
-<p>用這張卡自己寫 prompt 請 AI 算。提醒它前處理和 PCA 只能在訓練折擬合，也告訴它不要替你改主張。</p>
+<details class="bg"><summary>寫完再對照：驗收卡範例</summary>
+<div class="bg-body">
+<ul>
+<li>主張：標準化後保留 <strong>4 個</strong>主成分就夠。</li>
+<li>比較：3、4、5 個主成分辨識客訴的 AUC。</li>
+<li>撤回條件：如果 4 個的 AUC 比 5 個低超過 0.02，我就撤回。</li>
+</ul>
+<p style="margin-bottom:0">你的主張可以是 3 個或 5 個，猜錯也沒關係；重點是先寫，再看結果。</p>
+</div>
+</details>
+<p>用這張卡自己寫 prompt 請 AI 算。也提醒它兩件事：第一，用<strong>交叉驗證</strong>（把資料切成幾份，輪流拿一份當考題、其餘當練習題），而且標準化和 PCA 只能用練習題去算，不能偷看考題；第二，不要替你改主張。</p>
 <details class="bg"><summary>算完再打開：參考結果</summary>
 <div class="bg-body">
-<p>參考程式（<code>reference/lab2_pca.py</code>，標準化後取主成分分數，用 logistic 迴歸做 5 折交叉驗證）：</p>
+<p>參考程式（<code>reference/lab2_pca.py</code>，標準化後取主成分分數，用 logistic 迴歸做 5 折交叉驗證，Lab 3 會介紹這個模型）：</p>
 <div class="tw"><table>
-<tr><th>保留內容</th><th>累積變異</th><th>辨識故障的 AUC</th></tr>
+<tr><th>保留內容</th><th>累積變異</th><th>辨識客訴的 AUC</th></tr>
 <tr><td>前 3 個主成分</td><td>69.0%</td><td>0.588</td></tr>
 <tr><td>前 4 個主成分</td><td>83.9%</td><td><strong>1.000</strong></td></tr>
 <tr><td>前 5 個主成分</td><td>92.9%</td><td>1.000</td></tr>
-<tr><td>拿掉 <code>ch09</code>～<code>ch11</code>，用其餘通道</td><td>不適用</td><td>0.439</td></tr>
+<tr><td>拿掉讀數很小的兩欄和 <code>rider_odometer_m</code>，用其餘 8 欄</td><td>不適用</td><td>0.438</td></tr>
 <tr><td>原始尺度只留 1 個主成分</td><td>約 100%</td><td>0.503</td></tr>
 </table></div>
-<p>第 4 個主成分幾乎就是 <code>ch09</code>、<code>ch10</code>，第 5 個幾乎只有和故障無關的 <code>ch11</code>。<strong>解釋變異比例量的是「變化多大」，不是「對你多重要」。</strong>這不是說 90% 這類門檻不能用，而是用之前要先知道用途。標準化也不是萬用解：它救回了弱通道，也把 <code>ch11</code> 這種和故障無關的欄位放大了。</p>
-<p>這張表只看主成分分數。講師實測兩個模型各 3 次，都判定「4 個就夠」成立；有幾次自己加了監控常用的 Q 殘差統計量，只留 3 個時也能達到約 0.999，因為故障訊號跑到被丟掉的部分。所以「3 個不夠」也有條件：要看你的監控怎麼用這些主成分。</p>
+<p>第 4 個主成分幾乎就是 <code>drop_offset_km</code>、<code>pause_ratio</code>，第 5 個幾乎只有和客訴無關的 <code>rider_odometer_m</code>。<strong>解釋變異比例量的是「變化多大」，不是「對你多重要」。</strong>90% 這類門檻可以用，但用之前要先知道用途。標準化也不是萬用解：它救回了讀數很小的欄，也把 <code>rider_odometer_m</code> 這種和客訴無關的欄位放大了。</p>
+<p>這張表只看主成分分數。有些 AI 會自己加上「重建誤差」這類指標（把主成分放回 11 欄後，和原本的資料差多少）：只留 3 個主成分時，客訴訊號跑到被丟掉的部分，重建誤差反而很大，也能抓到客訴。所以「3 個不夠」也有條件：要看你的預警系統怎麼用這些主成分。</p>
 </div>
 </details>
 </div>
@@ -197,13 +223,13 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 
 <div class="step" data-n="4">
 <h3>規劃：手刻，並先說清楚怎麼驗</h3>
-<p>輸入 <code>/new</code>，依你的驗收卡自己寫 prompt，至少交代：只能用 numpy 的 <code>eigh</code> 手刻；每欄先<strong>除以標準差但不減平均</strong>，中心化留給 PCA 本身；取前 4 個主成分；sklearn（<code>svd_solver='full'</code>）只當對照組；檔名 <code>lab2_pca.py</code>；每項檢查印出實際數值和 PASS/FAIL。</p>
+<p>輸入 <code>/new</code>，自己寫 prompt，至少交代：只能用 numpy 的 <code>eigh</code> 手刻；每欄先<strong>除以標準差但不減平均</strong>，中心化留給 PCA 本身，這樣待會「忘記中心化」的錯誤才測得出來；取前 4 個主成分；sklearn（<code>svd_solver='full'</code>）只當對照組；檔名 <code>lab2_pca.py</code>；每項檢查印出實際數值和 PASS/FAIL。</p>
 <p>跑完後打開程式，<strong>找出通過條件到底比了哪些量</strong>，列在 <code>notes/</code> 或紙上。有印出來不代表有列入判定。</p>
 </div>
 
 <div class="step" data-n="5">
 <h3>驗證：先預測，再跑「檢查 × 錯誤」表</h3>
-<p>下面四個錯誤是<strong>講師設計後注入</strong>的，不是 AI 犯的。用你剛才列的檢查，先預測每一格會 PASS 還是 FAIL，再貼上：</p>
+<p>下面四個錯誤是<strong>故意放進去</strong>的，不是 AI 犯的。用你剛才列的檢查，先預測每一格會 PASS 還是 FAIL，再貼上：</p>
 <pre class="cmd"><code>請在 lab2_pca.py 加一個 bug 參數，可選：
 none、ratio_topk（比例分母只用前 4 個特徵值的和）、denom_n（變異數分母用 n，不是 n-1）、
 no_center（不中心化）、rows（主成分取錯方向：取矩陣的前 4 列，不是前 4 個特徵向量）。
@@ -216,7 +242,7 @@ no_center（不中心化）、rows（主成分取錯方向：取矩陣的前 4 �
 <p>下面是檢查項目齊全時的參考結果：</p>
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">參考程式輸出（reference/lab2_pca_bugs.py）</span></div>
-  <div class="term-body"><div class="o">錯誤（講師注入）　　　比例　 |cos|　重建　 正交　 特徵值</div>
+  <div class="term-body"><div class="o">故意放的錯誤　　　　　比例　 |cos|　重建　 正交　 特徵值</div>
 <div class="o">正確版本　　　　　　　PASS　PASS　 PASS　 PASS　 PASS</div>
 <div class="o">比例分母只用前 4 個　　<span class="e">FAIL</span>　PASS　 PASS　 PASS　 PASS</div>
 <div class="o">變異數分母用 n　　　　PASS　PASS　 PASS　 PASS　 <span class="e">FAIL</span></div>
@@ -242,7 +268,7 @@ $$Cv=\lambda v\;\Longrightarrow\;C'v=(c\lambda)v$$
 <h3>說明：主張、證據、限制</h3>
 <p>用三句話寫下這份結果，不要只寫「驗證通過」。例如：</p>
 <ul>
-<li><strong>主張</strong>：這份資料要做故障監控時，標準化後保留 4 個主成分就夠。</li>
+<li><strong>主張</strong>：這份資料要做客訴預警時，標準化後保留 4 個主成分就夠。</li>
 <li><strong>證據</strong>：AUC 從 3 個的 0.588 升到 4 個的 1.000；手刻 PCA 和 sklearn 在容差內一致，四種注入錯誤都至少被一項檢查抓到（沒跑到的就照實寫）。</li>
 <li><strong>限制</strong>：只針對這份資料和這四種錯誤。sklearn 是對照組，不是真理；換用途要重新判斷。</li>
 </ul>
@@ -301,7 +327,7 @@ $WW^\top\approx I$ 確實不需要對照組，但它只證明「這 $K$ 個向�
 <section>
 <h2>如果還有時間</h2>
 <ul>
-<li>挑一個自己想試的：不標準化再跑一次、只拿掉 <code>ch11</code>，或改用最小的幾個特徵值。先預測，再看哪些檢查抓得到。</li>
+<li>挑一個自己想試的：不標準化再跑一次、只拿掉 <code>rider_odometer_m</code>，或改用最小的幾個特徵值。先預測，再看哪些檢查抓得到。</li>
 <li>問 agent：<code>pca._fit_svd_solver</code> 是什麼？確認你的對照組是不是真的用了另一種演算法。</li>
 </ul>
 </section>

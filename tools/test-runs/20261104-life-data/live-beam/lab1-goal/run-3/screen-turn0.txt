@@ -1,0 +1,40 @@
+  ┃          print(f'{s:>5}'+' '.join(f'{x:>3}' for x in counts))                                                       
+  ┃  "                                                                                                                  
+  ┃                                                                                                                     
+  ┃  <string>:18: SyntaxWarning: invalid escape sequence '\c'                                                           
+  ┃  === k 9                                                                                                            
+  ┃  store\clus  0   1   2   3   4   5   6   7   8                                                                      
+  ┃      1  0   0   0   0   0  73   0   0   0                                                                           
+  ┃      2  0   0   0   0   0   0   0   0  57                                                                           
+  ┃      3  0   0   0   0   0   0  55   0   0                                                                           
+  ┃      4  0   0   0  65   0   0   0   0   0                                                                           
+  ┃      5  0   0  92   0   0   0   0   0   0                                                                           
+  ┃      6  0   0   0   0   0   0   0  59   0                                                                           
+  ┃      7  0   0   0   0  90   0   0   0   0                                                                           
+  ┃  …                                                                                                                  
+  ┃                                                                                                                     
+  ┃  Click to expand                                                                                                    
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 2.5s                                                                                                    
+                                                                                                                        
+     決定清單：                                                                                                         
+                                                                                                                        
+     1. 讀入 8 個數值欄位；open_hours、menu_version 全欄常數（std=0），無鑑別力，移除。                                 
+     2. 先用 StandardScaler z-score 標準化（revenue 與 rating 尺度差異大，KMeans 距離需等尺度）。                       
+     3. KMeans：n_init=20、random_state=42，重現性。                                                                    
+     4. k 搜尋 2–15，用 silhouette 選 k：峰值 k=9（silhouette 0.794）。                                                 
+     5. 僅在選定後用店別檔算 ARI：k=9 的 ARI=0.881（店 1 與店 10 被合併）；k=10 的 ARI=0.990。                          
+     6. 客訴回查「不同店不能合併」為硬限制，silhouette 峰值 k=9 違反此限制。                                            
+                                                                                                                        
+     用途該用 10 群（ARI 0.990，幾乎一店一群；silhouette 0.725，略低於 9 群但可接受）。                                 
+                                                                                                                        
+     ▣  Build · Beam Free · 43.9s                                                                                       
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Beam Free OpenCode                                                                                         
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/live-beam/lab1-goal-3/project                 21.8K (2%)  ctrl+p commands  
+                                                                                                                        

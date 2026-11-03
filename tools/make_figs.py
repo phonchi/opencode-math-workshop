@@ -71,8 +71,8 @@ def generate(out, evidence):
         "savefig.facecolor": PAPER,
     })
     data = ROOT / "assets" / "data"
-    X = np.genfromtxt(data / "line_modes.csv", delimiter=",", skip_header=1)
-    batch = np.genfromtxt(data / "reveal" / "line_modes_batches.csv", delimiter=",", skip_header=1)
+    X = np.genfromtxt(data / "shops_daily.csv", delimiter=",", skip_header=1)
+    store = np.genfromtxt(data / "reveal" / "shops_daily_store.csv", delimiter=",", skip_header=1)
     Z = StandardScaler().fit_transform(X)
     provenance = {
         "created_utc": datetime.now(timezone.utc).isoformat(),
@@ -91,24 +91,13 @@ def generate(out, evidence):
         plt.close(fig)
         print(f"Saved {name}.png and {name}.svg")
 
-    def preview(name, size):
-        fig, ax = plt.subplots(figsize=size, layout="constrained")
-        im = ax.imshow(Z[:40, :6].T, aspect="auto", cmap="PuOr", vmin=-2.5, vmax=2.5)
-        ax.set_yticks(range(6), ["temp", "vibration", "pressure", "flow", "current", "speed"])
-        ax.set_xlabel("First 40 records (standardized)")
-        fig.colorbar(im, ax=ax, shrink=0.8)
-        save(fig, name)
-
-    preview("line-preview", (10, 2.6))
-    preview("line-preview-mobile", (5, 3))
-
     results = []
     for k in range(2, 13):
         row = {"k": k}
         for tag, A in (("raw", X), ("standardized", Z)):
             labels = KMeans(n_clusters=k, n_init=10, random_state=0).fit_predict(A)
             row[f"{tag}_silhouette"] = float(silhouette_score(A, labels))
-            row[f"{tag}_ari"] = float(adjusted_rand_score(batch, labels))
+            row[f"{tag}_ari"] = float(adjusted_rand_score(store, labels))
         results.append(row)
         print(json.dumps(row))
     dump(out / "lab1-k-selection.json", results)
@@ -117,8 +106,8 @@ def generate(out, evidence):
 
     def curves(name, size, ticks):
         fig, axes = plt.subplots(2, 1, figsize=size, layout="constrained")
-        for ax, key, title in ((axes[0], "silhouette", "Mean silhouette (no batch labels)"),
-                               (axes[1], "ari", "ARI against the 10 batches (revealed later)")):
+        for ax, key, title in ((axes[0], "silhouette", "Mean silhouette (no store labels)"),
+                               (axes[1], "ari", "ARI against the 10 stores (revealed later)")):
             ax.plot(ks, [r[f"raw_{key}"] for r in results], "o-", color=INDIGO, lw=2.2, label="Raw units")
             ax.plot(ks, [r[f"standardized_{key}"] for r in results], "o-", color=TERRACOTTA, lw=2.2, label="Standardized")
             ax.set(title=title, xlabel="Number of clusters, k", xticks=ticks)
@@ -131,7 +120,7 @@ def generate(out, evidence):
     with plt.rc_context({"font.size": 12, "axes.labelsize": 12, "axes.titlesize": 13}):
         curves("lab1-k-selection-mobile", (4.4, 6.4), [2, 4, 6, 8, 9, 10, 12])
 
-    names = ["line-preview", "line-preview-mobile", "lab1-k-selection", "lab1-k-selection-mobile"]
+    names = ["lab1-k-selection", "lab1-k-selection-mobile"]
     panels = [(n, ImageOps.contain(Image.open(out / f"{n}.png").convert("RGB"), (1000, 900))) for n in names]
     montage = Image.new("RGB", (1040, sum(i.height + 50 for _, i in panels) + 20), PAPER)
     draw = ImageDraw.Draw(montage)
@@ -147,10 +136,9 @@ def generate(out, evidence):
     dump(evidence / "provenance.json", provenance)
     (out / "README.md").write_text("""# 工作坊教學圖
 
-以 `starter/.venv/bin/python tools/make_figs.py --out assets/figures --evidence-dir tools/test-runs/20261101-lab-redesign/figures` 重建。資料由 `tools/make_line_data.py` 產生，是講師設計的合成資料。
+以 `starter/.venv/bin/python tools/make_figs.py --out assets/figures --evidence-dir tools/test-runs/20261104-life-data/figures` 重建。資料由 `tools/make_lab_data.py` 產生，是為工作坊設計的合成資料。
 
-- **line-preview**：`line_modes.csv` 前 40 筆標準化後的熱圖，只示意資料樣貌。
-- **lab1-k-selection**：原始尺度與標準化各掃 k=2..12（random_state=0、n_init=10）的 silhouette，以及揭曉後與 10 個批次比對的 ARI。
+- **lab1-k-selection**：原始尺度與標準化各掃 k=2..12（random_state=0、n_init=10）的 silhouette，以及揭曉後與 10 家分店比對的 ARI。
 
 結果只適用於這份資料，不代表其他資料有相同排序。
 """)

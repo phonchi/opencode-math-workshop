@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lab 2 · 降維｜OpenCode × AI-Math 工作坊</title>
-<meta name="description" content="AI 告訴你 5 個主成分就夠，保留了 93% 的變異。夠，是夠做什麼？再用講師注入的錯誤，審查它的驗證抓得到什麼。">
+<meta name="description" content="一份 11 欄的外送訂單，AI 告訴你 5 個主成分就夠，保留了 93% 的變異。夠，是夠做什麼？再故意放進幾個錯誤，看它的驗證抓不抓得到。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2213%22%20fill%3D%22%23191922%22%2F%3E%3Cpath%20d%3D%22M16%2020l12%2012-12%2012%22%20fill%3D%22none%22%20stroke%3D%22%23e3c273%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Crect%20x%3D%2233%22%20y%3D%2240%22%20width%3D%2217%22%20height%3D%226%22%20rx%3D%223%22%20fill%3D%22%23b8503c%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -699,7 +699,8 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 </li>
 <li><a class="chapter-link" href="lab2-pca.html" aria-current="page">Lab 2 · PCA</a>
 <ul class="section-nav" aria-label="本章內容">
-<li><a href="#projection-title">先轉一轉：把平面上的點投影到一條線</a></li>
+<li><a href="#section-這一關的資料">這一關的資料</a></li>
+<li><a href="#projection-title">先玩一次：只准記一個數字，要記哪個？</a></li>
 <li><a href="#section-從投影接到-pca">從投影接到 PCA</a></li>
 <li><a href="#section-動手">動手</a></li>
 <li><a href="#section-手刻並審查驗證">手刻並審查驗證</a></li>
@@ -749,7 +750,8 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 </li>
 <li><a class="chapter-link" href="lab2-pca.html" aria-current="page">Lab 2 · PCA</a>
 <ul class="section-nav" aria-label="本章內容">
-<li><a href="#projection-title">先轉一轉：把平面上的點投影到一條線</a></li>
+<li><a href="#section-這一關的資料">這一關的資料</a></li>
+<li><a href="#projection-title">先玩一次：只准記一個數字，要記哪個？</a></li>
 <li><a href="#section-從投影接到-pca">從投影接到 PCA</a></li>
 <li><a href="#section-動手">動手</a></li>
 <li><a href="#section-手刻並審查驗證">手刻並審查驗證</a></li>
@@ -791,104 +793,244 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
   <div class="kicker"><span>Lab 2</span><span>·</span><span class="badge live">現場 32 分</span><span>·</span><span>AI 的風險：說「夠了」，沒問夠做什麼</span></div>
   <h1>降維：保留 93% 的變異，就夠了嗎？</h1>
   <p class="lead">
-    這一關 AI 多半做得不錯，也會告訴你幾個主成分就夠。你要問兩件事：夠，是夠做什麼？它的驗證，真的抓得到錯嗎？
+    11 欄的資料太多，想用少數幾個數字概括。AI 多半做得不錯，也會告訴你幾個主成分就夠。你要問兩件事：夠，是夠做什麼？它的驗證，真的抓得到錯嗎？
     你要帶走的能力：審查 AI 的門檻和驗證方式。
   </p>
 </div>
 
-<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#projection-title">轉動投影</a></li><li><a href="#section-動手">問、核對、揭曉</a></li><li><a href="#section-手刻並審查驗證">審查驗證</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
+<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#section-這一關的資料">看資料</a></li><li><a href="#projection-title">玩一次投影</a></li><li><a href="#section-動手">問、核對、揭曉</a></li><li><a href="#section-手刻並審查驗證">審查驗證</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
+
+<section>
+<h2 id="section-這一關的資料">這一關的資料</h2>
+<p>課前下載的 <code>data/orders.csv</code> 是校園外送平台的 800 張訂單，<strong>每一列是一張訂單</strong>，有 11 欄。</p>
+<div class="tw"><table>
+<tr><th>欄位</th><th>意思</th><th>單位</th><th>第一列</th></tr>
+<tr><td><code>amount_ntd</code></td><td>餐點金額</td><td>元</td><td>249</td></tr>
+<tr><td><code>distance_km</code></td><td>店家到送達地址的距離</td><td>公里</td><td>2.37</td></tr>
+<tr><td><code>prep_min</code></td><td>店家備餐時間</td><td>分鐘</td><td>17.6</td></tr>
+<tr><td><code>ride_min</code></td><td>騎乘時間</td><td>分鐘</td><td>19.3</td></tr>
+<tr><td><code>handoff_min</code></td><td>到門口後等你來拿的時間</td><td>分鐘</td><td>2.17</td></tr>
+<tr><td><code>tip_ntd</code></td><td>小費</td><td>元</td><td>11.9</td></tr>
+<tr><td><code>package_g</code></td><td>包裝總重</td><td>公克</td><td>629</td></tr>
+<tr><td><code>shop_rating</code></td><td>店家評分</td><td>1 到 5 顆星</td><td>4.21</td></tr>
+<tr><td><code>drop_offset_km</code></td><td>實際送達點和地址差多遠</td><td>公里</td><td>0.0359</td></tr>
+<tr><td><code>pause_ratio</code></td><td>途中停住不動的時間比例</td><td>0 到 1</td><td>0.0412</td></tr>
+<tr><td><code>rider_odometer_m</code></td><td>這位騎士帳號的累積里程</td><td>公尺</td><td>1696442</td></tr>
+</table></div>
+<p>11 個數字描述一張訂單有點多，而且很多欄會一起變動：距離遠的，騎乘時間通常也長。<strong>降維</strong>就是用少數幾個「綜合數字」概括這 11 欄，盡量不丟掉資訊。最常用的方法是 <strong>PCA（主成分分析）</strong>：它找出資料變化最大的方向，叫第 1 主成分；再找和它垂直、變化第二大的方向，以此類推。每個方向都是 11 欄的加權組合。</p>
+<p>「留下多少變化」用<strong>解釋變異比例</strong>表示：例如前 3 個主成分合起來占 70%，就是用 3 個數字保留了原本 11 欄 70% 的變化。下面先在兩欄的小例子裡玩一次。</p>
+</section>
 
 <section class="pca-explorer" aria-labelledby="projection-title">
-<h2 id="projection-title">先轉一轉：把平面上的點投影到一條線</h2>
-<p>假設每個點代表一筆只有兩個特徵的資料。現在只准用一個數字描述它：把點垂直投影到藍線，記下沿線的位置。<strong>你會把線轉向哪裡，讓投影後的點盡量分散？</strong></p>
-<div class="projection-panel">
-  <div class="projection-controls">
-    <label for="projection-angle">投影方向 <output id="projection-angle-value" for="projection-angle">0.0°</output></label>
-    <input id="projection-angle" type="range" min="0" max="180" step="any" value="0" aria-describedby="projection-help">
-    <div class="projection-actions"><button type="button" id="projection-principal">轉到主成分方向</button><button type="button" id="projection-reset">重設</button></div>
+<h2 id="projection-title">先玩一次：只准記一個數字，要記哪個？</h2>
+<p>下面是 60 張<strong>示範外送訂單</strong>，只畫兩欄：距離和騎乘時間。PCA 要做的事，就是用比較少的數字描述每一筆資料。跟著步驟按「下一步」。</p>
+<div class="pc-panel">
+  <div class="pc-head">
+    <span class="pc-count" id="projection-count">第 1／6 步</span>
+    <strong class="pc-title" id="projection-step-title">看資料</strong>
   </div>
-  <figure>
-    <svg id="projection-plot" viewBox="0 0 680 390" role="img" aria-labelledby="projection-svg-title projection-svg-desc">
-      <title id="projection-svg-title">二維資料與一維投影</title>
-      <desc id="projection-svg-desc">圓點是原始資料，方框是垂直投影到藍線後的位置。轉動藍線，比較投影後的分散程度與點到線的距離。</desc>
-      <g id="projection-grid" stroke="#ded6c6" stroke-width="1"></g>
-      <line x1="36" y1="195" x2="644" y2="195" stroke="#7d7a72"/>
-      <line x1="340" y1="28" x2="340" y2="362" stroke="#7d7a72"/>
-      <line id="projection-axis" stroke="#2a3c78" stroke-width="3"/>
-      <g id="projection-drops" stroke="#7d7a72" stroke-dasharray="4 5" stroke-width="1.5"></g>
-      <g id="projection-originals" fill="#1b1b2b"></g>
-      <g id="projection-projected" fill="#fffdf8" stroke="#b8503c" stroke-width="2"></g>
+  <p class="pc-say" id="projection-say" aria-live="polite"></p>
+  <div class="pc-controls" role="group" aria-label="這一步的操作">
+    <span class="pc-group pc-slider" data-for="1 3">
+      <label for="projection-angle">投影方向</label>
+      <input id="projection-angle" type="range" min="0" max="180" step="1" value="0">
+    </span>
+    <span class="pc-group" data-for="1"><button type="button" id="projection-principal">轉到 PCA 選的方向</button></span>
+    <span class="pc-group" data-for="3"><button type="button" id="projection-second">改看第 2 主成分</button><button type="button" id="projection-first">回到第 1 主成分</button></span>
+    <span class="pc-group" data-for="4" role="group" aria-label="距離的單位"><span class="pc-label">距離用</span><button type="button" data-unit="km" aria-pressed="true">公里</button><button type="button" data-unit="m">公尺</button><span class="pc-label">記錄</span></span>
+  </div>
+  <figure id="projection-figure">
+    <svg id="projection-plot" viewBox="0 0 680 450" role="img" aria-labelledby="projection-svg-title projection-svg-desc">
+      <title id="projection-svg-title">外送訂單的距離與騎乘時間，以及投影到一條線後的位置</title>
+      <desc id="projection-svg-desc">上方散布圖的每個點是一張訂單；藍線是投影方向，虛線連到投影位置。下方的帶子是每張訂單只記一個數字時的位置。</desc>
+      <g id="projection-axes" class="pc-axes"></g>
+      <defs><clipPath id="projection-clip"><rect x="56" y="20" width="584" height="285"/></clipPath></defs>
+      <g clip-path="url(#projection-clip)"><line id="projection-axis" class="pc-line"/>
+      <g id="projection-drops"></g></g>
+      <g id="projection-points"></g>
+      <g id="projection-strip" class="pc-strip-g"></g>
     </svg>
-    <figcaption>實心圓：原始資料　空心方框：投影與重建的位置　虛線：重建的偏差</figcaption>
   </figure>
-  <dl class="projection-readouts">
-    <div><dt>投影變異</dt><dd><output id="projection-variance">—</output></dd></div>
-    <div><dt>平均重建平方距離</dt><dd><output id="projection-error">—</output></dd></div>
-  </dl>
-  <p id="projection-help">先拖曳滑桿，觀察投影變異與重建距離怎麼變；也可用鍵盤方向鍵調整。找到你認為最好的方向後，按「轉到主成分方向」比較。按「重設」可回到起點。</p>
+  <div class="pc-result" id="projection-result" aria-live="polite"></div>
+  <div class="pc-nav">
+    <button type="button" id="projection-prev">← 上一步</button>
+    <button type="button" id="projection-next" class="pc-primary">下一步 →</button>
+    <button type="button" id="projection-reset">從頭開始</button>
+  </div>
 </div>
-<p>主成分方向保留最多變異，也讓重建的平方距離總和最小。這裡的「重建」是把線上的位置放回平面：它仍在投影線上，通常不會回到原來的點。</p>
+<div class="box warn">
+<div class="bt">玩完回答</div>
+<ul style="margin-bottom:0">
+<li>第 1 主成分留下了 96% 的變化，為什麼還是分不出客訴？</li>
+<li>距離改用公尺記，PCA 選的方向為什麼就變了？這和資料本身有關嗎？</li>
+<li><strong>「保留 90% 的變化就夠」是誰定的？夠做什麼？</strong>AI 替你降維時，它知道你要拿來做什麼嗎？</li>
+</ul>
+</div>
 <details class="bg"><summary>把剛才看到的圖寫成公式</summary><div class="bg-body">
-<p>這組固定點雲的平均為零。令單位方向 $u=(\cos\theta,\sin\theta)^\top$，第 $i$ 點投影的位置是 $z_i=x_i^\top u$，重建為 $\hat x_i=z_i u$。</p>
-<p>上方分別顯示樣本變異 $\sum_i z_i^2/(n-1)$ 與平均平方距離 $\sum_i\|x_i-\hat x_i\|^2/n$。兩者分母不同，不能直接相加；方向最佳化的結論不受這兩個固定分母影響。</p>
-<p>把方向反過來，$u$ 換成 $-u$，投影座標會變號，但重建位置與這兩個指標都不變。稍後比對兩種 PCA 實作時，這點很有用。</p>
+<p>先把兩欄都標準化，點雲的平均為零。令單位方向 $u=(\cos\theta,\sin\theta)^\top$，第 $i$ 筆投影後記下的數字是 $z_i=x_i^\top u$，放回平面的位置是 $\hat x_i=z_i u$。</p>
+<p>「留下的變化」是 $\sum_i z_i^2\big/\sum_i\|x_i\|^2$。使它最大的 $u$ 就是共變異數矩陣最大特徵值的特徵向量，也就是第 1 主成分；它同時讓虛線長度的平方和 $\sum_i\|x_i-\hat x_i\|^2$ 最小。</p>
+<p style="margin-bottom:0">把方向反過來，$u$ 換成 $-u$，$z_i$ 會變號，但投影位置與留下的變化都不變。稍後比對兩種 PCA 實作時，這點很有用。</p>
 </div></details>
-<noscript><p>此互動需要 JavaScript。也可以用下方公式：沿點雲較長的方向投影，保留的變異較大；垂直偏差較小。</p></noscript>
+<noscript><p>此互動需要 JavaScript。重點是：第 1 主成分留下最多變化，但客訴訂單只在變化很小的第 2 主成分上分得開；換單位也會改變 PCA 選的方向。</p></noscript>
 </section>
 <style>
-.projection-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
-.projection-controls{display:grid;grid-template-columns:1fr auto;gap:.6rem 1.5rem;align-items:center}
-.projection-controls label{font-weight:600}.projection-controls label output{color:var(--link);font-variant-numeric:tabular-nums;margin-left:.6rem}
-.projection-controls input{grid-column:1;min-width:0;width:100%;accent-color:var(--link);min-height:44px}
-.projection-actions{grid-column:2;grid-row:1 / 3;display:flex;gap:.5rem;flex-wrap:wrap}
-.projection-actions button{font:inherit;font-size:.86rem;min-height:44px;padding:.4rem .8rem;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
-.projection-actions button:hover{border-color:var(--link);color:var(--link)}.projection-actions button:focus-visible,.projection-controls input:focus-visible{outline:3px solid var(--link);outline-offset:3px}
-.projection-panel figure{margin:1rem 0}.projection-panel svg{display:block;width:100%;height:auto}.projection-panel figcaption{font-size:.82rem;color:var(--ink-2);text-align:center}
-.projection-readouts{display:flex;gap:2.5rem;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:1rem}.projection-readouts dt{font-size:.86rem;color:var(--ink-2)}.projection-readouts dd{margin:0;font-size:1.65rem;color:var(--link);font-variant-numeric:tabular-nums}.projection-panel #projection-help{font-size:.86rem;color:var(--ink-2);margin:.8rem 0 0}
-@media(max-width:600px){.projection-controls{display:block}.projection-actions{margin-top:.5rem}.projection-readouts{gap:1.2rem}.projection-panel figcaption{text-align:left}}
-@media print{.projection-controls input,.projection-actions{display:none}}
+.pc-panel{background:var(--paper-2);border:1px solid var(--rule);padding:clamp(1rem,2vw,1.75rem);border-radius:10px}
+.pc-head{display:flex;gap:.8rem;align-items:baseline;flex-wrap:wrap}
+.pc-count{font-size:.82rem;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.pc-title{font-size:1.1rem;color:var(--link)}
+.pc-say{margin:.5rem 0 .8rem;min-height:3.2em;line-height:1.7}
+.pc-controls{display:flex;flex-wrap:wrap;gap:.6rem 1rem;align-items:center;min-height:44px}
+.pc-group{display:inline-flex;flex-wrap:wrap;gap:.3rem;align-items:center}
+.pc-group[hidden]{display:none}
+.pc-slider{flex:1 1 260px;gap:.6rem}.pc-slider label{font-weight:600}
+.pc-slider input{flex:1;min-width:0;min-height:44px;accent-color:var(--link)}
+.pc-label{font-size:.9rem;color:var(--ink-2)}
+.pc-panel button{font:inherit;font-size:.9rem;min-height:44px;min-width:44px;padding:.4rem .8rem;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
+.pc-panel button:hover{border-color:var(--link);color:var(--link)}
+.pc-panel button[aria-pressed="true"],.pc-panel button.pc-primary{background:var(--link);border-color:var(--link);color:var(--paper)}
+.pc-panel button:disabled{opacity:.4;cursor:default}
+.pc-panel button:focus-visible,.pc-slider input:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+.pc-panel figure{margin:1rem 0 .6rem}.pc-panel figure[hidden]{display:none}.pc-panel svg{display:block;width:100%;height:auto}
+.pc-axes line{stroke:var(--ink-3);stroke-width:1}.pc-axes text{fill:var(--ink-2);font-size:14px}.pc-axes .pc-axis-title{fill:var(--ink);font-size:15px}
+.pc-line{stroke:var(--link);stroke-width:3;transition:all .5s var(--ease)}
+#projection-drops line{stroke:var(--ink-3);stroke-dasharray:3 4;stroke-width:1}
+.pc-pt{fill:var(--ink-3)}.pc-pt.bad{fill:var(--live)}
+.pc-strip-line{stroke:var(--ink-3);stroke-width:1}.pc-strip-g text{fill:var(--ink-2);font-size:14px}
+.pc-mark{fill:var(--link);fill-opacity:.75}.pc-mark.bad{fill:var(--live)}.pc-mark.gray{fill:var(--ink-3)}
+.pc-result{border-top:1px solid var(--rule);padding-top:.8rem;min-height:2.4em}
+.pc-result p{margin:.2rem 0}
+.pc-big{font-size:1.5rem;color:var(--link);font-variant-numeric:tabular-nums}
+.pc-bars{display:grid;grid-template-columns:auto 1fr auto;gap:.3rem .7rem;align-items:center;max-width:560px;margin:.4rem 0 .8rem}
+.pc-bar{height:14px;background:var(--rule);border-radius:3px;position:relative}.pc-bar span{display:block;height:100%;background:var(--ink-3);border-radius:3px}
+.pc-bar.keep span{background:var(--link)}.pc-bar.sig span{background:var(--live)}
+.pc-bar i{position:absolute;top:-3px;bottom:-3px;left:90%;border-left:2px dashed var(--warn)}
+.pc-tag{font-size:.82rem;color:var(--live);font-weight:600}
+.pc-nav{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+@media (prefers-reduced-motion:reduce){.pc-line{transition:none}}
+@media(max-width:720px){.pc-say{min-height:0}.pc-nav button{flex:1 1 auto}.pc-axes text,.pc-axes .pc-axis-title,.pc-strip-g text{font-size:24px}}
+@media print{.pc-controls,.pc-nav{display:none}}
 </style>
 <script>
 (function(){
   'use strict';
-  const points=[[-3,-1],[-2.5,-1.6],[-2,-.6],[-1.5,-1.2],[-1,-.2],[-.5,-.8],[.5,.8],[1,.2],[1.5,1.2],[2,.6],[2.5,1.6],[3,1]];
+  // 60 張示範訂單：[距離 km, 騎乘分鐘, 是否客訴]。客訴訂單比同距離的訂單慢很多。
+  const D=[[0.95,11.3,1],[2.25,14.1,1],[2.61,11.8,0],[0.6,4.8,0],[1.02,6.6,0],[3.75,14.6,0],[0.75,6.2,0],[0.95,6.5,0],[3.82,15.1,0],[2.68,12.0,0],[1.79,9.6,0],[2.29,11.6,0],[2.82,10.9,0],[1.46,8.3,0],[0.98,6.5,0],[3.26,13.4,0],[2.85,11.4,0],[2.29,11.2,0],[3.36,12.9,0],[2.42,11.1,0],[3.93,16.5,0],[1.22,5.8,0],[2.44,10.6,0],[2.19,9.1,0],[1.74,8.7,0],[2.57,12.3,0],[1.32,8.6,0],[3.31,16.8,1],[3.54,13.9,0],[0.95,6.5,0],[2.13,10.9,0],[1.47,8.0,0],[0.79,5.0,0],[3.64,14.9,0],[2.0,9.4,0],[1.02,6.1,0],[2.86,11.6,0],[1.21,7.1,0],[3.66,14.9,0],[1.26,7.0,0],[0.62,4.8,0],[1.2,5.9,0],[1.71,8.1,0],[2.14,10.7,0],[3.67,14.6,0],[2.94,11.4,0],[1.69,9.3,0],[0.56,5.2,0],[1.06,7.9,0],[3.99,20.3,1],[2.11,9.4,0],[2.92,11.3,0],[0.69,6.1,0],[0.62,6.8,0],[3.46,13.5,0],[2.56,10.7,0],[1.58,8.5,0],[1.61,12.1,1],[0.81,5.4,0],[1.1,6.3,0]];
+  // 正文資料 orders.csv 標準化後 11 個主成分的解釋變異比例（reference/lab2_pca.py 同一份結果）
+  const RATIO=[0.3196,0.205,0.1655,0.1486,0.0907,0.0333,0.0156,0.0084,0.0066,0.0047,0.0022];
   const root=document.querySelector('.pca-explorer');
   const ns='http://www.w3.org/2000/svg';
   const el=id=>document.getElementById('projection-'+id);
-  const xy=(x,y)=>[340+x*70,195-y*70];
-  function shape(tag,attrs,parent){const node=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))node.setAttribute(k,v);parent.appendChild(node);return node;}
-  for(let x=-4;x<=4;x++){const [px]=xy(x,0);shape('line',{x1:px,y1:30,x2:px,y2:360},el('grid'));}
-  for(let y=-2;y<=2;y++){const [,py]=xy(0,y);shape('line',{x1:40,y1:py,x2:640,y2:py},el('grid'));}
-  const originals=points.map(([x,y])=>{const [cx,cy]=xy(x,y);return shape('circle',{cx,cy,r:5},el('originals'));});
-  const drops=points.map(()=>shape('line',{},el('drops')));
-  const projected=points.map(()=>shape('rect',{width:8,height:8},el('projected')));
-  function draw(){
-    const degrees=Number(el('angle').value),t=degrees*Math.PI/180,ux=Math.cos(t),uy=Math.sin(t);
-    // Intersect the direction with the drawing bounds, preserving the data scale.
-    const length=Math.min(300/Math.max(Math.abs(ux),1e-12),160/Math.max(Math.abs(uy),1e-12));
-    for(const [k,v] of Object.entries({x1:340-length*ux,y1:195+length*uy,x2:340+length*ux,y2:195-length*uy}))el('axis').setAttribute(k,v);
-    let ss=0,error=0;
-    points.forEach(([x,y],i)=>{const z=x*ux+y*uy,rx=z*ux,ry=z*uy;ss+=z*z;error+=(x-rx)**2+(y-ry)**2;const [px,py]=xy(rx,ry),[ox,oy]=xy(x,y);for(const [k,v] of Object.entries({x1:ox,y1:oy,x2:px,y2:py}))drops[i].setAttribute(k,v);projected[i].setAttribute('x',px-4);projected[i].setAttribute('y',py-4);});
-    const variance=ss/(points.length-1),mse=error/points.length;
-    el('angle-value').value=degrees.toFixed(1)+'°';el('variance').value=variance.toFixed(4);el('error').value=mse.toFixed(4);
-    root.dataset.angle=String(degrees);root.dataset.variance=String(variance);root.dataset.error=String(mse);
-    el('angle').setAttribute('aria-valuetext',degrees.toFixed(1)+' 度');
+  const shape=(tag,attrs,parent)=>{const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(parent)parent.appendChild(n);return n;};
+  const mean=a=>a.reduce((s,v)=>s+v,0)/a.length,sd=a=>{const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/a.length);};
+  const md=mean(D.map(d=>d[0])),sdd=sd(D.map(d=>d[0])),mr=mean(D.map(d=>d[1])),sdr=sd(D.map(d=>d[1]));
+  const S=D.map(d=>[(d[0]-md)/sdd,(d[1]-mr)/sdr]);
+  const CX=340,CY=204,U=56; // 標準化座標每單位 56px
+  const toPx=([a,b])=>[CX+a*U,CY-b*U];
+  const TRI='M0,-6L5.5,4.5H-5.5z',DOT='M-4.5,0a4.5,4.5 0 1,0 9,0a4.5,4.5 0 1,0 -9,0';
+  function pcaAngle(P){let xx=0,yy=0,xy=0;for(const [x,y] of P){xx+=x*x;yy+=y*y;xy+=x*y;}let a=Math.atan2(2*xy,xx-yy)*90/Math.PI;if(a<0)a+=180;return a;}
+  const PC1=pcaAngle(S),PC2=(PC1+90)%180;
+  // 公尺記錄時，在原始單位（公尺、分鐘）下的第 1 主成分方向幾乎就是距離軸。
+  const M=D.map(d=>[(d[0]-md)*1000,d[1]-mr]);const PCm=pcaAngle(M);
+  const keptM=(()=>{const t=PCm*Math.PI/180,u=[Math.cos(t),Math.sin(t)];let a=0,b=0;M.forEach(p=>{const z=p[0]*u[0]+p[1]*u[1];a+=z*z;b+=p[0]**2+p[1]**2;});return a/b;})();
+  function axes(){
+    const g=el('axes');g.replaceChildren();
+        const text=(x,y,t,a={})=>{const n=shape('text',{x,y,...a},g);n.textContent=t;};
+    shape('line',{x1:60,y1:305,x2:620,y2:305},g);shape('line',{x1:55,y1:20,x2:55,y2:305},g);
+    for(const km of [1,2,3,4]){const [x]=toPx([(km-md)/sdd,0]);shape('line',{x1:x,y1:305,x2:x,y2:311},g);text(x,326,String(km),{'text-anchor':'middle'});}
+    for(const m of [5,10,15,20]){const [,y]=toPx([0,(m-mr)/sdr]);if(y<20||y>305)continue;shape('line',{x1:49,y1:y,x2:55,y2:y},g);text(45,y+5,String(m),{'text-anchor':'end'});}
+    text(630,326,'距離（公里）',{'text-anchor':'end',class:'pc-axis-title'});text(62,16,'騎乘時間（分鐘）',{class:'pc-axis-title'});
   }
-  el('angle').addEventListener('input',draw);
-  el('principal').addEventListener('click',()=>{let xx=0,yy=0,xy=0;for(const [x,y]of points){xx+=x*x;yy+=y*y;xy+=x*y;}let angle=Math.atan2(2*xy,xx-yy)*90/Math.PI;if(angle<0)angle+=180;el('angle').value=String(angle);draw();});
-  el('reset').addEventListener('click',()=>{el('angle').value='0';draw();});
-  draw();
+  axes();
+  const pts=S.map((p,i)=>{const [x,y]=toPx(p);return shape('path',{d:DOT,transform:`translate(${x},${y})`,class:'pc-pt'},el('points'));});
+  const drops=S.map(()=>shape('line',{},el('drops')));
+  // 下方的帶子
+  const SY=402,SX0=70,SX1=610,SU=(SX1-SX0)/7;
+  shape('line',{x1:SX0,y1:SY,x2:SX1,y2:SY,class:'pc-strip-line'},el('strip'));
+  const stripLabel=shape('text',{x:SX0,y:SY+24},el('strip'));
+  const marks=S.map(()=>shape('path',{d:DOT,class:'pc-mark'},el('strip')));
+  let step=0,unit='km',showBad=false,touched=false;
+  const TITLES=['看資料','只准記一個數字','揭曉：哪些訂單被客訴？','變化小的方向','換個單位','回到 11 欄的真實資料'];
+  function kept(angle){const t=angle*Math.PI/180,u=[Math.cos(t),Math.sin(t)];let a=0;S.forEach(p=>{a+=(p[0]*u[0]+p[1]*u[1])**2;});return a/S.length/2;}
+  function draw(){
+    const angle=Number(el('angle').value),t=angle*Math.PI/180,u=[Math.cos(t),Math.sin(t)];
+    const onLine=step>=1&&step<=4;
+    const L=420;el('axis').setAttribute('x1',CX-L*u[0]);el('axis').setAttribute('y1',CY+L*u[1]);el('axis').setAttribute('x2',CX+L*u[0]);el('axis').setAttribute('y2',CY-L*u[1]);
+    el('axis').style.opacity=onLine?'1':'0';
+    const zs=S.map(p=>p[0]*u[0]+p[1]*u[1]);
+    S.forEach((p,i)=>{
+      const bad=showBad&&D[i][2]===1;
+      pts[i].setAttribute('d',bad?TRI:DOT);pts[i].setAttribute('class','pc-pt'+(bad?' bad':''));
+      const [ox,oy]=toPx(p),[px,py]=toPx([zs[i]*u[0],zs[i]*u[1]]);
+      for(const [a,v] of Object.entries({x1:ox,y1:oy,x2:px,y2:py}))drops[i].setAttribute(a,v);
+      drops[i].style.opacity=onLine?'1':'0';
+      const sx=SX0+(zs[i]+3.5)*SU,jit=((i*37)%11)*3.2; // 固定的上下錯開，避免點完全重疊
+      marks[i].setAttribute('d',bad?TRI:DOT);marks[i].setAttribute('class','pc-mark'+(bad?' bad':showBad?' gray':''));
+      marks[i].setAttribute('transform',`translate(${sx},${SY-7-jit})`);marks[i].style.opacity=onLine?'1':'0';
+    });
+    stripLabel.textContent=onLine?'每張訂單只記一個數字：在藍線上的位置':'';
+    const k=kept(angle);el('angle').setAttribute('aria-valuetext',`${angle} 度，留下 ${(k*100).toFixed(1)}% 的變化`);
+    Object.assign(root.dataset,{step:String(step),angle:String(angle),kept:String(k),unit});
+    return k;
+  }
+  const say=t=>{el('say').textContent=t;},result=h=>{el('result').innerHTML=h;};
+  function keptLine(k,extra=''){return `<p>留下的變化：<span class="pc-big">${(k*100).toFixed(1)}%</span>${extra}</p>`;}
+  function render(){
+    el('count').textContent=`第 ${step+1}／${TITLES.length} 步`;el('step-title').textContent=TITLES[step];
+    root.querySelectorAll('.pc-group').forEach(g=>g.hidden=!g.dataset.for.split(' ').includes(String(step)));
+    el('prev').disabled=step===0;el('next').disabled=step===TITLES.length-1;
+    el('figure').hidden=step===5;
+    showBad=step===2||step===3;
+    if(step===0){
+      el('angle').value='0';draw();
+      say('每個點是一張外送訂單：橫軸是距離，縱軸是騎乘時間。越遠騎越久，所以點沿著一條斜線排。圖已經把兩欄換成同一把尺（標準化），距離和時間的單位不會影響形狀。');
+      result('<p>兩欄高度相關：知道距離，大概就猜得到騎多久。</p>');
+    }else if(step===1){
+      if(!touched)el('angle').value='0';
+      const k=draw();
+      say('如果每張訂單只准記一個數字，可以把點垂直投影到藍線上，記下它在線上的位置（下方的帶子）。拖動滑桿轉方向，讓帶子上的點盡量散開，也就是留下最多變化。');
+      result(keptLine(k,Math.abs(Number(el('angle').value)-Math.round(PC1))<=1?'　這就是 PCA 選的方向：<strong>第 1 主成分</strong>。':''));
+    }else if(step===2){
+      el('angle').value=String(Math.round(PC1));const k=draw();
+      say('現在揭曉：紅色三角形是事後被客訴的訂單。在第 1 主成分的帶子上，它們混在其他訂單中間，分不出來。');
+      result(keptLine(k,'　卻分不出客訴。'));
+    }else if(step===3){
+      const k=draw();
+      say('按「改看第 2 主成分」，換到和第 1 主成分垂直的方向。這個方向的意思是「比同樣距離的訂單慢多少」。');
+      result(keptLine(k,Math.abs(Number(el('angle').value)-Math.round(PC2))<=1?'　只留下這麼一點變化，卻正好把客訴訂單分了出來。<strong>變化小，不代表不重要。</strong>':''));
+    }else if(step===4){
+      showBad=false;
+      el('angle').value=String(unit==='m'?Math.round(PCm):Math.round(PC1));draw();
+      if(unit==='m'){say('如果不標準化，直接用原始數字做 PCA，而且距離用公尺記，數字一下子大了 1000 倍。PCA 是照「數字變化多大」挑方向的，於是它幾乎只看距離，騎乘時間被當成雜訊。訂單沒變，只是換了單位、少了標準化。');
+        result(`<p>不標準化、距離用公尺時，PCA 選的方向幾乎只看距離，留下 <span class="pc-big">${(keptM*100).toFixed(1)}%</span> 的變化。</p><p>先標準化的話，換成公尺也不會影響結果，因為每欄都會先換成「比平均高幾個標準差」。但標準化也會把和目標無關、只是數字大的欄位一起放大。</p>`);}
+      else{say('到目前為止，兩欄都先標準化了。PCA 只看數字變化多大，所以不標準化時單位很重要。按「公尺」，看看不標準化、又換了單位會發生什麼事。');result(keptLine(kept(Math.round(PC1)),'　（兩欄都標準化）'));}
+    }else{
+      let cum=0;
+      const rows=RATIO.map((r,i)=>{cum+=r;const n=i+1;return `<span>PC${n}</span><span class="pc-bar${n<=5?' keep':''}"><span style="width:${(r/RATIO[0]*100).toFixed(1)}%"></span></span><span>${(r*100).toFixed(1)}%　累積 ${(cum*100).toFixed(1)}%${n===5?'　<b class="pc-tag">累積超過 90%</b>':''}</span>`;}).join('');
+      say('正文的 orders.csv 有 11 欄。標準化後做 PCA，每根長條是一個主成分留下的變化。照「累積到 90% 就夠」的習慣，會留下前 5 個。');
+      result(`<div class="pc-bars">${rows}</div><p>剛才的小例子裡，客訴訊號藏在變化很小的方向。這 11 欄裡，它會在哪一個主成分？只看這張圖答不出來，要等正文揭曉用途、拿到客訴標籤，再用你的驗收卡檢查。</p><p><strong>90% 這個門檻回答的是「變化留了多少」，回答不了「你要的訊號留了沒有」。</strong></p>`);
+      Object.assign(root.dataset,{step:String(step)});
+    }
+  }
+  el('angle').addEventListener('input',()=>{touched=true;render();});
+  el('principal').addEventListener('click',()=>{el('angle').value=String(Math.round(PC1));touched=true;render();});
+  el('second').addEventListener('click',()=>{el('angle').value=String(Math.round(PC2));render();});
+  el('first').addEventListener('click',()=>{el('angle').value=String(Math.round(PC1));render();});
+  root.querySelectorAll('[data-unit]').forEach(b=>b.addEventListener('click',()=>{unit=b.dataset.unit;root.querySelectorAll('[data-unit]').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));render();}));
+  el('prev').addEventListener('click',()=>{if(step>0){step--;render();}});
+  el('next').addEventListener('click',()=>{if(step<TITLES.length-1){step++;render();}});
+  el('reset').addEventListener('click',()=>{step=0;unit='km';touched=false;root.querySelectorAll('[data-unit]').forEach(o=>o.setAttribute('aria-pressed',String(o.dataset.unit==='km')));render();});
+  render();
 })();
 </script>
 
 
 <section>
 <h2 id="section-從投影接到-pca">從投影接到 PCA</h2>
-<p>剛才是二維變一維；這一關的 <code>data/line_channels.csv</code> 有 800 筆資料、11 個通道，通道名稱只有 <code>ch01</code> 到 <code>ch11</code>。這也是<strong>講師設計的資料</strong>。PCA 做的是「減去平均、找方向、投影」。還沒學過特徵向量也可以先跟著做，下方會補上意義。</p>
+<p>剛才是二維變一維；<code>data/orders.csv</code> 則是 11 維變幾維。做法一樣：減去平均、找方向、投影。還沒學過特徵向量也可以先跟著做，下方會補上意義。</p>
 <details class="bg"><summary>PCA 在做什麼？為什麼要降維？</summary>
 <div class="bg-body">
 <p>
-每筆資料是 11 個通道的讀數。這些通道並<strong>不獨立</strong>，有些會一起變動。
+每筆資料是 11 欄的數字。這些欄並<strong>不獨立</strong>，有些會一起變動。
 所以資料實際上只「住」在一個<strong>維度低得多的子空間附近</strong>。
 </p>
 <p>
@@ -914,13 +1056,13 @@ PCA 要做的就是找出那個子空間：在 $\mathbb{R}^{11}$ 裡找 $K$ 個�
 <details class="bg"><summary>共變異數矩陣是什麼？為什麼要先中心化？</summary>
 <div class="bg-body">
 <p>
-先把每一行（每個通道）減掉它自己的平均，得到中心化的 $X_c$。
+先把每一行（每個欄位）減掉它自己的平均，得到中心化的 $X_c$。
 然後 $C=\frac{X_c^\top X_c}{n-1}$ 是一個 $11\times 11$ 的矩陣，其中
 </p>
 $$C_{jk}=\frac{1}{n-1}\sum_{i=1}^{n}(x_{ij}-\bar x_j)(x_{ik}-\bar x_k)$$
 <ul>
-<li><strong>對角線</strong> $C_{jj}$：第 $j$ 個通道自己的變異數，也就是它「變化得多劇烈」</li>
-<li><strong>非對角線</strong> $C_{jk}$：第 $j$ 與第 $k$ 個通道<strong>一起變動的程度</strong>。
+<li><strong>對角線</strong> $C_{jj}$：第 $j$ 欄自己的變異數，也就是它「變化得多劇烈」</li>
+<li><strong>非對角線</strong> $C_{jk}$：第 $j$ 與第 $k$ 欄<strong>一起變動的程度</strong>。
     正的代表「一個高另一個也傾向高」，負的代表相反，接近 0 代表線性共同變動較弱，仍可能有非線性關係</li>
 </ul>
 <h4>為什麼一定要先中心化</h4>
@@ -938,7 +1080,7 @@ $$C_{jk}=\frac{1}{n-1}\sum_{i=1}^{n}(x_{ij}-\bar x_j)(x_{ik}-\bar x_k)$$
 把 $C$ 的特徵值由大到小排成 $\lambda_1\ge\lambda_2\ge\cdots$。
 每個 $\lambda_j$ 就是<strong>資料在第 $j$ 個主成分方向上的變異數</strong>。
 </p>
-<p>對稱矩陣的跡等於特徵值總和，而這個跡剛好是所有通道的變異數總和，所以</p>
+<p>對稱矩陣的跡等於特徵值總和，而這個跡剛好是所有欄位的變異數總和，所以</p>
 $$\text{第 }j\text{ 個主成分的解釋變異比例}=\frac{\lambda_j}{\sum_{m}\lambda_m}$$
 <p>
 意思是「整體變異裡，有百分之幾是由這個方向貢獻的」。
@@ -984,7 +1126,7 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <div class="step" data-n="1">
 <h3>先照平常的方式問</h3>
 <p>輸入 <code>/new</code> 開新對話，貼上這句：</p>
-<pre class="cmd"><code>data/line_channels.csv 是產線感測資料，幫我降維，看幾個主成分就夠。</code></pre>
+<pre class="cmd"><code>data/orders.csv 是校園外送平台的訂單資料，幫我降維，看幾個主成分就夠。</code></pre>
 <p>它回答後，先做一張三欄對照，再相信它：</p>
 <div class="tw"><table>
 <tr><th>摘要說它做了什麼</th><th>畫面上實際出現的工具、你按了幾次 Allow</th><th><code>!</code> 用 <code>ls</code> 看到的檔案</th></tr>
@@ -998,22 +1140,12 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <p>先寫下：</p>
 <ul>
 <li>「夠了」的門檻是誰定的？為什麼是這個數字？</li>
-<li>它有沒有處理資料尺度？看 <code>ch11</code> 和 <code>ch09</code> 的大小，不處理會發生什麼事？</li>
-<li>它有沒有建議丟掉哪些通道？你敢丟嗎？你還缺什麼資訊？</li>
+<li>它有沒有處理資料尺度？看 <code>rider_odometer_m</code> 和 <code>drop_offset_km</code> 的數字大小，不處理會發生什麼事？</li>
+<li>它有沒有建議丟掉哪些欄位？你敢丟嗎？你還缺什麼資訊？</li>
 </ul>
-<details class="bg"><summary>寫完判斷再打開：講師實測</summary>
+<details class="bg"><summary>寫完判斷再打開：AI 常見的反應</summary>
 <div class="bg-body">
-<div class="box tip">
-<div class="bt">講師實測：同一句 prompt</div>
-<p>2026-11-02、03，OpenCode 1.19.5 互動模式，<code>big-pickle</code>、<code>Gemini 3.5 Flash Lite</code>、<code>GLM-5.3-Flash</code> 各 3 次：</p>
-<ul>
-<li><strong>9 次都主動標準化</strong>，這步做得很好，否則 <code>ch11</code> 會獨占 100% 的變異。<strong>9 次也都沒有先問用途。</strong></li>
-<li><code>big-pickle</code> 的回答是「機台核心看 3 個、全部通道要 6 個」「4 個」「4 個」，依據包括特徵值大於 1 這類它自己選的準則。3 次都提醒只留 4 個會丟掉 <code>ch11</code>，其中 2 次寫明要看 <code>ch11</code> 重不重要。這很好，但重不重要它不知道，要由你回答。</li>
-<li>Gemini 和 GLM 都以累積變異為依據，建議 5 個左右（92.95%），也有人同時提 4 個。90% 這類門檻是它自己選的。</li>
-<li>其中一次建議「ch09、ch10、ch11 貢獻極小，可考慮剔除」。</li>
-</ul>
-<p style="margin-bottom:0">你那次可能不一樣，先看自己的。</p>
-</div>
+<p style="margin-bottom:0">AI 多半會主動標準化，這步做得很好，否則 <code>rider_odometer_m</code> 會獨占將近 100% 的變異。接著它常依累積變異 90% 或「特徵值大於 1」這類<strong>它自己選的準則</strong>建議 5 個或 4 個，很少先問你要拿來做什麼。它也會替欄位下判斷：同一欄 <code>rider_odometer_m</code>，有一次說它「具獨立訊號，建議保留」，另一次說它是雜訊。哪一欄重要，它其實不知道，要由你回答。</p>
 </div>
 </details>
 </div>
@@ -1025,31 +1157,46 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <div class="box warn">
 <div class="bt">需求卡</div>
 <ul style="margin-bottom:0">
-<li>降維後的結果要給<strong>故障監控</strong>用。</li>
-<li><code>ch09</code>、<code>ch10</code> 是高頻振動通道，讀數很小。<code>ch11</code> 是累積脈衝數，讀數很大，和故障無關。</li>
+<li>降維後的結果要給<strong>客訴預警</strong>用：希望在客訴發生前，先找出可能出問題的訂單。</li>
+<li><code>drop_offset_km</code>、<code>pause_ratio</code> 讀數很小，但送錯地點、途中停很久正是客訴的主因。<code>rider_odometer_m</code> 是騎士帳號用了多久，數字很大，和這張訂單會不會被客訴無關。</li>
 </ul>
 </div>
-<p>下載故障標籤。它只用來檢查降維結果。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
-<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/line_channels_fault.csv -o data/line_channels_fault.csv</code></pre>
-<p>先預測，再寫下這張卡。<strong>AUC</strong> 是用來衡量分不分得出故障的分數：0.5 約等於亂猜，1 是完全分開。</p>
+<p>下載客訴標籤。這個檔只有一欄 <code>complaint</code>（1 表示這張訂單事後被客訴），列的順序和 <code>orders.csv</code> 相同。它只用來檢查降維結果。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
+<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/orders_complaint.csv -o data/orders_complaint.csv</code></pre>
+<p>要檢查「幾個主成分夠不夠」，可以用主成分當輸入，看能不能分出客訴。分得好不好用 <strong>AUC</strong> 衡量：隨機抽一張客訴訂單和一張正常訂單，模型把客訴那張排得比較可疑的機率。0.5 約等於亂猜，1 是完全分開。</p>
+<p>「AI 說 5 個就夠」要變成你能檢查的事，得先講好怎樣算夠。<strong>驗收卡就是在看結果之前，先寫下你的主張和撤回條件</strong>，免得看到數字再改口，或任由 AI 替你改。</p>
 <div class="box warn">
 <div class="bt">驗收卡</div>
-<p style="margin-bottom:0">我主張＿＿就夠；要比較＿＿；如果出現＿＿，我會撤回主張。</p>
+<ol style="margin-bottom:0">
+<li><strong>主張</strong>：我認為保留幾個主成分就夠用來做客訴預警？</li>
+<li><strong>比較</strong>：我要比哪幾種保留方式？用什麼分數比？</li>
+<li><strong>撤回條件</strong>：出現什麼結果，我就承認主張不成立？</li>
+</ol>
 </div>
-<p>用這張卡自己寫 prompt 請 AI 算。提醒它前處理和 PCA 只能在訓練折擬合，也告訴它不要替你改主張。</p>
+<details class="bg"><summary>寫完再對照：驗收卡範例</summary>
+<div class="bg-body">
+<ul>
+<li>主張：標準化後保留 <strong>4 個</strong>主成分就夠。</li>
+<li>比較：3、4、5 個主成分辨識客訴的 AUC。</li>
+<li>撤回條件：如果 4 個的 AUC 比 5 個低超過 0.02，我就撤回。</li>
+</ul>
+<p style="margin-bottom:0">你的主張可以是 3 個或 5 個，猜錯也沒關係；重點是先寫，再看結果。</p>
+</div>
+</details>
+<p>用這張卡自己寫 prompt 請 AI 算。也提醒它兩件事：第一，用<strong>交叉驗證</strong>（把資料切成幾份，輪流拿一份當考題、其餘當練習題），而且標準化和 PCA 只能用練習題去算，不能偷看考題；第二，不要替你改主張。</p>
 <details class="bg"><summary>算完再打開：參考結果</summary>
 <div class="bg-body">
-<p>參考程式（<code>reference/lab2_pca.py</code>，標準化後取主成分分數，用 logistic 迴歸做 5 折交叉驗證）：</p>
+<p>參考程式（<code>reference/lab2_pca.py</code>，標準化後取主成分分數，用 logistic 迴歸做 5 折交叉驗證，Lab 3 會介紹這個模型）：</p>
 <div class="tw"><table>
-<tr><th>保留內容</th><th>累積變異</th><th>辨識故障的 AUC</th></tr>
+<tr><th>保留內容</th><th>累積變異</th><th>辨識客訴的 AUC</th></tr>
 <tr><td>前 3 個主成分</td><td>69.0%</td><td>0.588</td></tr>
 <tr><td>前 4 個主成分</td><td>83.9%</td><td><strong>1.000</strong></td></tr>
 <tr><td>前 5 個主成分</td><td>92.9%</td><td>1.000</td></tr>
-<tr><td>拿掉 <code>ch09</code>～<code>ch11</code>，用其餘通道</td><td>不適用</td><td>0.439</td></tr>
+<tr><td>拿掉讀數很小的兩欄和 <code>rider_odometer_m</code>，用其餘 8 欄</td><td>不適用</td><td>0.438</td></tr>
 <tr><td>原始尺度只留 1 個主成分</td><td>約 100%</td><td>0.503</td></tr>
 </table></div>
-<p>第 4 個主成分幾乎就是 <code>ch09</code>、<code>ch10</code>，第 5 個幾乎只有和故障無關的 <code>ch11</code>。<strong>解釋變異比例量的是「變化多大」，不是「對你多重要」。</strong>這不是說 90% 這類門檻不能用，而是用之前要先知道用途。標準化也不是萬用解：它救回了弱通道，也把 <code>ch11</code> 這種和故障無關的欄位放大了。</p>
-<p>這張表只看主成分分數。講師實測兩個模型各 3 次，都判定「4 個就夠」成立；有幾次自己加了監控常用的 Q 殘差統計量，只留 3 個時也能達到約 0.999，因為故障訊號跑到被丟掉的部分。所以「3 個不夠」也有條件：要看你的監控怎麼用這些主成分。</p>
+<p>第 4 個主成分幾乎就是 <code>drop_offset_km</code>、<code>pause_ratio</code>，第 5 個幾乎只有和客訴無關的 <code>rider_odometer_m</code>。<strong>解釋變異比例量的是「變化多大」，不是「對你多重要」。</strong>90% 這類門檻可以用，但用之前要先知道用途。標準化也不是萬用解：它救回了讀數很小的欄，也把 <code>rider_odometer_m</code> 這種和客訴無關的欄位放大了。</p>
+<p>這張表只看主成分分數。有些 AI 會自己加上「重建誤差」這類指標（把主成分放回 11 欄後，和原本的資料差多少）：只留 3 個主成分時，客訴訊號跑到被丟掉的部分，重建誤差反而很大，也能抓到客訴。所以「3 個不夠」也有條件：要看你的預警系統怎麼用這些主成分。</p>
 </div>
 </details>
 </div>
@@ -1063,13 +1210,13 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 
 <div class="step" data-n="4">
 <h3>規劃：手刻，並先說清楚怎麼驗</h3>
-<p>輸入 <code>/new</code>，依你的驗收卡自己寫 prompt，至少交代：只能用 numpy 的 <code>eigh</code> 手刻；每欄先<strong>除以標準差但不減平均</strong>，中心化留給 PCA 本身；取前 4 個主成分；sklearn（<code>svd_solver='full'</code>）只當對照組；檔名 <code>lab2_pca.py</code>；每項檢查印出實際數值和 PASS/FAIL。</p>
+<p>輸入 <code>/new</code>，自己寫 prompt，至少交代：只能用 numpy 的 <code>eigh</code> 手刻；每欄先<strong>除以標準差但不減平均</strong>，中心化留給 PCA 本身，這樣待會「忘記中心化」的錯誤才測得出來；取前 4 個主成分；sklearn（<code>svd_solver='full'</code>）只當對照組；檔名 <code>lab2_pca.py</code>；每項檢查印出實際數值和 PASS/FAIL。</p>
 <p>跑完後打開程式，<strong>找出通過條件到底比了哪些量</strong>，列在 <code>notes/</code> 或紙上。有印出來不代表有列入判定。</p>
 </div>
 
 <div class="step" data-n="5">
 <h3>驗證：先預測，再跑「檢查 × 錯誤」表</h3>
-<p>下面四個錯誤是<strong>講師設計後注入</strong>的，不是 AI 犯的。用你剛才列的檢查，先預測每一格會 PASS 還是 FAIL，再貼上：</p>
+<p>下面四個錯誤是<strong>故意放進去</strong>的，不是 AI 犯的。用你剛才列的檢查，先預測每一格會 PASS 還是 FAIL，再貼上：</p>
 <pre class="cmd"><code>請在 lab2_pca.py 加一個 bug 參數，可選：
 none、ratio_topk（比例分母只用前 4 個特徵值的和）、denom_n（變異數分母用 n，不是 n-1）、
 no_center（不中心化）、rows（主成分取錯方向：取矩陣的前 4 列，不是前 4 個特徵向量）。
@@ -1082,7 +1229,7 @@ no_center（不中心化）、rows（主成分取錯方向：取矩陣的前 4 �
 <p>下面是檢查項目齊全時的參考結果：</p>
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">參考程式輸出（reference/lab2_pca_bugs.py）</span></div>
-  <div class="term-body"><div class="o">錯誤（講師注入）　　　比例　 |cos|　重建　 正交　 特徵值</div>
+  <div class="term-body"><div class="o">故意放的錯誤　　　　　比例　 |cos|　重建　 正交　 特徵值</div>
 <div class="o">正確版本　　　　　　　PASS　PASS　 PASS　 PASS　 PASS</div>
 <div class="o">比例分母只用前 4 個　　<span class="e">FAIL</span>　PASS　 PASS　 PASS　 PASS</div>
 <div class="o">變異數分母用 n　　　　PASS　PASS　 PASS　 PASS　 <span class="e">FAIL</span></div>
@@ -1108,7 +1255,7 @@ $$Cv=\lambda v\;\Longrightarrow\;C'v=(c\lambda)v$$
 <h3>說明：主張、證據、限制</h3>
 <p>用三句話寫下這份結果，不要只寫「驗證通過」。例如：</p>
 <ul>
-<li><strong>主張</strong>：這份資料要做故障監控時，標準化後保留 4 個主成分就夠。</li>
+<li><strong>主張</strong>：這份資料要做客訴預警時，標準化後保留 4 個主成分就夠。</li>
 <li><strong>證據</strong>：AUC 從 3 個的 0.588 升到 4 個的 1.000；手刻 PCA 和 sklearn 在容差內一致，四種注入錯誤都至少被一項檢查抓到（沒跑到的就照實寫）。</li>
 <li><strong>限制</strong>：只針對這份資料和這四種錯誤。sklearn 是對照組，不是真理；換用途要重新判斷。</li>
 </ul>
@@ -1167,7 +1314,7 @@ $WW^\top\approx I$ 確實不需要對照組，但它只證明「這 $K$ 個向�
 <section>
 <h2 id="section-如果還有時間">如果還有時間</h2>
 <ul>
-<li>挑一個自己想試的：不標準化再跑一次、只拿掉 <code>ch11</code>，或改用最小的幾個特徵值。先預測，再看哪些檢查抓得到。</li>
+<li>挑一個自己想試的：不標準化再跑一次、只拿掉 <code>rider_odometer_m</code>，或改用最小的幾個特徵值。先預測，再看哪些檢查抓得到。</li>
 <li>問 agent：<code>pca._fit_svd_solver</code> 是什麼？確認你的對照組是不是真的用了另一種演算法。</li>
 </ul>
 </section>

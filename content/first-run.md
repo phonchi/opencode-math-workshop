@@ -170,13 +170,7 @@ opencode run --auto "讀 pyproject.toml，用一句話說明這個專案裝了�
 
 看它接下來怎麼做（實測多半直接停下），再貼一次同一句。如果它又跳出權限要求，這次選 `Allow once`。如果它沒有再試，就明確告訴它：`現在可以執行了。`
 
-講師實測（2026-11-02、03，OpenCode 1.19.5，各 3 次）：
-
-| 模型 | 拒絕後 | 再問同一句 |
-|---|---|---|
-| `big-pickle` | 停下來 | 2 次再試，允許後回報版本；1 次回答「沒有實際執行」，沒有再試 |
-| `GLM-5.3-Flash` | 停下來 | 再試一次，允許後回報版本 |
-| `Gemini 3.5 Flash Lite` | 停下來 | 回答「沒有實際執行」，沒有再試 |
+AI 常見的反應：拒絕後多半會停下來；再問同一句時，有的模型會再試、允許後回報版本，有的只回答「沒有實際執行」，就不再試了。
 
 想做、獲准、做完是三件事。換模型會不同，同一個模型每次也可能不同。先看你這次是哪一種。
 
@@ -277,7 +271,7 @@ opencode run --auto "讀 pyproject.toml，用一句話說明這個專案裝了�
 
 :::bg 課後試試：Plan 模式會怎麼處理 `ls`
 
-切到 Plan 試一句：`請執行 ls，列出目前資料夾的檔案。`，再看它用了什麼工具。講師實測三個模型各 3 次，都列出了檔案，但用的是讀取或搜尋工具，不是 `bash`；其中 1 次列完檔後還試了 `bash`，被擋下才作答。權限能擋住特定工具，agent 仍可能換一條路達成目的，所以要看畫面。試完按 `Tab` 切回 Build，確認左下角的標示。
+切到 Plan 試一句：`請執行 ls，列出目前資料夾的檔案。`，再看它用了什麼工具。AI 常會列出檔案，但用的是讀取或搜尋工具，不是 `bash`；也可能先試 `bash`，被擋下才換路。權限能擋住特定工具，agent 仍可能換一條路達成目的，所以要看畫面。試完按 `Tab` 切回 Build，確認左下角的標示。
 
 :::
 
@@ -288,24 +282,18 @@ Plan 的限制來自設定，不是模式名稱。如果設定檔只寫 `"edit":
 這門課貫穿一個問題：**AI 這麼強，為什麼還要自己想、自己驗證？**先試一次。貼上這句，**如果跳出權限要求就選 `Reject`**：
 
 ```text
-不要讀檔也不要跑程式，直接回答：data/line_modes.csv 有幾欄是常數？
+不要讀檔也不要跑程式，直接回答：data/shops_daily.csv 有幾欄是常數？
 ```
 
 先別管答案對不對。**它靠什麼回答？畫面上有幾個工具呼叫？你要它不讀檔，它照做了嗎？**記下來，再按 `!` 進 Shell 模式自己核對：
 
 ```bash
-uv run python -c "import numpy as np; X = np.genfromtxt('data/line_modes.csv', delimiter=',', skip_header=1); print(np.flatnonzero(X.std(0) == 0))"
+uv run python -c "import numpy as np; X = np.genfromtxt('data/shops_daily.csv', delimiter=',', skip_header=1); print(np.flatnonzero(X.std(0) == 0))"
 ```
 
 正確答案是第 6、7 欄（從 0 數起），共 2 欄。
 
-講師實測（2026-11-02、03，OpenCode 1.19.5 互動模式，同一句 prompt）：
-
-| 模型 | 回答 | 工具 |
-|---|---|---|
-| `big-pickle`（3 次） | 3 次都說不讀檔無法知道 | 沒有用工具 |
-| `GLM-5.3-Flash`（3 次） | 3 次都說不讀檔無法知道 | 沒有用工具 |
-| `Gemini 3.5 Flash Lite`（3 次） | 3 次都說無法得知 | 3 次都先用了找檔或搜尋工具，1 次還讀了 `AGENTS.md`，但都沒讀資料檔 |
+AI 常見的反應：多半說不讀檔就無法知道；有的模型會先用找檔或搜尋工具看一眼，但沒有讀資料檔。
 
 這次它們很老實，這是好事：**沒有資料時，它說不知道。**下一關把資料交給它，它就算得出數字，也會開始替你做決定。這時候要問的問題就不同了：它知道你要做什麼嗎？
 
@@ -392,7 +380,7 @@ opencode -c     # 直接接續上一個 session
 | 你看到的 | 為什麼 | 怎麼解 |
 |---|---|---|
 | `Error: Internal server error` | 這是預設的錯誤訊息，什麼資訊都沒有 | 加上 log 參數重跑：`opencode run "訊息" --print-logs --log-level ERROR`，才看得到真正的原因 |
-| `Free usage exceeded`，並顯示很長的重試倒數 | 免費模型的額度用完了，等待沒有用 | 按 `Esc` 中斷，打 `/models` 換一個免費模型，先試 `beam-free`（講師實測較快）。其他模型也可能一起被擋，這時改用課前準備的 [Gemini 或 GLM 備案](prep.html#backup-keys) |
+| `Free usage exceeded`，並顯示很長的重試倒數 | 免費模型的額度用完了，等待沒有用 | 按 `Esc` 中斷，打 `/models` 換一個免費模型，先試 `beam-free`（通常較快）。其他模型也可能一起被擋，這時改用課前準備的 [Gemini 或 GLM 備案](prep.html#backup-keys) |
 | `Unrecognized request argument supplied: prompt_cache_key` | 上游的 bug，偶發 | **重試一次就好**。不用改任何設定 |
 | 畫面底部一直顯示 `esc again to interrupt` | 你只按了一次 `Esc`，還沒真的中斷 | 再按一次 `Esc`。如果它正在跑工具，多按幾次 |
 | opencode 突然關掉了 | 輸入框是空的時候按了 `ctrl+c`，那就是「離開」 | 重新 `opencode`，再用 `/sessions`（`ctrl+x l`）找回剛剛的對話，或直接 `opencode -c` |
