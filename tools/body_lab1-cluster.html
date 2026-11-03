@@ -97,19 +97,20 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 </ul>
 <p>如果它用了你沒學過的方法，不必硬著頭皮相信，可以追問：</p>
 <pre class="cmd"><code>請只用 k-means 和 silhouette 重算，列出你替我做的每個決定，先不要下結論。</code></pre>
-<p>和鄰座對一下答案。如果它先問你要拿來做什麼，那很好：回答它，再看建議怎麼變。</p>
+<p>和鄰座對一下答案。答案一樣也先別放心：這只表示做法相近，不表示符合你的用途。如果它先問你要拿來做什麼，那很好：回答它，再看建議怎麼變。</p>
 <details class="bg"><summary>寫完判斷再打開：講師實測</summary>
 <div class="bg-body">
 <div class="box tip">
 <div class="bt">講師實測：同一句 prompt</div>
-<p>2026-11-02，OpenCode 1.19.5 互動模式，每次都是新對話。</p>
+<p>2026-11-02、03，OpenCode 1.19.5 互動模式，每次都是新對話。</p>
 <div class="tw"><table>
 <tr><th>模型</th><th>它給的答案</th></tr>
+<tr><td><code>big-pickle</code>（3 次，課堂預設）</td><td>9 種、9 種、9 種</td></tr>
 <tr><td><code>Gemini 3.5 Flash Lite</code>（3 次）</td><td>4 種（另提可細分為 6 種）、9 種、4 種（另提可細分為 5 至 6 種）</td></tr>
 <tr><td><code>GLM-5.3-Flash</code>（3 次）</td><td>9 種、7 種、9 種</td></tr>
 </table></div>
-<p>6 次都直接給了群數（2 次附帶可細分的備選），沒有一次先問要拿來做什麼。其中一次寫「BIC 明確指向 9，可信度較高」，另一次寫「證實是 7 個完全分離的緊密群」。</p>
-<p style="margin-bottom:0">這裡的數字多半算得對，只是每次的決定不同。<code>big-pickle</code> 當天額度用完，還沒有這一題的紀錄。樣本很少，所以這不是模型排名，你那次也可能不一樣。</p>
+<p>9 次都直接給了群數（2 次附帶可細分的備選），沒有一次先問要拿來做什麼。其中一次寫「BIC 明確指向 9，可信度較高」，另一次寫「證實是 7 個完全分離的緊密群」。</p>
+<p style="margin-bottom:0">這裡的數字多半算得對，差別在它替你做的決定。<code>big-pickle</code> 3 次都用了 GMM 和 BIC，也換隨機種子確認過很穩定。穩定只表示同樣的做法會得到同樣的結果，還回答不了這個答案夠不夠你用。樣本很少，所以這不是模型排名，你那次也可能不一樣。</p>
 </div>
 </div>
 </details>
@@ -154,6 +155,7 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <li><strong>但 3 次都是先看到 silhouette 最高是 9，再用批次紀錄淘汰 9、改選 10。</strong>你說不能用它選 k，它也說只拿來檢查，實際上這就是用它選了 k。結果對，不代表照你的規則做。讀它列出的決定，才看得出來。</li>
 </ul>
 <p>另一組 prompt 寫得更具體（共 10 批，只比 k=9 和 k=10，用 ARI 判斷），兩個模型各 3 次也都答 k=10。其中 2 次 Gemini 保留了兩個常數欄；標準化後它們都變成 0，不影響距離和分群。<code>Gemini 3.5 Flash Lite</code> 只有這組紀錄，上面那組當天額度用完。</p>
+<p>回頭看模糊問的那 3 次 <code>big-pickle</code>：它答 9 種，最大的一群有 159 筆，正好是批次 1 的 73 筆加批次 10 的 86 筆。其中 1 次還看到 gap statistic 偏好 k=10，判定 k=10「只是把最大的一群（159 筆）硬拆成兩群」。對任務 A 這樣可能夠用，對任務 B 就把要分開追蹤的兩批併掉了。它不知道任務，再穩定也判斷不了。</p>
 <p style="margin-bottom:0">把目標說清楚有幫助，但不代表不用驗。</p>
 </div>
 </div>

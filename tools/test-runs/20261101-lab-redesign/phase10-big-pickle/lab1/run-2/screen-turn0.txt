@@ -1,0 +1,40 @@
+  ┃  for j in range(9):                                                                                                 
+  ┃      c=X[lab==j].mean(0); n=(lab==j).sum()                                                                          
+  ┃      print(f"M{j+1} n={n:3d} | temp {c[0]:5.1f} | vib {c[1]:4.2f} | pres {c[2]:5.1f} | flow {c[3]:5.1f} | cur {c[   
+  ┃  4]:5.2f} | rpm {c[5]:6.0f}")                                                                                       
+  ┃  PY                                                                                                                 
+  ┃                                                                                                                     
+  ┃  ARI kmeans vs gmm9 1.0                                                                                             
+  ┃  saved figs/line_modes_clusters.png                                                                                 
+  ┃  sil {2: np.float64(0.421), 3: np.float64(0.457), 4: np.float64(0.536), 5: np.float64(0.575), 6: np.float64(0.616)  
+  ┃  , 7: np.float64(0.67), 8: np.float64(0.747), 9: np.float64(0.794), 10: np.float64(0.725), 11: np.float64(0.641),   
+  ┃  12: np.float64(0.587)}                                                                                             
+  ┃                                                                                                                     
+  ┃  profiles sorted by temp                                                                                            
+  ┃  M1 n= 92 | temp  52.2 | vib 3.06 | pres 412.2 | flow 156.5 | cur 10.89 | rpm   1931                                
+  ┃  M2 n= 77 | temp  55.2 | vib 2.71 | pres 374.4 | flow 192.1 | cur  8.51 | rpm   1415                                
+  ┃  M3 n= 59 | temp  56.4 | vib 3.98 | pres 392.4 | flow 185.2 | cur  9.56 | rpm    956                                
+  ┃  M4 n= 90 | temp  56.7 | vib 1.89 | pres 429.5 | flow 183.2 | cur  9.97 | rpm   1806                                
+  ┃  M5 n= 55 | temp  61.7 | vib 2.75 | pres 337.9 | flow 175.8 | cur 13.52 | rpm   1808                                
+  ┃  …                                                                                                                  
+  ┃                                                                                                                     
+  ┃  Click to expand                                                                                                    
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 4.6s                                                                                                    
+                                                                                                                        
+     有 9 種運作模式。                                                                                                  
+                                                                                                                        
+     將 firmware_ver、sample_period_s 排除（兩者都是常數）後，用 6 個感測變數標準化分群：輪廓係數在 k=9 最高（0.        
+     794），GMM 的 BIC 也在 k=9 最小，且 20 個隨機種子結果完全一致。9 群大小為 55–159 筆，                              
+     從低溫高轉速到高溫高壓呈連續製程光譜。圖已存到 figs/line_modes_clusters.png。                                      
+                                                                                                                        
+     ▣  Build · Big Pickle · 1m 39s                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Big Pickle OpenCode                                                                                        
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-big-pickle/lab1-2/project            28.4K (14%)  ctrl+p commands  
+                                                                                                                        

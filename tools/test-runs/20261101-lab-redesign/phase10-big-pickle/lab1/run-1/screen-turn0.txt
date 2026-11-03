@@ -1,0 +1,40 @@
+  ┃  ax[1].plot(list(ks),sil,'o-',label='Silhouette')                                                                   
+  ┃  ax2=ax[1].twinx(); ax2.plot(list(ks),bic,'s--',color='tab:red',label='GMM BIC')                                    
+  ┃  ax[1].set_xlabel('k'); ax[1].set_ylabel('Silhouette'); ax2.set_ylabel('BIC')                                       
+  ┃  ax[1].set_title('Model selection: peak at k=9')                                                                    
+  ┃  h1,l1=ax[1].get_legend_handles_labels(); h2,l2=ax2.get_legend_handles_labels()                                     
+  ┃  ax[1].legend(h1+h2,l1+l2,fontsize=8,frameon=False)                                                                 
+  ┃  plt.tight_layout(); plt.savefig('figs/line_modes_clusters.png',dpi=150)                                            
+  ┃  print('saved figs/line_modes_clusters.png')                                                                        
+  ┃  print('sil peak k=',list(ks)[int(np.argmax(sil))],'BIC min k=',list(ks)[int(np.argmin(bic))])                      
+  ┃  PY                                                                                                                 
+  ┃                                                                                                                     
+  ┃  saved figs/line_modes_clusters.png                                                                                 
+  ┃  sil peak k= 9 BIC min k= 9                                                                                         
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 1.7s                                                                                                    
+                                                                                                                        
+     9 種運作模式。                                                                                                     
+                                                                                                                        
+     我針對 6 個實體感測訊號（temp、vibration、pressure、flow、current、speed）做標準化後分群，firmware_ver 與          
+     sample_period_s 皆為常數因此排除：                                                                                 
+                                                                                                                        
+     - Silhouette 在 k=9 最高（0.79），k=10 開始下降                                                                    
+     - 高斯混合模型（full covariance）BIC 在 k=9 最小                                                                   
+     - 9 個分群在不同隨機種子下 ARI ≈ 0.97，結果穩定                                                                    
+                                                                                                                        
+     各模式大小約 55–159 筆，中心涵蓋不同轉速（約 956–1931 rpm）、溫度（52–81°C）與電流（8.5–15.3 A）組合。雖然 gap     
+     statistic 偏好 k=10，但 k=10 只是把最大的一群（159 筆）硬拆成兩群，該子群內部 BIC 並不支持再分，因此判定為 9 種。  
+                                                                                                                        
+     圖表已存到 figs/line_modes_clusters.png。                                                                          
+                                                                                                                        
+     ▣  Build · Big Pickle · 2m 22s                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Big Pickle OpenCode                                                                                        
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-big-pickle/lab1-1/project            34.3K (17%)  ctrl+p commands  
+                                                                                                                        

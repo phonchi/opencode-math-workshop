@@ -1,0 +1,40 @@
+  ┃                                                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃  $ uv run python pca_line_channels.py >/dev/null && sed -n '1,30p' notes/pca_line_channels.md                       
+  ┃                                                                                                                     
+  ┃  # 產線感測資料 PCA 降維                                                                                            
+  ┃                                                                                                                     
+  ┃  - 資料：`data/line_channels.csv`，800 筆樣本、11 個通道，無缺值。                                                  
+  ┃  - 各通道單位與尺度差異大（ch11 約 $10^6$、ch09 約 $10^{-2}$），因此先對每個通道做 z-score 標準化，                 
+  ┃  再對相關係數矩陣做 PCA。                                                                                           
+  ┃                                                                                                                     
+  ┃  ## 要保留幾個主成分                                                                                                
+  ┃                                                                                                                     
+  ┃  | 判準 | 建議個數 |                                                                                                
+  ┃  |---|---|                                                                                                          
+  ┃  | Kaiser（特徵值 > 1） | 4 |                                                                                       
+  ┃  …                                                                                                                  
+  ┃                                                                                                                     
+  ┃  Click to expand                                                                                                    
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 477ms                                                                                                   
+                                                                                                                        
+     已對 11 個通道做 z-score 標準化後跑 PCA。4 個主成分就夠：Kaiser 與 parallel analysis 都指向 4 個，累積解釋 *83.    
+     9%*（PC1 32.0%、PC2 20.5%、PC3 16.6%、PC4 14.9%）。                                                                
+                                                                                                                        
+     要注意：ch11 幾乎自成 PC5，只取 4 個會把它完全丟掉；若做異常偵測且 ch11 重要，建議保留 5 個（累積 93.0%）。        
+                                                                                                                        
+     產出：pca_line_channels.py、notes/pca_line_channels.md、figs/pca_scree.png、figs/pca_loadings.png、figs/           
+     pca_biplot.png、figs/pca_scores.csv。                                                                              
+                                                                                                                        
+     ▣  Build · Big Pickle · 1m 28s                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Big Pickle OpenCode                                                                                        
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-big-pickle/lab2-3/project            27.2K (14%)  ctrl+p commands  
+                                                                                                                        

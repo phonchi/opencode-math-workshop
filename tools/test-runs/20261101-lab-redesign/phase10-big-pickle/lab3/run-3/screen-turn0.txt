@@ -1,0 +1,40 @@
+  ┃  " && ls -la notes models figs                                                                                      
+  ┃                                                                                                                     
+  ┃  loaded ok, n 900 pred faults 162 actual 71                                                                         
+  ┃  figs:                                                                                                              
+  ┃  total 444                                                                                                          
+  ┃  drwxr-xr-x 2 phonchi phonchi   4096 Nov  3 09:32 .                                                                 
+  ┃  drwxr-xr-x 7 phonchi phonchi   4096 Nov  3 09:32 ..                                                                
+  ┃  -rw-r--r-- 1 phonchi phonchi 121239 Nov  3 09:32 evaluation_random_vs_temporal.png                                 
+  ┃  -rw-r--r-- 1 phonchi phonchi 320674 Nov  3 09:32 fault_timeline.png                                                
+  ┃                                                                                                                     
+  ┃  models:                                                                                                            
+  ┃  total 16                                                                                                           
+  ┃  …                                                                                                                  
+  ┃                                                                                                                     
+  ┃  Click to expand                                                                                                    
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 1.6s                                                                                                    
+                                                                                                                        
+     結論：不能上線。                                                                                                   
+                                                                                                                        
+     - 71 筆故障全部集中在 record_id = 1–111，之後 789 筆完全沒有故障；但檔案是打亂的。這其實只涵蓋一次早期故障事件。   
+     - 隨機 5-fold CV 的 ROC-AUC 0.961 是時間洩漏造成的假象；改用連續時間區塊分組後掉到 0.768（RandomForest 僅 0.       
+       498）。                                                                                                          
+     - 用前 600 筆訓練、後 300 筆測試時，測試集 0 筆故障，召回率無法驗證；且正常資料仍有 11.7% 誤報（門檻調到 90%       
+       recall 仍 9.3%）。                                                                                               
+     - 另外 line_modes.csv 有 36–62% 的特徵超出訓練範圍，模型會把其中 34% 誤判為故障，無法轉移到其他運轉模式。          
+                                                                                                                        
+     已產出 train_fault_model.py、models/fault_model.joblib、models/metrics.json、notes/fault_model_report.md           
+     與兩張圖。要上線需補齊跨時間、多次故障的資料，並改用時間切分驗證。                                                 
+                                                                                                                        
+     ▣  Build · Big Pickle · 3m 19s                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Big Pickle OpenCode                                                                                        
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-big-pickle/lab3-3/project            43.8K (22%)  ctrl+p commands  
+                                                                                                                        

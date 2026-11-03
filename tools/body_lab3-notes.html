@@ -153,7 +153,13 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <div class="bg-body">
 <div class="box tip">
 <div class="bt">講師實測：同一句 prompt</div>
-<p>2026-11-02，OpenCode 1.19.5 互動模式，<code>Gemini 3.5 Flash Lite</code> 與 <code>GLM-5.3-Flash</code> 各 3 次：</p>
+<p>2026-11-02、03，OpenCode 1.19.5 互動模式，每個模型各 3 次。先看課堂預設的 <code>big-pickle</code>：</p>
+<ul>
+<li><strong>3 次都直接說不能上線，也都在摘要點出故障全擠在 <code>record_id</code> 小的區段</strong>，判定是洩漏。AI 做對了很重要的一件事，這也是好結果。</li>
+<li>它們都把 <code>record_id</code> 當成時間，沒有問過這個編號怎麼來的；有的還往下推，說這是「同一次事件」或「暖機」階段。</li>
+<li>回答裡沒有提到漏報代價或複查人力，也沒有先問你。其中 1 次拿 Lab 1 的 <code>data/line_modes.csv</code> 當理由，說模型無法轉移到其他運轉模式。</li>
+</ul>
+<p><code>Gemini 3.5 Flash Lite</code> 與 <code>GLM-5.3-Flash</code>：</p>
 <ul>
 <li><strong>6 次的最終模型都沒有用 <code>record_id</code></strong>，5 次在回答裡報了 recall，1 次只寫在筆記。AI 這裡多半做得不錯。其中 1 次還主動指出它與故障相關，是洩漏風險。</li>
 <li>但只有 1 次在摘要提到 <code>record_id</code>，另外 5 次要讀程式或它寫的筆記才知道。</li>
@@ -161,7 +167,7 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <li>其中 1 次提到要依停機和維修成本調門檻，但 6 次都在沒問你的情況下先給了結論。</li>
 <li>有 1 次拿 Lab 1 的 <code>data/line_modes.csv</code> 當理由，說轉速「超出訓練分布」，講得很肯定；但那份資料和這題的關係，它其實不知道。</li>
 </ul>
-<p style="margin-bottom:0"><code>big-pickle</code> 當天額度用完，還沒有這一題的紀錄。</p>
+<p style="margin-bottom:0">所以你那次可能完全不同。不論它有沒有抓到，都照上面四項查一次。</p>
 </div>
 </div>
 </details>
@@ -180,6 +186,7 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <li>下一批 300 筆資料已經有結果了。</li>
 </ul>
 </div>
+<p>比對一下：它對 <code>record_id</code> 的解釋和建議，符合現場說的嗎？它說不能上線，有根據你的複查上限嗎？</p>
 <p>在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
 <pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/line_faults_new_batch.csv -o data/line_faults_new_batch.csv</code></pre>
 <p>先預測，再寫下這張卡，用它自己寫 prompt 請 AI 計算：</p>
@@ -197,7 +204,7 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <tr><td>含 <code>record_id</code></td><td>0.993</td><td><strong>0.952</strong></td><td><strong>0.000</strong></td></tr>
 <tr><td>不含 <code>record_id</code>，門檻 0.5</td><td>0.933</td><td>0.476</td><td>0.462</td></tr>
 </table></div>
-<p>含 <code>record_id</code> 的模型測試成績最好，換一批就一個故障都抓不到：它學到的是「編號小的多半是異常」，新批次的編號都很大。</p>
+<p>含 <code>record_id</code> 的模型測試成績最好，換一批就一個故障都抓不到：它學到的是「編號小的多半是異常」，新批次的編號都很大。實測 <code>big-pickle</code> 3 次都抓到這個規律，但解釋成時間洩漏，建議補更多故障事件、改用時間切分；需求卡告訴你，這個編號其實是登錄順序。AI 看得出異常，原因要問現場。</p>
 <p>不含 <code>record_id</code> 時，門檻決定了抓到多少，也決定了要複查多少：</p>
 <div class="tw"><table>
 <tr><th>門檻</th><th>下一批：警報數</th><th>抓到</th><th>漏掉</th><th>誤報</th></tr>
@@ -324,7 +331,7 @@ B. loss 不變，只把 grad 乘以 2
 <div class="step" data-n="2">
 <h3>看記憶的邊界</h3>
 <p>告訴它 <code>這次的代號是海鷗-47，請記住。只回答好。</code>，輸入 <code>/new</code>，再問 <code>上一段的代號是什麼？不知道就明說。</code></p>
-<p>講師實測兩個模型各 3 次，都回答不知道。所以要它記得的事，就寫進檔案。</p>
+<p>講師實測三個模型各 3 次，都回答不知道。所以要它記得的事，就寫進檔案。</p>
 </div>
 <div class="step" data-n="3">
 <h3>把一個問題寫成規則，再測它</h3>
@@ -336,8 +343,8 @@ B. loss 不變，只把 grad 乘以 2
 <p><code>/new</code> 後，把 Lab 3 第一句再問一次，<strong>逐條檢查它有沒有照做</strong>，再和鄰座比較。</p>
 <div class="box tip">
 <div class="bt">講師實測：上面這兩條規則（分開測，兩條一起用還沒測）</div>
-<p>2026-11-02。「摘要要寫出決定」這條，兩個模型各 3 次都照做，也都提到 <code>record_id</code>；沒有這條時只有 1 次提到。</p>
-<p>另一條我們改過寫法。原本寫「資訊不足先問我，不要自己假設」，兩個模型各 3 次<strong>都沒有先問</strong>，直接訓練並下結論。改成上面這種可以檢查的停止點後，<code>GLM-5.3-Flash</code> 3 次都停下來列出缺的資訊和假設（其中 1 次先用指令看了資料檔）；<code>Gemini 3.5 Flash Lite</code> 當天額度用完，還沒有這一條的紀錄。</p>
+<p>2026-11-02、03。「摘要要寫出決定」這條，Gemini 和 GLM 各 3 次都照做，也都提到 <code>record_id</code>；沒有這條時，這兩個模型只有 1 次提到。</p>
+<p>另一條我們改過寫法。原本寫「資訊不足先問我，不要自己假設」，Gemini 和 GLM 各 3 次<strong>都沒有先問</strong>，直接訓練並下結論。<code>big-pickle</code> 只有 1 次完整紀錄，同樣先訓練完，最後才問 <code>fault</code> 是當下還是未來的故障；另 1 次跑到一半額度用完，在那之前也沒有停下來問。改成上面這種可以檢查的停止點後，<code>GLM-5.3-Flash</code> 3 次都停下來列出缺的資訊和假設（其中 1 次先用指令看了資料檔）；<code>Gemini 3.5 Flash Lite</code> 當天額度用完，還沒有這一條的紀錄。</p>
 <p style="margin-bottom:0">所以規則有用，但寫法有差，也不保證每次遵守，寫完要測。</p>
 </div>
 <p>想多練習，看 <a href="agents-md.html">AGENTS.md 專案規則</a>。</p>

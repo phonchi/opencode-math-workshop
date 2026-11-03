@@ -1,0 +1,40 @@
+  ┃  p=Path('fault_model_analysis.py')                                                                                  
+  ┃  s=p.read_text()                                                                                                    
+  ┃  s=s.replace('from pathlib import Path\n', 'import json\nfrom pathlib import Path\n',1)                             
+  ┃  s=s.replace('\nimport json\n(Path("notes") / "fault_model_metrics.json")', '\n(Path("notes") /                     
+  ┃  "fault_model_metrics.json")')                                                                                      
+  ┃  p.write_text(s)                                                                                                    
+  ┃  PY                                                                                                                 
+  ┃  uv run python fault_model_analysis.py >/dev/null && echo ok                                                        
+  ┃                                                                                                                     
+  ┃  ok                                                                                                                 
+  ┃                                                                                                                     
+                                                                                                                        
+     + Thought: 2.8s                                                                                                    
+                                                                                                                        
+     不建議上線。 模型已訓練，但這份資料的驗證結果不能支撐上線：                                                        
+                                                                                                                        
+     - 71 筆故障全部集中在 record_id 1–111；112–900 的 789 筆全正常，而且前 55 筆全為故障，沒有故障前的正常基線。       
+     - 隨機 5-fold CV 看似 AUC 0.93–0.96，但那是同一次故障事件被拆進訓練與測試，屬於時間洩漏。                          
+     - 依時間切分後，測試集故障數為 0，AUC/recall 無法計算；time-series CV 的 5 個 fold 也全是 0 個正例。               
+     - 用 1–111 訓練、門檻調到 90% recall 後套到後段正常資料，仍有 8.5%–12.7% 誤報；用 0.5 當門檻則高達 *17%–28%*。     
+                                                                                                                        
+     目前只能說特徵和「那次故障事件」有關，不能證明能預測下一次故障。要上線至少需要多個獨立故障事件，                   
+     且每個事件都要包含故障前正常窗，並用時間切分驗證。                                                                 
+                                                                                                                        
+     完整分析在 notes/fault_model_report.md，圖在 figs/，腳本為 fault_model_analysis.py。                               
+                                                                                                                        
+     我自己做的決定：依 record_id 排序（原檔順序不是時間）、沒有把 record_id 當特徵、沒有合併 line_modes.csv 與         
+     line_channels.csv（無故障標籤／無對應鍵，且 line_modes 分布與 labeled 資料幾乎不重疊）、新增 pandas 套件。         
+                                                                                                                        
+     另外需要確認：fault 是「當下故障」還是「未來幾分鐘會故障」？這會決定後續資料要怎麼收集。                           
+                                                                                                                        
+     ▣  Build · Big Pickle · 4m 4s                                                                                      
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Big Pickle OpenCode                                                                                        
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-big-pickle/rule-lab3-1/project       46.0K (23%)  ctrl+p commands  
+                                                                                                                        

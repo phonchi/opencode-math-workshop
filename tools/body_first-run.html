@@ -96,9 +96,9 @@ ls</code></pre>
 <p>貼上這句，跳出權限要求時，這次選 <code>Reject</code>：</p>
 <pre class="cmd" data-lang="text"><code>用 uv run python 印出 numpy 版本；沒有實際執行就明說。</code></pre>
 <p>看它接下來怎麼做（實測多半直接停下），再貼一次同一句。如果它又跳出權限要求，這次選 <code>Allow once</code>。如果它沒有再試，就明確告訴它：<code>現在可以執行了。</code></p>
-<p>講師實測（2026-11-02，OpenCode 1.19.5，各 3 次）：</p>
-<div class="tw"><table><tr><th>模型</th><th>拒絕後</th><th>再問同一句</th></tr><tr><td><code>GLM-5.3-Flash</code></td><td>停下來</td><td>再試一次，允許後回報版本</td></tr><tr><td><code>Gemini 3.5 Flash Lite</code></td><td>停下來</td><td>回答「沒有實際執行」，沒有再試</td></tr></table></div>
-<p>想做、獲准、做完是三件事，而且換模型，行為就可能不同。先看你這次是哪一種。</p>
+<p>講師實測（2026-11-02、03，OpenCode 1.19.5，各 3 次）：</p>
+<div class="tw"><table><tr><th>模型</th><th>拒絕後</th><th>再問同一句</th></tr><tr><td><code>big-pickle</code></td><td>停下來</td><td>2 次再試，允許後回報版本；1 次回答「沒有實際執行」，沒有再試</td></tr><tr><td><code>GLM-5.3-Flash</code></td><td>停下來</td><td>再試一次，允許後回報版本</td></tr><tr><td><code>Gemini 3.5 Flash Lite</code></td><td>停下來</td><td>回答「沒有實際執行」，沒有再試</td></tr></table></div>
+<p>想做、獲准、做完是三件事。換模型會不同，同一個模型每次也可能不同。先看你這次是哪一種。</p>
 <p>跑的過程中如果你想停下來：按 <code>Esc</code>。<strong>注意按一次不夠</strong>。底部會從 <code>esc interrupt</code> 變成 <code>esc again to interrupt</code>，要再按一次才真的中斷（如果它正在執行工具，請等畫面確認中斷）。</p>
 <h3>3.4 打多行字</h3>
 <p>輸入框裡按 <code>Enter</code> 就送出了。要換行不送出，按 <strong><code>ctrl+j</code></strong>。<code>shift+Enter</code>、<code>alt+Enter</code>、<code>ctrl+Enter</code> 也綁著同樣的功能，但有些終端機吃不到這幾組，<code>ctrl+j</code> 最保險。</p>
@@ -150,7 +150,7 @@ ls</code></pre>
 <h3>4.5 順便說 agent 模式</h3>
 <p>按 <code>Tab</code> 可以在兩個 agent 之間切換，畫面左下角的 <code>Build · Big Pickle</code> 會跟著變成 <code>Plan · Big Pickle</code>。</p>
 <div class="tw"><table><tr><th>agent</th><th>用來做什麼</th></tr><tr><td><code>Build</code></td><td>預設。可以讀、可以改、可以跑指令。工作坊多半用這個</td></tr><tr><td><code>Plan</code></td><td>先討論與規劃，不動檔案。本專案的 <code>opencode.json</code> 已設定 Plan 不能編輯、不能跑指令</td></tr></table></div>
-<details class="bg"><summary>課後試試：Plan 模式會怎麼處理 <code>ls</code></summary><div class="bg-body"><p>切到 Plan 試一句：<code>請執行 ls，列出目前資料夾的檔案。</code>，再看它用了什麼工具。講師實測兩個模型各 3 次，都列出了檔案，但用的是讀取或搜尋工具，不是 <code>bash</code>；其中 1 次列完檔後還試了 <code>bash</code>，被擋下才作答。權限能擋住特定工具，agent 仍可能換一條路達成目的，所以要看畫面。試完按 <code>Tab</code> 切回 Build，確認左下角的標示。</p></div></details>
+<details class="bg"><summary>課後試試：Plan 模式會怎麼處理 <code>ls</code></summary><div class="bg-body"><p>切到 Plan 試一句：<code>請執行 ls，列出目前資料夾的檔案。</code>，再看它用了什麼工具。講師實測三個模型各 3 次，都列出了檔案，但用的是讀取或搜尋工具，不是 <code>bash</code>；其中 1 次列完檔後還試了 <code>bash</code>，被擋下才作答。權限能擋住特定工具，agent 仍可能換一條路達成目的，所以要看畫面。試完按 <code>Tab</code> 切回 Build，確認左下角的標示。</p></div></details>
 <p>Plan 的限制來自設定，不是模式名稱。如果設定檔只寫 <code>"edit": "ask"</code>，這條會蓋掉 Plan 內建的禁止，它就只是問你。所以起始專案特別加了 <code>agent.plan.permission</code>，可以用 <code>opencode debug agent plan</code> 查實際結果。</p>
 <h3>4.6 開場練習：它不知道的時候</h3>
 <p>這門課貫穿一個問題：<strong>AI 這麼強，為什麼還要自己想、自己驗證？</strong>先試一次。貼上這句，<strong>如果跳出權限要求就選 <code>Reject</code></strong>：</p>
@@ -158,8 +158,8 @@ ls</code></pre>
 <p>先別管答案對不對。<strong>它靠什麼回答？畫面上有幾個工具呼叫？你要它不讀檔，它照做了嗎？</strong>記下來，再按 <code>!</code> 進 Shell 模式自己核對：</p>
 <pre class="cmd" data-lang="bash"><code>uv run python -c "import numpy as np; X = np.genfromtxt('data/line_modes.csv', delimiter=',', skip_header=1); print(np.flatnonzero(X.std(0) == 0))"</code></pre>
 <p>正確答案是第 6、7 欄（從 0 數起），共 2 欄。</p>
-<p>講師實測（2026-11-02，OpenCode 1.19.5 互動模式，同一句 prompt）：</p>
-<div class="tw"><table><tr><th>模型</th><th>回答</th><th>工具</th></tr><tr><td><code>GLM-5.3-Flash</code>（3 次）</td><td>3 次都說不讀檔無法知道</td><td>沒有用工具</td></tr><tr><td><code>Gemini 3.5 Flash Lite</code>（3 次）</td><td>3 次都說無法得知</td><td>3 次都先用了找檔或搜尋工具，1 次還讀了 <code>AGENTS.md</code>，但都沒讀資料檔</td></tr></table></div>
+<p>講師實測（2026-11-02、03，OpenCode 1.19.5 互動模式，同一句 prompt）：</p>
+<div class="tw"><table><tr><th>模型</th><th>回答</th><th>工具</th></tr><tr><td><code>big-pickle</code>（3 次）</td><td>3 次都說不讀檔無法知道</td><td>沒有用工具</td></tr><tr><td><code>GLM-5.3-Flash</code>（3 次）</td><td>3 次都說不讀檔無法知道</td><td>沒有用工具</td></tr><tr><td><code>Gemini 3.5 Flash Lite</code>（3 次）</td><td>3 次都說無法得知</td><td>3 次都先用了找檔或搜尋工具，1 次還讀了 <code>AGENTS.md</code>，但都沒讀資料檔</td></tr></table></div>
 <p>這次它們很老實，這是好事：<strong>沒有資料時，它說不知道。</strong>下一關把資料交給它，它就算得出數字，也會開始替你做決定。這時候要問的問題就不同了：它知道你要做什麼嗎？</p>
 <hr>
 <h2>5. session：對話的記憶邊界</h2>

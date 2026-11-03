@@ -1,0 +1,40 @@
+  ┃                                                                                                                     
+  ┃  $ ls -la figs notes; uv run python -c "import matplotlib; print('ok')"                                             
+  ┃                                                                                                                     
+  ┃  figs:                                                                                                              
+  ┃  total 232                                                                                                          
+  ┃  drwxr-xr-x 2 phonchi phonchi   4096 Nov  3 09:28 .                                                                 
+  ┃  drwxr-xr-x 6 phonchi phonchi   4096 Nov  3 09:28 ..                                                                
+  ┃  -rw-r--r-- 1 phonchi phonchi 225508 Nov  3 09:28 fault_model_diagnostics.png                                       
+  ┃                                                                                                                     
+  ┃  notes:                                                                                                             
+  ┃  total 12                                                                                                           
+  ┃  drwxr-xr-x 2 phonchi phonchi 4096 Nov  3 09:29 .                                                                   
+  ┃  drwxr-xr-x 6 phonchi phonchi 4096 Nov  3 09:28 ..                                                                  
+  ┃  …                                                                                                                  
+  ┃                                                                                                                     
+  ┃  Click to expand                                                                                                    
+  ┃                                                                                                                     
+                                                                                                                        
+     不能上線。 我訓練了 logistic regression 與 random forest，但真正的問題在資料：                                     
+                                                                                                                        
+     - 71 筆故障全部集中在 record_id 1–200，第 201–900 筆一筆故障都沒有。                                               
+     - 只用 record_id 預測，隨機 CV 的 ROC-AUC 就高達 0.983，代表時間洩漏。                                             
+     - 隨機 5-fold CV 的 RF ROC-AUC 0.93、PR-AUC 0.51，看似可用；但改成「前段訓練、後段測試」後，測試期幾乎零故障，     
+       recall 無法估計，且模型在後 700 筆正常資料上誤報 95–210 筆。                                                     
+     - 特徵也隨時間漂移（temp_c 約 -0.47 SD、vibration +0.33 SD）。                                                     
+                                                                                                                        
+     建議先補齊跨時間的故障樣本、改用 walk-forward 驗證、移除 record_id，並先跑 shadow mode。                           
+                                                                                                                        
+     完整分析：notes/fault_model_report.md；圖：figs/fault_model_diagnostics.png；可重跑：uv run python                 
+     train_fault_model.py。                                                                                             
+                                                                                                                        
+     ▣  Build · Big Pickle · 2m 43s                                                                                     
+                                                                                                                        
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃                                                                                                                     
+  ┃  Build · Big Pickle OpenCode                                                                                        
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀  
+   /home/phonchi/.cache/oc-lab-redesign/runs/phase10-big-pickle/lab3-2/project            28.4K (14%)  ctrl+p commands  
+                                                                                                                        
