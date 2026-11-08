@@ -6,15 +6,42 @@
 
 如果目的是完成工作坊，沿用 `opencode/big-pickle` 即可。本地路線適合想研究模型設定，或需要讓推論資料留在自己電腦上的同學；使用外部工具時，仍要留意它會把哪些內容送上網。
 
+本地模型和網路模型可以分工。需要規劃、推理較難的任務交給網路模型；資料不想送出去、份量大而重複的工作，例如逐份整理私人筆記、把一批檔案轉成表格，再考慮留在本地。
+
 ## 先看自己的需求與電腦
 
 本地模型需要下載權重，執行時也會占用記憶體。**模型檔案放得下，不代表執行時的記憶體一定夠。** 對話變長、可用的工具變多，都可能增加負擔。
 
 - 有獨立顯示卡時，留意顯示卡記憶體；沒有時，留意一般記憶體與其他程式的用量。
 - 先從短對話與小任務開始。載入很慢、系統明顯卡住，就縮小任務、換較小模型，或回到網路模型。
-- 挑模型時，同時檢查大小與 **tool calling** 能力。tool calling 是模型依照工具定義提出操作請求，例如讀檔或執行指令。
+- 挑模型時，同時檢查大小與 **tool calling**（工具呼叫）能力。tool calling 是模型依照工具定義提出操作請求，例如讀檔或執行指令。
 
 模型名稱或大小本身不能保證能做好 agent 任務。可以先看 [Ollama 的 tools 模型清單](https://ollama.com/search?c=tools)，再依後面的檢查流程確認自己的選擇。
+
+### 估算放不放得下
+
+模型名稱裡的 `9b`、`27b` 是參數量，單位是十億（billion）。原始權重很大，下載的版本通常經過 **量化**：用較少位元儲存每個參數，檔案變小，品質也會損失一些，壓得越多損失越大。量化程度寫在名稱尾端，例如 `q4_K_M` 是以 4 位元為主的混合量化、`q8_0` 是 8 位元。名稱沒寫的話，`ollama show` 輸出的 `quantization` 欄位會列出來。
+
+| 量化 | 每十億參數約需 | 例：Qwen3.5 9B | 例：Qwen3.8 27B |
+|---|---|---|---|
+| 4 位元（`q4_K_M` 一類） | 0.6 GB | 約 5.7 GB | 約 16.5 GB |
+| 8 位元（`q8_0`） | 1.1 GB | 約 9.5 GB | 約 29 GB |
+
+例子是 Hugging Face 上的實際檔案；同參數量的其他模型會略有出入。本章範例 `qwen3.5:9b-q4_K_M` 多帶了處理圖片的視覺元件，`ollama list` 顯示 6.6 GB。表中只算模型檔本身，context 也要占記憶體，對話越長占得越多，所以還要再多留一段空間。
+
+以 12 GB 顯示卡為例，6.6 GB 的範例模型放得進去，剩下約 5 GB 給 context 與其他用途，載入後再用 `ollama ps` 確認實際狀況。27B 的 4 位元模型無法完整放進顯示卡，Ollama 會把一部分改放一般記憶體、交給 CPU 計算；一般記憶體也夠的話還能跑，但會慢很多。
+
+Apple silicon 的 Mac 由 CPU 與 GPU 共用同一塊記憶體，macOS 預設會保留一部分給系統，能給模型的上限依機型而異。常見的經驗值是 32 GB 以下約三分之二（16 GB 的機器約 10–11 GB），更大的約四分之三。這只是估算，實際上限以載入結果為準。
+
+:::bg 為什麼有些較大的模型反而比較快：MoE
+
+模型每產生一個 token，都要把參與計算的參數從記憶體讀一遍。一般的 **稠密模型**（dense model）每次動用全部參數，所以其他條件相同時，模型越大、每個 token 越慢。
+
+**MoE**（mixture of experts）把模型分成許多組「專家」，每個 token 只啟用其中幾組。名稱常會標出每次啟用的量，例如 `35B-A3B` 代表總共約 350 億個參數，每次只動用約 30 億。每個 token 要搬的資料少很多，通常明顯較快，實際速度仍要在自己的電腦上測。
+
+但所有專家都要放在記憶體裡待命，**記憶體看總參數，速度主要看每次啟用的參數**；硬體、量化與軟體實作也會影響速度。`35B-A3B` 的 4 位元版本仍要約 22 GB，8–16 GB 的筆電放不下這一類。記憶體夠大、想要較快的回應時，可以留意名稱帶 `A3B` 這類標示的 MoE 模型；做較長的 agent 任務時，再實際比較它和同大小的稠密模型哪一個比較穩。
+
+:::
 
 ## 安裝 Ollama
 
@@ -67,7 +94,19 @@ Capabilities
 
 ## Context 是什麼，為什麼兩邊都要設定
 
-Context 是模型一次能讀到的內容，包括你的需求、對話、檔案內容與工具說明。**Token** 是模型切分文字的單位，不能直接把 token 數當成中文字數。
+Context 是模型一次能讀到的內容，包括你的需求、對話、檔案內容與工具說明。**Token** 是模型切分文字的單位，不能直接把 token 數當成中文字數。context 快滿時，OpenCode 會先把較早的對話摘要壓縮；真的超過上限時，依後端與設定，可能截掉較早的內容，也可能直接報錯。不論哪一種，細節都可能遺失，模型就忘了你先前交代的事。
+
+你還沒開口，agent 就已經先放進一大段說明。講師在工作坊的 starter 專案裡用 OpenCode 1.18.30 接 Qwen3.5 本地模型，只輸入「嗨」，送出的內容就約有 7,500 個 token，其中約 5,200 個是讀檔、寫檔、執行指令等工具的定義。版本或模型不同，數字會跟著變。
+
+Ollama 的預設 context 卻依顯示卡記憶體決定：
+
+| 顯示卡記憶體 | Ollama 預設 context |
+|---|---|
+| 未滿 24 GiB | 4k（4,096） |
+| 24 GiB 以上、未滿 48 GiB | 32k |
+| 48 GiB 以上 | 256k |
+
+多數學生筆電落在第一列；實際是哪一列，以 Ollama 偵測到的 GPU 記憶體為準，Mac 則依能給模型的記憶體判斷。照上面的量測，**預設的 4k 連第一輪附帶的說明和工具定義都放不下**，工具呼叫可能一開始就出錯。Ollama 官方建議 agent 與寫程式的工具至少設到 64,000；記憶體不夠時，可以像後面的範例先設 32,768（32k）練習小任務，對話越長越早被壓縮或截掉。
 
 這裡有兩個需要配合的設定：
 
@@ -161,7 +200,7 @@ opencode models ollama
 ollama ps
 ```
 
-檢查 `CONTEXT` 是否與 `32768` 相符，同時留意 `PROCESSOR` 與系統是否卡頓。如果數字不符，先查看原本是否另設了 `OLLAMA_CONTEXT_LENGTH`；請選一種設定方式管理，避免互相覆蓋。
+檢查 `CONTEXT` 是否與 `32768` 相符，同時留意 `PROCESSOR` 與系統是否卡頓。如果數字不符，先查看原本是否另設了 `OLLAMA_CONTEXT_LENGTH`，或在 Ollama App 的設定裡調過 context length；請選一種設定方式管理，避免互相覆蓋。
 
 降低 context 時，修改 `Modelfile` 後重新執行 `ollama create`，並同步調整 OpenCode 的 `limit.context`。若仍無法穩定執行，就先回到網路模型。
 
@@ -208,6 +247,27 @@ uv run python local_hello.py
 
 規則可以提醒模型，但不能補足所有能力差距。確認設定、縮小任務後仍做不到，就換模型或回到工作坊的網路模型，不必一直修改同一份設定。
 
+:::bg 可能讓工具呼叫失效的三個設定
+
+聊天看起來正常，一到讀檔、寫檔就出錯時，可以檢查下面三個設定。工具呼叫要求模型輸出格式完全正確的請求，比一般聊天更容易受影響。
+
+- **對話範本（chat template）不對。** 每個模型都有自己的對話格式。網路上重新打包的模型檔若沒帶上這份格式，軟體會改用通用格式，模型可能讀錯對話、產生不出正確的工具請求。直接從 Ollama 模型庫下載的話，這項可以先略過；自己匯入模型檔時，優先選原作者發布的版本，懷疑時換一個版本比較。
+- **量化壓得太多。** 為了塞進較小的電腦，有些版本壓到 3 位元或 2 位元，壓得越多越容易出錯。做 agent 任務時選 `q4_K_M` 或更高。
+- **KV cache 被壓縮。** KV cache（鍵值快取）是模型記住前文用的資料，context 越長占得越多。Ollama 可以用 `OLLAMA_KV_CACHE_TYPE` 壓縮它來省記憶體，預設是不壓縮的 `f16`，官方說 `q8_0` 通常沒有明顯影響。Level1Techs 用另一套推論軟體測長 context 的工具任務時，KV cache 壓到 4 位元後工具呼叫出錯，之後也沒能自行修正。沒有設定過這個變數就維持預設，不用處理。
+
+:::
+
+## 本地不等於安全
+
+資料不送出去，確實比較私密，但 agent 能碰到什麼，比模型在哪裡跑更重要。SentinelOne 與 Censys 在 2026 年初公布的調查，前後掃描 293 天，找到約 17.5 萬台不需要密碼就能從網路連上的 Ollama 主機，其中超過 48% 透過 API 宣告支援工具呼叫。Ollama 預設只接受本機連線，這些主機多半是被設定成對外開放，例如改了 `OLLAMA_HOST`，或用 Docker 直接公開連接埠。
+
+照下面幾點設定：
+
+- **讓 Ollama 只監聽本機。** 預設位址是 `127.0.0.1:11434`。不要為了方便把 `OLLAMA_HOST` 改成 `0.0.0.0`；從外面連回自己的電腦屬於進階設定，這門課用不到。
+- **保持軟體更新。** Ollama 修過多次安全漏洞，定期更新到最新版。
+- **模型檔從可信來源下載。** 優先使用 Ollama 模型庫或原作者發布的版本。
+- **agent 的工作資料夾不放密碼與金鑰。** 模型檔本身不會執行程式，但 OpenCode 給了它讀檔與執行指令的工具，而且工作資料夾不是隔離環境，工具仍可能讀到其他位置的檔案。專案的 `opencode.json` 已把 `edit`、`bash` 設為 `ask`，保持這個設定，逐次確認它要做什麼；設定方式見[用 AGENTS.md 馴服 agent](agents-md.html)。
+
 ## 卡住時先查這幾項
 
 | 看到的情況 | 下一步 |
@@ -218,6 +278,8 @@ uv run python local_hello.py
 | `does not support tools` | 用 `ollama show` 檢查能力，改選支援工具的模型 |
 | `CONTEXT` 和設定不符 | 檢查 Modelfile、環境變數與實際載入的模型名稱 |
 | 系統變得很慢 | 停下任務，縮小 context 或換較小模型；不要只增加等待時間 |
+| 聊天正常，工具呼叫卻出錯 | 檢查量化程度與 KV cache 設定，再換 Ollama 模型庫的版本試試 |
+| 送出後很久才開始回答 | 模型要先讀完整段 context；一次少讀幾個檔案，或換較小、較快的模型 |
 | 只印出指令或宣稱完成 | 查實際檔案與工具紀錄，把任務縮成一步再試 |
 | 忘記先前的要求 | 將重點寫進 `notes/progress.md`，換新對話重讀；參考 [讓 agent 把工作做完整](agent-workflows.html) |
 
@@ -232,3 +294,8 @@ uv run python local_hello.py
 - [Ollama context length](https://docs.ollama.com/context-length)
 - [Ollama Modelfile](https://docs.ollama.com/modelfile)
 - [OpenCode providers](https://opencode.ai/docs/providers/)
+- [Ollama FAQ](https://docs.ollama.com/faq)：對外開放、KV cache 量化等設定
+- [Hugging Face：Unsloth Qwen3.8-27B GGUF](https://huggingface.co/unsloth/Qwen3.8-27B-GGUF)：各種量化的實際檔案大小
+- [SentinelOne：對外開放的 Ollama 主機調查](https://www.sentinelone.com/labs/silent-brothers-ollama-hosts-form-anonymous-ai-network-beyond-platform-guardrails/)
+- [Level1Techs：Why your local LLM feels dumber than it is](https://forum.level1techs.com/t/why-your-local-llm-feels-dumber-than-it-is/253917)：以 vLLM 與 Qwen3.6 測試量化與 KV cache 對長 context 工具任務的影響
+- 延伸觀看：[AI懶人報 EP460：你的電腦能跑什麼 AI？](https://www.youtube.com/watch?v=1nomxygMILI)，依記憶體大小介紹模型與常見設定陷阱；片中速度為社群數據，僅供參考
