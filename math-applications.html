@@ -296,6 +296,8 @@ pre.cmd{
   text-indent:-1.15rem;
 }
 pre.cmd code{display:block;}
+/* 每個原始行各自成塊，懸掛縮排才會逐行生效（見 build_site.split_cmd_lines）。 */
+pre.cmd .ln{display:block;}
 pre .copy{
   position:absolute;top:.6rem;right:.6rem;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
@@ -799,16 +801,16 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <details class="bg"><summary>想接到公式時再看</summary><div class="bg-body"><p>SVD 把矩陣寫成 $A=U\Sigma V^\top$。只保留最大的 $k$ 個奇異值，得到 $A_k=U_{:k}\Sigma_{:k}V_{:k}^\top$。</p>
 <p>這裡的誤差使用平方和 $\|A-A_k\|_F^2$，也就是所有像素差的平方相加。它等於被捨棄的奇異值平方和。這個等式可以幫我們獨立核對程式，而不只看圖像是否相似。</p></div></details>
 <h3>交給 agent 的任務</h3>
-<pre class="cmd" data-lang="text"><code>用 numpy 和 matplotlib 寫 low_rank.py，先用白話說明低秩近似。
-用 np.linspace(-1, 1, 48) 產生座標，np.meshgrid 得到 x, y；
-建立 A = exp(-5*(x*x+y*y)) + 0.2*cos(6*x+3*y)。
-用 np.linalg.svd(A, full_matrices=False) 做分解，保留 k=1、2、4 個成分。
-所有影像共用原始 A 的 vmin/vmax，並標明它是示意亮度，不是下載的真實照片。
-將原圖和三張近似圖排成一張 figs/low_rank.png。
-印出每個 k 的重建平方誤差，與被捨棄奇異值的平方和比對。
-驗證誤差隨 k 增加不會變大；再用完整分解確認可重建原矩陣。
-用 uv run python low_rank.py 實際執行。
-最後寫 notes/low_rank.md：哪些圖樣先留下？圖看起來接近，是否就能代表程式正確？</code></pre>
+<pre class="cmd" data-lang="text"><code><span class="ln">用 numpy 和 matplotlib 寫 low_rank.py，先用白話說明低秩近似。
+</span><span class="ln">用 np.linspace(-1, 1, 48) 產生座標，np.meshgrid 得到 x, y；
+</span><span class="ln">建立 A = exp(-5*(x*x+y*y)) + 0.2*cos(6*x+3*y)。
+</span><span class="ln">用 np.linalg.svd(A, full_matrices=False) 做分解，保留 k=1、2、4 個成分。
+</span><span class="ln">所有影像共用原始 A 的 vmin/vmax，並標明它是示意亮度，不是下載的真實照片。
+</span><span class="ln">將原圖和三張近似圖排成一張 figs/low_rank.png。
+</span><span class="ln">印出每個 k 的重建平方誤差，與被捨棄奇異值的平方和比對。
+</span><span class="ln">驗證誤差隨 k 增加不會變大；再用完整分解確認可重建原矩陣。
+</span><span class="ln">用 uv run python low_rank.py 實際執行。
+</span><span class="ln">最後寫 notes/low_rank.md：哪些圖樣先留下？圖看起來接近，是否就能代表程式正確？</span></code></pre>
 <h3>換你判讀</h3>
 <ul>
 <li>原矩陣是三個秩一圖樣的和，所以保留四個成分已足以在浮點誤差內重建；不要把這個特殊例子當成所有影像的結果。</li>
@@ -820,16 +822,16 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <p>找 $f(x)=(x-3)^2$ 的最小值，可以直接看出答案在 $x=3$。我們刻意用已知答案的問題，檢查 agent 寫出的梯度下降。</p>
 <p>導數 $f'(x)=2(x-3)$ 告訴你函數往哪邊上升。每次沿反方向走一小步：$x_{t+1}=x_t-\eta f'(x_t)$，其中 $\eta$ 是步長。</p>
 <h3>交給 agent 的任務</h3>
-<pre class="cmd" data-lang="text"><code>寫 gradient_steps.py，求 f(x)=(x-3)^2 的最小值。
-先解釋導數如何決定移動方向，再從 x0=0 開始，
-分別用步長 0.1、0.8、1.1 做 30 次梯度下降。
-印出最後的 x 與 f(x)，保留完整迭代軌跡。
-把三種步長的 f(x) 隨迭代次數變化畫在同一張圖，y 軸用對數刻度，
-存成 figs/gradient_steps.png。
-用中央差分在 x=0、1、4 檢查你寫的導數，h=1e-5。
-另外逐步比對解析式 x_t-3 = (1-2*eta)^t*(x0-3)。
-用 uv run python gradient_steps.py 執行，
-寫 notes/gradient_steps.md，說明哪個步長收斂、哪個振盪，以及哪個發散。</code></pre>
+<pre class="cmd" data-lang="text"><code><span class="ln">寫 gradient_steps.py，求 f(x)=(x-3)^2 的最小值。
+</span><span class="ln">先解釋導數如何決定移動方向，再從 x0=0 開始，
+</span><span class="ln">分別用步長 0.1、0.8、1.1 做 30 次梯度下降。
+</span><span class="ln">印出最後的 x 與 f(x)，保留完整迭代軌跡。
+</span><span class="ln">把三種步長的 f(x) 隨迭代次數變化畫在同一張圖，y 軸用對數刻度，
+</span><span class="ln">存成 figs/gradient_steps.png。
+</span><span class="ln">用中央差分在 x=0、1、4 檢查你寫的導數，h=1e-5。
+</span><span class="ln">另外逐步比對解析式 x_t-3 = (1-2*eta)^t*(x0-3)。
+</span><span class="ln">用 uv run python gradient_steps.py 執行，
+</span><span class="ln">寫 notes/gradient_steps.md，說明哪個步長收斂、哪個振盪，以及哪個發散。</span></code></pre>
 <h3>換你判讀</h3>
 <ul>
 <li>$0.1$ 的步長逐漸靠近最小值；$0.8$ 左右交替，但距離仍縮短；$1.1$ 的距離越來越大。</li>
@@ -843,15 +845,15 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <p>把地點當作點、可以走的路當作邊，每條邊標上距離，便得到一張帶權重的圖。我們用小型虛構路網練習，不把它當成實際校園地圖。</p>
 <p>這題不要求先學過圖論。只要知道「一路走過的距離要相加」，就能先找一條路，再檢查有沒有更短的。下面的「簡單路徑」指不重複經過同一個點的路徑。</p>
 <h3>交給 agent 的任務</h3>
-<pre class="cmd" data-lang="text"><code>寫 shortest_path.py，用 networkx 建立無向圖：
-A-B:2、A-C:5、B-C:1、B-D:4、C-D:1、C-E:5、D-E:1。
-先列出各邊，再用 Dijkstra 找 A 到 E 的最短路徑與總距離。
-獨立列舉所有 A 到 E 的簡單路徑，逐條把邊長加總，核對最小值。
-把圖和最短路徑畫到 figs/shortest_path.png，佈局使用固定座標：
-A=(0,1)、B=(1,2)、C=(1,0)、D=(2,1)、E=(3,1)。
-再加一個沒有連邊的 F，確認查詢 A 到 F 時能清楚回報「無路徑」。
-用 uv run python shortest_path.py 執行，
-寫 notes/shortest_path.md：列舉法為何適合驗證這張小圖，卻不適合大型路網？</code></pre>
+<pre class="cmd" data-lang="text"><code><span class="ln">寫 shortest_path.py，用 networkx 建立無向圖：
+</span><span class="ln">A-B:2、A-C:5、B-C:1、B-D:4、C-D:1、C-E:5、D-E:1。
+</span><span class="ln">先列出各邊，再用 Dijkstra 找 A 到 E 的最短路徑與總距離。
+</span><span class="ln">獨立列舉所有 A 到 E 的簡單路徑，逐條把邊長加總，核對最小值。
+</span><span class="ln">把圖和最短路徑畫到 figs/shortest_path.png，佈局使用固定座標：
+</span><span class="ln">A=(0,1)、B=(1,2)、C=(1,0)、D=(2,1)、E=(3,1)。
+</span><span class="ln">再加一個沒有連邊的 F，確認查詢 A 到 F 時能清楚回報「無路徑」。
+</span><span class="ln">用 uv run python shortest_path.py 執行，
+</span><span class="ln">寫 notes/shortest_path.md：列舉法為何適合驗證這張小圖，卻不適合大型路網？</span></code></pre>
 <h3>換你判讀</h3>
 <ul>
 <li>A → B → C → D → E 的距離是 $2+1+1+1=5$。列舉結果應確認沒有更短的路線。</li>

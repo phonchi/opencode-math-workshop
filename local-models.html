@@ -296,6 +296,8 @@ pre.cmd{
   text-indent:-1.15rem;
 }
 pre.cmd code{display:block;}
+/* 每個原始行各自成塊，懸掛縮排才會逐行生效（見 build_site.split_cmd_lines）。 */
+pre.cmd .ln{display:block;}
 pre .copy{
   position:absolute;top:.6rem;right:.6rem;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
@@ -824,13 +826,13 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <p>從 <a class="ext" href="https://ollama.com/download" target="_blank" rel="noopener">Ollama 官方下載頁</a> 安裝對應版本，開啟 Ollama。Windows 安裝後請重開 Git Bash，讓終端機能找到新指令。</p>
 <h3>Linux／WSL</h3>
 <p>在 Ubuntu 終端機執行官方安裝指令：</p>
-<pre class="cmd" data-lang="bash"><code>curl -fsSL https://ollama.com/install.sh | sh</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">curl -fsSL https://ollama.com/install.sh | sh</span></code></pre>
 <p>如果系統由 systemd 管理服務，可以查看狀態：</p>
-<pre class="cmd" data-lang="bash"><code>systemctl status ollama</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">systemctl status ollama</span></code></pre>
 <p>按 <code>q</code> 離開狀態畫面。其他啟動方式請依 <a class="ext" href="https://docs.ollama.com/linux" target="_blank" rel="noopener">Ollama Linux 說明</a> 操作。</p>
 <h3>確認指令可用</h3>
-<pre class="cmd" data-lang="bash"><code>ollama --version
-ollama list</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">ollama --version
+</span><span class="ln">ollama list</span></code></pre>
 <p><code>ollama list</code> 是已下載的模型清單。尚未下載時，沒有模型列出是正常的；不是要另外申請帳號。</p>
 <h2 id="section-先讓模型能聊天-再檢查工具能力">先讓模型能聊天，再檢查工具能力</h2>
 <p>在模型頁選好一個完整名稱後，用 <code>ollama pull</code> 下載，再用 <code>ollama run</code> 開始短對話。兩個指令後面都要接你選的模型名稱。下面的完整設定範例提供可照抄的寫法。</p>
@@ -851,71 +853,71 @@ ollama list</code></pre>
 <p>只改 OpenCode，不會替 Ollama 配好記憶體。兩邊不一致時，OpenCode 可能仍繼續送出模型放不下的內容。不要只看「沒有錯誤訊息」就判定設定成功，請看模型載入後的狀態。</p>
 <details class="bg"><summary>完整範例：用 Modelfile 固定 context，再接到 OpenCode</summary><div class="bg-body"><p>這份範例用 <code>qwen3.5:9b-q4_K_M</code> 與 <code>32768</code> 的 context 設定作示範，方便逐項對照。它是設定範例，不是每台學生筆電都適合的建議；記憶體不足時請停止載入，改選較小模型。換模型時，以下名稱都要一起調整。</p>
 <h3>下載並試一段短對話</h3>
-<pre class="cmd" data-lang="bash"><code>ollama pull qwen3.5:9b-q4_K_M
-ollama run qwen3.5:9b-q4_K_M</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">ollama pull qwen3.5:9b-q4_K_M
+</span><span class="ln">ollama run qwen3.5:9b-q4_K_M</span></code></pre>
 <p>對話裡輸入 <code>/bye</code> 離開，再檢查能力：</p>
-<pre class="cmd" data-lang="bash"><code>ollama show qwen3.5:9b-q4_K_M</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">ollama show qwen3.5:9b-q4_K_M</span></code></pre>
 <h3>建立固定設定的模型名稱</h3>
 <p>在工作坊專案裡建立 <code>Modelfile</code>，沒有副檔名，內容如下：</p>
-<pre class="cmd" data-lang="text"><code>FROM qwen3.5:9b-q4_K_M
-PARAMETER num_ctx 32768</code></pre>
+<pre class="cmd" data-lang="text"><code><span class="ln">FROM qwen3.5:9b-q4_K_M
+</span><span class="ln">PARAMETER num_ctx 32768</span></code></pre>
 <p>回到終端機，逐行執行：</p>
-<pre class="cmd" data-lang="bash"><code>ollama create qwen3.5-32k -f ./Modelfile
-ollama show --parameters qwen3.5-32k</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">ollama create qwen3.5-32k -f ./Modelfile
+</span><span class="ln">ollama show --parameters qwen3.5-32k</span></code></pre>
 <p>參數輸出應有 <code>num_ctx 32768</code>。這個新名稱讓你可以保留原模型，分開使用不同 context 設定。</p>
 <h3>在專案設定中登錄 provider</h3>
 <p>先另存一份原本的 <code>opencode.json</code>，例如 <code>opencode-cloud.json.bak</code>，方便比較與還原。在原檔的 <code>provider</code> 裡，和 <code>nvidia</code> 並列加入 <code>ollama</code>，其他既有的規則與權限都保留。加完後 <code>provider</code> 這段長這樣：</p>
-<pre class="cmd" data-lang="json"><code>{
-  "provider": {
-    "nvidia": {
-      "models": {
-        "z-ai/glm-5.3-flash": {
-          "options": { "reasoningEffort": "low" }
-        }
-      }
-    },
-    "ollama": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "Ollama (local)",
-      "options": { "baseURL": "http://localhost:11434/v1" },
-      "models": {
-        "qwen3.5-32k": {
-          "name": "Qwen3.5 local",
-          "tool_call": true,
-          "limit": { "context": 32768, "output": 8192 }
-        }
-      }
-    }
-  }
-}</code></pre>
+<pre class="cmd" data-lang="json"><code><span class="ln">{
+</span><span class="ln">  "provider": {
+</span><span class="ln">    "nvidia": {
+</span><span class="ln">      "models": {
+</span><span class="ln">        "z-ai/glm-5.3-flash": {
+</span><span class="ln">          "options": { "reasoningEffort": "low" }
+</span><span class="ln">        }
+</span><span class="ln">      }
+</span><span class="ln">    },
+</span><span class="ln">    "ollama": {
+</span><span class="ln">      "npm": "@ai-sdk/openai-compatible",
+</span><span class="ln">      "name": "Ollama (local)",
+</span><span class="ln">      "options": { "baseURL": "http://localhost:11434/v1" },
+</span><span class="ln">      "models": {
+</span><span class="ln">        "qwen3.5-32k": {
+</span><span class="ln">          "name": "Qwen3.5 local",
+</span><span class="ln">          "tool_call": true,
+</span><span class="ln">          "limit": { "context": 32768, "output": 8192 }
+</span><span class="ln">        }
+</span><span class="ln">      }
+</span><span class="ln">    }
+</span><span class="ln">  }
+</span><span class="ln">}</span></code></pre>
 <p><code>baseURL</code> 是 Ollama 的本機服務位址；這個相容介面的網址要包含 <code>/v1</code>。<code>models</code> 下的名稱必須與 <code>ollama list</code> 相同；<code>name</code> 只是顯示文字。</p>
 <p>這裡先保留網路模型為預設。確認設定能被讀取：</p>
-<pre class="cmd" data-lang="bash"><code>opencode models ollama</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">opencode models ollama</span></code></pre>
 <p>清單應出現 <code>ollama/qwen3.5-32k</code>。接著啟動 <code>opencode</code>，用 <code>/models</code> 選擇它，並確認畫面標示為本地模型。</p>
 <h3>看實際載入的 context</h3>
 <p>送出一個簡短問題，讓模型載入。它還在執行或留在記憶體裡時，另開同一環境的終端機：</p>
-<pre class="cmd" data-lang="bash"><code>ollama ps</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">ollama ps</span></code></pre>
 <p>檢查 <code>CONTEXT</code> 是否與 <code>32768</code> 相符，同時留意 <code>PROCESSOR</code> 與系統是否卡頓。如果數字不符，先查看原本是否另設了 <code>OLLAMA_CONTEXT_LENGTH</code>，或在 Ollama App 的設定裡調過 context length；請選一種設定方式管理，避免互相覆蓋。</p>
 <p>降低 context 時，修改 <code>Modelfile</code> 後重新執行 <code>ollama create</code>，並同步調整 OpenCode 的 <code>limit.context</code>。若仍無法穩定執行，就先回到網路模型。</p></div></details>
 <h2 id="section-最後一關-它真的有建立檔案嗎">最後一關：它真的有建立檔案嗎</h2>
 <p>模型能回話、清單能列出名字，都還不代表 agent 任務完成。<strong>先確認畫面目前選的是 <code>ollama/...</code> 本地模型。</strong> 如果仍顯示 Big Pickle，先展開上一節完成連接與模型切換；否則測到的是網路模型。確認後，在 OpenCode 的互動模式中貼上：</p>
-<pre class="cmd" data-lang="text"><code>請讀 AGENTS.md，再建立 local_hello.py，內容是印出 1 到 10 的平方。
-用 uv run python local_hello.py 實際執行。
-完成後回報你寫入的檔案與執行指令；沒有成功的部分請明說。</code></pre>
+<pre class="cmd" data-lang="text"><code><span class="ln">請讀 AGENTS.md，再建立 local_hello.py，內容是印出 1 到 10 的平方。
+</span><span class="ln">用 uv run python local_hello.py 實際執行。
+</span><span class="ln">完成後回報你寫入的檔案與執行指令；沒有成功的部分請明說。</span></code></pre>
 <p>逐次閱讀並回答權限要求。看工具紀錄是否真的有讀檔、寫檔與執行，接著在終端機自己核對：</p>
-<pre class="cmd" data-lang="bash"><code>uv run python -c "from pathlib import Path; p=Path('local_hello.py'); print('檔案存在：', p.is_file()); print(p.read_text(encoding='utf-8') if p.is_file() else '尚未建立')"
-uv run python local_hello.py</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">uv run python -c "from pathlib import Path; p=Path('local_hello.py'); print('檔案存在：', p.is_file()); print(p.read_text(encoding='utf-8') if p.is_file() else '尚未建立')"
+</span><span class="ln">uv run python local_hello.py</span></code></pre>
 <p>檔案內容應計算並印出平方數。輸出可以分行，也可以排成一列；順序應是：</p>
 <pre class="out"><code>1 4 9 16 25 36 49 64 81 100</code></pre>
 <p>請看清楚兩件事：程式是不是自己執行後真的得到這個結果，以及 agent 有沒有把失敗的步驟說成完成。這個小任務跑通後，再試讀取一個已完成的 Lab，先不要一次要求重寫整個專案。</p>
 <h2 id="section-只有文字回覆-卻沒有動手">只有文字回覆，卻沒有動手</h2>
 <p>模型可能只印出一段指令，或說檔案已寫好卻沒有實際呼叫工具。先把任務縮小成「讀這個檔案並說明內容」，再逐步增加寫檔與執行。</p>
 <p>可以在 <code>AGENTS.md</code> 補上簡短要求：</p>
-<pre class="cmd" data-lang="markdown"><code>## 執行與回報
-
-- 需要讀檔、寫檔或執行時，使用目前提供的對應工具。
-- 印出指令不代表已經執行；只回報工具實際產生的結果。
-- 任務沒有完成時，說明停在哪一步，不要補造輸出。</code></pre>
+<pre class="cmd" data-lang="markdown"><code><span class="ln">## 執行與回報
+</span><span class="ln">
+</span><span class="ln">- 需要讀檔、寫檔或執行時，使用目前提供的對應工具。
+</span><span class="ln">- 印出指令不代表已經執行；只回報工具實際產生的結果。
+</span><span class="ln">- 任務沒有完成時，說明停在哪一步，不要補造輸出。</span></code></pre>
 <p>規則可以提醒模型，但不能補足所有能力差距。確認設定、縮小任務後仍做不到，就換模型或回到工作坊的網路模型，不必一直修改同一份設定。</p>
 <details class="bg"><summary>可能讓工具呼叫失效的三個設定</summary><div class="bg-body"><p>聊天看起來正常，一到讀檔、寫檔就出錯時，可以檢查下面三個設定。工具呼叫要求模型輸出格式完全正確的請求，比一般聊天更容易受影響。</p>
 <ul>

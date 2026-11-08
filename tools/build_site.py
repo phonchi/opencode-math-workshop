@@ -292,6 +292,30 @@ def pager(config, current):
     return '<nav class="pager" aria-label="章節順序">' + ''.join(links) + '</nav>' if links else ''
 
 
+CMD_BLOCK = re.compile(r'(<pre class="cmd"[^>]*><code>)(.*?)(</code></pre>)', re.S)
+
+
+def split_cmd_lines(body):
+    """Wrap each source line of a command block in a block-level span.
+
+    pre.cmd uses a hanging indent so that a long command wrapped by the browser reads as one
+    line. text-indent only affects the first line of a block, so without per-line blocks every
+    explicit line after the first shows up indented. Newlines stay inside the spans, so
+    textContent (and the copy button) is unchanged.
+    """
+    def wrap(match):
+        start, code, end = match.groups()
+        if '<' in code:  # already wrapped or contains markup: leave untouched
+            return match[0]
+        lines = code.split('\n')
+        if lines[-1] == '' and len(lines) > 1:
+            lines.pop()
+            lines[-1] += '\n'
+        parts = [line + '\n' for line in lines[:-1]] + [lines[-1]]
+        return start + ''.join(f'<span class="ln">{part}</span>' for part in parts) + end
+    return CMD_BLOCK.sub(wrap, body)
+
+
 def compose_page(slug, source, config, head, tail, root=ROOT):
     metadata = re.match(r'<!--TITLE:(.*?)-->\s*\n<!--DESC:(.*?)-->\s*\n', source)
     if not metadata:
@@ -299,6 +323,7 @@ def compose_page(slug, source, config, head, tail, root=ROOT):
     title, description = metadata[1], metadata[2]
     body = expand_assets(remove_legacy_pagers(source[metadata.end():]), root)
     body, headings = add_heading_ids(body)
+    body = split_cmd_lines(body)
     for key, value in [('__TITLE__', title), ('__DESC__', description)]:
         head = head.replace(key, html.escape(value, quote=True))
     head = head.replace('__SITE_CSS__', (root / 'tools/site-layout.css').read_text(encoding='utf-8'))

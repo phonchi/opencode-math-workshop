@@ -296,6 +296,8 @@ pre.cmd{
   text-indent:-1.15rem;
 }
 pre.cmd code{display:block;}
+/* 每個原始行各自成塊，懸掛縮排才會逐行生效（見 build_site.split_cmd_lines）。 */
+pre.cmd .ln{display:block;}
 pre .copy{
   position:absolute;top:.6rem;right:.6rem;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
@@ -1079,7 +1081,7 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <div class="step" data-n="1">
 <h3>先照平常的方式問</h3>
 <p>輸入 <code>/new</code> 開新對話，貼上這句：</p>
-<pre class="cmd"><code>data/loans.csv 是圖書館的借閱紀錄，overdue 是逾期標籤。幫我訓練模型預測逾期，告訴我能不能上線用。</code></pre>
+<pre class="cmd"><code><span class="ln">data/loans.csv 是圖書館的借閱紀錄，overdue 是逾期標籤。幫我訓練模型預測逾期，告訴我能不能上線用。</span></code></pre>
 <p>每個權限要求都讀一下。</p>
 </div>
 
@@ -1115,7 +1117,7 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 </div>
 <p>比對一下：它對 <code>case_no</code> 的解釋和建議，符合館員說的嗎？它說能或不能上線，有根據你的人力上限嗎？</p>
 <p>在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
-<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/loans_new_batch.csv -o data/loans_new_batch.csv</code></pre>
+<pre class="cmd"><code><span class="ln">curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/loans_new_batch.csv -o data/loans_new_batch.csv</span></code></pre>
 <p>選門檻是取捨：門檻低，抓到的逾期多，白提醒也多；門檻高則相反。這個取捨要由知道代價的人來做。<strong>決策卡就是先寫下你的優先順序和限制，再請 AI 只負責算數字</strong>，最後由你拍板。</p>
 <div class="box warn">
 <div class="bt">決策卡</div>
@@ -1132,9 +1134,9 @@ PCA 那類轉換器則是 <code>fit</code> 之後用 <code>transform</code>（�
 <li>限制：每 300 筆最多 40 封。</li>
 <li>預測：門檻從 0.5 降到 0.2，抓到會變多，但提醒數會逼近 40。</li>
 </ul>
-<pre class="cmd"><code>不要用 case_no 當特徵。用 data/loans.csv 訓練 logistic 迴歸，再用 data/loans_new_batch.csv 檢查。
-我優先避免漏掉逾期，每 300 筆最多寄 40 封提醒。
-請列出門檻 0.5、0.3、0.2、0.1、0.05 在新一批的提醒數、抓到、漏掉、白提醒，不要替我選。</code></pre>
+<pre class="cmd"><code><span class="ln">不要用 case_no 當特徵。用 data/loans.csv 訓練 logistic 迴歸，再用 data/loans_new_batch.csv 檢查。
+</span><span class="ln">我優先避免漏掉逾期，每 300 筆最多寄 40 封提醒。
+</span><span class="ln">請列出門檻 0.5、0.3、0.2、0.1、0.05 在新一批的提醒數、抓到、漏掉、白提醒，不要替我選。</span></code></pre>
 <p style="margin-bottom:0">你也可以優先避免白提醒，只要說得出理由。</p>
 </div>
 </details>
@@ -1205,10 +1207,10 @@ $$\frac{\partial L}{\partial w_i}\;\approx\;\frac{L(w+h\mathbf{e}_i)-L(w-h\mathb
 <div class="step" data-n="5">
 <h3>驗證：PASS 到底證明了什麼？</h3>
 <p>下面兩個錯誤是<strong>故意放進去</strong>的，不是 AI 犯的。先預測結果，再請它跑：</p>
-<pre class="cmd"><code>請做兩個實驗，不要修改原本的 loss 和 grad，完成後停止：
-A. 把 loss 和 grad 一起換成均方誤差 mean((σ(z)-y)^2) 與它正確的梯度
-B. loss 不變，只把 grad 乘以 2
-兩個都用同一段梯度檢查跑一次，印出最大絕對誤差與 PASS/FAIL。</code></pre>
+<pre class="cmd"><code><span class="ln">請做兩個實驗，不要修改原本的 loss 和 grad，完成後停止：
+</span><span class="ln">A. 把 loss 和 grad 一起換成均方誤差 mean((σ(z)-y)^2) 與它正確的梯度
+</span><span class="ln">B. loss 不變，只把 grad 乘以 2
+</span><span class="ln">兩個都用同一段梯度檢查跑一次，印出最大絕對誤差與 PASS/FAIL。</span></code></pre>
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">參考程式輸出，h=1e-5，門檻 1e-8</span></div>
   <div class="term-body"><div class="o">正確的 loss 與 grad　　　　 9.27e-12　PASS</div>
@@ -1234,13 +1236,13 @@ B. loss 不變，只把 grad 乘以 2
 <section>
 <h2 id="section-最後-把它變成一份筆記">最後：把它變成一份筆記</h2>
 <p>再記一次底部的 context 用量，和第 4 步比較。如果現在壓縮對話，哪個結論可能不見？重要的東西要寫成檔案。這份短筆記由 AI 起草，你要讀過每一句，抓出它說過頭的地方。</p>
-<pre class="cmd"><code>先讀 notes/decision.md。把它和這次已完成的步驟整理成 notes/logistic.md，寫給之後複習的我看，分三段：
-
-1. 觀察：實際執行的指令與輸出數字
-2. 決定：notes/decision.md 裡我選的門檻和理由，以及需求卡提供了哪些資訊
-3. 不能證明什麼：梯度檢查 PASS、準確率高，各自不能證明什麼
-
-數學式用 $...$ 與 $$...$$。沒有實際跑過的內容不要寫成已完成。</code></pre>
+<pre class="cmd"><code><span class="ln">先讀 notes/decision.md。把它和這次已完成的步驟整理成 notes/logistic.md，寫給之後複習的我看，分三段：
+</span><span class="ln">
+</span><span class="ln">1. 觀察：實際執行的指令與輸出數字
+</span><span class="ln">2. 決定：notes/decision.md 裡我選的門檻和理由，以及需求卡提供了哪些資訊
+</span><span class="ln">3. 不能證明什麼：梯度檢查 PASS、準確率高，各自不能證明什麼
+</span><span class="ln">
+</span><span class="ln">數學式用 $...$ 與 $$...$$。沒有實際跑過的內容不要寫成已完成。</span></code></pre>
 <p>寫完後核對：<strong>每個數字都對得上剛才的輸出嗎？有沒有哪句結論比證據說得更滿？</strong>結論是「AI 這次是對的」也可以，只要說得出憑據。</p>
 <p>課後想保留修改歷程，可以看 <a href="git-safety.html">git 安全網</a>：下次叫 agent 改這份筆記，<code>git diff</code> 會告訴你它改了哪幾行。想把課本或文獻接進來，看<a href="research-notes.html">整理數學文獻與筆記</a>。</p>
 </section>
@@ -1279,10 +1281,10 @@ B. loss 不變，只把 grad 乘以 2
 <div class="step" data-n="3">
 <h3>把一個問題寫成規則，再測它</h3>
 <p>挑一個你今天真的遇到的情況，寫成規則加進 <code>AGENTS.md</code>。寫具體一點，它才做得到：</p>
-<pre class="cmd"><code># 例子，請換成你自己遇到的問題
-## 回報規則
-- 最後的摘要要寫出沒被要求、由你自己做的決定，例如前處理、切分資料、移除哪些欄位。
-- 開始分析前，先列出「我缺的資訊」和「我打算假設的值」各至少兩項，然後停下等我確認，不要先跑程式。</code></pre>
+<pre class="cmd"><code><span class="ln"># 例子，請換成你自己遇到的問題
+</span><span class="ln">## 回報規則
+</span><span class="ln">- 最後的摘要要寫出沒被要求、由你自己做的決定，例如前處理、切分資料、移除哪些欄位。
+</span><span class="ln">- 開始分析前，先列出「我缺的資訊」和「我打算假設的值」各至少兩項，然後停下等我確認，不要先跑程式。</span></code></pre>
 <p><code>/new</code> 後，把 Lab 3 第一句再問一次，<strong>逐條檢查它有沒有照做</strong>，再和鄰座比較。</p>
 <details class="bg"><summary>測完再打開：AI 常見的反應</summary>
 <div class="bg-body">
@@ -1312,9 +1314,9 @@ B. loss 不變，只把 grad 乘以 2
 <li>改一個條件自己試：把提醒上限改成 20 封，或假設漏掉逾期沒那麼嚴重，你的門檻會變嗎？</li>
 <li>把手刻模型換成 sklearn 的 <code>class_weight='balanced'</code>，比較提醒數。</li>
 </ul>
-<details class="bg"><summary>課後練習：從概似推導損失與梯度</summary><div class="bg-body"><p>可以請 agent 陪你逐步推導，遇到不熟的符號就停下來問：</p><pre class="cmd"><code>先定義 Bernoulli 模型的成功機率，解釋為什麼把獨立樣本的機率相乘。
-從負對數概似逐步推導本頁的平均損失，再推導梯度。
-每個新符號先定義，每一步說明用了哪個微分規則；先不要寫程式。</code></pre></div></details>
+<details class="bg"><summary>課後練習：從概似推導損失與梯度</summary><div class="bg-body"><p>可以請 agent 陪你逐步推導，遇到不熟的符號就停下來問：</p><pre class="cmd"><code><span class="ln">先定義 Bernoulli 模型的成功機率，解釋為什麼把獨立樣本的機率相乘。
+</span><span class="ln">從負對數概似逐步推導本頁的平均損失，再推導梯度。
+</span><span class="ln">每個新符號先定義，每一步說明用了哪個微分規則；先不要寫程式。</span></code></pre></div></details>
 </section>
 
 

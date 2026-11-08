@@ -296,6 +296,8 @@ pre.cmd{
   text-indent:-1.15rem;
 }
 pre.cmd code{display:block;}
+/* 每個原始行各自成塊，懸掛縮排才會逐行生效（見 build_site.split_cmd_lines）。 */
+pre.cmd .ln{display:block;}
 pre .copy{
   position:absolute;top:.6rem;right:.6rem;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
@@ -796,24 +798,24 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <h2 id="section-把來源交給-opencode">把來源交給 OpenCode</h2>
 <p>回到這個專案的 OpenCode 對話，用 <code>@notes/pca-source.txt</code> 指定剛才的檔案。若已完成 Lab 2，也讓它讀 <code>lab2_pca.py</code>；自己的執行結果若已存成檔案或筆記，再補上實際路徑。只有程式、沒有結果也能做這一題，缺少的觀察留待補上。</p>
 <p>下面的任務可以直接複製。檔案若還沒準備好，先完成上一節再送出。</p>
-<pre class="cmd" data-lang="text"><code>請讀 AGENTS.md 和 @notes/pca-source.txt。
-我要整理「PCA 的中心化做了什麼？和特徵縮放有什麼不同？」。
-若 lab2_pca.py 存在，請讀取；也先查看 notes/ 中有哪些相關筆記，
-只讀與這題有關的內容，不要猜不存在的輸出路徑。
-
-請根據指定片段整理定義、必要假設和主要結論，再補一段簡短解釋。
-需要推導或小例子時，先定義符號，逐步寫出；
-若有反例可幫助理解，可以提供，但不要冒稱是原文的例子。
-每項論斷用 [原文]、[AI 解釋] 或 [我推導] 其中一個標記。
-[我推導] 只留給我實際提供或自己完成的內容，不要代填。
-原文沒提的假設、理由或推導，不能歸到 [原文]。
-
-指出 lab2_pca.py 中對應中心化的程式碼，以及我可以自己檢查的一步。
-程式不存在就跳過這項，標明尚未提供。
-沒有實際執行輸出時，標明結果待補，不為了寫筆記重跑實驗。
-列出還不能從指定片段回答的問題，存成 notes/pca-reading.md。
-若該筆記已存在，先讀內容並保留我寫過的推導，再更新。
-讀不到來源檔就停下來告訴我缺什麼，不要猜測原文或另找資料代替。</code></pre>
+<pre class="cmd" data-lang="text"><code><span class="ln">請讀 AGENTS.md 和 @notes/pca-source.txt。
+</span><span class="ln">我要整理「PCA 的中心化做了什麼？和特徵縮放有什麼不同？」。
+</span><span class="ln">若 lab2_pca.py 存在，請讀取；也先查看 notes/ 中有哪些相關筆記，
+</span><span class="ln">只讀與這題有關的內容，不要猜不存在的輸出路徑。
+</span><span class="ln">
+</span><span class="ln">請根據指定片段整理定義、必要假設和主要結論，再補一段簡短解釋。
+</span><span class="ln">需要推導或小例子時，先定義符號，逐步寫出；
+</span><span class="ln">若有反例可幫助理解，可以提供，但不要冒稱是原文的例子。
+</span><span class="ln">每項論斷用 [原文]、[AI 解釋] 或 [我推導] 其中一個標記。
+</span><span class="ln">[我推導] 只留給我實際提供或自己完成的內容，不要代填。
+</span><span class="ln">原文沒提的假設、理由或推導，不能歸到 [原文]。
+</span><span class="ln">
+</span><span class="ln">指出 lab2_pca.py 中對應中心化的程式碼，以及我可以自己檢查的一步。
+</span><span class="ln">程式不存在就跳過這項，標明尚未提供。
+</span><span class="ln">沒有實際執行輸出時，標明結果待補，不為了寫筆記重跑實驗。
+</span><span class="ln">列出還不能從指定片段回答的問題，存成 notes/pca-reading.md。
+</span><span class="ln">若該筆記已存在，先讀內容並保留我寫過的推導，再更新。
+</span><span class="ln">讀不到來源檔就停下來告訴我缺什麼，不要猜測原文或另找資料代替。</span></code></pre>
 <h2 id="section-回原文-再回自己的-lab">回原文，再回自己的 Lab</h2>
 <p>打開筆記，把標成 <code>[原文]</code> 的句子逐一對回摘錄。例如，文件說 <code>PCA</code> 會中心化輸入，但不會預先縮放每個特徵。若筆記把它寫成「PCA 會自動標準化到單位變異數」，就需要修正。原文說明了程式的行為，未必完整回答它的數學理由；這一段理由應另外核對。</p>
 <p>接著看自己的 <code>lab2_pca.py</code>。減掉的平均是沿哪個軸算的？每個特徵減去各自平均後，欄平均應接近零。程式寫了這一步，和你已經看過執行結果，是兩件事；筆記要照目前手上的證據寫。</p>
@@ -821,33 +823,33 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <p>讀不到原文時，把你能閱讀的短摘錄存進來源檔再繼續。若仍無法判斷某句是否有根據，就在筆記寫「待查」，不用急著補成完整答案。</p>
 <h2 id="section-留下一頁下次看得懂的筆記">留下一頁下次看得懂的筆記</h2>
 <p>這份模板由本工作坊設計。每個要點選一個適合的標記；不用每行都塞入三種。範本中的提示填完就刪掉，沒有證據的欄位可以寫「待補」。</p>
-<pre class="cmd" data-lang="markdown"><code># PCA 閱讀筆記
-
-問題：PCA 的中心化做了什麼？和特徵縮放有什麼不同？
-
-## 來源
-- 網址：https://scikit-learn.org/stable/modules/decomposition.html#pca
-- 節名：2.5.1.1. Exact PCA and probabilistic interpretation
-- 閱讀日期：填入實際日期
-- 摘錄：notes/pca-source.txt
-- 其他來源如有使用，附頁碼、式號或可定位的段落；沒有則省略。
-
-## 定義、假設與重點
-- [原文] 用自己的話記下一個重點，附對應節名或摘錄段落。
-- [AI 解釋] 記下幫助理解的說明，以及仍需核對的假設。
-
-## 我能核對的一步
-- [我推導] 寫下自己算過的小例子或推導，先定義符號。
-- Lab 對照：填入實際程式路徑與相關步驟。
-- 執行結果：附實際結果檔路徑；未提供就寫「待補」。
-
-## 還沒弄懂
-- 寫下一個來源沒有回答，或自己還不能說清楚的問題。
-
-## AI 使用紀錄
-- 工具與日期：OpenCode；填入實際日期。
-- 用途：整理指定摘錄、解釋概念、協助對照程式。
-- 自己核對或修正：記下實際完成的部分。</code></pre>
+<pre class="cmd" data-lang="markdown"><code><span class="ln"># PCA 閱讀筆記
+</span><span class="ln">
+</span><span class="ln">問題：PCA 的中心化做了什麼？和特徵縮放有什麼不同？
+</span><span class="ln">
+</span><span class="ln">## 來源
+</span><span class="ln">- 網址：https://scikit-learn.org/stable/modules/decomposition.html#pca
+</span><span class="ln">- 節名：2.5.1.1. Exact PCA and probabilistic interpretation
+</span><span class="ln">- 閱讀日期：填入實際日期
+</span><span class="ln">- 摘錄：notes/pca-source.txt
+</span><span class="ln">- 其他來源如有使用，附頁碼、式號或可定位的段落；沒有則省略。
+</span><span class="ln">
+</span><span class="ln">## 定義、假設與重點
+</span><span class="ln">- [原文] 用自己的話記下一個重點，附對應節名或摘錄段落。
+</span><span class="ln">- [AI 解釋] 記下幫助理解的說明，以及仍需核對的假設。
+</span><span class="ln">
+</span><span class="ln">## 我能核對的一步
+</span><span class="ln">- [我推導] 寫下自己算過的小例子或推導，先定義符號。
+</span><span class="ln">- Lab 對照：填入實際程式路徑與相關步驟。
+</span><span class="ln">- 執行結果：附實際結果檔路徑；未提供就寫「待補」。
+</span><span class="ln">
+</span><span class="ln">## 還沒弄懂
+</span><span class="ln">- 寫下一個來源沒有回答，或自己還不能說清楚的問題。
+</span><span class="ln">
+</span><span class="ln">## AI 使用紀錄
+</span><span class="ln">- 工具與日期：OpenCode；填入實際日期。
+</span><span class="ln">- 用途：整理指定摘錄、解釋概念、協助對照程式。
+</span><span class="ln">- 自己核對或修正：記下實際完成的部分。</span></code></pre>
 <p>收好筆記前，先關掉 agent 的解釋，用自己的話回答開頭的問題。說不清楚的地方，就留作下次閱讀的起點。若已建立 <a href="mcp-skills.html">math-notes skill</a>，也可以把這次有用的整理方式加入流程。</p>
 <details class="bg"><summary>選讀：讀第二篇資料時怎麼比較</summary><div class="bg-body"><p>先沿用同一個問題，再選另一份你能合法閱讀的講義或文章。把短摘錄和出處另存一份來源檔，要求 agent 逐項比較「符號怎麼定義、假設是什麼、回答了問題的哪一部分」。</p>
 <p>例如，兩份資料的共變異數分母分別是 $n$ 和 $n-1$，先確認 $n$ 都指樣本數，再推導這個差異會改變哪些量。摘錄沒有說明原因，就標成待查；不要把兩段說法硬湊成一致。需要查參數定義時，可另讀 <a class="ext" href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html" target="_blank" rel="noopener">PCA API 文件</a> 的相關項目。</p></div></details>

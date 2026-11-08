@@ -296,6 +296,8 @@ pre.cmd{
   text-indent:-1.15rem;
 }
 pre.cmd code{display:block;}
+/* 每個原始行各自成塊，懸掛縮排才會逐行生效（見 build_site.split_cmd_lines）。 */
+pre.cmd .ln{display:block;}
 pre .copy{
   position:absolute;top:.6rem;right:.6rem;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
@@ -1086,7 +1088,7 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <div class="step" data-n="1">
 <h3>先照平常的方式問</h3>
 <p>如果已在 OpenCode 裡，先輸入 <code>/new</code>；還沒啟動就在專案資料夾輸入 <code>opencode</code>。左下角應顯示 <code>Build · Big Pickle</code>。貼上這句，不要補充任何條件：</p>
-<pre class="cmd"><code>data/shops_daily.csv 是手搖飲連鎖的每日營業紀錄，幫我看有幾種店。</code></pre>
+<pre class="cmd"><code><span class="ln">data/shops_daily.csv 是手搖飲連鎖的每日營業紀錄，幫我看有幾種店。</span></code></pre>
 <p>等它回答時，每個權限要求都讀一下，看它實際跑了什麼。如果它因為缺套件（例如 <code>pandas</code>）停下來、沒給答案，就回它：<code>請改用 numpy，或用 uv add 安裝後繼續。</code></p>
 </div>
 
@@ -1099,7 +1101,7 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <li>它說的「明確」「可信」，是對什麼而言？還缺什麼資訊，你才敢把答案交給別人用？</li>
 </ul>
 <p>如果它用了你沒學過的方法，不必硬著頭皮相信，可以追問：</p>
-<pre class="cmd"><code>請只用 k-means 和 silhouette 重算，列出你替我做的每個決定，先不要下結論。</code></pre>
+<pre class="cmd"><code><span class="ln">請只用 k-means 和 silhouette 重算，列出你替我做的每個決定，先不要下結論。</span></code></pre>
 <p>和鄰座對一下答案。答案一樣也先別放心：這只表示做法相近，不表示符合你的用途。如果它先問你要拿來做什麼，那很好：回答它，再看建議怎麼變。</p>
 <details class="bg"><summary>寫完判斷再打開：AI 常見的反應</summary>
 <div class="bg-body">
@@ -1123,7 +1125,7 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 </ul>
 </div>
 <p>下載店別紀錄。這個檔只有一欄 <code>store</code>，第 N 列就是 <code>shops_daily.csv</code> 第 N 列的店別。它只用來檢查，選 k 時不能用。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
-<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/shops_daily_store.csv -o data/shops_daily_store.csv</code></pre>
+<pre class="cmd"><code><span class="ln">curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/shops_daily_store.csv -o data/shops_daily_store.csv</span></code></pre>
 <p>先想：AI 的答案對任務 A 夠用嗎？對任務 B 呢？如果它說的不是 10，算它錯嗎？</p>
 </div>
 </details>
@@ -1151,9 +1153,9 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <tr><td>判斷證據</td><td>標準化後的 silhouette，加上每群大小是否合理</td><td>用 silhouette 挑候選 k；店別紀錄只用來算 ARI 檢查，<strong>不能</strong>用來選 k</td></tr>
 </table></div>
 <p>把任務 B 的卡改寫成 prompt，大概是這樣：</p>
-<pre class="cmd"><code>data/shops_daily.csv 是手搖飲 10 家分店的每日營業紀錄。我的用途是客訴回查：要分辨每列來自哪一家店，不同店不能合併。
-請用 k-means，先處理欄位尺度，用 silhouette 挑 k。data/shops_daily_store.csv 是店別紀錄，只能在選好 k 之後拿來算 ARI 檢查，不能用來選 k。
-列出你替我做的每個決定，最後回答我的用途該用幾群。</code></pre>
+<pre class="cmd"><code><span class="ln">data/shops_daily.csv 是手搖飲 10 家分店的每日營業紀錄。我的用途是客訴回查：要分辨每列來自哪一家店，不同店不能合併。
+</span><span class="ln">請用 k-means，先處理欄位尺度，用 silhouette 挑 k。data/shops_daily_store.csv 是店別紀錄，只能在選好 k 之後拿來算 ARI 檢查，不能用來選 k。
+</span><span class="ln">列出你替我做的每個決定，最後回答我的用途該用幾群。</span></code></pre>
 <p style="margin-bottom:0">範例只是參考，你的卡寫得不一樣也沒關係，重點是三格都有寫到。</p>
 </div>
 </details>
@@ -1356,17 +1358,17 @@ $$\text{ARI}=\frac{\sum_{ij}\binom{n_{ij}}{2}-\dfrac{AB}{M}}{\dfrac{1}{2}(A+B)-\
 </ul>
 <details class="bg"><summary>寫完再對照：一份參考的清楚版 prompt</summary>
 <div class="bg-body">
-<pre class="cmd"><code>用 data/shops_daily.csv 做 k-means 分群。先拿掉標準差為 0 的欄位，再標準化。
-
-掃過 k = 2 到 12，每個 k 都記錄 silhouette，也算一次不標準化的結果做對照，
-逐項印出數值，並把兩條曲線畫到 figs/lab1_k_selection.png。
-
-要求：
-- 選 k 時不可以使用 data/shops_daily_store.csv
-- random_state 固定為 0，n_init=10
-- 寫成 lab1_cluster.py，用 uv run python 執行
-- 選好 k 之後，再用店別紀錄算 k=9、k=10 的 ARI，並列出每群包含哪些店
-- 最後分別回答：店型手冊適合幾群？客訴回查適合幾群？</code></pre>
+<pre class="cmd"><code><span class="ln">用 data/shops_daily.csv 做 k-means 分群。先拿掉標準差為 0 的欄位，再標準化。
+</span><span class="ln">
+</span><span class="ln">掃過 k = 2 到 12，每個 k 都記錄 silhouette，也算一次不標準化的結果做對照，
+</span><span class="ln">逐項印出數值，並把兩條曲線畫到 figs/lab1_k_selection.png。
+</span><span class="ln">
+</span><span class="ln">要求：
+</span><span class="ln">- 選 k 時不可以使用 data/shops_daily_store.csv
+</span><span class="ln">- random_state 固定為 0，n_init=10
+</span><span class="ln">- 寫成 lab1_cluster.py，用 uv run python 執行
+</span><span class="ln">- 選好 k 之後，再用店別紀錄算 k=9、k=10 的 ARI，並列出每群包含哪些店
+</span><span class="ln">- 最後分別回答：店型手冊適合幾群？客訴回查適合幾群？</span></code></pre>
 </div>
 </details>
 </section>

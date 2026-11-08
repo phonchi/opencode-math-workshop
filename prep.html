@@ -296,6 +296,8 @@ pre.cmd{
   text-indent:-1.15rem;
 }
 pre.cmd code{display:block;}
+/* 每個原始行各自成塊，懸掛縮排才會逐行生效（見 build_site.split_cmd_lines）。 */
+pre.cmd .ln{display:block;}
 pre .copy{
   position:absolute;top:.6rem;right:.6rem;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
@@ -883,21 +885,21 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <div class="step" data-n="2">
 <h3>開啟 Git Bash，安裝 opencode 與 uv</h3>
 <p>從開始選單搜尋並開啟 <strong>Git Bash</strong>，<strong>依序</strong>貼上這三行：</p>
-<pre class="cmd"><code>touch ~/.bash_profile
-curl -fsSL https://opencode.ai/install | bash
-curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
+<pre class="cmd"><code><span class="ln">touch ~/.bash_profile
+</span><span class="ln">curl -fsSL https://opencode.ai/install | bash
+</span><span class="ln">curl -LsSf https://astral.sh/uv/install.sh | sh</span></code></pre>
 <p>第一行建立 Git Bash 的設定檔。少了它，opencode 的安裝程式找不到地方記錄路徑，重開後會找不到 <code>opencode</code>。</p>
 </div>
 <div class="step" data-n="3">
 <h3>讓 Python 正確輸出中文</h3>
 <p>在同一個視窗執行一次，之後不用再設定：</p>
-<pre class="cmd"><code>setx PYTHONUTF8 1</code></pre>
+<pre class="cmd"><code><span class="ln">setx PYTHONUTF8 1</span></code></pre>
 <p>繁體中文 Windows 上的 Python 預設不一定用 UTF-8 輸出，少了這一步，OpenCode 裡看到的中文可能變成亂碼。</p>
 </div>
 <div class="step" data-n="4">
 <h3>讓 OpenCode 可以用 Ctrl+V 貼上</h3>
 <p>同樣只要執行一次：</p>
-<pre class="cmd"><code>printf 'KeyFunctions=C+v:paste\nShootFoot=on\n' &gt;&gt; ~/.minttyrc</code></pre>
+<pre class="cmd"><code><span class="ln">printf 'KeyFunctions=C+v:paste\nShootFoot=on\n' &gt;&gt; ~/.minttyrc</span></code></pre>
 <p>這行讓 Git Bash 視窗自己處理 <code>Ctrl+V</code>。少了它，在 OpenCode 裡按 <code>Ctrl+V</code> 可能貼不上文字。</p>
 </div>
 <div class="step" data-n="5">
@@ -907,10 +909,10 @@ curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 
 <h3>macOS</h3>
 <p>先開「終端機」確認 Git。如果還沒安裝，macOS 會跳出視窗請你安裝 Command Line Tools，照畫面完成即可：</p>
-<pre class="cmd"><code>git --version</code></pre>
+<pre class="cmd"><code><span class="ln">git --version</span></code></pre>
 <p>macOS 內建 <code>curl</code>，接著貼這兩行：</p>
-<pre class="cmd"><code>curl -fsSL https://opencode.ai/install | bash
-curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
+<pre class="cmd"><code><span class="ln">curl -fsSL https://opencode.ai/install | bash
+</span><span class="ln">curl -LsSf https://astral.sh/uv/install.sh | sh</span></code></pre>
 <p class="lead" style="font-size:.92rem;color:var(--ink-3)">
 （macOS 請依官方安裝說明操作，課前完成同一份自測；需要協助時提早聯絡講師。）
 </p>
@@ -921,20 +923,20 @@ curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 Ubuntu 的基本安裝不一定包含它們。真正一定有的是套件管理員 <code>apt</code>，
 所以先用它補上：
 </p>
-<pre class="cmd"><code>sudo apt update &amp;&amp; sudo apt install -y git curl ca-certificates</code></pre>
+<pre class="cmd"><code><span class="ln">sudo apt update &amp;&amp; sudo apt install -y git curl ca-certificates</span></code></pre>
 <p>（<code>ca-certificates</code> 是驗證 HTTPS 憑證用的，少了它 <code>curl</code> 會連不上。
 如果這些本來就有，這行也只會告訴你「已經是最新版」，不會弄壞任何東西。）</p>
 <p>接著才裝 opencode 與 uv：</p>
-<pre class="cmd"><code>curl -fsSL https://opencode.ai/install | bash
-curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
+<pre class="cmd"><code><span class="ln">curl -fsSL https://opencode.ai/install | bash
+</span><span class="ln">curl -LsSf https://astral.sh/uv/install.sh | sh</span></code></pre>
 <p>裝完後關掉終端機重開，或執行 <code>source ~/.bashrc</code>。</p>
 </section>
 
 <section>
 <h2 id="section-確認裝好了">確認裝好了</h2>
-<pre class="cmd"><code>git --version
-opencode --version
-uv --version</code></pre>
+<pre class="cmd"><code><span class="ln">git --version
+</span><span class="ln">opencode --version
+</span><span class="ln">uv --version</span></code></pre>
 <p>三個指令都應印出版本號；記下來，之後求助時可以一起提供。</p>
 <div class="box warn">
 <div class="bt">如果出現「找不到指令」</div>
@@ -951,59 +953,59 @@ uv --version</code></pre>
 <div class="step" data-n="1">
 <h3>建資料夾與檔案</h3>
 <p>找一個你記得住的位置（例如 <code>Documents</code>），建立資料夾：</p>
-<pre class="cmd"><code>cd ~/Documents
-mkdir ai-math-lab
-cd ai-math-lab
-mkdir notes
-mkdir figs
-mkdir data</code></pre>
+<pre class="cmd"><code><span class="ln">cd ~/Documents
+</span><span class="ln">mkdir ai-math-lab
+</span><span class="ln">cd ai-math-lab
+</span><span class="ln">mkdir notes
+</span><span class="ln">mkdir figs
+</span><span class="ln">mkdir data</span></code></pre>
 <p>接著下載三份練習資料，它們是為這堂課造的生活化資料：手搖飲分店營業紀錄、校園外送訂單、圖書館借閱紀錄。</p>
-<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/shops_daily.csv -o data/shops_daily.csv
-curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/orders.csv -o data/orders.csv
-curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/loans.csv -o data/loans.csv</code></pre>
+<pre class="cmd"><code><span class="ln">curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/shops_daily.csv -o data/shops_daily.csv
+</span><span class="ln">curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/orders.csv -o data/orders.csv
+</span><span class="ln">curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/loans.csv -o data/loans.csv</span></code></pre>
 </div>
 
 <div class="step" data-n="2">
 <h3>建立 <code>pyproject.toml</code></h3>
 <p>用任何文字編輯器建立一個叫 <code>pyproject.toml</code> 的檔案。Windows 可在 Git Bash 輸入 <code>notepad pyproject.toml</code>，用記事本建立後存檔；後面兩個檔案也一樣。內容：</p>
-<pre class="cmd"><code>[project]
-name = "ai-math-lab"
-version = "0.1.0"
-requires-python = "&gt;=3.10"
-dependencies = [
-    "numpy&gt;=1.26",
-    "scipy&gt;=1.11",
-    "matplotlib&gt;=3.8",
-    "scikit-learn&gt;=1.4",
-    "networkx&gt;=3.2",
-]</code></pre>
+<pre class="cmd"><code><span class="ln">[project]
+</span><span class="ln">name = "ai-math-lab"
+</span><span class="ln">version = "0.1.0"
+</span><span class="ln">requires-python = "&gt;=3.10"
+</span><span class="ln">dependencies = [
+</span><span class="ln">    "numpy&gt;=1.26",
+</span><span class="ln">    "scipy&gt;=1.11",
+</span><span class="ln">    "matplotlib&gt;=3.8",
+</span><span class="ln">    "scikit-learn&gt;=1.4",
+</span><span class="ln">    "networkx&gt;=3.2",
+</span><span class="ln">]</span></code></pre>
 </div>
 
 <div class="step" data-n="3">
 <h3>建立 <code>opencode.json</code></h3>
 <p>同一個資料夾，建立 <code>opencode.json</code>：</p>
-<pre class="cmd"><code>{
-  "$schema": "https://opencode.ai/config.json",
-  "model": "opencode/big-pickle",
-  "provider": {
-    "nvidia": {
-      "models": {
-        "z-ai/glm-5.3-flash": {
-          "options": { "reasoningEffort": "low" }
-        }
-      }
-    }
-  },
-  "permission": {
-    "bash": "ask",
-    "edit": "ask",
-    "webfetch": "ask"
-  },
-  "agent": {
-    "plan": { "permission": { "edit": "deny", "bash": "deny" } }
-  },
-  "instructions": ["AGENTS.md"]
-}</code></pre>
+<pre class="cmd"><code><span class="ln">{
+</span><span class="ln">  "$schema": "https://opencode.ai/config.json",
+</span><span class="ln">  "model": "opencode/big-pickle",
+</span><span class="ln">  "provider": {
+</span><span class="ln">    "nvidia": {
+</span><span class="ln">      "models": {
+</span><span class="ln">        "z-ai/glm-5.3-flash": {
+</span><span class="ln">          "options": { "reasoningEffort": "low" }
+</span><span class="ln">        }
+</span><span class="ln">      }
+</span><span class="ln">    }
+</span><span class="ln">  },
+</span><span class="ln">  "permission": {
+</span><span class="ln">    "bash": "ask",
+</span><span class="ln">    "edit": "ask",
+</span><span class="ln">    "webfetch": "ask"
+</span><span class="ln">  },
+</span><span class="ln">  "agent": {
+</span><span class="ln">    "plan": { "permission": { "edit": "deny", "bash": "deny" } }
+</span><span class="ln">  },
+</span><span class="ln">  "instructions": ["AGENTS.md"]
+</span><span class="ln">}</span></code></pre>
 <p>中間的 <code>provider</code> 只在你切到備案模型 GLM-5.3-Flash 時才有作用。少了它，這個模型會推理很久，同一題可能從幾十秒拖到十幾分鐘。</p>
 <div class="box tip">
 <div class="bt">為什麼放在專案裡而不是全域設定</div>
@@ -1018,29 +1020,29 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 <div class="step" data-n="4">
 <h3>建立 <code>AGENTS.md</code></h3>
 <p>這是給 agent 看的專案規則。課前只放操作規則；「數學要怎麼驗證」先不寫，今天課程結束時，你會把自己抓到的問題寫成規則加回來。同一個資料夾，建立 <code>AGENTS.md</code>：</p>
-<pre class="cmd"><code># AI-Math 工作坊　專案規則
-
-## 語言
-一律使用台灣繁體中文回答。程式碼、變數名稱、套件名稱保留英文。
-
-## 執行環境
-本專案用 uv 管理環境。執行 Python 一律用：`uv run python &lt;檔案&gt;`
-不要用 `python`、`python3`、`pip install`。要加套件用 `uv add &lt;套件&gt;`。
-
-## 圖檔
-所有圖存到 `figs/`，用 `savefig()`，不要用 `plt.show()`（它可能開視窗並等待關閉，程式看起來像卡住）。
-
-## 筆記
-筆記寫在 `notes/` 底下的 .md 檔，數學式用 $...$ 與 $$...$$。
-
-## 不要做的事
-- 不要 git commit 或 git push，除非我明講。
-- 不要刪除 `figs/` 或 `notes/` 裡既有的檔案。</code></pre>
+<pre class="cmd"><code><span class="ln"># AI-Math 工作坊　專案規則
+</span><span class="ln">
+</span><span class="ln">## 語言
+</span><span class="ln">一律使用台灣繁體中文回答。程式碼、變數名稱、套件名稱保留英文。
+</span><span class="ln">
+</span><span class="ln">## 執行環境
+</span><span class="ln">本專案用 uv 管理環境。執行 Python 一律用：`uv run python &lt;檔案&gt;`
+</span><span class="ln">不要用 `python`、`python3`、`pip install`。要加套件用 `uv add &lt;套件&gt;`。
+</span><span class="ln">
+</span><span class="ln">## 圖檔
+</span><span class="ln">所有圖存到 `figs/`，用 `savefig()`，不要用 `plt.show()`（它可能開視窗並等待關閉，程式看起來像卡住）。
+</span><span class="ln">
+</span><span class="ln">## 筆記
+</span><span class="ln">筆記寫在 `notes/` 底下的 .md 檔，數學式用 $...$ 與 $$...$$。
+</span><span class="ln">
+</span><span class="ln">## 不要做的事
+</span><span class="ln">- 不要 git commit 或 git push，除非我明講。
+</span><span class="ln">- 不要刪除 `figs/` 或 `notes/` 裡既有的檔案。</span></code></pre>
 </div>
 
 <div class="step" data-n="5">
 <h3>建立 Python 環境（這步會等比較久）</h3>
-<pre class="cmd"><code>uv sync</code></pre>
+<pre class="cmd"><code><span class="ln">uv sync</span></code></pre>
 <p>
 第一次執行會下載 Python 與套件，請等指令完成，回到可輸入下一個指令的提示字元。</p>
 <p>如果超過一分鐘還在跑，去泡杯茶。看到類似這樣就對了：</p>
@@ -1062,15 +1064,15 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 <p>下面三個測試全部通過，你就準備好了。</p>
 
 <h3>測試一：Python 環境</h3>
-<pre class="cmd"><code>uv run python -c "import numpy, scipy, sklearn, matplotlib, networkx; print('環境 OK')"</code></pre>
+<pre class="cmd"><code><span class="ln">uv run python -c "import numpy, scipy, sklearn, matplotlib, networkx; print('環境 OK')"</span></code></pre>
 <p>應該印出 <code>環境 OK</code>。如果中文是亂碼，回到安裝步驟確認 <code>setx PYTHONUTF8 1</code> 已執行，並重開 Git Bash。</p>
 
 <h3>測試二：agent 會回話</h3>
-<pre class="cmd"><code>opencode run "用一句話說明什麼是主成分分析"</code></pre>
+<pre class="cmd"><code><span class="ln">opencode run "用一句話說明什麼是主成分分析"</span></code></pre>
 <p>應該得到一段繁體中文的回答。</p>
 
 <h3>測試三：agent 真的會動手（最重要的一關）</h3>
-<pre class="cmd"><code>opencode run --auto "建立一個 hello.py，內容是印出 1 到 10 的平方，然後執行它"</code></pre>
+<pre class="cmd"><code><span class="ln">opencode run --auto "建立一個 hello.py，內容是印出 1 到 10 的平方，然後執行它"</span></code></pre>
 
 <div class="box warn">
 <div class="bt">那個 --auto 是什麼，為什麼只有這裡要加</div>
@@ -1192,7 +1194,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <tr><th>症狀</th><th>原因</th><th>怎麼辦</th></tr>
 <tr><td><code>opencode: command not found</code></td>
     <td>PATH 沒重新載入</td>
-    <td>把終端機<strong>完全關掉重開</strong>。Windows 請用 Git Bash，不要用 PowerShell 或 cmd。仍然找不到時，在 Git Bash 執行下面的補救指令，再重開一次。<pre class="cmd"><code>echo 'export PATH="$HOME/.opencode/bin:$HOME/.local/bin:$PATH"' &gt;&gt; ~/.bash_profile</code></pre></td></tr>
+    <td>把終端機<strong>完全關掉重開</strong>。Windows 請用 Git Bash，不要用 PowerShell 或 cmd。仍然找不到時，在 Git Bash 執行下面的補救指令，再重開一次。<pre class="cmd"><code><span class="ln">echo 'export PATH="$HOME/.opencode/bin:$HOME/.local/bin:$PATH"' &gt;&gt; ~/.bash_profile</span></code></pre></td></tr>
 <tr><td>開始選單找不到 Git Bash<br><code>git: command not found</code></td>
     <td>Git 還沒裝好</td>
     <td>Windows 重新從<a href="https://git-scm.com/install/windows">官方下載頁</a>下載安裝檔，保留預設選項安裝。</td></tr>

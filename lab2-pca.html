@@ -296,6 +296,8 @@ pre.cmd{
   text-indent:-1.15rem;
 }
 pre.cmd code{display:block;}
+/* 每個原始行各自成塊，懸掛縮排才會逐行生效（見 build_site.split_cmd_lines）。 */
+pre.cmd .ln{display:block;}
 pre .copy{
   position:absolute;top:.6rem;right:.6rem;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
@@ -1126,7 +1128,7 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <div class="step" data-n="1">
 <h3>先照平常的方式問</h3>
 <p>輸入 <code>/new</code> 開新對話，貼上這句：</p>
-<pre class="cmd"><code>data/orders.csv 是校園外送平台的訂單資料，幫我降維，看幾個主成分就夠。</code></pre>
+<pre class="cmd"><code><span class="ln">data/orders.csv 是校園外送平台的訂單資料，幫我降維，看幾個主成分就夠。</span></code></pre>
 <p>它回答後，先做一張三欄對照，再相信它：</p>
 <div class="tw"><table>
 <tr><th>摘要說它做了什麼</th><th>畫面上實際出現的工具、你按了幾次 Allow</th><th><code>!</code> 用 <code>ls</code> 看到的檔案</th></tr>
@@ -1162,7 +1164,7 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 </ul>
 </div>
 <p>下載客訴標籤。這個檔只有一欄 <code>complaint</code>（1 表示這張訂單事後被客訴），列的順序和 <code>orders.csv</code> 相同。它只用來檢查降維結果。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
-<pre class="cmd"><code>curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/orders_complaint.csv -o data/orders_complaint.csv</code></pre>
+<pre class="cmd"><code><span class="ln">curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/orders_complaint.csv -o data/orders_complaint.csv</span></code></pre>
 <p>要檢查「幾個主成分夠不夠」，可以用主成分當輸入，看能不能分出客訴。分得好不好用 <strong>AUC</strong> 衡量：隨機抽一張客訴訂單和一張正常訂單，模型把客訴那張排得比較可疑的機率。0.5 約等於亂猜，1 是完全分開。</p>
 <p>「AI 說 5 個就夠」要變成你能檢查的事，得先講好怎樣算夠。<strong>驗收卡就是在看結果之前，先寫下你的主張和撤回條件</strong>，免得看到數字再改口，或任由 AI 替你改。</p>
 <div class="box warn">
@@ -1217,14 +1219,14 @@ $$C=\frac{X_c^\top X_c}{n-1},\qquad C=V\Lambda V^\top$$
 <div class="step" data-n="5">
 <h3>驗證：先預測，再跑「檢查 × 錯誤」表</h3>
 <p>下面四個錯誤是<strong>故意放進去</strong>的，不是 AI 犯的。用你剛才列的檢查，先預測每一格會 PASS 還是 FAIL，再貼上：</p>
-<pre class="cmd"><code>請在 lab2_pca.py 加一個 bug 參數，可選：
-none、ratio_topk（比例分母只用前 4 個特徵值的和）、denom_n（變異數分母用 n，不是 n-1）、
-no_center（不中心化）、rows（主成分取錯方向：取矩陣的前 4 列，不是前 4 個特徵向量）。
-
-每一種 bug 都跑一次你原本那組檢查，做成「檢查 × 錯誤」表，
-每格印出實際數值與 PASS/FAIL。
-
-規則：不准修 bug、不准新增或修改檢查、不准改門檻，表做好就停下來。</code></pre>
+<pre class="cmd"><code><span class="ln">請在 lab2_pca.py 加一個 bug 參數，可選：
+</span><span class="ln">none、ratio_topk（比例分母只用前 4 個特徵值的和）、denom_n（變異數分母用 n，不是 n-1）、
+</span><span class="ln">no_center（不中心化）、rows（主成分取錯方向：取矩陣的前 4 列，不是前 4 個特徵向量）。
+</span><span class="ln">
+</span><span class="ln">每一種 bug 都跑一次你原本那組檢查，做成「檢查 × 錯誤」表，
+</span><span class="ln">每格印出實際數值與 PASS/FAIL。
+</span><span class="ln">
+</span><span class="ln">規則：不准修 bug、不准新增或修改檢查、不准改門檻，表做好就停下來。</span></code></pre>
 <p>如果它自動修掉錯誤、加新檢查或放寬門檻，就打斷它，要它照規則重做。對照你的預測：哪一格猜錯了？<strong>有沒有哪一列整列都是 PASS？</strong>那個錯誤就從這組檢查的縫隙溜過去了。同一句話每次放錯的方式也可能不同，所以要看它實際怎麼改。</p>
 <p>下面是檢查項目齊全時的參考結果：</p>
 <div class="term">

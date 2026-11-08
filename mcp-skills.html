@@ -296,6 +296,8 @@ pre.cmd{
   text-indent:-1.15rem;
 }
 pre.cmd code{display:block;}
+/* 每個原始行各自成塊，懸掛縮排才會逐行生效（見 build_site.split_cmd_lines）。 */
+pre.cmd .ln{display:block;}
 pre .copy{
   position:absolute;top:.6rem;right:.6rem;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);
@@ -821,17 +823,17 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <p><strong>問題</strong>：<code>opencode/big-pickle</code> 和所有模型一樣，知識有時間截止點。你問它 scikit-learn 某個參數怎麼用，它可能給你一個兩年前的 API，跑起來噴 <code>TypeError</code>。你也可以叫它用 <code>webfetch</code> 去抓文件，但那是抓整頁 HTML，又慢又雜。</p>
 <p>Context7 可以替 agent 提供套件文件查詢；查到後仍要確認文件版本與本專案相符。官方安裝與使用條件見 <a class="ext" href="https://github.com/upstash/context7" target="_blank" rel="noopener">Context7 官方說明</a>。</p>
 <p>在專案根目錄的 <code>opencode.json</code> 加上 <code>mcp</code> 區塊，和 <code>model</code>、<code>permission</code> 並列，其他設定都保留：</p>
-<pre class="cmd" data-lang="json"><code>{
-  "mcp": {
-    "context7": {
-      "type": "remote",
-      "url": "https://mcp.context7.com/mcp",
-      "enabled": true
-    }
-  }
-}</code></pre>
+<pre class="cmd" data-lang="json"><code><span class="ln">{
+</span><span class="ln">  "mcp": {
+</span><span class="ln">    "context7": {
+</span><span class="ln">      "type": "remote",
+</span><span class="ln">      "url": "https://mcp.context7.com/mcp",
+</span><span class="ln">      "enabled": true
+</span><span class="ln">    }
+</span><span class="ln">  }
+</span><span class="ln">}</span></code></pre>
 <p>存檔後驗證：</p>
-<pre class="cmd" data-lang="bash"><code>opencode mcp list</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">opencode mcp list</span></code></pre>
 <p>連線成功時的輸出例子：</p>
 <pre class="out"><code>┌  MCP Servers
 │
@@ -841,27 +843,27 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 └  1 server(s)</code></pre>
 <p>看到 <code>connected</code> 表示連線成功，還要實際查一次文件才知道服務能否使用。Context7 官方目前建議使用金鑰取得較高額度；本教材只示範不帶金鑰的連線，服務可用性與配額會變動。遇到認證、額度或付費要求就停止，改用下方的官方文件路線，不必申請帳號或啟用付費設定。</p>
 <p>接上之後可以這樣問：</p>
-<pre class="cmd" data-lang="text"><code>scikit-learn 最新版的 PCA，取得解釋變異比例的屬性叫什麼？查文件確認再回答。</code></pre>
+<pre class="cmd" data-lang="text"><code><span class="ln">scikit-learn 最新版的 PCA，取得解釋變異比例的屬性叫什麼？查文件確認再回答。</span></code></pre>
 <h3>不接 MCP 也能查官方文件</h3>
 <p>把這段貼進 OpenCode，允許它讀取指定的公開文件：</p>
-<pre class="cmd" data-lang="text"><code>請讀 https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html，
-說明 n_init 的用途，並和 lab1_cluster.py 的設定比較。
-請附上來源連結；如果讀不到網頁，直接說明，不要靠猜測補上 API 行為。</code></pre>
+<pre class="cmd" data-lang="text"><code><span class="ln">請讀 https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html，
+</span><span class="ln">說明 n_init 的用途，並和 lab1_cluster.py 的設定比較。
+</span><span class="ln">請附上來源連結；如果讀不到網頁，直接說明，不要靠猜測補上 API 行為。</span></code></pre>
 <p>網頁讀不到時，你也可以自己在瀏覽器開啟官方文件，把需要的短段落貼進對話。</p>
 <h3>兩種 MCP：remote 與 local</h3>
 <p><strong>remote</strong>：連到別人架好的網路服務。你不用安裝任何東西。</p>
-<pre class="cmd" data-lang="json"><code>{
-  "mcp": {
-    "my-remote-mcp": {
-      "type": "remote",
-      "url": "https://mcp.example.com/mcp",
-      "enabled": true,
-      "headers": {
-        "Authorization": "Bearer {env:MY_API_KEY}"
-      }
-    }
-  }
-}</code></pre>
+<pre class="cmd" data-lang="json"><code><span class="ln">{
+</span><span class="ln">  "mcp": {
+</span><span class="ln">    "my-remote-mcp": {
+</span><span class="ln">      "type": "remote",
+</span><span class="ln">      "url": "https://mcp.example.com/mcp",
+</span><span class="ln">      "enabled": true,
+</span><span class="ln">      "headers": {
+</span><span class="ln">        "Authorization": "Bearer {env:MY_API_KEY}"
+</span><span class="ln">      }
+</span><span class="ln">    }
+</span><span class="ln">  }
+</span><span class="ln">}</span></code></pre>
 <ul>
 <li><code>url</code>（必填）：server 網址</li>
 <li><code>headers</code>（選填）：需要金鑰時用。<strong>注意 <code>{env:MY_API_KEY}</code> 這種寫法</strong>：它會去讀環境變數，<strong>不要把金鑰直接寫進 <code>opencode.json</code></strong>，因為那個檔案會進 git。</li>
@@ -870,18 +872,18 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><code>oauth</code>（選填）：需要 OAuth 授權時用，設 <code>false</code> 可停用自動偵測</li>
 </ul>
 <p><strong>local</strong>：在你電腦上跑一個程式當 server。</p>
-<pre class="cmd" data-lang="json"><code>{
-  "mcp": {
-    "my-local-mcp": {
-      "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-everything"],
-      "enabled": true,
-      "environment": {
-        "MY_ENV_VAR": "value"
-      }
-    }
-  }
-}</code></pre>
+<pre class="cmd" data-lang="json"><code><span class="ln">{
+</span><span class="ln">  "mcp": {
+</span><span class="ln">    "my-local-mcp": {
+</span><span class="ln">      "type": "local",
+</span><span class="ln">      "command": ["npx", "-y", "@modelcontextprotocol/server-everything"],
+</span><span class="ln">      "enabled": true,
+</span><span class="ln">      "environment": {
+</span><span class="ln">        "MY_ENV_VAR": "value"
+</span><span class="ln">      }
+</span><span class="ln">    }
+</span><span class="ln">  }
+</span><span class="ln">}</span></code></pre>
 <ul>
 <li><code>command</code>（必填）：<strong>陣列</strong>，不是字串。<code>["npx", "-y", "套件名"]</code></li>
 <li><code>environment</code>（選填）：環境變數</li>
@@ -891,11 +893,11 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <p><strong>這門課建議只用 remote</strong>，因為 local 需要 Node.js 環境、要下載套件，多一層可能出錯的地方。</p>
 <h3><code>opencode mcp</code> 這個 CLI</h3>
 <p>可以先查看有哪些管理指令：</p>
-<pre class="cmd" data-lang="bash"><code>opencode mcp add [name]      # 新增 MCP server
-opencode mcp list            # 列出所有 server 與連線狀態（別名 ls）
-opencode mcp auth [name]     # 對支援 OAuth 的 server 進行認證
-opencode mcp logout [name]   # 移除已儲存的 OAuth 憑證
-opencode mcp debug &lt;name&gt;    # 偵錯 OAuth 連線問題</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">opencode mcp add [name]      # 新增 MCP server
+</span><span class="ln">opencode mcp list            # 列出所有 server 與連線狀態（別名 ls）
+</span><span class="ln">opencode mcp auth [name]     # 對支援 OAuth 的 server 進行認證
+</span><span class="ln">opencode mcp logout [name]   # 移除已儲存的 OAuth 憑證
+</span><span class="ln">opencode mcp debug &lt;name&gt;    # 偵錯 OAuth 連線問題</span></code></pre>
 <p><strong>最常用的是 <code>opencode mcp list</code></strong>，改完設定就跑一次確認狀態。可能的狀態有 <code>connected</code>、<code>disabled</code>、<code>failed</code>、<code>needs_auth</code>、<code>needs_client_registration</code>。</p>
 <h3>排錯</h3>
 <div class="tw"><table><tr><th>症狀</th><th>原因</th><th>解法</th></tr><tr><td><code>failed</code></td><td>網址錯或服務掛了</td><td>檢查 <code>url</code> 拼字，用瀏覽器試連</td></tr><tr><td>連線逾時</td><td>網路慢</td><td>加大 <code>timeout</code> 值</td></tr><tr><td><code>needs_auth</code></td><td>需要認證</td><td><code>opencode mcp debug &lt;name&gt;</code></td></tr><tr><td>local server 起不來</td><td><code>command</code> 寫錯或找不到執行檔</td><td>確認是<strong>陣列</strong>格式，確認 <code>npx</code> 在 PATH 裡</td></tr><tr><td>設定改了沒反應</td><td>檔案格式錯誤</td><td><code>opencode debug config</code> 看有沒有讀進去</td></tr></table></div>
@@ -927,51 +929,51 @@ general (subagent)</code></pre>
 <p>最典型的例子就是「<strong>只做數學驗證的 reviewer</strong>」：你想要一個看得到你的程式、並關閉本練習會用到的編輯、執行指令與再委派入口的審查員。</p>
 <h3>完整範例：數學驗證 reviewer</h3>
 <p>先在專案終端機建立資料夾：</p>
-<pre class="cmd" data-lang="bash"><code>uv run python -c "from pathlib import Path; Path('.opencode/agents').mkdir(parents=True, exist_ok=True)"</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">uv run python -c "from pathlib import Path; Path('.opencode/agents').mkdir(parents=True, exist_ok=True)"</span></code></pre>
 <p>再用文字編輯器建立 <code>.opencode/agents/math-reviewer.md</code>，貼上以下內容。檔名結尾是 <code>.md</code>，不要多出 <code>.txt</code>：</p>
-<pre class="cmd" data-lang="markdown"><code>---
-description: 檢查數學程式的正確性與可重現性，只讀不改
-mode: subagent
-temperature: 0.1
-permission:
-  edit: deny
-  bash: deny
-  task: deny
-  external_directory: deny
----
-
-你是數學驗證審查員。只讀取本專案內的程式與已有輸出，不讀其他資料夾或其他 Python 環境的套件。若本專案沒有對應證據，明確說明缺少。你的工作是**檢查**，不是修改。
-
-檢查以下項目，逐項回報「通過」或「有問題」，有問題要指出行號：
-
-1. **數學正確性**：公式與演算法步驟是否正確？矩陣維度是否對得起來？
-2. **可重現性**：所有用到隨機性的地方是否都有固定種子（`random_state=0`
-   或 `np.random.seed(0)`）？
-3. **有沒有偷懶**：如果程式宣稱是「手刻」實作，檢查是否偷偷呼叫了
-   sklearn 的對應函式來充數。
-4. **數值穩定性**：有沒有除以可能為零的量？有沒有對可能為負的數開根號？
-   大數相減造成的抵消誤差？
-5. **驗證段落**：有沒有附上驗證程式碼？若提供了執行輸出，核對輸出與結論是否相符。
-   本角色不能執行指令；沒有現成紀錄時必須寫「尚無執行證據」，不能宣稱已通過測試。
-
-回報格式：用台灣繁體中文，條列，每一項先寫結論再寫理由。
-不要修改任何檔案。不要執行任何指令。</code></pre>
+<pre class="cmd" data-lang="markdown"><code><span class="ln">---
+</span><span class="ln">description: 檢查數學程式的正確性與可重現性，只讀不改
+</span><span class="ln">mode: subagent
+</span><span class="ln">temperature: 0.1
+</span><span class="ln">permission:
+</span><span class="ln">  edit: deny
+</span><span class="ln">  bash: deny
+</span><span class="ln">  task: deny
+</span><span class="ln">  external_directory: deny
+</span><span class="ln">---
+</span><span class="ln">
+</span><span class="ln">你是數學驗證審查員。只讀取本專案內的程式與已有輸出，不讀其他資料夾或其他 Python 環境的套件。若本專案沒有對應證據，明確說明缺少。你的工作是**檢查**，不是修改。
+</span><span class="ln">
+</span><span class="ln">檢查以下項目，逐項回報「通過」或「有問題」，有問題要指出行號：
+</span><span class="ln">
+</span><span class="ln">1. **數學正確性**：公式與演算法步驟是否正確？矩陣維度是否對得起來？
+</span><span class="ln">2. **可重現性**：所有用到隨機性的地方是否都有固定種子（`random_state=0`
+</span><span class="ln">   或 `np.random.seed(0)`）？
+</span><span class="ln">3. **有沒有偷懶**：如果程式宣稱是「手刻」實作，檢查是否偷偷呼叫了
+</span><span class="ln">   sklearn 的對應函式來充數。
+</span><span class="ln">4. **數值穩定性**：有沒有除以可能為零的量？有沒有對可能為負的數開根號？
+</span><span class="ln">   大數相減造成的抵消誤差？
+</span><span class="ln">5. **驗證段落**：有沒有附上驗證程式碼？若提供了執行輸出，核對輸出與結論是否相符。
+</span><span class="ln">   本角色不能執行指令；沒有現成紀錄時必須寫「尚無執行證據」，不能宣稱已通過測試。
+</span><span class="ln">
+</span><span class="ln">回報格式：用台灣繁體中文，條列，每一項先寫結論再寫理由。
+</span><span class="ln">不要修改任何檔案。不要執行任何指令。</span></code></pre>
 <p><strong>確認設定被載入</strong>：</p>
-<pre class="cmd" data-lang="bash"><code>opencode agent list                    # 看 math-reviewer 有沒有出現
-opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">opencode agent list                    # 看 math-reviewer 有沒有出現
+</span><span class="ln">opencode debug agent math-reviewer     # 看解析後的完整設定</span></code></pre>
 <p>檢查 <code>opencode debug agent math-reviewer</code> 中的模式、提示與權限。輸出中應有對應欄位：</p>
-<pre class="cmd" data-lang="json"><code>{
-  "name": "math-reviewer",
-  "mode": "subagent",
-  "description": "檢查數學程式的正確性與可重現性，只讀不改",
-  "temperature": 0.1,
-  "prompt": "你是數學驗證審查員。..."
-}</code></pre>
+<pre class="cmd" data-lang="json"><code><span class="ln">{
+</span><span class="ln">  "name": "math-reviewer",
+</span><span class="ln">  "mode": "subagent",
+</span><span class="ln">  "description": "檢查數學程式的正確性與可重現性，只讀不改",
+</span><span class="ln">  "temperature": 0.1,
+</span><span class="ln">  "prompt": "你是數學驗證審查員。..."
+</span><span class="ln">}</span></code></pre>
 <p>而且權限規則裡確實出現了：</p>
-<pre class="cmd" data-lang="json"><code>{ "permission": "edit", "action": "deny", "pattern": "*" }
-{ "permission": "bash", "action": "deny", "pattern": "*" }
-{ "permission": "task", "action": "deny", "pattern": "*" }
-{ "permission": "external_directory", "action": "deny", "pattern": "*" }</code></pre>
+<pre class="cmd" data-lang="json"><code><span class="ln">{ "permission": "edit", "action": "deny", "pattern": "*" }
+</span><span class="ln">{ "permission": "bash", "action": "deny", "pattern": "*" }
+</span><span class="ln">{ "permission": "task", "action": "deny", "pattern": "*" }
+</span><span class="ln">{ "permission": "external_directory", "action": "deny", "pattern": "*" }</span></code></pre>
 <p><strong>這是自訂 agent 勝過 AGENTS.md 的地方</strong>：<code>edit: deny</code> 是機制上的封鎖，不是口頭請求。這份設定拒絕本練習的編輯、執行指令與再委派入口；若日後加入其他工具，也要檢查那些工具的權限。</p>
 <h3>怎麼用它</h3>
 <p>在 opencode 對話裡用 <code>@</code> 呼叫：</p>
@@ -982,20 +984,20 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 <div class="box tip"><p><strong>關於 <code>model</code> 欄位的提醒</strong>：官方文件和中文教學站的範例幾乎都寫 <code>model: anthropic/claude-sonnet-4-...</code>。<strong>照抄會壞掉</strong>，因為那些模型需要付費帳號，這門課用的是免費模型。<strong>直接把 <code>model</code> 那行刪掉</strong>，agent 就會沿用你在 <code>opencode.json</code> 設的模型。上面的範例就是這樣寫的。</p></div>
 <h3>也可以寫在 opencode.json 裡</h3>
 <p>不想開新檔案的話，也可以定義在 <code>opencode.json</code> 的 <code>agent</code> 區塊：</p>
-<pre class="cmd" data-lang="json"><code>{
-  "agent": {
-    "math-reviewer": {
-      "description": "檢查數學程式的正確性與可重現性，只讀不改",
-      "mode": "subagent",
-      "prompt": "只讀本專案內的程式與已有輸出，不讀其他資料夾或Python環境。唯讀檢查數學公式、矩陣維度、隨機種子與驗證段落。指出實際檔案與行號。不修改、不執行、不再委派；沒有現成輸出時寫尚無執行證據，不可宣稱測試通過。",
-      "permission": { "edit": "deny", "bash": "deny", "task": "deny", "external_directory": "deny" }
-    }
-  }
-}</code></pre>
+<pre class="cmd" data-lang="json"><code><span class="ln">{
+</span><span class="ln">  "agent": {
+</span><span class="ln">    "math-reviewer": {
+</span><span class="ln">      "description": "檢查數學程式的正確性與可重現性，只讀不改",
+</span><span class="ln">      "mode": "subagent",
+</span><span class="ln">      "prompt": "只讀本專案內的程式與已有輸出，不讀其他資料夾或Python環境。唯讀檢查數學公式、矩陣維度、隨機種子與驗證段落。指出實際檔案與行號。不修改、不執行、不再委派；沒有現成輸出時寫尚無執行證據，不可宣稱測試通過。",
+</span><span class="ln">      "permission": { "edit": "deny", "bash": "deny", "task": "deny", "external_directory": "deny" }
+</span><span class="ln">    }
+</span><span class="ln">  }
+</span><span class="ln">}</span></code></pre>
 <p><strong>但建議用 <code>.md</code> 檔</strong>，因為系統提示會很長，寫在 JSON 裡要處理跳脫字元，很痛苦。</p>
 <h3><code>opencode agent create</code></h3>
 <p>也可以用互動方式建立：</p>
-<pre class="cmd" data-lang="bash"><code>opencode agent create</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">opencode agent create</span></code></pre>
 <p>它會用互動問答引導你設定位置、描述、系統提示和權限。</p>
 <p>本章採直接建立 <code>.md</code> 檔的做法，方便閱讀每個欄位並修改。</p>
 <hr>
@@ -1440,11 +1442,11 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 <p><strong>判斷原則：這件事需要翻很多東西，但結論只有幾句話？→ 拆。</strong></p>
 <h3>怎麼用</h3>
 <p>最簡單的方式就是直接 <code>@</code> 呼叫：</p>
-<pre class="cmd" data-lang="text"><code>@explore 請唯讀檢查 lab1_cluster.py、lab2_pca.py、lab3_logistic.py 裡用到隨機性的地方。只看實際存在的檔案，回報檔名、行號與用途，不要修改或執行。</code></pre>
+<pre class="cmd" data-lang="text"><code><span class="ln">@explore 請唯讀檢查 lab1_cluster.py、lab2_pca.py、lab3_logistic.py 裡用到隨機性的地方。只看實際存在的檔案，回報檔名、行號與用途，不要修改或執行。</span></code></pre>
 <p><code>explore</code> 是內建的唯讀探索 subagent，很適合這種「翻檔案找東西」的工作，而且它唯讀，不可能改壞你的東西。</p>
 <p>或者直接描述工作，讓主 agent 自己決定要不要拆：</p>
-<pre class="cmd" data-lang="text"><code>先用子任務調查我已完成的 Lab 程式的隨機性用法，整理成清單，
-然後我們再討論要怎麼統一設定種子。</code></pre>
+<pre class="cmd" data-lang="text"><code><span class="ln">先用子任務調查我已完成的 Lab 程式的隨機性用法，整理成清單，
+</span><span class="ln">然後我們再討論要怎麼統一設定種子。</span></code></pre>
 <h3>相關設定</h3>
 <ul>
 <li>保留目前的子任務深度設定；練習先由主 agent 分派一層子任務即可。</li>
@@ -1455,35 +1457,35 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 <p><code>AGENTS.md</code> 放整個專案一直適用的規則；<strong>skill</strong> 放某一類任務才需要的流程。下面把「根據實際結果整理數學筆記」做成一個 skill，之後換一個 Lab 也能沿用。</p>
 <h3>建立資料夾與 SKILL.md</h3>
 <p>回到專案資料夾的終端機（Windows 為 Git Bash），建立資料夾：</p>
-<pre class="cmd" data-lang="bash"><code>mkdir -p .opencode/skills/math-notes</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">mkdir -p .opencode/skills/math-notes</span></code></pre>
 <p>用文字編輯器建立 <code>.opencode/skills/math-notes/SKILL.md</code>，貼上以下完整內容。Windows 請確認副檔名是 <code>.md</code>，沒有多出 <code>.txt</code>。</p>
-<pre class="cmd" data-lang="markdown"><code>---
-name: math-notes
-description: 根據本專案已完成的數學實驗與輸出整理學習筆記；當使用者要求把 Lab 結果寫成可複習的筆記時使用。
----
-
-# 數學實驗筆記
-
-先讀使用者指定的程式、結果與既有筆記，再整理這次任務。
-
-- 筆記寫清楚研究問題、符號與必要假設，再說明做了什麼、看到什麼。
-- 公式使用 Markdown 的 $...$ 與 $$...$$。沒有解釋過的符號要先定義。
-- 結果註明來源檔案與實際執行指令；沒有執行輸出時，標明只有程式可讀。
-- 保留原始數字與結論的適用範圍。分開寫已觀察結果、推論與尚未確認的事。
-- 以學生可以自己回答的一個檢查問題收尾，答案另列。
-- 依使用者指定路徑存檔；若檔案已存在，先讀內容再更新。不要為了寫筆記另做實驗。</code></pre>
+<pre class="cmd" data-lang="markdown"><code><span class="ln">---
+</span><span class="ln">name: math-notes
+</span><span class="ln">description: 根據本專案已完成的數學實驗與輸出整理學習筆記；當使用者要求把 Lab 結果寫成可複習的筆記時使用。
+</span><span class="ln">---
+</span><span class="ln">
+</span><span class="ln"># 數學實驗筆記
+</span><span class="ln">
+</span><span class="ln">先讀使用者指定的程式、結果與既有筆記，再整理這次任務。
+</span><span class="ln">
+</span><span class="ln">- 筆記寫清楚研究問題、符號與必要假設，再說明做了什麼、看到什麼。
+</span><span class="ln">- 公式使用 Markdown 的 $...$ 與 $$...$$。沒有解釋過的符號要先定義。
+</span><span class="ln">- 結果註明來源檔案與實際執行指令；沒有執行輸出時，標明只有程式可讀。
+</span><span class="ln">- 保留原始數字與結論的適用範圍。分開寫已觀察結果、推論與尚未確認的事。
+</span><span class="ln">- 以學生可以自己回答的一個檢查問題收尾，答案另列。
+</span><span class="ln">- 依使用者指定路徑存檔；若檔案已存在，先讀內容再更新。不要為了寫筆記另做實驗。</span></code></pre>
 <p>資料夾名稱與 frontmatter 的 <code>name</code> 都是 <code>math-notes</code>。<code>description</code> 說明何時使用；下面的正文才是實際流程。這份練習只需一個檔案，沒有額外安裝或網路服務。<a class="ext" href="https://opencode.ai/docs/skills/" target="_blank" rel="noopener">OpenCode 官方 skills 說明</a> 列出了命名、載入與權限規則。</p>
 <p>想把筆記流程用在課本或文獻，可接著做<a href="research-notes.html">課後補充：整理數學文獻與筆記</a>，練習整理指定來源並回原文核對。</p>
 <h3>先確認發現，再確認真的載入</h3>
 <p>在同一個專案資料夾執行：</p>
-<pre class="cmd" data-lang="bash"><code>opencode debug skill</code></pre>
+<pre class="cmd" data-lang="bash"><code><span class="ln">opencode debug skill</span></code></pre>
 <p>清單應出現 <code>math-notes</code> 和你剛建立的路徑。這只確認 <strong>skill 被發現</strong>，還不代表某次任務已經使用它。</p>
 <p>重新啟動 OpenCode，貼上：</p>
-<pre class="cmd" data-lang="text"><code>請用 skill 工具載入 math-notes。
-讀取 lab1_cluster.py 與 figs/lab1_k_selection.png；若目前模型不能讀圖，
-請明說，改以程式與這段對話裡實際提供的執行輸出為依據，不要猜圖上數值。
-將這次分群實驗整理成 notes/lab1-review.md。
-沒有的輸出請標示缺少，不要重新執行實驗。</code></pre>
+<pre class="cmd" data-lang="text"><code><span class="ln">請用 skill 工具載入 math-notes。
+</span><span class="ln">讀取 lab1_cluster.py 與 figs/lab1_k_selection.png；若目前模型不能讀圖，
+</span><span class="ln">請明說，改以程式與這段對話裡實際提供的執行輸出為依據，不要猜圖上數值。
+</span><span class="ln">將這次分群實驗整理成 notes/lab1-review.md。
+</span><span class="ln">沒有的輸出請標示缺少，不要重新執行實驗。</span></code></pre>
 <p>觀察工具紀錄有沒有載入 <code>math-notes</code>，再打開產出的筆記。它應說明資料、參數與結論的範圍；只看到模型說「我用了 skill」還不夠。若沒載入，先檢查檔名、frontmatter 與 <code>opencode debug skill</code> 的清單，再要求它使用 skill 工具。</p>
 <h3>換一個任務，看看流程能否沿用</h3>
 <p>用自己已完成的 PCA 或 logistic 程式再做一次，指定不同筆記檔名。比較兩份筆記：流程可以一致，內容、數字和結論必須來自各自的實驗。最後刪掉或縮短你發現沒有幫助的規則，讓 skill 保持容易閱讀。</p>
