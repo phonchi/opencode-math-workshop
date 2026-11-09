@@ -1,0 +1,52 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode/big-pickle",
+  "provider": {
+    "nvidia": {
+      "models": {
+        "z-ai/glm-5.3-flash": {
+          "options": {
+            "reasoningEffort": "low"
+          }
+        }
+      }
+    },
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": {
+        "baseURL": "http://localhost:11434/v1"
+      },
+      "models": {
+        "qwen3.5-9b-32k": {
+          "name": "qwen3.5-9b-32k",
+          "tool_call": true,
+          "limit": {
+            "context": 32768,
+            "output": 8192
+          }
+        }
+      }
+    }
+  },
+  "permission": {
+    "bash": {
+      "*": "deny",
+      "uv run python local_hello.py": "allow"
+    },
+    "edit": "allow",
+    "webfetch": "deny",
+    "external_directory": "deny"
+  },
+  "instructions": [
+    "AGENTS.md"
+  ],
+  "agent": {
+    "plan": {
+      "permission": {
+        "edit": "deny",
+        "bash": "deny"
+      }
+    }
+  }
+}

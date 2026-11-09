@@ -408,8 +408,10 @@ td{padding:.58rem .9rem;border-bottom:1px solid var(--rule-2);vertical-align:top
 tr:last-child td{border-bottom:none;}
 tbody tr:hover{background:rgba(222,214,198,.16);}
 td code,th code{
-  /* 短的保持一行好讀，過長的允許換行，否則整個表格會被撐爆 */
-  white-space:normal;overflow-wrap:anywhere;
+  /* 短的保持一行好讀，過長的允許換行，否則整個表格會被撐爆。
+     用 break-word 而非 anywhere：anywhere 會讓表格排版把每個 code 都當成可任意切開，
+     手機上連 `Build`、`qwen3.5:4b` 都被從中間切斷。 */
+  white-space:normal;overflow-wrap:break-word;word-break:normal;
 }
 .ok{color:var(--after);font-weight:700;}
 .no{color:var(--live);font-weight:700;}
@@ -817,6 +819,13 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <p>例子是 Hugging Face 上的實際檔案；同參數量的其他模型會略有出入。本章範例 <code>qwen3.5:9b-q4_K_M</code> 多帶了處理圖片的視覺元件，<code>ollama list</code> 顯示 6.6 GB。表中只算模型檔本身，context 也要占記憶體，對話越長占得越多，所以還要再多留一段空間。</p>
 <p>以 12 GB 顯示卡為例，6.6 GB 的範例模型放得進去，剩下約 5 GB 給 context 與其他用途，載入後再用 <code>ollama ps</code> 確認實際狀況。27B 的 4 位元模型無法完整放進顯示卡，Ollama 會把一部分改放一般記憶體、交給 CPU 計算；一般記憶體也夠的話還能跑，但會慢很多。</p>
 <p>Apple silicon 的 Mac 由 CPU 與 GPU 共用同一塊記憶體，macOS 預設會保留一部分給系統，能給模型的上限依機型而異。常見的經驗值是 32 GB 以下約三分之二（16 GB 的機器約 10–11 GB），更大的約四分之三。這只是估算，實際上限以載入結果為準。</p>
+<h3>依記憶體挑起點</h3>
+<p>下表整理影片 <a class="ext" href="https://www.youtube.com/watch?v=1nomxygMILI" target="_blank" rel="noopener">AI懶人報 EP460</a> 介紹的模型，換成 Ollama 模型庫裡可以直接下載的名稱；8 GB 那一列的 <code>qwen3.5:4b</code> 是講師另外補測的。這些模型在模型庫都標有 <code>tools</code>。</p>
+<p>表中的記憶體一律指「能給模型的記憶體」：有獨立顯示卡時看顯示卡記憶體，Mac 用上一段的估算。沒有獨立顯示卡時，Ollama 多半用不到內建的 GPU，會改用 CPU；載入後用 <code>ollama ps</code> 的 <code>PROCESSOR</code> 欄確認。下載大小是 2026 年 11 月模型庫預設版本的大小，同名的其他版本會不同；執行時還要再加上 context。</p>
+<div class="tw"><table><tr><th>能給模型的記憶體</th><th>候選模型</th><th>下載大小</th><th>講師實測：最後一關</th></tr><tr><td>約 8 GB</td><td><code>qwen3.5:4b</code></td><td>3.3 GB</td><td>兩次都沒完成</td></tr><tr><td>12–16 GB</td><td><code>qwen3.5:9b</code></td><td>6.6 GB</td><td>兩次都寫檔並執行成功，一次沒有回報</td></tr><tr><td>12–16 GB</td><td><code>gemma4:e4b</code></td><td>6.6 GB</td><td>兩次都完成</td></tr><tr><td>16 GB</td><td><code>gpt-oss:20b</code>（MoE）</td><td>14 GB</td><td>未實測</td></tr><tr><td>24–32 GB</td><td><code>gemma4:26b</code>（MoE）</td><td>16 GB</td><td>未實測</td></tr><tr><td>24–32 GB</td><td><code>qwen3.8:27b</code></td><td>18 GB</td><td>未實測</td></tr><tr><td>32 GB</td><td><code>qwen3.6:35b</code>（MoE）</td><td>23 GB</td><td>未實測</td></tr></table></div>
+<p>講師的實測環境是 RTX 5070 12 GB 顯示卡、Ollama 0.40.15、OpenCode 1.18.30，context 設為 32,768，用本章最後一關的任務文字各跑兩次。為了讓測試能自動執行，權限預先放行了寫檔和 <code>uv run python local_hello.py</code> 這一條指令，不是課堂上逐次回答 <code>ask</code> 的流程。</p>
+<p><code>qwen3.5:9b</code> 與 <code>gemma4:e4b</code> 兩次都建立了檔案、實際執行，輸出正確；有文字回報的三次都和結果相符，<code>qwen3.5:9b</code> 有一次執行完就結束，沒有回報。<code>qwen3.5:4b</code> 一次只列了待辦，另一次只讀了 <code>AGENTS.md</code>，兩次都沒有寫檔也沒有執行。這只是最小的任務，大一點的專案仍可能失敗。</p>
+<p>這次沒有找到能在 8 GB 左右通過最後一關的模型，記憶體只有這麼多時，agent 任務請沿用網路模型。影片也提到，小模型比較適合改寫、翻譯、摘要這類單純的文字工作。<code>gpt-oss:20b</code> 放進 16 GB 的顯示卡後，留給 context 的空間不多，開 32k 之前先實際確認；照前面的估算，16 GB 的 Mac 放不下它。整台機器的記憶體到 64 GB 時，影片的建議是繼續用 27B 這一級，改用 8 位元版本或開更長的 context；影片再以 128 GB 的機器示範更大的模型，例如 65 GB 的 <code>gpt-oss:120b</code>。</p>
 <details class="bg"><summary>為什麼有些較大的模型反而比較快：MoE</summary><div class="bg-body"><p>模型每產生一個 token，都要把參與計算的參數從記憶體讀一遍。一般的 <strong>稠密模型</strong>（dense model）每次動用全部參數，所以其他條件相同時，模型越大、每個 token 越慢。</p>
 <p><strong>MoE</strong>（mixture of experts）把模型分成許多組「專家」，每個 token 只啟用其中幾組。名稱常會標出每次啟用的量，例如 <code>35B-A3B</code> 代表總共約 350 億個參數，每次只動用約 30 億。每個 token 要搬的資料少很多，通常明顯較快，實際速度仍要在自己的電腦上測。</p>
 <p>但所有專家都要放在記憶體裡待命，<strong>記憶體看總參數，速度主要看每次啟用的參數</strong>；硬體、量化與軟體實作也會影響速度。<code>35B-A3B</code> 的 4 位元版本仍要約 22 GB，8–16 GB 的筆電放不下這一類。記憶體夠大、想要較快的回應時，可以留意名稱帶 <code>A3B</code> 這類標示的 MoE 模型；做較長的 agent 任務時，再實際比較它和同大小的稠密模型哪一個比較穩。</p></div></details>
