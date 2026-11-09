@@ -408,8 +408,10 @@ td{padding:.58rem .9rem;border-bottom:1px solid var(--rule-2);vertical-align:top
 tr:last-child td{border-bottom:none;}
 tbody tr:hover{background:rgba(222,214,198,.16);}
 td code,th code{
-  /* 短的保持一行好讀，過長的允許換行，否則整個表格會被撐爆 */
-  white-space:normal;overflow-wrap:anywhere;
+  /* 短的保持一行好讀，過長的允許換行，否則整個表格會被撐爆。
+     用 break-word 而非 anywhere：anywhere 會讓表格排版把每個 code 都當成可任意切開，
+     手機上連 `Build`、`qwen3.5:4b` 都被從中間切斷。 */
+  white-space:normal;overflow-wrap:break-word;word-break:normal;
 }
 .ok{color:var(--after);font-weight:700;}
 .no{color:var(--live);font-weight:700;}
