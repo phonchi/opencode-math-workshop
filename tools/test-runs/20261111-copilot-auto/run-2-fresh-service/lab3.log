@@ -1,0 +1,60 @@
+[0m
+> build · gpt-6-luna
+我會先確認資料欄位、目標標記與資料筆數，再依「不使用 `case_no`」訓練模型並逐一評估你指定的門檻；不會替你挑選門檻。
+[0m✱ [0mGlob "data/*" [90m6 matches[0m
+[0m✱ [0mGlob "**/*.{py,ipynb,md,csv}" [90m11 matches[0m
+[0m$ [0muv --version
+uv 0.13.6 (329bf9448 2026-10-26 x86_64-pc-windows-msvc)
+> build · gpt-6-luna
+[0m→ [0mRead lab2_auc.py 
+[0m→ [0mRead AGENTS.md 
+[0m→ [0mRead data/loans_new_batch.csv [90m[limit=8][0m
+[0m→ [0mRead data/loans.csv [90m[limit=8][0m
+> build · gpt-6-luna
+[0m→ [0mRead data/loans.csv [90m[offset=1, limit=5][0m
+[0m→ [0mRead data/loans_new_batch.csv [90m[offset=280, limit=4][0m
+[0m✱ [0mGlob "pyproject.toml" [90m1 match[0m
+> build · gpt-6-luna
+[0m→ [0mRead pyproject.toml 
+> build · gpt-6-luna
+資料欄位顯示 `overdue` 是 0/1 目標，新的批次也有實際標籤可供核對。我會把 `case_no` 與目標欄位排除於特徵之外，使用數值欄位中位數補值（若缺值）及標準化後的 logistic 迴歸；各門檻的提醒數會另和每 300 筆 40 封的上限比較。
+[0m% [0mPatch 1 file 
+> build · gpt-6-luna
+[0m$ [0muv run python loans_logistic_thresholds.py
+訓練資料：900 筆；逾期 71 筆
+新批次：300 筆；實際逾期 13 筆
+特徵：pages, past_ontime_pct, past_avg_days, commute_min, account_age_days, book_age_years
+門檻提醒量上限（按 40/300 比例換算並取整）：40 封
+
+門檻	提醒數	抓到(TP)	漏掉(FN)	白提醒(FP)	符合上限
+0.50	11	5		8		6		是
+0.30	26	10		3		16		是
+0.20	34	11		2		23		是
+0.10	51	11		2		40		否
+0.05	76	13		0		63		否
+
+欄位檢查：
+丟棄欄位：case_no（識別碼）、overdue（目標標籤，不作特徵）
+訓練特徵缺值：0；新批次特徵缺值：0
+> build · gpt-6-luna
+已用 `data/loans.csv` 的 900 筆資料訓練 logistic 迴歸，並在 `data/loans_new_batch.csv` 的 300 筆資料上核對。新批次實際逾期 13 筆；提醒上限是 40 封。
+
+| 門檻 | 提醒數 | 抓到逾期 | 漏掉逾期 | 白提醒 | 符合 40 封上限 |
+|---:|---:|---:|---:|---:|:---:|
+| 0.50 | 11 | 5 | 8 | 6 | 是 |
+| 0.30 | 26 | 10 | 3 | 16 | 是 |
+| 0.20 | 34 | 11 | 2 | 23 | 是 |
+| 0.10 | 51 | 11 | 2 | 40 | 否 |
+| 0.05 | 76 | 13 | 0 | 63 | 否 |
+
+**我做的決定**
+
+- **訓練與檢查方式：** 用 `loans.csv` 全部資料訓練；用新批次評估。新批次的 `overdue` 標籤只用於計算抓到、漏掉與白提醒，不作為模型特徵。
+- **特徵：** 使用 `pages`、`past_ontime_pct`、`past_avg_days`、`commute_min`、`account_age_days`、`book_age_years`。
+- **丟掉的欄位：** `case_no` 是識別碼，不作特徵；`overdue` 是預測目標，不作特徵。沒有其他欄位被剔除。
+- **前處理：** 數值缺值以中位數補值，之後標準化。這兩份資料的特徵目前都沒有缺值。
+- **模型設定：** logistic 迴歸，`lbfgs` solver、`C=1.0`、最多 1000 次迭代；未做類別加權或重抽樣。
+- **判定準則：** 逾期機率大於或等於門檻，就列為提醒；「抓到」是 TP、「漏掉」是 FN、「白提醒」是 FP。
+- **門檻：** 只比較你指定的 0.5、0.3、0.2、0.1、0.05；沒有替你選門檻。低門檻在此批資料會超過 40 封上限。
+
+分析程式已存為 `loans_logistic_thresholds.py`。

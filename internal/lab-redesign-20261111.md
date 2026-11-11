@@ -37,3 +37,10 @@
   - Astra：Lab 2 標籤「只能用來檢查」與訓練分類器衝突、參考 prompt 的 W 形狀未定義會讓 WWᵀ 檢查誤判、Lab 3 梯度方向說反。三處都已修。Astra 另外重跑 5 支參考程式並核對 PCA 動畫，確認無誤。
   - Fable：Lab 3 課後梯度收合的公式框與 danger 框被切空（搬移時的切段錯誤）、Lab 1 切回 Build 要收小範圍、Plan 問答要有明確換軌條件、`notes/decision.md` 與 AGENTS.md 規則要給可貼的句子、圖說與驗收卡名稱不一致。都已修。「Plan 模式執行 ls」那則保留，因為實測時它直接列出檔案、沒有先發問。
   - Gemini 3.8：first-run 環境檢查漏 pandas、Lab 2／3 下載後沒提醒按 Esc 離開 Shell、mcp-skills 一處 Tab、故障排除的路徑位置。都已修。
+
+## 追加：provider 討論與 GitHub Copilot（同日稍晚）
+- 與 Astra、Fable、Gemini 3.8 討論其他 provider。結論：沒有同時符合免費、按帳號計、免綁卡、OpenCode 可接、一堂課夠用的新選項。Groq（token 日上限太小）、OpenRouter 免費（未儲值 50 請求／日）、Cerebras、Ollama Cloud、Mistral 免費都不建議。尚未決定：Zen 預設改用零保留的 `glm-5.3-flash-free`／`deepseek-v4.1-flash-free`、NVIDIA 改用 flash 模型、是否改 Gemini 優先。
+- NVIDIA 免費額度：個人帳號 40 RPM（NVIDIA 論壇工作人員 2026-05-30 回覆）；每日 10,000 請求只見於第三方追蹤頁。課前頁補了「註冊要手機簡訊驗證碼」。
+- Copilot：v2.2.7 起支援 Auto（PR #62997）。credits 數字經 Astra、Fable 查證並抽查原文：1 credit＝0.01 美元、按 token 依模型價目扣；Pro 1,500、Pro+ 7,000、Max 20,000；Student 200（官方 community 公告）；Free 未公布。Free／Student 只能用 Auto。Student 不在 2026-04-24 訓練政策內（官方 FAQ #188488）。Auto 九折只寫到付費方案的 Chat／cloud agent，OpenCode 是否適用不確定，正文不寫。
+- Copilot Auto 實跑見 `tools/test-runs/20261111-copilot-auto/`：照教材 prompt 三關約 8.2 credits。舊背景服務上 `patch` 工具卡住，重啟服務後未重現。
+- 處置：starter 與課前頁的 `opencode.json` 加 `"plugins": ["-opencode.tool.patch"]`（GPT 系列模型改用 write/edit，其他模型不受影響；原始碼依據 `packages/core/src/tool/plugin/patch.ts:288`，Astra 讀碼、實測可用）；「卡住了？」表加一列（`/exit` → `opencode service restart` → 重開）；課前頁新增「選配：已經有 GitHub Copilot 的人」收合。

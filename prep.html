@@ -1023,9 +1023,11 @@ Ubuntu 的基本安裝不一定包含它們。真正一定有的是套件管理�
 </span><span class="ln">  "agent": {
 </span><span class="ln">    "plan": { "permission": { "edit": "deny", "bash": "deny" } }
 </span><span class="ln">  },
-</span><span class="ln">  "instructions": ["AGENTS.md"]
+</span><span class="ln">  "instructions": ["AGENTS.md"],
+</span><span class="ln">  "plugins": ["-opencode.tool.patch"]
 </span><span class="ln">}</span></code></pre>
 <p>中間的 <code>provider</code> 只在你切到備案模型 GLM-5.3-Flash 時才有作用。少了它，這個模型會推理很久，同一題可能從幾十秒拖到十幾分鐘。</p>
+<p>最後一行關掉 <code>patch</code> 這個改檔工具，它要寫在 <code>opencode.json</code>，不是前面的 <code>cli.json</code>。GPT 系列模型（例如 Copilot 上的 GPT 模型）預設用它改檔；關掉後會改用和其他模型一樣的 <code>write</code>、<code>edit</code>。用 <code>big-pickle</code> 等其他模型時沒有差別。</p>
 <div class="box tip">
 <div class="bt">為什麼放在專案裡而不是全域設定</div>
 <p style="margin-bottom:0">
@@ -1224,6 +1226,40 @@ Error: This non-interactive run cannot ask the user for permission, so the reque
 <li><input type="checkbox" id="p8"><label for="p8">Gemini 3.5 Flash Lite 回答了問題</label></li>
 <li><input type="checkbox" id="p9"><label for="p9">GLM-5.3-Flash 回答了問題</label></li>
 </ul>
+
+<details class="bg" id="copilot"><summary>選配：已經有 GitHub Copilot 的人</summary>
+<div class="bg-body">
+<p>如果你的 GitHub 帳號已經有 Copilot（包括通過學生認證的 Copilot Student），也可以用它上課。它的額度跟著你的 GitHub 帳號走，全班共用 Wi-Fi 也不會互相影響。沒有的人不用為了這堂課去申請。</p>
+
+<h4>各方案每月的 credits</h4>
+<p>Copilot 按 <strong>AI credits</strong> 計費，1 credit 等於 0.01 美元。扣多少要看用了哪個模型、送出和收到多少文字，不是一次對話扣一點。每月沒用完的 credits 不會留到下個月。</p>
+<div class="tw"><table>
+<tr><th>方案</th><th>月費</th><th>每月 credits</th><th>能選的模型</th></tr>
+<tr><td>Copilot Free</td><td>免費</td><td>官方沒有公布數字</td><td>只有 Auto</td></tr>
+<tr><td>Copilot Student</td><td>免費（要通過學生認證）</td><td>200（約 2 美元）</td><td>只有 Auto</td></tr>
+<tr><td>Copilot Pro</td><td>10 美元</td><td>1,500</td><td>Auto 或自己選</td></tr>
+<tr><td>Copilot Pro+</td><td>39 美元</td><td>7,000</td><td>Auto 或自己選，含高階模型</td></tr>
+<tr><td>Copilot Max</td><td>100 美元</td><td>20,000</td><td>Auto 或自己選，含高階模型</td></tr>
+</table></div>
+<p>照本教材的 prompt 跑完三個 Lab，大約用掉 8 credits；上課多問幾次會再多一些，實際也會因 Auto 挑到的模型而不同。credits 用完後不會自動換成免費模型，要等下個月，或改用上面的備案模型。</p>
+
+<h4>連接步驟</h4>
+<ol>
+<li>在專案資料夾輸入 <code>opencode</code>，再輸入 <code>/connect</code>，選 <code>GitHub Copilot</code> → <code>Login with GitHub Copilot</code> → <code>GitHub.com</code>。</li>
+<li>畫面會出現一組代碼。用瀏覽器開 <a href="https://github.com/login/device">github.com/login/device</a>，貼上代碼並授權。</li>
+<li>回到 OpenCode，用 <code>/models</code> 選 <code>Auto</code>，問一次 <code>1+1 等於多少？只回答數字</code>，應該收到回答。</li>
+</ol>
+<p>Auto 在每段對話的第一句就挑模型，之後大多沿用它。所以每個 Lab 先輸入 <code>/new</code>，第一句就貼正式任務，不要先打招呼。</p>
+
+<h4>要注意的地方</h4>
+<ul>
+<li><strong>學生認證要提早申請。</strong>到 <a href="https://github.com/settings/education/benefits">GitHub Education</a> 上傳學生證或在學證明。通過之後，Copilot Student 可能還要幾天才會生效。畫面只出現付費方案時，先不要購買，過幾天再看。</li>
+<li><strong>不要多花錢。</strong>帳號有綁付款方式的人，請開啟 <a href="https://github.com/settings/billing">GitHub 帳務設定</a>，選 <em>Budgets and alerts</em> → <em>New budget</em> → <em>Bundled AI credits budget</em>，金額填 0 美元，勾選 <em>Stop usage when budget limit is reached</em>，再按 <em>Create budget</em>。只開提醒不會停止扣款。</li>
+<li><strong>資料會不會拿去訓練。</strong>Free、Pro、Pro+、Max 預設可能會，要到 Copilot settings 把 <em>Allow GitHub to use my data for AI model training</em> 改成 Disabled。官方說 Copilot Student 不在這個範圍內。</li>
+</ul>
+<p style="font-size:.88rem;color:var(--ink-3)">資料來源：GitHub 官方的<a href="https://docs.github.com/en/copilot/get-started/plans">方案說明</a>、<a href="https://docs.github.com/en/copilot/concepts/billing-and-usage/individuals/billing">計費說明</a>、<a href="https://github.com/orgs/community/discussions/189268">Copilot Student 公告</a>與<a href="https://github.com/orgs/community/discussions/188488">資料政策 FAQ</a>（2026 年 11 月查閱，方案內容可能變動）。</p>
+</div>
+</details>
 </section>
 
 <section>
@@ -1260,6 +1296,9 @@ Error: This non-interactive run cannot ask the user for permission, so the reque
 <tr><td><code>permission requested: edit ...; auto-rejecting</code></td>
     <td><code>opencode run</code> 是非互動模式，沒人能回答 <code>ask</code> 的權限詢問</td>
     <td>自測時加 <code>--auto</code>。平常請用互動模式（直接打 <code>opencode</code>）。</td></tr>
+<tr><td>畫面好幾分鐘都沒有動，按兩次 <code>Esc</code> 也停不下來</td>
+    <td>OpenCode 的背景服務卡住了</td>
+    <td>輸入 <code>/exit</code> 離開；離不開就關掉 Git Bash 再重開，並 <code>cd</code> 回專案資料夾。執行 <code>opencode service restart</code>，再開 <code>opencode</code>，用 <code>/models</code> 選回原本的模型，把剛才的任務重送一次。</td></tr>
 <tr><td>agent 用了 <code>python</code> 而不是 <code>uv run python</code></td>
     <td><code>AGENTS.md</code> 沒被讀到</td>
     <td>確認 <code>AGENTS.md</code> 跟 <code>opencode.json</code> 在<strong>同一個資料夾</strong>，且你是在那個資料夾裡啟動 opencode。</td></tr>

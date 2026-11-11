@@ -1,0 +1,62 @@
+[0m
+> build · gpt-6.1-terra
+[0m→ [0mRead lab1_cluster.py 
+[0m→ [0mRead data/shops_daily_store.csv [90m[limit=12][0m
+[0m→ [0mRead data 
+> build · gpt-6.1-terra
+我會沿用先前的 9 群結果，再依兩個檔案的列順序對照店別；店別只用於事後驗證，不會重新選群或改變原先建議。
+[0m% [0mPatch 1 file 
+> build · gpt-6.1-terra
+[0m$ [0muv run python lab1_check_store.py
+Rows: 723; distinct stores: 10
+Adjusted Rand index: 0.881108
+
+Days by cluster and store (aligned by row order):
+store   1   2   3   4   5   6   7   8   9  10  total
+row_0                                               
+0       0   0   0  65   0   0   0   0   0   0     65
+1      73   0   0   0   0   0   0   0   0  86    159
+2       0   0   0   0   0   0   0   0  77   0     77
+3       0   0   0   0  92   0   0   0   0   0     92
+4       0  57   0   0   0   0   0   0   0   0     57
+5       0   0   0   0   0   0  90   0   0   0     90
+6       0   0  55   0   0   0   0   0   0   0     55
+7       0   0   0   0   0  59   0   0   0   0     59
+8       0   0   0   0   0   0   0  69   0   0     69
+> build · gpt-6.1-terra
+[0m% [0mPatch 1 file 
+> build · gpt-6.1-terra
+[0m$ [0muv run python lab1_check_store.py
+Rows: 723; distinct stores: 10
+Adjusted Rand index: 0.881108
+
+Days by cluster and store (aligned by row order):
+store     1   2   3   4   5   6   7   8   9  10  total
+cluster                                               
+0         0   0   0  65   0   0   0   0   0   0     65
+1        73   0   0   0   0   0   0   0   0  86    159
+2         0   0   0   0   0   0   0   0  77   0     77
+3         0   0   0   0  92   0   0   0   0   0     92
+4         0  57   0   0   0   0   0   0   0   0     57
+5         0   0   0   0   0   0  90   0   0   0     90
+6         0   0  55   0   0   0   0   0   0   0     55
+7         0   0   0   0   0  59   0   0   0   0     59
+8         0   0   0   0   0   0   0  69   0   0     69
+> build · gpt-6.1-terra
+沿用先前的 **9 群**進行事後驗證，得到 **ARI = 0.881108**。分群與店別的吻合度高，但不是完全一致：第 1 群混合了店 1 和店 10，因此不能用這個分群直接區分這兩家店。
+
+| 群 | 各店天數 |
+|---:|---|
+| 0 | 店 4：65 天 |
+| 1 | 店 1：73 天；店 10：86 天 |
+| 2 | 店 9：77 天 |
+| 3 | 店 5：92 天 |
+| 4 | 店 2：57 天 |
+| 5 | 店 7：90 天 |
+| 6 | 店 3：55 天 |
+| 7 | 店 6：59 天 |
+| 8 | 店 8：69 天 |
+
+**對照假設：**兩個檔案均有 723 列，本次按列順序配對；店別檔沒有可獨立確認配對的共同識別欄位。
+
+驗證程式存於 [lab1_check_store.py](lab1_check_store.py)，店別僅用於分群後計算 ARI 和交叉表。先前建議維持不變。
