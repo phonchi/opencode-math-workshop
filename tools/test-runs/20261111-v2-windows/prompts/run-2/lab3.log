@@ -1,0 +1,254 @@
+
+> build · big-pickle
+→ Read data/loans_new_batch.csv [limit=5]
+→ Read data/loans.csv [limit=5]
+> build · big-pickle
+✱ Glob "**/*" 15 matches
+$ wc -l data/loans.csv data/loans_new_batch.csv
+901 data/loans.csv
+  301 data/loans_new_batch.csv
+ 1202 total
+> build · big-pickle
+→ Read pyproject.toml 
+→ Read lab2_auc.py 
+> build · big-pickle
+$ uv run python -c "
+import pandas as pd
+tr = pd.read_csv('data/loans.csv')
+te = pd.read_csv('data/loans_new_batch.csv')
+for name, df in [('train', tr), ('new', te)]:
+    print(name, df.shape)
+    print('NA:', df.isna().sum().to_dict())
+    print('dtypes:', df.dtypes.to_dict())
+    print('overdue rate:', df['overdue'].mean(), 'count:', df['overdue'].sum())
+    print('case_no duplicated:', df['case_no'].duplicated().sum())
+    print('case_no ranges:', df['case_no'].min(), df['case_no'].max())
+    print()
+print('overlap case_no:', len(set(tr.case_no) & set(te.case_no)))
+"
+train (900, 8)
+NA: {'case_no': 0, 'pages': 0, 'past_ontime_pct': 0, 'past_avg_days': 0, 'commute_min': 0, 'account_age_days': 0, 'book_age_years': 0, 'overdue': 0}
+dtypes: {'case_no': dtype('int64'), 'pages': dtype('int64'), 'past_ontime_pct': dtype('float64'), 'past_avg_days': dtype('float64'), 'commute_min': dtype('float64'), 'account_age_days': dtype('int64'), 'book_age_years': dtype('float64'), 'overdue': dtype('int64')}
+overdue rate: 0.07888888888888888 count: 71
+case_no duplicated: 0
+case_no ranges: 1 900
+
+new (300, 8)
+NA: {'case_no': 0, 'pages': 0, 'past_ontime_pct': 0, 'past_avg_days': 0, 'commute_min': 0, 'account_age_days': 0, 'book_age_years': 0, 'overdue': 0}
+dtypes: {'case_no': dtype('int64'), 'pages': dtype('int64'), 'past_ontime_pct': dtype('float64'), 'past_avg_days': dtype('float64'), 'commute_min': dtype('float64'), 'account_age_days': dtype('int64'), 'book_age_years': dtype('float64'), 'overdue': dtype('int64')}
+overdue rate: 0.043333333333333335 count: 13
+case_no duplicated: 0
+case_no ranges: 901 1200
+
+overlap case_no: 0
+> build · big-pickle
+→ Read lab2_pca.py 
+> build · big-pickle
+✱ Grep "font|savefig|rcParams" in lab1_cluster.py · 3 matches
+> build · big-pickle
+環境與資料都確認過了（訓練檔 900 筆、新批 300 筆、無遺漏值、兩檔 case_no 不重疊）。接著照 lab 風格寫 `lab3_loans_threshold.py`：
+← Write lab3_loans_threshold.py
+Created file successfully: lab3_loans_threshold.py
+> build · big-pickle
+← Edit lab3_loans_threshold.py
+Index: lab3_loans_threshold.py
+===================================================================
+--- lab3_loans_threshold.py
++++ lab3_loans_threshold.py
+@@ -78,9 +78,9 @@
+     print(f"新一批：{len(new)} 筆，逾期 {int(y_new.sum())} 筆（{y_new.mean():.1%}）")
+     print(f"特徵（{len(features)} 個，標準化後餵模型）：{'、'.join(features)}")
+     print(f"丟掉：case_no（你的指示）、overdue（只當標籤）\n")
+ 
+-    # ===== 交.extensions 叉驗證 AUC（只看模型能不能用，不做模型選擇）=====
++    # ===== 交叉驗證 AUC（只看模型能不能用，不做模型選擇）=====
+     cv = StratifiedKFold(n_splits=N_SPLITS, shuffle=True, random_state=RANDOM_STATE)
+     oof = np.zeros(len(y_train))
+     for tr_idx, te_idx in cv.split(X_train, y_train):
+         pipe = make_pipeline(StandardScaler(), make_model())
+
+> build · big-pickle
+$ uv run python lab3_loans_threshold.py
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+Font 'default' does not have a glyph for '\u2212' [U+2212], substituting with a dummy symbol.
+訓練檔：900 筆，逾期 71 筆（7.9%）
+新一批：300 筆，逾期 13 筆（4.3%）
+特徵（6 個，標準化後餵模型）：pages、past_ontime_pct、past_avg_days、commute_min、account_age_days、book_age_years
+丟掉：case_no（你的指示）、overdue（只當標籤）
+
+訓練檔 5 折分層交叉驗證 AUC（out-of-fold）：0.959
+訓練檔內樣本 AUC：0.965
+新一批 AUC：0.953
+新一批 P(逾期) 分布：min 0.0000／中位數 0.0057／90 分位 0.2280／max 0.9261
+
+係數（標準化尺度，正號 = 該欄越大 P(逾期) 越高）：
+  pages             +2.528
+  past_ontime_pct   -1.614
+  past_avg_days     +1.139
+  book_age_years    +0.649
+  account_age_days  -0.178
+  commute_min       -0.153
+  截距              -5.123
+
+== 門檻表（新一批 300 筆，逾期共 13 筆；預算：40 封/300 筆）==
+門檻    提醒數    抓到    漏掉    白提醒    提醒數 ≤ 40   
+----------------------------------------------------------
+0.5     11        5       8       6         是
+0.3     26        10      3       16        是
+0.2     34        11      2       23        是
+0.1     51        11      2       40        否（超預算）
+0.05    76        13      0       63        否（超預算）
+
+圖已存：figs\lab3_threshold_tradeoff.png
+> build · big-pickle
+跑成功了，先檢查圖有沒有字型問題：
+→ Read figs/lab3_threshold_tradeoff.png 
+> build · big-pickle
+我這邊看不了圖檔內容，但終端有 36 個 `U+2212`（數學負號）字型警告，代表對數軸刻度用 mathtext 畫不出減號。改成固定刻度、純文字標籤，不用 mathtext：
+✗ Edit lab3_loans_threshold.py failed
+Error: No changes to apply: oldString and newString are identical.
+> build · big-pickle
+剛剛編輯內容寫錯（新舊相同），改成在兩軸設定固定刻度與純文字標籤：
+← Edit lab3_loans_threshold.py
+Index: lab3_loans_threshold.py
+===================================================================
+--- lab3_loans_threshold.py
++++ lab3_loans_threshold.py
+@@ -168,8 +168,14 @@
+     ax2.set_ylabel("筆數")
+     ax2.set_title("門檻 vs 抓到／漏掉")
+     ax2.legend()
+ 
++    # 刻度用純文字標籤：log 軸的 mathtext 刻度會用到 U+2212，字型缺字會變成空框
++    for ax in (ax1, ax2):
++        ax.set_xticks(THRESHOLDS)
++        ax.set_xticklabels([f"{t:g}" for t in THRESHOLDS])
++        ax.minorticks_off()
++
+     fig.suptitle("logistic 迴歸在新一批（300 筆）的門檻取捨；門檻由你挑")
+     fig.tight_layout()
+     fig.savefig(FIG_PATH, dpi=150)
+     print(f"\n圖已存：{FIG_PATH}")
+
+> build · big-pickle
+$ uv run python lab3_loans_threshold.py
+訓練檔：900 筆，逾期 71 筆（7.9%）
+新一批：300 筆，逾期 13 筆（4.3%）
+特徵（6 個，標準化後餵模型）：pages、past_ontime_pct、past_avg_days、commute_min、account_age_days、book_age_years
+丟掉：case_no（你的指示）、overdue（只當標籤）
+
+訓練檔 5 折分層交叉驗證 AUC（out-of-fold）：0.959
+訓練檔內樣本 AUC：0.965
+新一批 AUC：0.953
+新一批 P(逾期) 分布：min 0.0000／中位數 0.0057／90 分位 0.2280／max 0.9261
+
+係數（標準化尺度，正號 = 該欄越大 P(逾期) 越高）：
+  pages             +2.528
+  past_ontime_pct   -1.614
+  past_avg_days     +1.139
+  book_age_years    +0.649
+  account_age_days  -0.178
+  commute_min       -0.153
+  截距              -5.123
+
+== 門檻表（新一批 300 筆，逾期共 13 筆；預算：40 封/300 筆）==
+門檻    提醒數    抓到    漏掉    白提醒    提醒數 ≤ 40   
+----------------------------------------------------------
+0.5     11        5       8       6         是
+0.3     26        10      3       16        是
+0.2     34        11      2       23        是
+0.1     51        11      2       40        否（超預算）
+0.05    76        13      0       63        否（超預算）
+
+圖已存：figs\lab3_threshold_tradeoff.png
+> build · big-pickle
+字型警告沒了。最後把決定清單和結果寫進 `notes/`：
+← Write notes/lab3_loans_decisions.md
+Created file successfully: notes/lab3_loans_decisions.md
+> build · big-pickle
+← Edit notes/lab3_loans_decisions.md
+Index: notes/lab3_loans_decisions.md
+===================================================================
+--- notes/lab3_loans_decisions.md
++++ notes/lab3_loans_decisions.md
+@@ -62,5 +62,6 @@
+ 
+ - 只有 0.05 能把 13 筆逾期全部抓到，但 76 封超過預算（40 封）近一倍。
+ - 0.1 與 0.2 抓到數相同（11）、漏掉數相同（2），差別只在 0.1 多寄 17 封
+   全部是白提醒——0.2 在兩個門檻之間是「多寄不會少漏」的保守端。
+-- 預算內（≤40 封）的門檻中，最低可漏到 2 筆（0.2 與 0.3 都是 3、0.2 是 2）。
++- 預算內（≤40 封）的三個門檻中，漏掉最少的是 0.2（漏 2 筆）；0.3 漏 3、
++  0.5 漏 8。要 0 漏掉只能靠 0.05，且代價是 76 封、超預算 36 封。
+
+> build · big-pickle
+完成。`lab3_loans_threshold.py`（模型訓練＋門檻表）與 `notes/lab3_loans_decisions.md`（決定清單）都寫好了。
+
+## 門檻表（新一批 300 筆，逾期共 13 筆，預算 40 封／300 筆）
+
+| 門檻 | 提醒數 | 抓到 | 漏掉 | 白提醒 | 提醒數 ≤ 40？ |
+|---|---|---|---|---|---|
+| 0.5 | 11 | 5 | 8 | 6 | 是 |
+| 0.3 | 26 | 10 | 3 | 16 | 是 |
+| 0.2 | 34 | 11 | 2 | 23 | 是 |
+| 0.1 | 51 | 11 | 2 | 40 | 否（超預算） |
+| 0.05 | 76 | 13 | 0 | 63 | 否（超預算） |
+
+模型概況：5 折交叉驗證 AUC 0.959、新一批 AUC 0.953。`pages`（+2.53）和 `past_ontime_pct`（−1.61）是最強的兩個訊號。
+
+## 我替你做的每個決定
+
+**丟掉的欄位**
+- `case_no`：你的指示（流水號，不是特徵）；`overdue` 只當標籤。
+- 其餘 6 個數值欄位全部保留，沒做特徵篩選、沒有合成或交互欄位。
+
+**前處理**
+- 兩檔都無遺漏值、無重複列（已檢查），所以不插補、不刪列。
+- 特徵標準化，`StandardScaler` 只用訓練檔 fit、新批套同一轉換（不讓新批資訊漏進模型）。
+
+**模型設定**
+- `LogisticRegression` 全用 sklearn 預設（L2、C=1.0、lbfgs），只設 `max_iter=1000` 確保收斂，不調參。
+- **沒有**用 `class_weight` 或重取樣：機率維持訓練檔盛行率（7.9%）的校準。注意新一批實際逾期率只有 4.3%，所以整批預測機率會略偏高。若改用 `class_weight="balanced"`，各門檻數字會整個移動——你要的話我可以加一組對照。
+
+**準則**
+- 提醒 = $\hat P(\text{逾期}) \ge$ 門檻就寄信（用 $\ge$；實際上沒有機率正好落在門檻上，$\ge$/$>$ 無差）。
+- 指標定義：抓到＝逾期且寄信、漏掉＝逾期沒寄、白提醒＝沒逾期卻寄；每列已驗算 抓到＋漏掉＝13、抓到＋白提醒＝提醒數。
+- 900 筆全拿去訓練（不切驗證集）；交叉驗證只拿來報 AUC，沒回頭改模型。
+
+**門檻**
+- 只算你指定的五個，不替你選。表中的「提醒數 ≤ 40？」只是對照你的預算，不是建議。
+
+兩個可能影響你判斷的事實（不是結論）：0.1 和 0.2 的抓到、漏掉完全相同（11、2），差別只在 0.1 多寄的 17 封全是白提醒；預算內漏最少的門檻漏 2 筆。圖在 `figs/lab3_threshold_tradeoff.png`。

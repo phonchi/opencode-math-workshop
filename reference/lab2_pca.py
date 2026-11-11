@@ -12,9 +12,18 @@ from sklearn.model_selection import cross_val_predict
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-DATA = Path(__file__).resolve().parents[1] / "assets" / "data"
-X = np.genfromtxt(DATA / "orders.csv", delimiter=",", skip_header=1)
-complaint = np.genfromtxt(DATA / "reveal" / "orders_complaint.csv", delimiter=",", skip_header=1)
+
+def data_file(name, reveal=False):
+    """先找學生專案的 data/，再找教材 repo 的 assets/data/。"""
+    repo = Path(__file__).resolve().parents[1] / "assets" / "data"
+    for p in (Path("data") / name, (repo / "reveal" if reveal else repo) / name):
+        if p.exists():
+            return p
+    raise FileNotFoundError(f"找不到 {name}，請先把它下載到 data/")
+
+
+X = np.genfromtxt(data_file("orders.csv"), delimiter=",", skip_header=1)
+complaint = np.genfromtxt(data_file("orders_complaint.csv", reveal=True), delimiter=",", skip_header=1)
 K = 3
 
 

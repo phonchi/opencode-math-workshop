@@ -1,0 +1,71 @@
+
+> build · big-pickle
+了解，我會把 bug 注入點做在「手刻 PCA 流程」裡，檢查的算式、門檻、數量完全不動，五種模式各跑一次後彙整成表。
+← Write lab2_pca.py
+Wrote file successfully: lab2_pca.py
+> build · big-pickle
+! retrying (attempt 2): Timed out waiting for response headers
+! retrying (attempt 3): Timed out waiting for response headers
+! retrying (attempt 4): Timed out waiting for response headers
+寫到一半的檔案內容有誤（截斷且含錯誤 import），立即用完整正確版覆蓋：
+← Write lab2_pca.py
+Wrote file successfully: lab2_pca.py
+> build · big-pickle
+$ uv run python lab2_pca.py
+資料：data\orders.csv，800 筆 × 11 欄
+前處理：每欄除以樣本標準差（ddof=1），不減平均；中心化由 PCA 內部處理
+手刻：eigh 於樣本共變異數矩陣；對照：sklearn PCA(n_components=4, svd_solver='full')
+bug 模式：none、ratio_topk、denom_n、no_center、rows（只注入不修；檢查定義與門檻不變）
+
+== 檢查清單（名稱｜門檻；各 bug 共用同一組檢查與門檻）==
+ 1. 輸入資料完整（無 NaN／非數值／零變異欄位 → 不丟欄位）｜門檻：三者皆 = 0
+ 2. 共變異數矩陣半正定（最小特徵值 ≥ 0，容許浮點負值）｜門檻：≥ -1e-10
+ 3. 頻譜完整：Σλ（全部 11 個特徵值）= trace(C)｜門檻：< 1e-12
+ 4. 縮放自洽：trace(C) = 欄數（每欄除以樣本標準差後變異數恰為 1）｜門檻：< 1e-10
+ 5. 特徵值 = sklearn explained_variance_（前 4 個）｜門檻：< 1e-10
+ 6. 變異解釋比 = sklearn explained_variance_ratio_（前 4 個）｜門檻：< 1e-10
+ 7. 負載向量 = sklearn components_（對齊正負號後）｜門檻：< 1e-08
+ 8. 投影分數 = sklearn transform()（對齊正負號後）｜門檻：< 1e-08
+ 9. 負載正交：WᵀW = I₄（主成分軸互相垂直且單位長）｜門檻：< 1e-10
+10. PCA 定義性質：第 k 個主成分分數的樣本變異數 = λ_k（不依賴 sklearn）｜門檻：< 1e-10
+
+== 檢查 × 錯誤 表（每格：實際數值 PASS/FAIL）==
+檢查                              none      ratio_topk         denom_n       no_center            rows
+------------------------------------------------------------------------------------------------------
+1 資料完整                      0 PASS          0 PASS          0 PASS          0 PASS          0 PASS
+2 半正定 min(λ)            0.0237 PASS     0.0237 PASS     0.0237 PASS      0.024 PASS     0.0237 PASS
+3 Σλ = trace                    0 PASS          0 PASS   1.62e-16 PASS    4.7e-16 PASS          0 PASS
+4 trace = 11                    0 PASS          0 PASS    0.00125 FAIL        263 FAIL          0 PASS
+5 λ vs sklearn           1.58e-15 PASS   1.58e-15 PASS    0.00125 FAIL        821 FAIL   1.58e-15 PASS
+6 解釋比 vs sklearn      4.44e-16 PASS     0.0615 FAIL   6.66e-16 PASS      0.677 FAIL   4.44e-16 PASS
+7 負載 vs sklearn        1.33e-15 PASS   1.33e-15 PASS   1.22e-15 PASS       0.87 FAIL        0.8 FAIL
+8 分數 vs sklearn        1.18e-14 PASS   1.18e-14 PASS    1.2e-14 PASS       59.1 FAIL       5.82 FAIL
+9 正交 WᵀW = I           7.77e-16 PASS   7.77e-16 PASS   1.33e-15 PASS   7.77e-16 PASS   1.11e-15 PASS
+10 變異數 = λ            1.97e-15 PASS   1.97e-15 PASS    0.00125 FAIL          1 FAIL      0.686 FAIL
+------------------------------------------------------------------------------------------------------
+PASS 合計                        10/10            9/10            7/10            4/10            7/10
+> build · big-pickle
+表做好了，輸出如上（`uv run python lab2_pca.py`）。依規則：bug 只注入、沒修；10 項檢查的算式、名稱、門檻全部原封不動；沒有新增檢查。
+
+## 表的讀法（各 bug 被哪些檢查抓到）
+
+| bug | FAIL 的檢查 | 訊號 |
+|---|---|---|
+| none | 無 | 10/10 PASS |
+| ratio_topk | 6 | 只有解釋比錯（分母變 9.23 而非 11，PC1 差 0.0615） |
+| denom_n | 4、5、10 | 一致地錯 1/800 ≈ 0.00125（整條譜等比縮小） |
+| no_center | 4、5、6、7、8、10 | 最慘：λ 暴增到 ~2900（縮放後欄平均很大，二階動差矩陣被平均向量主導）、分數差 59.1 |
+| rows | 7、8、10 | 負載、分數全錯，但 λ 正確 |
+
+有趣的兩個盲點（這是表告訴我們的，我沒動任何東西）：
+- **檢查 9（正交）全部 PASS**：取「列」時，正交矩陣的列依然單位正交，所以單靠正交性抓不到 rows 這種 bug。
+- **檢查 3（Σλ = trace）全部 PASS**：它只驗證 eigh 吃到完整頻譜，對前處理和方向錯誤不敏感。
+
+## 替你做的實作決定（bug 注入點的解釋）
+
+1. **rows**：取「降冪排序後特徵向量矩陣」的前 4 列，轉置成 (11, 4) 當負載矩陣 W（讓 `Xc @ W` 維度仍可運算）；λ 仍取前 4 個特徵值——bug 只在方向選取。
+2. **no_center**：中心化是流程中單一步驟，跳過它後共變異數矩陣 C 和投影分數 Z 都用未中心化的縮放矩陣。
+3. **denom_n**：只改 C 的分母（n−1 → n），λ、ratio 隨之連動。
+4. **sklearn 對照組在每種 bug 下都維持正確**（bug 只注入手刻路徑），所以檢查 5–8 的對照才有意義。
+5. 檢查 1 在所有 bug 下都 PASS 是預期的——它驗的是輸入資料，五種跑法讀同一份資料。
+6. 輸出從「逐行印」改成「先收集結果、再印檢查 × 錯誤表」（含完整檢查清單與門檻的 legend），檢查邏輯本身一字未改；原本「有 FAIL 就非零結碼」的驅動行為移除了，因為 bug 模式本來就預期會 FAIL。

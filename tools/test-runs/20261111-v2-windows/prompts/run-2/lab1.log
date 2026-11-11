@@ -1,0 +1,444 @@
+
+> build · big-pickle
+→ Read data/shops_daily.csv [limit=5]
+$ uv run python -c "import pandas, sklearn, matplotlib; print(pandas.__version__, sklearn.__version__, matplotlib.__version__)"
+3.1.1 1.9.1 3.11.2
+> build · big-pickle
+$ uv run python -c "
+import pandas as pd
+df = pd.read_csv('data/shops_daily.csv')
+print(df.shape)
+print(df.describe().T)
+print(df.isna().sum().sum())
+print(df.dtypes)
+"
+(723, 8)
+                count          mean  ...        75%        max
+revenue_ntd     723.0  43075.135546  ...  52924.000  57612.000
+cups_sold       723.0    647.520055  ...    758.000    832.000
+topping_share   723.0      0.292297  ...      0.316      0.452
+wait_min        723.0      8.773154  ...     10.140     12.480
+delivery_share  723.0      0.349173  ...      0.482      0.530
+rating          723.0      4.232071  ...      4.354      4.456
+open_hours      723.0     12.000000  ...     12.000     12.000
+menu_version    723.0      3.000000  ...      3.000      3.000
+
+[8 rows x 8 columns]
+0
+revenue_ntd         int64
+cups_sold           int64
+topping_share     float64
+wait_min          float64
+delivery_share    float64
+rating            float64
+open_hours          int64
+menu_version        int64
+dtype: object
+> build · big-pickle
+資料確認：723 列 × 8 欄，無遺漏值；`open_hours` 和 `menu_version` 是常數欄（標準差 = 0）。接著寫分析腳本。
+← Write lab1_cluster.py
+Created file successfully: lab1_cluster.py
+> build · big-pickle
+$ uv run python lab1_cluster.py
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 65288 (\N{FULLWIDTH LEFT PARENTHESIS}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 32676 (\N{CJK UNIFIED IDEOGRAPH-7FA4}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 25976 (\N{CJK UNIFIED IDEOGRAPH-6578}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 65289 (\N{FULLWIDTH RIGHT PARENTHESIS}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 36234 (\N{CJK UNIFIED IDEOGRAPH-8D8A}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 22823 (\N{CJK UNIFIED IDEOGRAPH-5927}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 22909 (\N{CJK UNIFIED IDEOGRAPH-597D}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 26368 (\N{CJK UNIFIED IDEOGRAPH-6700}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 20339 (\N{CJK UNIFIED IDEOGRAPH-4F73}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 23567 (\N{CJK UNIFIED IDEOGRAPH-5C0F}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 20998 (\N{CJK UNIFIED IDEOGRAPH-5206}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 65306 (\N{FULLWIDTH COLON}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 30340 (\N{CJK UNIFIED IDEOGRAPH-7684}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 36984 (\N{CJK UNIFIED IDEOGRAPH-9078}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 25799 (\N{CJK UNIFIED IDEOGRAPH-64C7}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 19977 (\N{CJK UNIFIED IDEOGRAPH-4E09}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 20491 (\N{CJK UNIFIED IDEOGRAPH-500B}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 20839 (\N{CJK UNIFIED IDEOGRAPH-5167}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 37096 (\N{CJK UNIFIED IDEOGRAPH-90E8}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 25351 (\N{CJK UNIFIED IDEOGRAPH-6307}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 27161 (\N{CJK UNIFIED IDEOGRAPH-6A19}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 65292 (\N{FULLWIDTH COMMA}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 19981 (\N{CJK UNIFIED IDEOGRAPH-4E0D}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 30475 (\N{CJK UNIFIED IDEOGRAPH-770B}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 24215 (\N{CJK UNIFIED IDEOGRAPH-5E97}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:108: UserWarning: Glyph 21029 (\N{CJK UNIFIED IDEOGRAPH-5225}) missing from font(s) DejaVu Sans.
+  fig.tight_layout(rect=(0, 0, 1, 0.94))
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 65288 (\N{FULLWIDTH LEFT PARENTHESIS}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 36234 (\N{CJK UNIFIED IDEOGRAPH-8D8A}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 22823 (\N{CJK UNIFIED IDEOGRAPH-5927}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 22909 (\N{CJK UNIFIED IDEOGRAPH-597D}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 65289 (\N{FULLWIDTH RIGHT PARENTHESIS}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 32676 (\N{CJK UNIFIED IDEOGRAPH-7FA4}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 25976 (\N{CJK UNIFIED IDEOGRAPH-6578}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 26368 (\N{CJK UNIFIED IDEOGRAPH-6700}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 20339 (\N{CJK UNIFIED IDEOGRAPH-4F73}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 23567 (\N{CJK UNIFIED IDEOGRAPH-5C0F}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 20998 (\N{CJK UNIFIED IDEOGRAPH-5206}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 65306 (\N{FULLWIDTH COLON}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 30340 (\N{CJK UNIFIED IDEOGRAPH-7684}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 36984 (\N{CJK UNIFIED IDEOGRAPH-9078}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 25799 (\N{CJK UNIFIED IDEOGRAPH-64C7}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 19977 (\N{CJK UNIFIED IDEOGRAPH-4E09}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 20491 (\N{CJK UNIFIED IDEOGRAPH-500B}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 20839 (\N{CJK UNIFIED IDEOGRAPH-5167}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 37096 (\N{CJK UNIFIED IDEOGRAPH-90E8}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 25351 (\N{CJK UNIFIED IDEOGRAPH-6307}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 27161 (\N{CJK UNIFIED IDEOGRAPH-6A19}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 65292 (\N{FULLWIDTH COMMA}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 19981 (\N{CJK UNIFIED IDEOGRAPH-4E0D}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 30475 (\N{CJK UNIFIED IDEOGRAPH-770B}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 24215 (\N{CJK UNIFIED IDEOGRAPH-5E97}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+C:\Users\User\AppData\Local\Temp\ai-math-lab-v2-run2\lab1_cluster.py:111: UserWarning: Glyph 21029 (\N{CJK UNIFIED IDEOGRAPH-5225}) missing from font(s) DejaVu Sans.
+  fig.savefig(FIG_PATH, dpi=150)
+資料筆數: 723
+丟掉的欄位（標準差 = 0）: ['open_hours', 'menu_version']
+保留並標準化的欄位: ['revenue_ntd', 'cups_sold', 'topping_share', 'wait_min', 'delivery_share', 'rating']
+
+  k  silhouette       CH     DB  各群筆數
+-------------------------------------
+  2      0.4212    502.5  1.110  [409, 314]
+  3      0.4569    480.8  0.941  [350, 237, 136]
+  4      0.5356    574.4  0.803  [65, 285, 237, 136]
+  5      0.5747    629.3  0.703  [57, 237, 228, 136, 65]
+  6      0.6156    778.6  0.643  [65, 228, 90, 136, 147, 57]
+  7      0.6702   1048.3  0.598  [147, 65, 159, 90, 126, 59, 77]
+  8      0.7470   1880.7  0.474  [90, 126, 59, 92, 77, 65, 159, 55]
+  9      0.7942   4726.1  0.274  [65, 159, 77, 92, 57, 90, 55, 59, 69]
+ 10      0.7252   4956.0  0.404  [65, 85, 77, 92, 57, 90, 55, 59, 69, 74]
+ 11      0.6407   4561.7  0.698  [65, 85, 77, 48, 57, 90, 55, 59, 69, 74, 44]
+ 12      0.6110   4228.9  0.843  [28, 92, 59, 65, 77, 55, 57, 55, 69, 71, 35, 60]
+
+silhouette 最高（越大越好）: k=9 (0.7942)
+Calinski-Harabasz 最高（越大越好）: k=10 (4956.0)
+Davies-Bouldin 最低（越小越好）: k=9 (0.274)
+
+圖已存到 figs/lab1_k_selection.png
+> build · big-pickle
+腳本跑通了，三個指標都集中在 k=9~10。不過圖有中文字型缺字的警告（DejaVu Sans 沒有 CJK），先修字型，再順手檢查 k=9 和 k=10 的差異（k=10 只是把 k=9 最大的那群 159 筆拆成 85+74，這對回答 A、B 很關鍵）。
+← Edit lab1_cluster.py
+Index: lab1_cluster.py
+===================================================================
+--- lab1_cluster.py
++++ lab1_cluster.py
+@@ -16,8 +16,12 @@
+ 
+ import matplotlib
+ matplotlib.use("Agg")
+ import matplotlib.pyplot as plt
++
++# Windows 上沒有 CJK 字型的話，中文會變成方框
++plt.rcParams["font.sans-serif"] = ["Microsoft JhengHei", "SimHei", "DejaVu Sans"]
++plt.rcParams["axes.unicode_minus"] = False
+ import numpy as np
+ import pandas as pd
+ from sklearn.cluster import KMeans
+ from sklearn.metrics import (
+
+> build · big-pickle
+$ uv run python lab1_cluster.py
+資料筆數: 723
+丟掉的欄位（標準差 = 0）: ['open_hours', 'menu_version']
+保留並標準化的欄位: ['revenue_ntd', 'cups_sold', 'topping_share', 'wait_min', 'delivery_share', 'rating']
+
+  k  silhouette       CH     DB  各群筆數
+-------------------------------------
+  2      0.4212    502.5  1.110  [409, 314]
+  3      0.4569    480.8  0.941  [350, 237, 136]
+  4      0.5356    574.4  0.803  [65, 285, 237, 136]
+  5      0.5747    629.3  0.703  [57, 237, 228, 136, 65]
+  6      0.6156    778.6  0.643  [65, 228, 90, 136, 147, 57]
+  7      0.6702   1048.3  0.598  [147, 65, 159, 90, 126, 59, 77]
+  8      0.7470   1880.7  0.474  [90, 126, 59, 92, 77, 65, 159, 55]
+  9      0.7942   4726.1  0.274  [65, 159, 77, 92, 57, 90, 55, 59, 69]
+ 10      0.7252   4956.0  0.404  [65, 85, 77, 92, 57, 90, 55, 59, 69, 74]
+ 11      0.6407   4561.7  0.698  [65, 85, 77, 48, 57, 90, 55, 59, 69, 74, 44]
+ 12      0.6110   4228.9  0.843  [28, 92, 59, 65, 77, 55, 57, 55, 69, 71, 35, 60]
+
+silhouette 最高（越大越好）: k=9 (0.7942)
+Calinski-Harabasz 最高（越大越好）: k=10 (4956.0)
+Davies-Bouldin 最低（越小越好）: k=9 (0.274)
+
+圖已存到 figs/lab1_k_selection.png
+> build · big-pickle
+字型警告消失了。確認圖片內容，同時檢查 k=9 最大群（159 筆）內部是不是其實藏了兩家店。
+→ Read figs/lab1_k_selection.png 
+$ uv run python - <<'EOF'
+import numpy as np
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score, silhouette_samples
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv('data/shops_daily.csv')
+X = StandardScaler().fit_transform(df)
+
+# k=9 解
+lab9 = KMeans(9, random_state=0, n_init=10).fit_predict(X)
+sizes = np.bincount(lab9)
+big = sizes.argmax()
+print('k=9 各群大小:', sizes.tolist())
+print('最大群 label =', big, '大小 =', sizes[big])
+
+# 每群平均 silhouette + 群內到質心的 RMS 距離
+sil_samples = silhouette_samples(X, lab9)
+for c in range(9):
+    m = lab9 == c
+    cent = X[m].mean(axis=0)
+    rms = np.sqrt(((X[m] - cent) ** 2).sum(axis=1).mean())
+    print(f'群 {c}: n={m.sum():3d}  內部RMS={rms:.3f}  平均silhouette={sil_samples[m].mean():.3f}')
+
+# 把最大群抽出來，看它再拆 2 群的情形
+sub = X[lab9 == big]
+for k in (2, 3):
+    s_lab = KMeans(k, random_state=0, n_init=10).fit_predict(sub)
+    sil = silhouette_score(sub, s_lab)
+    print(f'最大群內部再分 k={k}: silhouette={sil:.3f}, 大小={np.bincount(s_lab).tolist()}')
+
+# k=10 對不同 random_state 的穩定性（大小分布）
+for rs in range(5):
+    lab10 = KMeans(10, random_state=rs, n_init=10).fit_predict(X)
+    print(f'k=10, random_state={rs}: 大小={sorted(np.bincount(lab10).tolist())}')
+EOF
+k=9 各群大小: [65, 159, 77, 92, 57, 90, 55, 59, 69]
+最大群 label = 1 大小 = 159
+群 0: n= 65  內部RMS=0.297  平均silhouette=0.864
+群 1: n=159  內部RMS=0.401  平均silhouette=0.706
+群 2: n= 77  內部RMS=0.327  平均silhouette=0.814
+群 3: n= 92  內部RMS=0.300  平均silhouette=0.826
+群 4: n= 57  內部RMS=0.321  平均silhouette=0.799
+群 5: n= 90  內部RMS=0.310  平均silhouette=0.817
+群 6: n= 55  內部RMS=0.323  平均silhouette=0.827
+群 7: n= 59  內部RMS=0.315  平均silhouette=0.836
+群 8: n= 69  內部RMS=0.306  平均silhouette=0.772
+最大群內部再分 k=2: silhouette=0.397, 大小=[85, 74]
+最大群內部再分 k=3: silhouette=0.247, 大小=[61, 29, 69]
+k=10, random_state=0: 大小=[55, 57, 59, 65, 69, 74, 77, 85, 90, 92]
+k=10, random_state=1: 大小=[55, 57, 59, 65, 69, 74, 77, 85, 90, 92]
+k=10, random_state=2: 大小=[55, 57, 59, 65, 69, 74, 77, 85, 90, 92]
+k=10, random_state=3: 大小=[55, 57, 59, 65, 69, 74, 77, 85, 90, 92]
+k=10, random_state=4: 大小=[55, 57, 59, 65, 69, 74, 77, 85, 90, 92]
+> build · big-pickle
+$ uv run python - <<'EOF'
+import numpy as np
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv('data/shops_daily.csv')
+X = StandardScaler().fit_transform(df)
+feat = [c for c in df.columns if df[c].std() > 0]
+
+lab10 = KMeans(10, random_state=0, n_init=10).fit_predict(X)
+cent10 = np.array([X[lab10 == c].mean(axis=0) for c in range(10)])
+
+# 所有群對之間的質心距離
+from itertools import combinations
+dists = [np.linalg.norm(cent10[i] - cent10[j]) for i, j in combinations(range(10), 2)]
+dists = np.sort(dists)
+print('k=10 質心間距離：最小5個 =', np.round(dists[:5], 3), ' 中位數 =', round(np.median(dists), 3))
+
+# 最小的那對是誰（應該就是 85/74 那對）
+i, j = min(combinations(range(10), 2), key=lambda p: np.linalg.norm(cent10[p[0]] - cent10[p[1]]))
+print(f'最相近兩群: 群{i}(n={np.sum(lab10==i)}) 與 群{j}(n={np.sum(lab10==j)}), 距離 = {np.linalg.norm(cent10[i]-cent10[j]):.3f}')
+print('這兩群各欄質心差（標準化單位）:')
+for f, a, b in zip(feat, cent10[i], cent10[j]):
+    print(f'  {f:16s} {a:7.3f} vs {b:7.3f}  差 {a-b:+.3f}')
+
+# 群內 RMS（每點到質心的距離 RMS）— 拆開後有沒有變「正常」
+for c in range(10):
+    m = lab10 == c
+    rms = np.sqrt(((X[m] - cent10[c]) ** 2).sum(axis=1).mean())
+    print(f'群 {c}: n={m.sum():3d}  內部RMS={rms:.3f}')
+EOF
+k=10 質心間距離：最小5個 = [0.554 1.694 1.864 2.141 2.318]  中位數 = 3.714
+最相近兩群: 群1(n=85) 與 群9(n=74), 距離 = 0.554
+這兩群各欄質心差（標準化單位）:
+  revenue_ntd        1.112 vs   0.987  差 +0.125
+  cups_sold          0.800 vs   0.828  差 -0.028
+  topping_share     -0.207 vs  -0.402  差 +0.194
+  wait_min           1.546 vs   1.253  差 +0.293
+  delivery_share     1.135 vs   1.278  差 -0.143
+  rating            -0.781 vs  -0.398  差 -0.383
+群 0: n= 65  內部RMS=0.297
+群 1: n= 85  內部RMS=0.295
+群 2: n= 77  內部RMS=0.327
+群 3: n= 92  內部RMS=0.300
+群 4: n= 57  內部RMS=0.321
+群 5: n= 90  內部RMS=0.310
+群 6: n= 55  內部RMS=0.323
+群 7: n= 59  內部RMS=0.315
+群 8: n= 69  內部RMS=0.306
+群 9: n= 74  內部RMS=0.286
+> build · big-pickle
+$ ls -la figs/
+total 96
+drwxr-xr-x 1 User 197121     0 十一月 11 13:31 .
+drwxr-xr-x 1 User 197121     0 十一月 11 13:31 ..
+-rw-r--r-- 1 User 197121 92022 十一月 11 13:32 lab1_k_selection.png
+> build · big-pickle
+圖與表格都完成了。為了讓 A、B 的答案有依據且可重現，我在腳本加一小段輔助診斷（k=9 vs k=10 的群內緊密度與質心間距離）。
+← Edit lab1_cluster.py
+Index: lab1_cluster.py
+===================================================================
+--- lab1_cluster.py
++++ lab1_cluster.py
+@@ -86,8 +86,27 @@
+     print(f"silhouette 最高（越大越好）: k={best_sil['k']} ({best_sil['silhouette']:.4f})")
+     print(f"Calinski-Harabasz 最高（越大越好）: k={best_ch['k']} ({best_ch['ch']:.1f})")
+     print(f"Davies-Bouldin 最低（越小越好）: k={best_db['k']} ({best_db['db']:.3f})")
+ 
++    # ---- 輔助診斷（回答手冊／客訴兩種用途的 k 用）----
++    # 1) 各群內部 RMS（每點到自己群質心的距離）：某群特別大 → 裡面可能藏了兩家店。
++    # 2) k=10 質心兩兩距離：看最小那對和其他對差多少（近似雙胞胎店）。
++    from itertools import combinations
++
++    for kk in (9, 10):
++        km = KMeans(n_clusters=kk, random_state=0, n_init=10).fit(X)
++        rms = [
++            round(float(np.sqrt(((X[km.labels_ == c] - km.cluster_centers_[c]) ** 2).sum(axis=1).mean())), 3)
++            for c in range(kk)
++        ]
++        pair_d = sorted(
++            round(float(np.linalg.norm(km.cluster_centers_[i] - km.cluster_centers_[j])), 3)
++            for i, j in combinations(range(kk), 2)
++        )
++        print(f"\n[k={kk}] 各群內部 RMS: {rms}")
++        if kk == 10:
++            print(f"[k=10] 質心間距離最小 3 對: {pair_d[:3]}，中位數: {pair_d[len(pair_d) // 2]}")
++
+     # 畫圖：三個指標各自一個子圖（尺度不同，不硬疊在同一軸）
+     ks = [r["k"] for r in results]
+     fig, axes = plt.subplots(1, 3, figsize=(13, 4), sharex=True)
+ 
+
+> build · big-pickle
+$ uv run python lab1_cluster.py
+資料筆數: 723
+丟掉的欄位（標準差 = 0）: ['open_hours', 'menu_version']
+保留並標準化的欄位: ['revenue_ntd', 'cups_sold', 'topping_share', 'wait_min', 'delivery_share', 'rating']
+
+  k  silhouette       CH     DB  各群筆數
+-------------------------------------
+  2      0.4212    502.5  1.110  [409, 314]
+  3      0.4569    480.8  0.941  [350, 237, 136]
+  4      0.5356    574.4  0.803  [65, 285, 237, 136]
+  5      0.5747    629.3  0.703  [57, 237, 228, 136, 65]
+  6      0.6156    778.6  0.643  [65, 228, 90, 136, 147, 57]
+  7      0.6702   1048.3  0.598  [147, 65, 159, 90, 126, 59, 77]
+  8      0.7470   1880.7  0.474  [90, 126, 59, 92, 77, 65, 159, 55]
+  9      0.7942   4726.1  0.274  [65, 159, 77, 92, 57, 90, 55, 59, 69]
+ 10      0.7252   4956.0  0.404  [65, 85, 77, 92, 57, 90, 55, 59, 69, 74]
+ 11      0.6407   4561.7  0.698  [65, 85, 77, 48, 57, 90, 55, 59, 69, 74, 44]
+ 12      0.6110   4228.9  0.843  [28, 92, 59, 65, 77, 55, 57, 55, 69, 71, 35, 60]
+
+silhouette 最高（越大越好）: k=9 (0.7942)
+Calinski-Harabasz 最高（越大越好）: k=10 (4956.0)
+Davies-Bouldin 最低（越小越好）: k=9 (0.274)
+
+[k=9] 各群內部 RMS: [0.297, 0.401, 0.327, 0.3, 0.321, 0.31, 0.323, 0.315, 0.306]
+
+[k=10] 各群內部 RMS: [0.297, 0.295, 0.327, 0.3, 0.321, 0.31, 0.323, 0.315, 0.306, 0.286]
+[k=10] 質心間距離最小 3 對: [0.554, 1.694, 1.864]，中位數: 3.714
+
+圖已存到 figs/lab1_k_selection.png
+> build · big-pickle
+完成。程式在 `lab1_cluster.py`，圖在 `figs/lab1_k_selection.png`。
+
+## 結果總覽
+
+| k | silhouette ↑ | CH ↑ | DB ↓ | 各群筆數 |
+|---|---|---|---|---|
+| 2 | 0.421 | 502.5 | 1.110 | 409, 314 |
+| 3 | 0.457 | 480.8 | 0.941 | 350, 237, 136 |
+| 4 | 0.536 | 574.4 | 0.803 | 65, 285, 237, 136 |
+| 5 | 0.575 | 629.3 | 0.703 | 57, 237, 228, 136, 65 |
+| 6 | 0.616 | 778.6 | 0.643 | 65, 228, 90, 136, 147, 57 |
+| 7 | 0.670 | 1048.3 | 0.598 | 147, 65, 159, 90, 126, 59, 77 |
+| 8 | 0.747 | 1880.7 | 0.474 | 90, 126, 59, 92, 77, 65, 159, 55 |
+| **9** | **0.794** | 4726.1 | **0.274** | 65, **159**, 77, 92, 57, 90, 55, 59, 69 |
+| **10** | 0.725 | **4956.0** | 0.404 | 65, 85, 77, 92, 57, 90, 55, 59, 69, 74 |
+| 11 | 0.641 | 4561.7 | 0.698 | 65, 85, 77, 48, 57, 90, 55, 59, 69, 74, 44 |
+| 12 | 0.611 | 4228.9 | 0.843 | 28, 92, 59, 65, 77, 55, 57, 55, 69, 71, 35, 60 |
+
+三個指標都集中在 k = 9~10。關鍵在於 k=9 那個 159 筆的大群：
+
+- k=9 時它的**內部 RMS = 0.401**，其他 8 群都是 0.30~0.33（異常鬆，代表裡面其實是兩家店）。
+- 拆成 k=10 的 85+74 兩群後，內部 RMS 變成 0.295 / 0.286，跟其他群一致；這兩群質心只距離 **0.55**，而其他任何兩群至少距離 1.69（中位數 3.71）→ 資料裡有 10 團很緊的點雲，其中兩家是「近似雙胞胎店」。
+- k=11 以上指標全面變差，且是在單一店內碎裂（如 92 → 48+44），不是再找到新店；k=10 的分群結果對 random_state 0~4 完全穩定。
+
+## A. 店型手冊（相近的店可以合併）：**9 群**
+
+silhouette（0.794）和 Davies-Bouldin（0.274）都在 k=9 最佳。k=9 唯一「合併」的對象，就是那兩家質心只差 0.55 的雙胞胎店——營收、杯數、外送比例幾乎一樣，主要差在 `rating`（-0.78 vs -0.40）和 `wait_min`（+1.55 vs +1.25），寫成同一頁手冊完全合理。再少（k≤8）指標就開始明顯變差，會把不相近的店也糊在一起。
+
+## B. 客訴回查（不同店不能混在一起）：**10 群**
+
+「寧可多分、不可混店」的原則下要取分得開的上限：k=9 會把兩家不同店關進同一群（就是那個 RMS 異常大的 159 筆群），直接違反需求。k=10 把所有群拆到緊密度一致（每群內部 RMS 都是 0.29~0.33）、CH 也在此最高（4956），且結果穩定。往 k=11、12 走只是把單一店撕成碎片，不會增加分店純度。
+
+## 我替你做的每個決定
+
+1. **丟掉的欄位**：`open_hours`、`menu_version`（全資料都是 12 和 3，標準差 = 0，對分群零資訊；先拿掉再標準化，如題目要求）。
+2. **標準化**：剩下的 6 個數值欄（`revenue_ntd`, `cups_sold`, `topping_share`, `wait_min`, `delivery_share`, `rating`）用 z-score；欄位尺度差很大（營收上萬、share 約 0.3），不標準化會讓營收獨大。
+3. **完全沒讀店別檔**：從頭到尾只開 `data/shops_daily.csv`。
+4. **KMeans 參數**：k = 2~12、`random_state=0`、`n_init=10`（如題目指定）；用全部 723 筆計算與評估（內部指標不需要切訓練/測試）。
+5. **指標方向**：silhouette、CH 越大越好；DB 越小越好。
+6. **A 的準則**：多數決（silhouette + DB 同指 k=9）＋「相近可合併」的容錯方向 → k=9。
+7. **B 的準則**：取「分得乾淨」的保守上限——輔助證據是各群內部 RMS 是否一致（k=9 有一群 0.401 是離群值，k=10 全部 0.29~0.33）、質心間最小距離 0.55 對下次小 1.69 的斷層、以及不同 random_state 的穩定性 → k=10。
+8. **沒有設硬性門檻**（例如 silhouette > 0.7 才算好）：資料的分群結構很清楚（高峰明顯），用相對比較就夠，硬門檻反而武斷。
+9. **圖的形式**：三個指標尺度差太多（CH 上千、DB < 1），所以畫成三個並排子圖而不是疊在同一軸，各用紅點標最佳 k；圖表中文用 Microsoft JhengHei（避免方框）。
+10. **輔助診斷**（k=9/k=10 的群內 RMS、質心間距離）直接寫進 `lab1_cluster.py` 尾段，讓 A/B 的結論可重現。
+
+一點小提醒：`read` 工具回報我這個模型看不了圖片內容，所以圖我只能就「程式無警告、正常輸出」確認，你打開 `figs/lab1_k_selection.png` 看一眼排版即可。

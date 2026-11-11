@@ -33,7 +33,7 @@ ls
 檢查環境：
 
 ```bash
-uv run python -c "import numpy, scipy, sklearn, matplotlib, networkx; print('環境 OK')"
+uv run python -c "import numpy, pandas, scipy, sklearn, matplotlib, networkx; print('環境 OK')"
 ```
 
 這個專案一律用 `uv run python 檔名.py` 執行程式，不要用 `python`、`python3`，也不要用 `pip install`。要加套件用 `uv add 套件名`。這條規則已經寫在專案的 `AGENTS.md` 裡；執行時仍請看一下它用的指令。
@@ -66,7 +66,7 @@ opencode run --auto "讀 pyproject.toml，用一句話說明這個專案裝了�
 }
 ```
 
-`big-pickle` 不用登入、不用 API key、不用信用卡。畫面下方會輪流顯示 Tip，例如 `Run /connect to add an AI provider and start coding`，**可以忽略**。只有額度用完、要換[備案模型](prep.html#backup-keys)時才需要 `/connect`。
+`big-pickle` 不用登入、不用 API key、不用信用卡。只有額度用完、要換[備案模型](prep.html#backup-keys)時才需要 `/connect`。
 
 ---
 
@@ -80,15 +80,13 @@ opencode run --auto "讀 pyproject.toml，用一句話說明這個專案裝了�
                               ▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
 
       ┃
-      ┃  Ask anything… "What is the tech stack of this project?"
+      ┃  Ask anything… "Fix broken tests"
       ┃
       ┃  Build · Big Pickle OpenCode
       ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-                                       tab agents  ctrl+p commands
+      ~/ai-math-lab            shift+tab agents  ctrl+p commands
 
-              ● Tip Run /connect to add an AI provider and start coding
-
-  /home/you/ai-math-lab                                          1.19.5
+                                                                  2.2.7
 ```
 
 由上往下看：
@@ -97,10 +95,10 @@ opencode run --auto "讀 pyproject.toml，用一句話說明這個專案裝了�
 |---|---|
 | `Ask anything…` | 輸入框。游標在這裡，直接打字就行 |
 | `Build · Big Pickle OpenCode` | 現在用的 **agent**（Build）· **模型**（Big Pickle）· **供應商**（OpenCode） |
-| `tab agents` | 按 `Tab` 可以換 agent |
+| `shift+tab agents` | 按 `Shift+Tab` 可以換 agent |
 | `ctrl+p commands` | 按 `ctrl+p` 開指令面板 |
-| 最底左邊 | 你現在在哪個資料夾。**開始之前先確認這行是對的** |
-| 最底右邊 | opencode 版本 |
+| 輸入框下方左邊 | 你現在在哪個資料夾。**開始之前先確認這行是對的** |
+| 最底右邊 | opencode 版本，應該是 2 開頭 |
 
 開始對話之後，右邊會多出一欄側邊欄：
 
@@ -116,7 +114,7 @@ opencode run --auto "讀 pyproject.toml，用一句話說明這個專案裝了�
                                      LSPs are disabled
 ```
 
-`8% used` 表示目前使用了多少 context 空間。底部狀態列也會同步顯示成 `16.0K (8%)`。第 5 節會用到它。
+`8% used` 表示目前使用了多少 context 空間。底部也會同步顯示成 `16.0K (8%)`；課前開啟的狀態列外掛會在最底下再多一行，顯示 context、回應速度和經過時間。第 5 節會用到它。
 
 `$0.00 spent` 表示這次對話目前沒有列出費用。課堂只選指定的免費模型；若服務要求付費或連接帳號，先停下來請講師確認。
 
@@ -168,7 +166,7 @@ opencode run --auto "讀 pyproject.toml，用一句話說明這個專案裝了�
 用 uv run python 印出 numpy 版本；沒有實際執行就明說。
 ```
 
-看它接下來怎麼做（實測多半直接停下），再貼一次同一句。如果它又跳出權限要求，這次選 `Allow once`。如果它沒有再試，就明確告訴它：`現在可以執行了。`
+看它接下來怎麼做（多半會直接停下），再貼一次同一句。如果它又跳出權限要求，這次選 `Allow once`。如果它沒有再試，就明確告訴它：`現在可以執行了。`
 
 AI 常見的反應：拒絕後多半會停下來；再問同一句時，有的模型會再試、允許後回報版本，有的只回答「沒有實際執行」，就不再試了。
 
@@ -210,11 +208,10 @@ AI 常見的反應：拒絕後多半會停下來；再問同一句時，有的�
 
 ```
   ┃  △ Permission required
-  ┃    # Shell command
   ┃
-  ┃  $ ls -la
+  ┃  $ ls
   ┃
-  ┃   Allow once   Allow always   Reject      ctrl+f fullscreen  ⇆ select  enter confirm
+  ┃   Allow once   Always allow   Reject      ctrl+f fullscreen  ⇆ select  enter confirm
 ```
 
 ### 4.2 怎麼回答
@@ -222,10 +219,10 @@ AI 常見的反應：拒絕後多半會停下來；再問同一句時，有的�
 | 選項 | 意思 | 工作坊建議 |
 |---|---|---|
 | `Allow once` | 只允許這一次 | **每次都選這個**。你才會看到 agent 到底做了哪些事 |
-| `Allow always` | 這個 session 之後同類的請求都不再問 | 熟了之後再用 |
+| `Always allow` | 這個 session 之後同類的請求都不再問 | 熟了之後再用 |
 | `Reject` | 拒絕。agent 會換別的做法或停下來 | 看到不該跑的指令就選這個 |
 
-操作方式：用方向鍵或 `Tab`（畫面提示的 `⇆ select`）移動，按 `Enter` 確認。預設游標在 `Allow once`，所以看完指令沒問題就直接按 `Enter`。
+操作方式：用左右方向鍵（畫面提示的 `⇆ select`）移動，按 `Enter` 確認。預設游標在 `Allow once`，所以看完指令沒問題就直接按 `Enter`。
 
 指令太長被截掉的時候，按 `ctrl+f` 全螢幕看完整內容。
 
@@ -262,7 +259,7 @@ AI 常見的反應：拒絕後多半會停下來；再問同一句時，有的�
 
 ### 4.5 順便說 agent 模式
 
-按 `Tab` 可以在兩個 agent 之間切換，畫面左下角的 `Build · Big Pickle` 會跟著變成 `Plan · Big Pickle`。
+按 `Shift+Tab` 可以在兩個 agent 之間切換，畫面左下角的 `Build · Big Pickle` 會跟著變成 `Plan · Big Pickle`。
 
 | agent | 用來做什麼 |
 |---|---|
@@ -271,7 +268,7 @@ AI 常見的反應：拒絕後多半會停下來；再問同一句時，有的�
 
 :::bg 課後試試：Plan 模式會怎麼處理 `ls`
 
-切到 Plan 試一句：`請執行 ls，列出目前資料夾的檔案。`，再看它用了什麼工具。AI 常會列出檔案，但用的是讀取或搜尋工具，不是 `bash`；也可能先試 `bash`，被擋下才換路。權限能擋住特定工具，agent 仍可能換一條路達成目的，所以要看畫面。試完按 `Tab` 切回 Build，確認左下角的標示。
+切到 Plan 試一句：`請執行 ls，列出目前資料夾的檔案。`，再看它用了什麼工具。AI 常會列出檔案，但用的是讀取或搜尋工具，不是 `bash`；也可能先試 `bash`，被擋下才換路。權限能擋住特定工具，agent 仍可能換一條路達成目的，所以要看畫面。試完按 `Shift+Tab` 切回 Build，確認左下角的標示。
 
 :::
 
@@ -322,7 +319,7 @@ agent 的「記憶」只有這個 session 裡的訊息，加上它自己去讀�
 /new
 ```
 
-或按 `ctrl+x n`。
+或按 `ctrl+x n`。新的 session 會出現在畫面頂端的分頁列，舊的還在，用 `/sessions` 就能切回去。
 
 ### 5.3 context 滿了怎麼辦
 
@@ -365,7 +362,7 @@ opencode -c     # 直接接續上一個 session
 |---|---|
 | `ctrl+p` | 打開指令面板，找不到功能時從這裡搜尋 |
 | `ctrl+j` | 在同一段任務裡換行 |
-| `Tab` | 切換目前的主要 agent 模式，切換後查看畫面標示 |
+| `Shift+Tab` | 切換 Build／Plan，切換後查看左下角的標示 |
 | `Esc`，再按一次 | 中斷正在進行的回應；看到中斷提示後確認工作已停下 |
 | `/new` | 開新的對話 |
 | `/sessions` | 找回既有對話 |
@@ -384,8 +381,7 @@ opencode -c     # 直接接續上一個 session
 | `Unrecognized request argument supplied: prompt_cache_key` | 上游的 bug，偶發 | **重試一次就好**。不用改任何設定 |
 | 畫面底部一直顯示 `esc again to interrupt` | 你只按了一次 `Esc`，還沒真的中斷 | 再按一次 `Esc`。如果它正在跑工具，多按幾次 |
 | opencode 突然關掉了 | 輸入框是空的時候按了 `ctrl+c`，那就是「離開」 | 重新 `opencode`，再用 `/sessions`（`ctrl+x l`）找回剛剛的對話，或直接 `opencode -c` |
-| `● Tip Run /connect to add an AI provider` | 這是給要接自己帳號的人看的提示 | 忽略。`big-pickle` 不用連任何 provider，換備案模型時才需要 |
-| agent 用簡體中文或英文回答 | 可能沒讀到 `AGENTS.md`，也可能讀到了卻沒照做 | 先確認你是在專案資料夾裡啟動的（看畫面最底左邊那行路徑）。規則只是提示，不保證每次都遵守 |
+| agent 用簡體中文或英文回答 | 可能沒讀到 `AGENTS.md`，也可能讀到了卻沒照做 | 先確認你是在專案資料夾裡啟動的（看輸入框下方左邊那行路徑）。規則只是提示，不保證每次都遵守 |
 | agent 改檔或執行前沒有問我 | 權限可能是 `allow`，或啟動時加了 `--auto` | 確認專案設定為 `ask`，重新用 `opencode` 啟動，不加 `--auto` |
 | 跑 `python xxx.py` 說找不到套件 | 沒走 uv 的環境 | 一律用 `uv run python xxx.py` |
 | 側邊欄的 Context / tokens 看不到 | 終端機視窗太窄，側邊欄自動收起來了 | 把視窗拉寬，或在 `ctrl+p` 搜尋側邊欄 |

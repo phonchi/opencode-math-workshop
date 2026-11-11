@@ -6,8 +6,17 @@ from pathlib import Path
 
 import numpy as np
 
-DATA = Path(__file__).resolve().parents[1] / "assets" / "data"
-D = np.genfromtxt(DATA / "loans.csv", delimiter=",", skip_header=1)
+
+def data_file(name, reveal=False):
+    """先找學生專案的 data/，再找教材 repo 的 assets/data/。"""
+    repo = Path(__file__).resolve().parents[1] / "assets" / "data"
+    for p in (Path("data") / name, (repo / "reveal" if reveal else repo) / name):
+        if p.exists():
+            return p
+    raise FileNotFoundError(f"找不到 {name}，請先把它下載到 data/")
+
+
+D = np.genfromtxt(data_file("loans.csv"), delimiter=",", skip_header=1)
 A = D[:, 1:-1]
 A = (A - A.mean(0)) / A.std(0)
 t = D[:, -1]

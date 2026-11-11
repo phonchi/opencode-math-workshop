@@ -1,0 +1,169 @@
+
+> build · big-pickle
+! retrying (attempt 2): The inference service is overloaded. Please try again later.
+→ Read . 
+$ ls -la data/ 2>/dev/null && head -5 data/orders.csv
+total 124
+drwxr-xr-x 1 User 197121     0 十一月 11 13:34 .
+drwxr-xr-x 1 User 197121     0 十一月 11 13:35 ..
+-rw-r--r-- 1 User 197121 30603 十一月 11 13:31 loans.csv
+-rw-r--r-- 1 User 197121 47990 十一月 11 13:31 orders.csv
+-rw-r--r-- 1 User 197121  1610 十一月 11 13:34 orders_complaint.csv
+-rw-r--r-- 1 User 197121 27759 十一月 11 13:31 shops_daily.csv
+-rw-r--r-- 1 User 197121  1538 十一月 11 13:33 shops_daily_store.csv
+amount_ntd,distance_km,prep_min,ride_min,handoff_min,tip_ntd,package_g,shop_rating,drop_offset_km,pause_ratio,rider_odometer_m
+249,2.37,17.6,19.3,2.17,11.9,629,4.21,0.0359,0.0412,1696442
+205,2.16,17.8,17.3,1.84,15.0,594,4.28,0.0262,0.0623,1393473
+209,2.34,17.1,14.8,1.98,13.0,673,4.30,0.0374,0.0495,1840028
+179,1.59,16.7,6.1,1.76,10.3,745,4.32,0.0358,0.0482,1532543
+> build · big-pickle
+→ Read lab2_auc.py 
+→ Read pyproject.toml 
+$ wc -l data/orders.csv && tail -3 data/orders.csv
+801 data/orders.csv
+262,2.30,20.4,16.2,1.68,12.5,644,4.24,0.0653,0.1184,1712910
+218,2.54,15.4,20.7,2.26,13.5,576,4.27,0.0331,0.0428,1100803
+207,2.56,16.2,19.8,2.15,14.0,577,4.27,0.0359,0.0690,1485678
+> build · big-pickle
+$ uv run python -c "
+import pandas as pd
+X = pd.read_csv('data/orders.csv')
+print(X.dtypes)
+print('shape:', X.shape)
+print('NaN:', X.isna().sum().sum())
+print('std:')
+print(X.std())
+print('min/max:')
+print(X.min())
+print(X.max())
+"
+amount_ntd            int64
+distance_km         float64
+prep_min            float64
+ride_min            float64
+handoff_min         float64
+tip_ntd             float64
+package_g             int64
+shop_rating         float64
+drop_offset_km      float64
+pause_ratio         float64
+rider_odometer_m      int64
+dtype: object
+shape: (800, 11)
+NaN: 0
+std:
+amount_ntd              51.592893
+distance_km              0.319162
+prep_min                 4.015732
+ride_min                 4.009522
+handoff_min              0.318274
+tip_ntd                  3.869650
+package_g               55.820248
+shop_rating              0.085202
+drop_offset_km           0.009862
+pause_ratio              0.019690
+rider_odometer_m    301043.514856
+dtype: float64
+min/max:
+amount_ntd              77.0000
+distance_km              1.5900
+prep_min                 6.2000
+ride_min                 6.1000
+handoff_min              1.0800
+tip_ntd                  2.5000
+package_g              356.0000
+shop_rating              4.0500
+drop_offset_km           0.0087
+pause_ratio              0.0068
+rider_odometer_m    641458.0000
+dtype: float64
+amount_ntd          4.320000e+02
+distance_km         3.770000e+00
+prep_min            3.080000e+01
+ride_min            3.590000e+01
+handoff_min         2.900000e+00
+tip_ntd             2.780000e+01
+package_g           7.850000e+02
+shop_rating         4.560000e+00
+drop_offset_km      7.060000e-02
+pause_ratio         1.359000e-01
+rider_odometer_m    2.475997e+06
+dtype: float64
+> build · big-pickle
+Data is clean: 800 rows × 11 numeric columns, no NaN. Let me check the other lab files to match the workshop style before writing.
+→ Read lab1_check_stores.py 
+> build · big-pickle
+Data is clean (800×11, all numeric, no NaN, no zero-variance columns), and I've seen the workshop style. Now I'll write `lab2_pca.py`.
+← Write lab2_pca.py
+Created file successfully: lab2_pca.py
+> build · big-pickle
+! retrying (attempt 2): Timed out waiting for response headers
+$ uv run python lab2_pca.py
+資料：data\orders.csv，800 筆 × 11 欄
+前處理：每欄除以樣本標準差（ddof=1），不減平均；中心化由 PCA 內部處理
+手刻：eigh 於樣本共變異數矩陣；對照：sklearn PCA(n_components=4, svd_solver='full')
+
+== 檢查 ==
+ 1. 輸入資料完整（無 NaN／非數值／零變異欄位 → 不丟欄位）
+    實際：NaN 0 格、非數值 0 欄、零變異 0 欄｜門檻：三者皆 = 0｜PASS
+ 2. 共變異數矩陣半正定（最小特徵值 ≥ 0，容許浮點負值）
+    實際：min(λ) = 0.023722｜門檻：≥ -1e-10｜PASS
+ 3. 頻譜完整：Σλ（全部 11 個特徵值）= trace(C)
+    實際：相對差 0.00e+00｜門檻：< 1e-12｜PASS
+ 4. 縮放自洽：trace(C) = 欄數（每欄除以樣本標準差後變異數恰為 1）
+    實際：trace = 11.000000（應為 11），相對差 0.00e+00｜門檻：< 1e-10｜PASS
+ 5. 特徵值 = sklearn explained_variance_（前 4 個）
+    實際：最大相對差 1.58e-15｜門檻：< 1e-10｜PASS
+ 6. 變異解釋比 = sklearn explained_variance_ratio_（前 4 個）
+    實際：最大絕對差 4.44e-16｜門檻：< 1e-10｜PASS
+ 7. 負載向量 = sklearn components_（對齊正負號後）
+    實際：最大絕對差 1.33e-15｜門檻：< 1e-08｜PASS
+ 8. 投影分數 = sklearn transform()（對齊正負號後）
+    實際：最大絕對差 1.18e-14｜門檻：< 1e-08｜PASS
+ 9. 負載正交：WᵀW = I₄（主成分軸互相垂直且單位長）
+    實際：最大偏離 7.77e-16｜門檻：< 1e-10｜PASS
+10. PCA 定義性質：第 k 個主成分分數的樣本變異數 = λ_k（不依賴 sklearn）
+    實際：最大相對差 1.97e-15｜門檻：< 1e-10｜PASS
+
+== 前 4 個主成分摘要（800 筆 × 11 欄，中心化後總變異 = 11.0000）==
+ PC       λ 手刻  λ sklearn      解釋比       累計  符號
+  1     3.5158     3.5158   31.96%   31.96%  同號
+  2     2.2546     2.2546   20.50%   52.46%  同號
+  3     1.8200     1.8200   16.55%   69.00%  翻號
+  4     1.6350     1.6350   14.86%   83.87%  同號
+前 4 個主成分累積解釋變異：83.87%
+
+結果：10/10 項 PASS
+> build · big-pickle
+跑完了，`lab2_pca.py` 已存好，10 項檢查全數 PASS。以下是你叫我列的決定清單：
+
+## 前處理
+- **只除標準差、不減平均**（照你的指定）：$X_s = X / \operatorname{std}(X)$，中心化放在 PCA 步驟裡（手刻扣 $\mu$、sklearn 內建 centering）。
+- **標準差用 ddof=1**（樣本標準差，同 pandas `.std()` 預設）。副作用：縮放後每欄變異數恰為 1，trace(C) = 11，拿來當檢查 4。
+- **對照組餵同一份「已除標準差、未中心化」矩陣**，不是餵原始資料——兩邊唯一差異就剩 PCA 演算法本身（eigh vs full SVD），比對才公平。
+- 不用 `orders_complaint.csv`：PCA 無監督，不需要標籤。
+
+## 準則（手刻的算法選擇）
+- 共變異數矩陣 $C = X_c^\top X_c / (n-1)$（ddof=1），與 sklearn `explained_variance_` 同分母，特徵值可直接對照。
+- **eigh 而非 eig**：$C$ 對稱半正定，eigh 專為對稱矩陣設計；回傳升冪，反轉成**降冪取前 4**。
+- 變異解釋比分母用**全譜 11 個特徵值**（不是前 4 個），與 sklearn 定義一致。
+- **特徵向量符號任意**（$\pm v$ 都是合法解）：比對前先以「與 sklearn 分量的點積」對齊每軸正負號（本資料 PC3 是翻號），再逐項比數值。
+
+## 門檻（實際誤差都在 1e-14 以下，門檻預留多個數量級餘裕）
+| 檢查 | 門檻 | 實際 |
+|---|---|---|
+| 1 資料完整（NaN／非數值／零變異欄） | 三者 = 0 | 全 0 |
+| 2 C 半正定 | min(λ) ≥ −1e−10 | 0.0237 |
+| 3 Σλ = trace(C) | < 1e−12 | 0 |
+| 4 trace(C) = 11 | < 1e−10 | 0 |
+| 5 λ vs sklearn | rel < 1e−10 | 1.6e−15 |
+| 6 解釋比 vs sklearn | abs < 1e−10 | 4.4e−16 |
+| 7 負載 vs components_（對齊符號後） | abs < 1e−8 | 1.3e−15 |
+| 8 分數 vs transform()（對齊符號後） | abs < 1e−8 | 1.2e−14 |
+| 9 WᵀW = I₄ | < 1e−10 | 7.8e−16 |
+| 10 主成分變異數 = λ_k（不依賴 sklearn） | rel < 1e−10 | 2.0e−15 |
+
+## 丟掉的欄位
+- **無**。orders.csv 本身 800×11 全數值、無 NaN、std 最小 0.0099 > 0；檢查 1 把這件事驗證進腳本，之後資料換掉時會自動抓出問題欄。
+
+結果摘要：前 4 個主成分特徵值 3.52 / 2.25 / 1.82 / 1.64，**累積解釋變異 83.87%**。有任一檢查 FAIL 時腳本會以非零結碼退出，方便之後接自動化。

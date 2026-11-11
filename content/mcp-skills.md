@@ -193,7 +193,7 @@ general (subagent)
 
 （另外還有 `compaction`、`summary`、`title` 等內部用的，不用管。）
 
-- **primary agent** 是你直接對話的對象，在介面裡按 **Tab** 切換。本課程用 `build` 執行任務，改檔與執行依專案的 `ask` 設定詢問；`plan` 適合先分析步驟。實際限制會受版本與專案設定影響，請查看權限要求。
+- **primary agent** 是你直接對話的對象，在介面裡按 **Shift+Tab** 切換。本課程用 `build` 執行任務，改檔與執行依專案的 `ask` 設定詢問；`plan` 適合先分析步驟。實際限制會受版本與專案設定影響，請查看權限要求。
 - **subagent** 是被主 agent 呼叫去做特定工作的。`explore` 唯讀探索程式碼，`general` 通用。
 
 **自訂 agent 就是自己定義一個**，給它專屬的系統提示、溫度和權限。
@@ -302,7 +302,7 @@ opencode debug agent math-reviewer     # 看解析後的完整設定
 | 欄位 | 說明 |
 |---|---|
 | `description` | 這個 agent 做什麼。**主 agent 靠它判斷要不要呼叫**，要寫清楚 |
-| `mode` | `subagent`（被呼叫）或 `primary`（Tab 切換） |
+| `mode` | `subagent`（被呼叫）或 `primary`（`Shift+Tab` 切換） |
 | `model` | 指定模型。**這門課請省略**，省略就沿用目前選的模型 |
 | `temperature` | 0 到 1。驗證、審查類的工作用低值（0.1），創意類用高值 |
 | `prompt` | 不用寫在這裡：`.md` agent 的系統提示就是 frontmatter 下方的正文。要用 `{file:./prompts/xxx.txt}` 讀外部檔案，請改寫在 `opencode.json` 的 agent 設定 |

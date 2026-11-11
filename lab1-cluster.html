@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lab 1 · 分群｜OpenCode × AI-Math 工作坊</title>
-<meta name="description" content="一份沒寫店名的手搖飲營業紀錄，問 AI 有幾種店。它會給你肯定的答案，但它不知道你要拿來做什麼。">
+<meta name="description" content="一份沒寫店名的手搖飲營業紀錄，問 AI 有幾種店。答案沒有唯一的對錯，要看你拿來做什麼；它不知道用途，還是會給你一個肯定的數字。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2213%22%20fill%3D%22%23191922%22%2F%3E%3Cpath%20d%3D%22M16%2020l12%2012-12%2012%22%20fill%3D%22none%22%20stroke%3D%22%23e3c273%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Crect%20x%3D%2233%22%20y%3D%2240%22%20width%3D%2217%22%20height%3D%226%22%20rx%3D%223%22%20fill%3D%22%23b8503c%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -704,9 +704,10 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a href="#section-這一關的資料">這一關的資料</a></li>
 <li><a href="#kmeans-title">先玩一次：k-means 怎麼分群？</a></li>
 <li><a href="#section-動手">動手</a></li>
-<li><a href="#section-誰錯了">誰錯了</a></li>
+<li><a href="#section-依用途選">依用途選</a></li>
 <li><a href="#section-檢查清單">檢查清單</a></li>
 <li><a href="#section-如果還有時間">如果還有時間</a></li>
+<li><a href="#section-課後補充">課後補充</a></li>
 </ul>
 </li>
 <li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
@@ -753,9 +754,10 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <li><a href="#section-這一關的資料">這一關的資料</a></li>
 <li><a href="#kmeans-title">先玩一次：k-means 怎麼分群？</a></li>
 <li><a href="#section-動手">動手</a></li>
-<li><a href="#section-誰錯了">誰錯了</a></li>
+<li><a href="#section-依用途選">依用途選</a></li>
 <li><a href="#section-檢查清單">檢查清單</a></li>
 <li><a href="#section-如果還有時間">如果還有時間</a></li>
+<li><a href="#section-課後補充">課後補充</a></li>
 </ul>
 </li>
 <li><a class="chapter-link" href="lab2-pca.html">Lab 2 · PCA</a>
@@ -793,12 +795,12 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
   <div class="kicker"><span>Lab 1</span><span>·</span><span class="badge live">現場 25 分</span><span>·</span><span>AI 的風險：不知道你要什麼，還是給了答案</span></div>
   <h1>分群：它說有 9 種店，你要相信嗎？</h1>
   <p class="lead">
-    你拿到一家手搖飲連鎖的營業紀錄，但匯出時漏了「哪一家店」這一欄。AI 算得出數字，也會給你肯定的群數，可是它不知道你要拿這個答案做什麼。
-    你要帶走的能力：判斷 AI 的結論，有沒有回答你真正想問的問題。
+    你拿到一家手搖飲連鎖的營業紀錄，但匯出時漏了「哪一家店」這一欄。該分幾群<strong>沒有唯一的正確答案</strong>：拿來寫店型手冊和拿來回查客訴，答案就不一樣。AI 不知道你的用途，卻常直接給一個肯定的數字。
+    你要帶走的能力：先講清楚用途，再判斷 AI 的結論有沒有回答你的問題。
   </p>
 </div>
 
-<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#section-這一關的資料">看資料</a></li><li><a href="#kmeans-title">玩一次分群</a></li><li><a href="#section-動手">問、判斷、揭曉、改問題</a></li><li><a href="#section-誰錯了">判讀結果</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；可展開的推導與補充，課後再讀。</p></nav>
+<nav class="chapter-path" aria-label="現場閱讀路徑"><p>現場閱讀路徑</p><ol><li><a href="#section-這一關的資料">看資料</a></li><li><a href="#kmeans-title">玩一次分群</a></li><li><a href="#section-動手">問、看它的決定、講清楚用途</a></li><li><a href="#section-依用途選">依用途選</a></li><li><a href="#section-檢查清單">檢查成果</a></li></ol><p class="path-note">先跟著正文操作與判讀；推導放在頁尾的課後補充。</p></nav>
 
 <section>
 <h2 id="section-這一關的資料">這一關的資料</h2>
@@ -822,37 +824,7 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 <h3>分群是什麼</h3>
 <p>把每一列看成一個點：6 個數字就是 6 維空間 $\mathbb{R}^6$ 裡的一個向量。<strong>分群</strong>就是在<strong>不知道答案</strong>的情況下，把距離近的點分在同一組。如果同一家店每天的營業樣貌差不多，同一家店的點就會聚成一團。</p>
 <p>兩個點有多近，用你熟悉的歐氏距離 $\|\mathbf{x}-\mathbf{y}\|$ 量。問題來了：營業額動輒幾萬元，評分只在 4 點多，直接算距離，營業額差 1000 元就壓過評分差 0.3 顆星。所以常先做<strong>標準化</strong>：每一欄減掉平均、再除以標準差，換成「比平常高或低幾個標準差」，各欄才站在同一個起跑點。</p>
-<p>這一關會用最常見的分群方法 <strong>k-means</strong>：你先指定要分成 $k$ 群，它會自己找出每群的中心。下面先玩一次，再去問 AI。</p>
-
-<details class="bg"><summary>分群跟「分類」差在哪？</summary>
-<div class="bg-body">
-<div class="tw"><table>
-<tr><th></th><th>分類（classification）</th><th>分群（clustering）</th></tr>
-<tr><td>你有什麼</td><td>資料 <strong>＋ 正確答案</strong></td><td><strong>只有資料</strong></td></tr>
-<tr><td>在做什麼</td><td>學一個規則，看到新資料能說出它屬於哪一類</td><td>看資料自己長成幾團，把靠近的歸在一起</td></tr>
-<tr><td>術語</td><td>監督式（supervised）</td><td>非監督式（unsupervised）</td></tr>
-<tr><td>本工作坊</td><td>Lab 3</td><td><strong>Lab 1（現在這關）</strong></td></tr>
-</table></div>
-<p style="margin-bottom:0">k-means 全程看不到「哪一家店」。就算資料真的來自 10 家店，它也<strong>不會知道</strong>，只能告訴你幾何上怎麼分比較開。</p>
-</div>
-</details>
-
-<details class="bg"><summary>k-means 在最小化什麼？（微積分版）</summary>
-<div class="bg-body">
-<p>給定 $k$，先挑 $k$ 個起點當中心 $\boldsymbol{\mu}_1,\dots,\boldsymbol{\mu}_k$，再反覆做兩件事，直到沒有點換群：</p>
-<ol>
-<li><strong>指派</strong>：每個點歸到離它最近的中心</li>
-<li><strong>更新</strong>：每個中心移到自己那群所有點的平均位置</li>
-</ol>
-<p>整個過程在最小化這個量，sklearn 把它叫做 <code>inertia_</code>：</p>
-$$J=\sum_{i=1}^{n}\bigl\|\mathbf{x}_i-\boldsymbol{\mu}_{c(i)}\bigr\|^2$$
-<p>$c(i)$ 是第 $i$ 個點被分到哪一群。白話：<strong>每個點到自己那群中心的距離平方，全部加起來</strong>。</p>
-<p>「移到平均」不是隨便定的：固定分群後對 $\boldsymbol{\mu}_j$ 微分並令其為零，
-$\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\boldsymbol{\mu}_j)=0$，
-解出 $\boldsymbol{\mu}_j=\frac{1}{|C_j|}\sum_{i\in C_j}\mathbf{x}_i$，就是群內平均。<strong>這就是微積分課的「令導數為零求極值」。</strong></p>
-<p style="margin-bottom:0">每一步都不會讓 $J$ 變大，但停下來的地方<strong>不保證是全域最小</strong>。所以實務上會設 <code>n_init=10</code>（換 10 組起點取最好的），並固定 <code>random_state</code> 讓結果可以重現。</p>
-</div>
-</details>
+<p>這一關會用最常見的分群方法 <strong>k-means</strong>：你先指定要分成 $k$ 群，它會自己找出每群的中心。下面先玩一次，再去問 AI。推導放在頁尾的課後補充。</p>
 </section>
 
 <section class="kmeans-explorer" aria-labelledby="kmeans-title">
@@ -1091,117 +1063,164 @@ $\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\b
 <h3>先照平常的方式問</h3>
 <p>如果已在 OpenCode 裡，先輸入 <code>/new</code>；還沒啟動就在專案資料夾輸入 <code>opencode</code>。左下角應顯示 <code>Build · Big Pickle</code>。貼上這句，不要補充任何條件：</p>
 <pre class="cmd"><code><span class="ln">data/shops_daily.csv 是手搖飲連鎖的每日營業紀錄，幫我看有幾種店。</span></code></pre>
-<p>等它回答時，每個權限要求都讀一下，看它實際跑了什麼。如果它因為缺套件（例如 <code>pandas</code>）停下來、沒給答案，就回它：<code>請改用 numpy，或用 uv add 安裝後繼續。</code></p>
+<p>等它回答時，每個權限要求都讀一下，看它實際跑了什麼。</p>
 </div>
 
 <div class="step" data-n="2">
-<h3>判斷：接受、保留，還是拒絕？</h3>
-<p>看完回答，<strong>先別追問</strong>。在 <code>notes/</code> 或紙上寫下：</p>
-<ul>
-<li>你會接受、保留，還是拒絕這個答案？</li>
-<li>它用的方法你學過嗎？它做了哪些你沒要求的事，例如標準化、刪欄位、寫檔、畫圖？</li>
-<li>它說的「明確」「可信」，是對什麼而言？還缺什麼資訊，你才敢把答案交給別人用？</li>
-</ul>
-<p>如果它用了你沒學過的方法，不必硬著頭皮相信，可以追問：</p>
-<pre class="cmd"><code><span class="ln">請只用 k-means 和 silhouette 重算，列出你替我做的每個決定，先不要下結論。</span></code></pre>
-<p>和鄰座對一下答案。答案一樣也先別放心：這只表示做法相近，不表示符合你的用途。如果它先問你要拿來做什麼，那很好：回答它，再看建議怎麼變。</p>
-<details class="bg"><summary>寫完判斷再打開：AI 常見的反應</summary>
-<div class="bg-body">
-<p style="margin-bottom:0">同一句話問 AI，它常直接報一個群數（例如 9 或 10），還會說「跨隨機種子完全一致」，沒有先問你要拿來做什麼。數字通常算得對，也會換起點確認很穩定；但穩定只表示同樣的做法得到同樣的結果，回答不了「這個答案夠不夠你用」。</p>
-</div>
-</details>
+<h3>看它替你做了哪些決定</h3>
+<p>這一步<strong>沒有標準答案</strong>。它可能說 9、可能說 10，也可能先反問你。先別急著相信，貼上這句：</p>
+<pre class="cmd"><code><span class="ln">列出你替我做的每個決定（前處理、準則、門檻、丟掉的欄位），先不要下結論。</span></code></pre>
+<p>讀它的清單，圈出一個你沒要求、卻會影響答案的決定，例如有沒有標準化、用哪個指標選 k。再問自己一句：它知道這個答案要拿來做什麼嗎？</p>
 </div>
 
 <div class="step" data-n="3">
-<h3>揭曉：總部知道什麼</h3>
-<details class="bg"><summary>寫完判斷再打開：需求卡</summary>
-<div class="bg-body">
-<p>這是總部後來補給你的資訊：</p>
+<h3>講清楚用途：總部要拿來做什麼</h3>
+<p>第 1 步的問題只有資料，沒有用途，AI 只好自己猜。下面是總部的需求，這一關兩個任務都要回答：</p>
 <div class="box warn">
 <div class="bt">需求卡</div>
 <ul style="margin-bottom:0">
-<li>這 723 列來自 <strong>10 家分店</strong>。第 1 家和第 10 家開在<strong>同一個捷運站的兩個出口</strong>，菜單、價位、客群幾乎一樣。</li>
-<li><strong>任務 A</strong>：總部要寫「店型手冊」，營運方式相近的店可以歸成同一型。</li>
-<li><strong>任務 B</strong>：有食安客訴，要能回查某天的紀錄來自哪一家店，<strong>不同店不能混在一起</strong>。</li>
-<li>店別紀錄可以拿來算 <strong>ARI</strong>：分群結果和真正的店別完全一致時為 1，亂分約為 0。silhouette 則不看店別，只看幾何上分不分得開。</li>
+<li><strong>任務 A：店型手冊</strong>。把營運方式相近的店歸成同一型，每型寫一套做法。不同店可以歸成同一型。</li>
+<li><strong>任務 B：客訴回查</strong>。有食安客訴時，要能回查某天的紀錄來自哪一家店。<strong>不同店不能混在一起</strong>，就算營業樣貌很像也一樣。</li>
+<li>店別紀錄之後才會給，只能用來事後核對，<strong>選群數時不能用</strong>。</li>
 </ul>
 </div>
-<p>下載店別紀錄。這個檔只有一欄 <code>store</code>，第 N 列就是 <code>shops_daily.csv</code> 第 N 列的店別。它只用來檢查，選 k 時不能用。在 OpenCode 裡按 <code>!</code> 進 Shell 模式，再執行：</p>
-<pre class="cmd"><code><span class="ln">curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/shops_daily_store.csv -o data/shops_daily_store.csv</span></code></pre>
-<p>先想：AI 的答案對任務 A 夠用嗎？對任務 B 呢？如果它說的不是 10，算它錯嗎？</p>
-</div>
-</details>
 </div>
 
 <div class="step" data-n="4">
-<h3>規劃：寫目標卡，再問一次</h3>
-<p>第 1 步的問題只有資料，沒有用途。AI 只好自己猜你要什麼。<strong>目標卡就是把「只有你知道的事」先寫下來</strong>，再把它放進 prompt，讓 AI 回答的是你的問題。</p>
-<p>和鄰座各挑一個任務（一人 A、一人 B），在 <code>notes/</code> 或紙上回答三個問題：</p>
-<div class="box warn">
-<div class="bt">目標卡</div>
-<ol style="margin-bottom:0">
-<li><strong>用途</strong>：分好的群要拿去做什麼？</li>
-<li><strong>合併規則</strong>：什麼情況可以算同一群？什麼情況絕對不行？</li>
-<li><strong>判斷證據</strong>：我看哪些數字或紀錄來決定 k？哪些資料只能拿來檢查、不能拿來選 k？</li>
-</ol>
-</div>
-<p>寫完互相讀一次，指出對方一個還模糊的詞，例如「差不多」「比較好」是什麼意思。</p>
-<details class="bg"><summary>寫完再對照：目標卡範例</summary>
-<div class="bg-body">
+<h3>用 Plan 模式讓它把問題問清楚</h3>
+<p>你不用自己寫出一段完整的 prompt。輸入 <code>/new</code>，按 <code>Shift+Tab</code> 切到 Plan（左下角變成 <code>Plan · Big Pickle</code>），貼一句目標就好：</p>
+<pre class="cmd"><code><span class="ln">用 data/shops_daily.csv 分群，分別給店型手冊和客訴回查用，各該分幾群？</span></code></pre>
+<p>專案的 <code>AGENTS.md</code> 已經要求它在 Plan 模式先一次問一題，並附上建議答案。它問你時，照需求卡回答：</p>
 <div class="tw"><table>
-<tr><th></th><th>任務 A：店型手冊</th><th>任務 B：客訴回查</th></tr>
-<tr><td>用途</td><td>把營運方式相近的店歸成同一型，每型寫一套做法</td><td>看到一筆紀錄，要能判斷它來自哪一家店</td></tr>
-<tr><td>合併規則</td><td>營業樣貌幾乎一樣的店<strong>可以</strong>合併；但每型的做法要講得出差別</td><td>不同店<strong>一律不能</strong>合併，就算樣貌很像也一樣</td></tr>
-<tr><td>判斷證據</td><td>標準化後的 silhouette，加上每群大小是否合理</td><td>用 silhouette 挑候選 k；店別紀錄只用來算 ARI 檢查，<strong>不能</strong>用來選 k</td></tr>
+<tr><th>它可能問</th><th>你可以這樣回答</th></tr>
+<tr><td>分群結果要拿來做什麼？</td><td>兩個用途都要：店型手冊可以合併相近的店；客訴回查不同店不能混在一起。</td></tr>
+<tr><td>一列代表什麼？（它常以為一列是一家店）</td><td>每一列是某家分店某一天的營業紀錄，匯出時漏了店別。</td></tr>
+<tr><td>可以用店別資料嗎？</td><td>店別紀錄之後才會給，只能事後核對，選群數時不能用。</td></tr>
 </table></div>
-<p>把任務 B 的卡改寫成 prompt，大概是這樣：</p>
-<pre class="cmd"><code><span class="ln">data/shops_daily.csv 是手搖飲 10 家分店的每日營業紀錄。我的用途是客訴回查：要分辨每列來自哪一家店，不同店不能合併。
-</span><span class="ln">請用 k-means，先處理欄位尺度，用 silhouette 挑 k。data/shops_daily_store.csv 是店別紀錄，只能在選好 k 之後拿來算 ARI 檢查，不能用來選 k。
-</span><span class="ln">列出你替我做的每個決定，最後回答我的用途該用幾群。</span></code></pre>
-<p style="margin-bottom:0">範例只是參考，你的卡寫得不一樣也沒關係，重點是三格都有寫到。</p>
-</div>
-</details>
-<p>用你的目標卡改寫第一句，<code>/new</code> 後貼上。程式存成 <code>lab1_cluster.py</code>，圖存到 <code>figs/lab1_k_selection.png</code>。比較兩人的選擇和理由。答案不一定不同，任務 A 也可能選 10；要看的是它是否符合各自的用途。</p>
-<details class="bg"><summary>問完再打開：AI 常見的反應</summary>
+<p>它最後會列出計畫和「我打算替你做的決定」。計畫常比這一關需要的大（例如兩套分群、重抽樣、很多張圖），不用全做。按 <code>Shift+Tab</code> 切回 Build，貼這句把範圍收小：</p>
+<pre class="cmd"><code><span class="ln">照計畫做，但只做這些：一次分群，k = 2 到 12，random_state=0、n_init=10，
+</span><span class="ln">用 silhouette、Calinski-Harabasz、Davies-Bouldin 三個指標，並印出每個 k 的各群筆數。
+</span><span class="ln">一張圖存到 figs/lab1_k_selection.png，程式存成 lab1_cluster.py。
+</span><span class="ln">最後分別回答店型手冊和客訴回查各用幾群，並列出你替我做的每個決定。</span></code></pre>
+<details class="bg"><summary>參考 prompt：問答超過 5 分鐘，或它沒照需求卡做，就 /new 改貼這個</summary>
 <div class="bg-body">
-<p>把用途寫清楚之後，AI 多半會改選 k=10，也會列出它替你做的決定。但要讀那些決定：它常常是先看到 silhouette 最高是 9，再拿店別紀錄淘汰 9、改選 10。你說店別紀錄不能用來選 k，它也說只拿來檢查，實際上卻是用它選了 k。結果對，不代表照你的規則做。</p>
-<p style="margin-bottom:0">模糊地問時，AI 答 9 種，最大的一群正好是第 1 家加第 10 家。對任務 A 這可能夠用，對任務 B 就把要分開回查的兩家店併掉了。它不知道任務，再穩定也判斷不了。</p>
+<p>在 Build 模式 <code>/new</code> 後貼上：</p>
+<pre class="cmd"><code><span class="ln">data/shops_daily.csv 每一列是某家分店某一天的營業紀錄，匯出時漏了店別。
+</span><span class="ln">請用 k-means 分群（先拿掉標準差為 0 的欄位，再標準化；k = 2 到 12，random_state=0、n_init=10）。
+</span><span class="ln">不要讀任何店別檔。用三個不看店別的指標比較：silhouette、Calinski-Harabasz、Davies-Bouldin，
+</span><span class="ln">並印出每個 k 的各群筆數。程式存成 lab1_cluster.py，圖存到 figs/lab1_k_selection.png。
+</span><span class="ln">
+</span><span class="ln">分別回答：
+</span><span class="ln">A. 店型手冊（相近的店可以合併）適合幾群？
+</span><span class="ln">B. 客訴回查（不同店不能混在一起）適合幾群？
+</span><span class="ln">列出你替我做的每個決定（前處理、準則、門檻、丟掉的欄位）。</span></code></pre>
 </div>
 </details>
-<p>你應該能回答這三個問題：</p>
-<ul>
-<li>原始尺度和標準化，選出的 k 一樣嗎？</li>
-<li>silhouette 最高的 k，和店別 ARI 最高的 k，是同一個嗎？</li>
-<li>那你會怎麼回答任務 A 和任務 B？</li>
-</ul>
+<p>看完它的回答，你應該能說出：三個指標都選同一個 k 嗎？如果不一樣，任務 A 和任務 B 各該聽哪一個？為什麼？</p>
+</div>
+
+<div class="step" data-n="5">
+<h3>拿店別紀錄核對</h3>
+<p>選好群數之後，才下載店別紀錄。這個檔只有一欄 <code>store</code>，第 N 列就是 <code>shops_daily.csv</code> 第 N 列的店別。按 <code>!</code> 進 Shell 模式執行：</p>
+<pre class="cmd"><code><span class="ln">curl -fsSL https://phonchi.github.io/opencode-math-workshop/assets/data/reveal/shops_daily_store.csv -o data/shops_daily_store.csv</span></code></pre>
+<p>按 <code>Esc</code> 離開 Shell 模式，再貼：</p>
+<pre class="cmd"><code><span class="ln">data/shops_daily_store.csv 是店別紀錄。用它檢查你剛才建議的群數：算 ARI，並列出每一群包含各家店幾天。不要改你剛才的建議。</span></code></pre>
+<p><strong>ARI</strong> 衡量分群結果和真正的店別有多一致：完全一致是 1，亂分約為 0。</p>
 </div>
 </section>
 
 <section>
-<h2 id="section-誰錯了">誰錯了</h2>
-<p>做完第 4 步再往下讀。下面是參考程式算的結果（<code>reference/lab1_cluster.py</code>，<code>random_state=0</code>、<code>n_init=10</code>）。你的方法不同，數字也可能不同。</p>
+<h2 id="section-依用途選">依用途選</h2>
+<p>不看店別的指標，量的都是「幾何上分得開不開」：</p>
+<ul>
+<li><strong>silhouette</strong>：每個點離同群近、還是離隔壁群近。越大越好</li>
+<li><strong>Calinski-Harabasz（CH）</strong>：群和群之間分得多開、群內有多緊。越大越好</li>
+<li><strong>Davies-Bouldin（DB）</strong>：每一群和最像它的那群有多容易混。越小越好</li>
+</ul>
+<p>三個指標不一定選同一個 k，這時就要回到用途。</p>
+<details class="bg"><summary>參考結果：這次跑出來的一種結果</summary>
+<div class="bg-body">
+<p>參考程式（<code>random_state=0</code>、<code>n_init=10</code>，<a href="#lab1-reference">下載方式見頁尾</a>）算出來的數字。你的做法不同，數字也可能不同。</p>
 <div class="tw"><table>
-<tr><th>做法</th><th>silhouette 最高的 k</th><th>分數</th><th>這個 k 對 10 家店的 ARI</th></tr>
-<tr><td>原始尺度</td><td><strong>2</strong></td><td>0.8140</td><td>0.204</td></tr>
-<tr><td>標準化</td><td><strong>9</strong></td><td>0.7942</td><td>0.881</td></tr>
-<tr><td>標準化，直接指定 k=10</td><td>10（不是最高）</td><td>0.7252</td><td><strong>0.990</strong></td></tr>
+<tr><th>做法</th><th>k</th><th>silhouette</th><th>CH</th><th>DB</th><th>對店別的 ARI</th></tr>
+<tr><td>原始尺度，silhouette 最高</td><td>2</td><td>0.814</td><td></td><td></td><td>0.204</td></tr>
+<tr><td>標準化</td><td>9</td><td><strong>0.794</strong>（最高）</td><td>4726</td><td><strong>0.274</strong>（最低）</td><td>0.881</td></tr>
+<tr><td>標準化</td><td>10</td><td>0.725</td><td><strong>4956</strong>（最高）</td><td>0.404</td><td><strong>0.990</strong></td></tr>
 </table></div>
+<p>不標準化時，距離幾乎只看營業額，所以只分成「營業額高、低」兩群。標準化後，silhouette 和 DB 選 9，CH 選 10。從 9 群變成 10 群，只是把最大的那一群（159 筆）拆成 85 筆和 74 筆，其他八群一筆都沒動。</p>
+<p>拿店別紀錄核對後才知道：那 159 筆正好是兩家店（73 天和 86 天），它們開在同一個捷運站的兩個出口，營業樣貌幾乎一樣。分成 10 群時 ARI 是 0.990，只剩 3 筆分錯。</p>
+<ul style="margin-bottom:0">
+<li><strong>任務 A</strong>：9 群可以。兩家店樣貌幾乎一樣，寫成同一型很合理。</li>
+<li><strong>任務 B</strong>：要選 10 群，而且要說明還有少數紀錄可能分錯；真的要回查到店，最好補回店別紀錄。</li>
+</ul>
+</div>
+</details>
 <figure class="teaching-figure">
 <picture><source media="(max-width: 720px)" srcset="assets/figures/lab1-k-selection-mobile.svg"><img src="assets/figures/lab1-k-selection.svg" alt="k 從 2 到 12 的兩張圖。上圖 silhouette：原始尺度在 k=2 最高，標準化在 k=9 最高。下圖對 10 家分店的 ARI：標準化在 k=10 最高。" width="900" height="840"></picture>
-<figcaption>上圖不看店別，下圖揭曉後才算得出來。<a href="assets/figures/lab1-k-selection.csv">查看曲線數據</a></figcaption>
+<figcaption>上圖不看店別，下圖要有第 5 步的店別紀錄才算得出來。<a href="assets/figures/lab1-k-selection.csv">查看曲線數據</a></figcaption>
 </figure>
-<p>原始尺度時，距離幾乎只看營業額，所以只分成「營業額高、低」兩群。標準化後，k=9 把第 1 家和第 10 家併成一群，其他店都分得開。對任務 A，這可能正好合適；對任務 B，就是把兩家店混在一起。</p>
-<p>所以 AI 說 9 並沒有算錯。<strong>問題在於它還不知道你要做什麼，就給了答案。</strong>如果它沒說自己標準化了，你也不會知道為什麼你的同學算出 2。</p>
+<p>AI 說 9 並沒有算錯。<strong>問題在於它還不知道你要做什麼，就給了答案。</strong>同一份資料，任務 A 和任務 B 可以選不同的 k，兩個都對；要說清楚的是「對哪個用途而言」。</p>
 
-<h3>silhouette 在量什麼</h3>
-<p>白話：每個點問自己「我離同組的人近，還是離隔壁組的人近？」離同組近得多，分數接近 1；在兩組交界，接近 0；離隔壁組反而比較近，就是負的。全部點平均起來就是整體分數。</p>
-<div class="box math">
-<div class="bt">silhouette</div>
-<p>設 $a(i)$ 是點 $i$ 到<em>同群</em>其他點的平均距離，$b(i)$ 是它到<em>最近的其他群</em>所有點的平均距離，則</p>
-$$s(i)=\frac{b(i)-a(i)}{\max\{a(i),\,b(i)\}},\qquad s(i)\in[-1,1]$$
-<p style="margin-bottom:0">它衡量<strong>群內夠不夠緊、群間夠不夠開</strong>，完全沒有用到店別紀錄。</p>
+<div class="box danger">
+<div class="bt">這一關真正要你帶走的</div>
+<p style="margin-bottom:0">
+<strong>AI 不知道你要什麼時，還是可能給你一個肯定的答案。</strong>往後每次看到「判定為」「建議」，先請它列出替你做的決定，再把結論改寫成帶條件的句子，例如：「標準化後比較 k=2 到 12，silhouette 選 9、CH 選 10；寫店型手冊用 9 群即可，回查客訴要用 10 群，仍有少數紀錄可能分錯。」
+</p>
 </div>
-<p><strong>ARI</strong>（adjusted Rand index）則要拿分群結果和店別紀錄比：任兩列「是不是同一家店」和「是不是被分在同一群」一致的程度，再扣掉亂分也會碰巧一致的部分。1 表示分組完全一致，和群的編號無關。</p>
+</section>
+
+<section>
+<h2 id="section-檢查清單">檢查清單</h2>
+<ul class="ckl">
+<li><input type="checkbox" id="l1a"><label for="l1a">我拿到了它的決定清單，圈出至少一個我沒要求、卻會影響答案的決定</label></li>
+<li><input type="checkbox" id="l1b"><label for="l1b">我用 Plan 模式讓它問清楚用途，並照需求卡回答，再切回 Build 執行</label></li>
+<li><input type="checkbox" id="l1c"><label for="l1c"><code>lab1_cluster.py</code> 和 <code>figs/lab1_k_selection.png</code> 都存在，我看得懂圖在比什麼</label></li>
+<li><input type="checkbox" id="l1d"><label for="l1d">我能說出任務 A 和任務 B 各用幾群，以及為什麼可以不一樣</label></li>
+<li><input type="checkbox" id="l1e"><label for="l1e">我知道 silhouette、CH、DB 不看店別，ARI 要看店別，所以店別紀錄只在選好 k 之後拿來核對</label></li>
+</ul>
+</section>
+
+<section>
+<h2 id="section-如果還有時間">如果還有時間</h2>
+<ul>
+<li>請它列出每群包含各家店的天數，自己找出哪兩家店被併在一起。</li>
+<li>用不同 <code>random_state</code> 重跑，看 k=9 和 k=10 的結果穩不穩定。</li>
+<li>問它：<strong>「inertia 為什麼隨 k 遞減？用數學證明給我看。」</strong>再自己檢查：k-means 找到的是局部解，實務上偶爾會不單調。</li>
+</ul>
+</section>
+
+<section>
+<h2 id="section-課後補充">課後補充</h2>
+<details class="bg"><summary>分群跟「分類」差在哪？</summary>
+<div class="bg-body">
+<div class="tw"><table>
+<tr><th></th><th>分類（classification）</th><th>分群（clustering）</th></tr>
+<tr><td>你有什麼</td><td>資料 <strong>＋ 正確答案</strong></td><td><strong>只有資料</strong></td></tr>
+<tr><td>在做什麼</td><td>學一個規則，看到新資料能說出它屬於哪一類</td><td>看資料自己長成幾團，把靠近的歸在一起</td></tr>
+<tr><td>術語</td><td>監督式（supervised）</td><td>非監督式（unsupervised）</td></tr>
+<tr><td>本工作坊</td><td>Lab 3</td><td><strong>Lab 1（現在這關）</strong></td></tr>
+</table></div>
+<p style="margin-bottom:0">k-means 全程看不到「哪一家店」。就算資料真的來自 10 家店，它也<strong>不會知道</strong>，只能告訴你幾何上怎麼分比較開。</p>
+</div>
+</details>
+
+<details class="bg"><summary>k-means 在最小化什麼？（微積分版）</summary>
+<div class="bg-body">
+<p>給定 $k$，先挑 $k$ 個起點當中心 $\boldsymbol{\mu}_1,\dots,\boldsymbol{\mu}_k$，再反覆做兩件事，直到沒有點換群：</p>
+<ol>
+<li><strong>指派</strong>：每個點歸到離它最近的中心</li>
+<li><strong>更新</strong>：每個中心移到自己那群所有點的平均位置</li>
+</ol>
+<p>整個過程在最小化這個量，sklearn 把它叫做 <code>inertia_</code>：</p>
+$$J=\sum_{i=1}^{n}\bigl\|\mathbf{x}_i-\boldsymbol{\mu}_{c(i)}\bigr\|^2$$
+<p>$c(i)$ 是第 $i$ 個點被分到哪一群。白話：<strong>每個點到自己那群中心的距離平方，全部加起來</strong>。</p>
+<p>「移到平均」不是隨便定的：固定分群後對 $\boldsymbol{\mu}_j$ 微分並令其為零，
+$\frac{\partial J}{\partial\boldsymbol{\mu}_j}=-2\sum_{i\in C_j}(\mathbf{x}_i-\boldsymbol{\mu}_j)=0$，
+解出 $\boldsymbol{\mu}_j=\frac{1}{|C_j|}\sum_{i\in C_j}\mathbf{x}_i$，就是群內平均。<strong>這就是微積分課的「令導數為零求極值」。</strong></p>
+<p style="margin-bottom:0">每一步都不會讓 $J$ 變大，但停下來的地方<strong>不保證是全域最小</strong>。所以實務上會設 <code>n_init=10</code>（換 10 組起點取最好的），並固定 <code>random_state</code> 讓結果可以重現。</p>
+</div>
+</details>
+
 <details class="bg"><summary>silhouette 詳解：公式怎麼來、分數怎麼讀</summary>
 <div class="bg-body">
 <h4>$a(i)$ 與 $b(i)$ 的完整定義</h4>
@@ -1331,46 +1350,13 @@ $$\text{ARI}=\frac{\sum_{ij}\binom{n_{ij}}{2}-\dfrac{AB}{M}}{\dfrac{1}{2}(A+B)-\
 </div>
 </details>
 
-<div class="box danger">
-<div class="bt">這一關真正要你帶走的</div>
-<p style="margin-bottom:0">
-<strong>AI 不知道你要什麼時，還是可能給你一個肯定的答案。</strong>往後每次看到「判定為」「建議」，先找出它做了哪些你沒要求的決定，再把結論改寫成帶條件的句子，例如：「標準化後以 silhouette 比較 k=2 到 12 時，k=9 最高；若要回查每家店，k=10 最接近，但仍有少數紀錄分錯，最好補回店別紀錄。」
-</p>
-</div>
-</section>
-
-<section>
-<h2 id="section-檢查清單">檢查清單</h2>
-<ul class="ckl">
-<li><input type="checkbox" id="l1a"><label for="l1a">看到揭曉前，我寫下了接受、保留或拒絕，以及它替我做的決定</label></li>
-<li><input type="checkbox" id="l1b"><label for="l1b">我寫了目標卡的三格（用途、合併規則、判斷證據），用它改寫問題，並打開 <code>lab1_cluster.py</code> 看過</label></li>
-<li><input type="checkbox" id="l1c"><label for="l1c"><code>figs/lab1_k_selection.png</code> 存在，我看得懂它在比什麼</label></li>
-<li><input type="checkbox" id="l1d"><label for="l1d">我能把結論改寫成帶條件的句子，說清楚資料怎麼處理、用什麼指標、回答哪個任務</label></li>
-<li><input type="checkbox" id="l1e"><label for="l1e">我知道 silhouette 不看店別、ARI 要看店別，也能說明兩者為什麼可能選不同的 k</label></li>
-</ul>
-</section>
-
-<section>
-<h2 id="section-如果還有時間">如果還有時間</h2>
-<ul>
-<li>挑一個自己想試的變化，例如拿掉一欄或換一種指標，和鄰座比較。</li>
-<li>請它列出每群包含各家店的天數，自己找出哪兩家店被併在一起。</li>
-<li>用不同 <code>random_state</code> 重跑，看 k=9 和 k=10 的排序穩不穩定。</li>
-<li>問它：<strong>「inertia 為什麼隨 k 遞減？用數學證明給我看。」</strong>再自己檢查：k-means 找到的是局部解，實務上偶爾會不單調。</li>
-</ul>
-<details class="bg"><summary>寫完再對照：一份參考的清楚版 prompt</summary>
+<details class="bg" id="lab1-reference"><summary>下載參考程式</summary>
 <div class="bg-body">
-<pre class="cmd"><code><span class="ln">用 data/shops_daily.csv 做 k-means 分群。先拿掉標準差為 0 的欄位，再標準化。
-</span><span class="ln">
-</span><span class="ln">掃過 k = 2 到 12，每個 k 都記錄 silhouette，也算一次不標準化的結果做對照，
-</span><span class="ln">逐項印出數值，並把兩條曲線畫到 figs/lab1_k_selection.png。
-</span><span class="ln">
-</span><span class="ln">要求：
-</span><span class="ln">- 選 k 時不可以使用 data/shops_daily_store.csv
-</span><span class="ln">- random_state 固定為 0，n_init=10
-</span><span class="ln">- 寫成 lab1_cluster.py，用 uv run python 執行
-</span><span class="ln">- 選好 k 之後，再用店別紀錄算 k=9、k=10 的 ARI，並列出每群包含哪些店
-</span><span class="ln">- 最後分別回答：店型手冊適合幾群？客訴回查適合幾群？</span></code></pre>
+<p>在專案資料夾執行。程式會從 <code>data/</code> 讀資料；店別紀錄要先照第 5 步下載。</p>
+<pre class="cmd"><code><span class="ln">mkdir -p reference
+</span><span class="ln">curl -fsSL https://phonchi.github.io/opencode-math-workshop/reference/lab1_cluster.py -o reference/lab1_cluster.py
+</span><span class="ln">uv run python reference/lab1_cluster.py</span></code></pre>
+<p style="margin-bottom:0">先完成自己的版本，再拿來對照：比的是做了哪些決定、印出哪些數字，不是程式長得像不像。</p>
 </div>
 </details>
 </section>

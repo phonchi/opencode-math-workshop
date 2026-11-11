@@ -1,0 +1,126 @@
+
+> build · big-pickle
+$ ls -la data/ && head -n 3 data/orders.csv && head -n 3 data/orders_complaint.csv && wc -l data/orders.csv data/orders_complaint.csv
+total 124
+drwxr-xr-x 1 User 197121     0 十一月 11 13:34 .
+drwxr-xr-x 1 User 197121     0 十一月 11 13:34 ..
+-rw-r--r-- 1 User 197121 30603 十一月 11 13:31 loans.csv
+-rw-r--r-- 1 User 197121 47990 十一月 11 13:31 orders.csv
+-rw-r--r-- 1 User 197121  1610 十一月 11 13:34 orders_complaint.csv
+-rw-r--r-- 1 User 197121 27759 十一月 11 13:31 shops_daily.csv
+-rw-r--r-- 1 User 197121  1538 十一月 11 13:33 shops_daily_store.csv
+amount_ntd,distance_km,prep_min,ride_min,handoff_min,tip_ntd,package_g,shop_rating,drop_offset_km,pause_ratio,rider_odometer_m
+249,2.37,17.6,19.3,2.17,11.9,629,4.21,0.0359,0.0412,1696442
+205,2.16,17.8,17.3,1.84,15.0,594,4.28,0.0262,0.0623,1393473
+complaint
+0
+0
+  801 data/orders.csv
+  801 data/orders_complaint.csv
+ 1602 total
+> build · big-pickle
+$ uv run python -c "
+import pandas as pd
+X = pd.read_csv('data/orders.csv')
+y = pd.read_csv('data/orders_complaint.csv')['complaint']
+print('shape:', X.shape)
+print('dtypes non-numeric:', X.select_dtypes(exclude='number').columns.tolist())
+print('missing total:', X.isna().sum().sum())
+print('dup rows:', X.duplicated().sum())
+print('label counts:'); print(y.value_counts())
+print('pos rate:', y.mean())
+"
+shape: (800, 11)
+dtypes non-numeric: []
+missing total: 0
+dup rows: 0
+label counts:
+complaint
+0    740
+1     60
+Name: count, dtype: int64
+pos rate: 0.075
+> build · big-pickle
+資料很乾淨：800 筆 × 11 個數值欄位、無遺漏值、無重複列，客訴 60 筆（7.5%，不平衡）。先確認環境有 scikit-learn，再寫程式。
+$ ls && uv run python -c "import sklearn, pandas, numpy; print(sklearn.__version__)"
+AGENTS.md
+data
+figs
+lab1_check_stores.py
+lab1_cluster.py
+notes
+opencode.json
+pyproject.toml
+uv.lock
+1.9.1
+> build · big-pickle
+← Write lab2_auc.py
+Created file successfully: lab2_auc.py
+> build · big-pickle
+$ uv run python lab2_auc.py
+資料：800 筆、11 個特徵；客訴 60 筆（7.5%）
+交叉驗證：分層 5 折（shuffle=True, random_state=42）
+（累積變異 = 各訓練折 PCA 的前 n 個 explained_variance_ratio_ 之和，5 折平均）
+
+ 主成分        累積變異       AUC
+   3      0.6909    0.5792
+   4      0.8388    1.0000
+   5      0.9295    1.0000
+
+AUC(5) - AUC(4) = 0.0000（你的門檻：超過 0.02 才撤回）
+> build · big-pickle
+跑一個不同隨機種子的快速檢查，確認結果不是湊巧（不改 `lab2_auc.py`）：
+$ uv run python -c "
+import pandas as pd, numpy as np
+from sklearn.model_selection import StratifiedKFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+X = pd.read_csv('data/orders.csv'); y = pd.read_csv('data/orders_complaint.csv')['complaint'].to_numpy()
+for seed in [0, 1, 7, 42]:
+    cv = StratifiedKFold(5, shuffle=True, random_state=seed)
+    out = {}
+    for tr, te in cv.split(X, y):
+        sc = StandardScaler().fit(X.iloc[tr]); Ztr = sc.transform(X.iloc[tr]); Zte = sc.transform(X.iloc[te])
+        p = PCA(5).fit(Ztr); A, B = p.transform(Ztr), p.transform(Zte)
+        for n in [3, 4, 5]:
+            c = LogisticRegression(max_iter=1000).fit(A[:, :n], y[tr])
+            out.setdefault(n, np.zeros(len(y)))[te] = c.predict_proba(B[:, :n])[:, 1]
+    print(seed, {n: round(roc_auc_score(y, out[n]), 4) for n in [3, 4, 5]})
+"
+0 {3: 0.535, 4: 1.0, 5: 1.0}
+1 {3: 0.5555, 4: 1.0, 5: 1.0}
+7 {3: 0.5587, 4: 1.0, 5: 1.0}
+42 {3: 0.5792, 4: 1.0, 5: 1.0}
+> build · big-pickle
+結果（`lab2_auc.py` 已存檔，用 `uv run python lab2_auc.py` 可重現）：
+
+| 主成分數 | 累積變異（5 折平均） | AUC（out-of-fold） |
+|---|---|---|
+| 3 | 0.6909 | 0.5792 |
+| 4 | 0.8388 | **1.0000** |
+| 5 | 0.9295 | **1.0000** |
+
+**AUC(5) − AUC(4) = 0.0000**，沒有超過你的 0.02 門檻——差值是零，結論照你的規則由你自己下。另外我用 seed 0、1、7 額外驗證過（不影響存檔的程式）：3 個主成分約 0.53–0.58，4 和 5 都是 1.0000，結果穩定。觀察到的事實是：第 4 個主成分承載了客訴訊號（AUC 從 0.58 跳到 1.00），第 5 個不再增加。
+
+## 我替你做的每個決定
+
+**前處理**
+1. **丟掉的欄位：無。** `orders.csv` 11 欄全是數值，沒有 ID、日期、文字欄位可丟；`orders_complaint.csv` 只當標籤 y，沒混入特徵。
+2. **遺漏值／重複列：0 個**，所以沒做插補、沒刪任何列。
+3. 標準化用 `StandardScaler`（減均值除標準差），**每折只在訓練折 fit** 再轉換測試折。
+
+**PCA 準則**
+4. PCA 也是**每折只在訓練折 fit**；一次 fit 5 個主成分再切前 3/4/5 個（主成分有巢狀性，前 k 個不受總數影響，且保證三種設定比的是同一組主成分）。
+5. 累積變異的報法：各**訓練折** PCA 的 `explained_variance_ratio_` 前 n 個之和、5 折平均。沒有用全資料 fit 的 PCA 來報，連描述統計都不碰測試折。
+
+**交叉驗證與 AUC**
+6. `StratifiedKFold(5, shuffle=True, random_state=42)`——正類只有 60/800（7.5%），所以用分層；固定種子為了可重現。三種主成分數**共用同一組折**，差異才是配對比較。
+7. AUC 是把 5 折的 out-of-fold 預測機率**合併後算單一 `roc_auc_score`**，不是每折算再平均。
+
+**分類器**
+8. `LogisticRegression` 全預設（C=1.0、L2、lbfgs），只把 `max_iter=1000` 提高；**沒做** `class_weight` 平衡、沒調任何超參數，避免額外引入選擇。
+
+**門檻**
+9. 0.02 是你定的，我照辦：程式只印出差值，不替你判定主張成立或撤回。

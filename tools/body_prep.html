@@ -69,7 +69,7 @@
 <div class="tw"><table>
 <tr><th>工具</th><th>作用</th></tr>
 <tr><td><strong>Git</strong></td><td>記錄與還原程式修改；Windows 版同時提供本教材使用的終端機 Git Bash</td></tr>
-<tr><td><strong>opencode</strong></td><td>在終端機裡接受你的任務，讀檔、寫程式並執行</td></tr>
+<tr><td><strong>opencode</strong></td><td>在終端機裡接受你的任務，讀檔、寫程式並執行。本課程用 V2 版（2.x）</td></tr>
 <tr><td><strong>uv</strong></td><td>建立本專案的 Python 環境並管理套件，不需要先另裝 Python</td></tr>
 </table></div>
 <div class="box tip">
@@ -96,7 +96,7 @@
 <h3>開啟 Git Bash，安裝 opencode 與 uv</h3>
 <p>從開始選單搜尋並開啟 <strong>Git Bash</strong>，<strong>依序</strong>貼上這三行：</p>
 <pre class="cmd"><code>touch ~/.bash_profile
-curl -fsSL https://opencode.ai/install | bash
+curl -fsSL https://opencode.ai/v2/install | bash
 curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 <p>第一行建立 Git Bash 的設定檔。少了它，opencode 的安裝程式找不到地方記錄路徑，重開後會找不到 <code>opencode</code>。</p>
 </div>
@@ -121,7 +121,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 <p>先開「終端機」確認 Git。如果還沒安裝，macOS 會跳出視窗請你安裝 Command Line Tools，照畫面完成即可：</p>
 <pre class="cmd"><code>git --version</code></pre>
 <p>macOS 內建 <code>curl</code>，接著貼這兩行：</p>
-<pre class="cmd"><code>curl -fsSL https://opencode.ai/install | bash
+<pre class="cmd"><code>curl -fsSL https://opencode.ai/v2/install | bash
 curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 <p class="lead" style="font-size:.92rem;color:var(--ink-3)">
 （macOS 請依官方安裝說明操作，課前完成同一份自測；需要協助時提早聯絡講師。）
@@ -137,7 +137,7 @@ Ubuntu 的基本安裝不一定包含它們。真正一定有的是套件管理�
 <p>（<code>ca-certificates</code> 是驗證 HTTPS 憑證用的，少了它 <code>curl</code> 會連不上。
 如果這些本來就有，這行也只會告訴你「已經是最新版」，不會弄壞任何東西。）</p>
 <p>接著才裝 opencode 與 uv：</p>
-<pre class="cmd"><code>curl -fsSL https://opencode.ai/install | bash
+<pre class="cmd"><code>curl -fsSL https://opencode.ai/v2/install | bash
 curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 <p>裝完後關掉終端機重開，或執行 <code>source ~/.bashrc</code>。</p>
 </section>
@@ -147,7 +147,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
 <pre class="cmd"><code>git --version
 opencode --version
 uv --version</code></pre>
-<p>三個指令都應印出版本號；記下來，之後求助時可以一起提供。</p>
+<p>三個指令都應印出版本號；記下來，之後求助時可以一起提供。<code>opencode --version</code> 要是 <code>v2</code> 開頭（例如 <code>opencode v2.2.7</code>）。如果你之前裝過 1.x 版，重跑一次上面的安裝指令就會換成 V2。</p>
 <div class="box warn">
 <div class="bt">如果出現「找不到指令」</div>
 <p style="margin-bottom:0">
@@ -155,6 +155,20 @@ uv --version</code></pre>
 還是不行的話，Windows 請確認開的是 <strong>Git Bash</strong>，不是 PowerShell 或 cmd。
 </p>
 </div>
+</section>
+
+<section>
+<h2>開啟狀態列</h2>
+<p>狀態列會一直顯示在 OpenCode 畫面最底下，告訴你 context 用了多少、回應速度和經過時間。Lab 3 會用它記 context 用量。這是第三方外掛 <a href="https://github.com/rashidrazak/opencode-status-line">opencode-status-line</a>，只支援 V2。三個平台都在終端機貼上同一段：</p>
+<pre class="cmd"><code>mkdir -p ~/.config/opencode
+cat &gt; ~/.config/opencode/cli.json &lt;&lt;'EOF'
+{
+  "$schema": "https://opencode.ai/v2/cli.json",
+  "plugins": ["@rashidrazak/opencode-status-line"]
+}
+EOF</code></pre>
+<p>如果你本來就有 <code>~/.config/opencode/cli.json</code>，上面這段會把它整個蓋掉。這時改用編輯器打開它，只在 <code>"plugins"</code> 裡加上 <code>"@rashidrazak/opencode-status-line"</code>。</p>
+<p>要等下面建好專案、啟動 <code>opencode</code> 並送出一句話後，底部才會出現狀態列。輸入 <code>/tps</code> 可以看詳細統計。</p>
 </section>
 
 <section>
@@ -184,6 +198,7 @@ version = "0.1.0"
 requires-python = "&gt;=3.10"
 dependencies = [
     "numpy&gt;=1.26",
+    "pandas&gt;=2.2",
     "scipy&gt;=1.11",
     "matplotlib&gt;=3.8",
     "scikit-learn&gt;=1.4",
@@ -225,11 +240,23 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 換一個資料夾就換一套設定。
 </p>
 </div>
+<details class="bg"><summary>OpenCode 的設定檔放在哪裡？</summary>
+<div class="bg-body">
+<div class="tw"><table>
+<tr><th>位置</th><th>放什麼</th></tr>
+<tr><td>全域：<code>~/.config/opencode/</code><br>（Windows 是 <code>C:\Users\你的名字\.config\opencode</code>）</td><td><code>opencode.json</code> 或 <code>opencode.jsonc</code>（可寫註解）：所有專案共用的設定<br><code>cli.json</code>：介面設定與介面外掛，例如上面的狀態列</td></tr>
+<tr><td>專案：專案資料夾裡的 <code>opencode.json</code><br>或 <code>.opencode/opencode.json</code></td><td>只對這個專案有效的設定，例如本課程的模型與權限</td></tr>
+<tr><td><code>~/.local/share/opencode/</code></td><td><code>/connect</code> 存的 API key 和對話紀錄。不要分享，也不要放進 Git</td></tr>
+</table></div>
+<p>同一個設定兩邊都有時，<strong>專案的蓋過全域的</strong>；<code>.opencode/</code> 裡的又蓋過專案根目錄的。想知道 OpenCode 實際讀到哪些設定檔，在專案資料夾執行 <code>opencode debug config</code>。</p>
+<p style="margin-bottom:0">詳細規則見官方的<a href="https://opencode.ai/docs/config/">設定文件</a>。</p>
+</div>
+</details>
 </div>
 
 <div class="step" data-n="4">
 <h3>建立 <code>AGENTS.md</code></h3>
-<p>這是給 agent 看的專案規則。課前只放操作規則；「數學要怎麼驗證」先不寫，今天課程結束時，你會把自己抓到的問題寫成規則加回來。同一個資料夾，建立 <code>AGENTS.md</code>：</p>
+<p>這是給 agent 看的專案規則。課前只放操作規則和「Plan 模式先一次問一題」；課程結束時，你會把今天學到的追問寫成規則加回來。同一個資料夾，建立 <code>AGENTS.md</code>：</p>
 <pre class="cmd"><code># AI-Math 工作坊　專案規則
 
 ## 語言
@@ -238,6 +265,9 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 ## 執行環境
 本專案用 uv 管理環境。執行 Python 一律用：`uv run python &lt;檔案&gt;`
 不要用 `python`、`python3`、`pip install`。要加套件用 `uv add &lt;套件&gt;`。
+
+## 規劃（Plan 模式）
+在 Plan 模式收到任務時，先不要列計畫。一次只問我一個問題，並附上你建議的答案，最多問 3 題。問清楚後，再列出計畫和你打算替我做的決定。
 
 ## 圖檔
 所有圖存到 `figs/`，用 `savefig()`，不要用 `plt.show()`（它可能開視窗並等待關閉，程式看起來像卡住）。
@@ -259,6 +289,7 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">uv sync</span></div>
   <div class="term-body"><div class="o"> + numpy==2.5.3</div>
+<div class="o"> + pandas==3.1.1</div>
 <div class="o"> + scipy==1.18.1</div>
 <div class="o"> + scikit-learn==1.9.1</div>
 <div class="o"> + matplotlib==3.11.2</div>
@@ -274,7 +305,7 @@ opencode 的設定是<strong>一層一層疊上去</strong>的：全域設定 �
 <p>下面三個測試全部通過，你就準備好了。</p>
 
 <h3>測試一：Python 環境</h3>
-<pre class="cmd"><code>uv run python -c "import numpy, scipy, sklearn, matplotlib, networkx; print('環境 OK')"</code></pre>
+<pre class="cmd"><code>uv run python -c "import numpy, pandas, scipy, sklearn, matplotlib, networkx; print('環境 OK')"</code></pre>
 <p>應該印出 <code>環境 OK</code>。如果中文是亂碼，回到安裝步驟確認 <code>setx PYTHONUTF8 1</code> 已執行，並重開 Git Bash。</p>
 
 <h3>測試二：agent 會回話</h3>
@@ -296,7 +327,7 @@ opencode 的處理方式是<strong>直接拒絕</strong>：
 </p>
 <pre><code>! permission requested: edit (hello.py); auto-rejecting
 ✗ Write hello.py failed
-Error: The user rejected permission to use this specific tool call.</code></pre>
+Error: This non-interactive run cannot ask the user for permission, so the request was rejected.</code></pre>
 <p style="margin-bottom:0">
 <code>--auto</code> 就是「這一次我事先全部答應」。
 它在自測時很方便，但<strong>平常不要養成習慣</strong>。
@@ -306,18 +337,20 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 </div>
 <div class="term">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">預期畫面</span></div>
-  <div class="term-body"><div class="t">Read　AGENTS.md</div>
-<div class="w">Write　hello.py</div>
-<div class="b">uv run python hello.py</div>
-<div class="o">1 4 9 16 25 36 49 64 81 100</div>
+  <div class="term-body"><div class="t">&gt; build · big-pickle</div>
+<div class="w">← Write hello.py</div>
+<div class="b">$ uv run python hello.py</div>
+<div class="o">1 1</div>
+<div class="o">2 4</div>
+<div class="o">（中間省略）</div>
+<div class="o">10 100</div>
 <div class="sp"></div>
-<div class="c">已建立 hello.py 並執行完成。</div>
+<div class="c">已建立 hello.py 並用 uv run python hello.py 執行完成。</div>
 </div>
 </div>
 <p>
-看到 <code>Read</code>、<code>Write</code>、<code>$</code> 這三種箭頭，代表 agent 的三種能力
-（讀檔、寫檔、執行指令）都正常。而且它讀了 <code>AGENTS.md</code>、用了 <code>uv run</code>，
-表示你的專案規則有生效。
+看到 <code>← Write</code>（寫檔）和 <code>$</code>（執行指令），代表 agent 能動手。
+它用了 <code>uv run python</code>，不是 <code>python</code>，表示你的 <code>AGENTS.md</code> 規則有生效。
 </p>
 
 <ul class="ckl">
@@ -344,7 +377,7 @@ Error: The user rejected permission to use this specific tool call.</code></pre>
 <tr><td>1</td><td><code>big-pickle</code></td><td>預設</td><td>不用登入</td></tr>
 <tr><td>2</td><td>其他免費模型，例如 <code>beam-free</code></td><td><code>big-pickle</code> 額度用完</td><td>用 <code>/models</code> 切換；可能和 <code>big-pickle</code> 一起被擋</td></tr>
 <tr><td>3</td><td><code>Gemini 3.5 Flash Lite</code></td><td>免費模型都不能用</td><td>要自己的 Gemini key</td></tr>
-<tr><td>4</td><td><code>GLM-5.3-Flash</code></td><td>Gemini 也不能用</td><td>要自己的 NVIDIA key；實測較慢，但一樣能完成三個 Lab</td></tr>
+<tr><td>4</td><td><code>GLM-5.3-Flash</code></td><td>Gemini 也不能用</td><td>要自己的 NVIDIA key；比較慢，但一樣能完成三個 Lab</td></tr>
 </table></div>
 
 <div class="box warn">

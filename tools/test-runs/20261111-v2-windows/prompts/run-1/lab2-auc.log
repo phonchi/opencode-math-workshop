@@ -1,0 +1,169 @@
+
+> build · big-pickle
+→ Read . 
+✱ Glob "data/*" 5 matches
+> build · big-pickle
+→ Read lab1_cluster.py 
+$ head -5 data/orders.csv && echo "---" && head -5 data/orders_complaint.csv && echo "---" && wc -l data/orders.csv data/orders_complaint.csv
+amount_ntd,distance_km,prep_min,ride_min,handoff_min,tip_ntd,package_g,shop_rating,drop_offset_km,pause_ratio,rider_odometer_m
+249,2.37,17.6,19.3,2.17,11.9,629,4.21,0.0359,0.0412,1696442
+205,2.16,17.8,17.3,1.84,15.0,594,4.28,0.0262,0.0623,1393473
+209,2.34,17.1,14.8,1.98,13.0,673,4.30,0.0374,0.0495,1840028
+179,1.59,16.7,6.1,1.76,10.3,745,4.32,0.0358,0.0482,1532543
+---
+complaint
+0
+0
+0
+0
+---
+  801 data/orders.csv
+  801 data/orders_complaint.csv
+ 1602 total
+> build · big-pickle
+$ cat pyproject.toml && uv run python -c "
+import pandas as pd
+X = pd.read_csv('data/orders.csv')
+y = pd.read_csv('data/orders_complaint.csv')['complaint']
+print(X.dtypes)
+print('缺失值總數:', X.isna().sum().sum())
+print('std=0 欄位:', [c for c in X.columns if X[c].std()==0])
+print('label 分布:'); print(y.value_counts())
+print('y 型別:', y.dtype)
+"
+[project]
+name = "ai-math-lab"
+version = "0.1.0"
+description = "AI-Math 工作坊實作環境"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "matplotlib>=3.8",
+    "scikit-learn>=1.4",
+    "networkx>=3.2",
+    "scipy>=1.11",
+]
+amount_ntd            int64
+distance_km         float64
+prep_min            float64
+ride_min            float64
+handoff_min         float64
+tip_ntd             float64
+package_g             int64
+shop_rating         float64
+drop_offset_km      float64
+pause_ratio         float64
+rider_odometer_m      int64
+dtype: object
+缺失值總數: 0
+std=0 欄位: []
+label 分布:
+complaint
+0    740
+1     60
+Name: count, dtype: int64
+y 型別: int64
+> build · big-pickle
+資料檢查完畢：800 筆 × 11 個數值欄位、無缺失、無 std=0 欄位，客訴陽性 60 筆（7.5%）。接著寫 `lab2_auc.py`。
+← Write lab2_auc.py
+Created file successfully: lab2_auc.py
+> build · big-pickle
+$ uv run python lab2_auc.py
+資料：800 列 x 11 個特徵欄位
+客訴陽性：60 筆（7.5%）
+
+  主成分數 |         累積變異（5折平均） |    AUC（折外）
+----------------------------------------
+     3 |          69.0532% |     0.5350
+     4 |          83.8919% |     1.0000
+     5 |          92.9524% |     1.0000
+
+AUC(4 個) = 1.0000
+AUC(5 個) = 1.0000
+AUC(5) - AUC(4) = 0.0000（門檻 0.02）
+4 個主成分的 AUC 沒有比 5 個低超過 0.02 -> 撤回條件不成立。
+> build · big-pickle
+AUC = 1.0000 這個結果太乾淨，我快速驗證一下不是流程洩漏造成的：
+$ uv run python -c "
+import pandas as pd, numpy as np
+from sklearn.model_selection import StratifiedKFold
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+
+X = pd.read_csv('data/orders.csv'); y = pd.read_csv('data/orders_complaint.csv')['complaint']
+cv = StratifiedKFold(5, shuffle=True, random_state=0)
+
+# (a) 不用 PCA，直接標準化 + logistic：看是否本來就線性可分
+p = Pipeline([('s', StandardScaler()), ('c', LogisticRegression(max_iter=1000))])
+oof = np.zeros(len(y))
+for tr, te in cv.split(X, y):
+    p.fit(X.iloc[tr], y.iloc[tr]); oof[te] = p.predict_proba(X.iloc[te])[:,1]
+print('無PCA AUC:', roc_auc_score(y, oof))
+
+# (b) k=4 逐折 AUC
+p4 = Pipeline([('s', StandardScaler()), ('p', PCA(4)), ('c', LogisticRegression(max_iter=1000))])
+for i,(tr,te) in enumerate(cv.split(X,y)):
+    p4.fit(X.iloc[tr], y.iloc[tr])
+    print(f'fold{i} AUC:', roc_auc_score(y.iloc[te], p4.predict_proba(X.iloc[te])[:,1]))
+
+# (c) 用第4主成分係數看訊號在哪
+sc = StandardScaler().fit(X); Z = sc.transform(X)
+pc = PCA(4).fit(Z)
+print('PC 每折方向穩定性略。全資料PC4 loading:')
+print(pd.Series(pc.components_[3], index=X.columns).sort_values().round(3).to_string())
+print('PC4 與 label 相關:', np.corrcoef(Z @ pc.components_[3].T, y)[0,1])
+"
+無PCA AUC: 1.0
+fold0 AUC: 1.0
+fold1 AUC: 1.0
+fold2 AUC: 1.0
+fold3 AUC: 1.0
+fold4 AUC: 1.0
+PC 每折方向穩定性略。全資料PC4 loading:
+rider_odometer_m   -0.066
+distance_km        -0.020
+amount_ntd         -0.018
+handoff_min        -0.017
+ride_min           -0.012
+package_g           0.013
+prep_min            0.014
+shop_rating         0.044
+tip_ntd             0.044
+pause_ratio         0.702
+drop_offset_km      0.705
+PC4 與 label 相關: 0.8688395179731098
+> build · big-pickle
+結果驗證無誤：不用 PCA、直接標準化 + logistic 也是 AUC = 1.0，逐折也都 1.0，客訴訊號主要集中在第 4 主成分（loading：`drop_offset_km` 0.705、`pause_ratio` 0.702，與標籤相關 0.87），所以 1.0000 是資料本身的性質，不是流程洩漏。
+
+## 執行結果（`lab2_auc.py`，已存檔並跑完）
+
+| 主成分數 | 累積變異（5 折訓練折平均） | AUC（折外預測） |
+|---|---|---|
+| 3 | 69.05% | 0.5350 |
+| 4 | 83.89% | 1.0000 |
+| 5 | 92.95% | 1.0000 |
+
+- AUC(5) − AUC(4) = 0.0000，未超過 0.02 → **撤回條件不成立**（4 個主成分沒有比 5 個低超過 0.02）。我沒有改動你的主張，只是依你的門檻回報檢查結果。
+- 附帶觀察：3 個主成分時 AUC 掉到 0.535，因為客訴訊號主要在第 4 主成分；另外 4 和 5 的 AUC 都頂到 1.0，這個比較只能告訴你「沒有更差」，無法再分辨更細的差異（天花板效應）。
+
+## 我替你做的每個決定
+
+**前處理**
+1. **丟掉的欄位：沒有丟任何欄位。** 11 個欄位全是數值、無缺失、無 std=0、無 ID 型欄位，全部保留當特徵。
+2. `orders_complaint.csv` 只當標籤 y 用來評分，從不進入特徵矩陣。
+3. 標準化 = `StandardScaler`（各欄平均 0、變異數 1）；只 fit 訓練折。
+4. PCA = sklearn 預設（SVD full、無 whitening），接在標準化之後，只 fit 訓練折。
+
+**模型與交叉驗證**
+5. `LogisticRegression` 用預設值（L2 正則、C=1.0、lbfgs），僅 `max_iter=1000` 確保收斂。
+6. **沒有做類別加權**（`class_weight=None`）：陽性僅 60/800 = 7.5%，我選不加權，維持「普通 logistic 迴歸」的字面設定。
+7. 5 折 = `StratifiedKFold(5, shuffle=True, random_state=0)`：分層保證每折都有陽性（每折約 12 筆）；shuffle + 固定亂數；**3、4、5 三種設定共用同一組切分**，比較才公平。
+
+**準則與門檻**
+8. AUC 的算法：把 5 折的**折外預測機率**彙整成一份，算單一 `roc_auc_score`（不是逐折 AUC 再平均）。
+9. 累積變異的定義：**5 個訓練折** PCA `explained_variance_ratio_ 總和的平均**（遵守你「PCA 只能用訓練資料算」的要求，而不是拿全資料算一份）。
+10. 「低超過 0.02」解讀為嚴格不等式：AUC(5) − AUC(4) > 0.02 才成立，等於 0.02 不算。

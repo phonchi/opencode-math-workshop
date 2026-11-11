@@ -9,9 +9,18 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix, recall_score
 from sklearn.model_selection import train_test_split
 
-DATA = Path(__file__).resolve().parents[1] / "assets" / "data"
-D = np.genfromtxt(DATA / "loans.csv", delimiter=",", skip_header=1)
-N = np.genfromtxt(DATA / "reveal" / "loans_new_batch.csv", delimiter=",", skip_header=1)
+
+def data_file(name, reveal=False):
+    """先找學生專案的 data/，再找教材 repo 的 assets/data/。"""
+    repo = Path(__file__).resolve().parents[1] / "assets" / "data"
+    for p in (Path("data") / name, (repo / "reveal" if reveal else repo) / name):
+        if p.exists():
+            return p
+    raise FileNotFoundError(f"找不到 {name}，請先把它下載到 data/")
+
+
+D = np.genfromtxt(data_file("loans.csv"), delimiter=",", skip_header=1)
+N = np.genfromtxt(data_file("loans_new_batch.csv", reveal=True), delimiter=",", skip_header=1)
 X, y = D[:, :-1], D[:, -1].astype(int)
 sig = lambda z: 1 / (1 + np.exp(-z))
 print(f"資料形狀 {X.shape}；逾期比例 {y.mean():.4f}")

@@ -1,0 +1,217 @@
+
+> build · big-pickle
+→ Read data 
+$ uv run python -c "
+import pandas as pd
+df = pd.read_csv('data/loans.csv')
+print(df.shape)
+print(df.dtypes)
+print(df.head())
+"
+(900, 8)
+case_no               int64
+pages                 int64
+past_ontime_pct     float64
+past_avg_days       float64
+commute_min         float64
+account_age_days      int64
+book_age_years      float64
+overdue               int64
+dtype: object
+   case_no  pages  ...  book_age_years  overdue
+0       24    518  ...            18.9        1
+1       82    396  ...            14.3        0
+2      335    202  ...             8.9        0
+3      174    317  ...            12.7        0
+4      553    389  ...            15.2        0
+
+[5 rows x 8 columns]
+> build · big-pickle
+$ uv run python -c "
+import pandas as pd
+df = pd.read_csv('data/loans.csv')
+print('=== missing ===')
+print(df.isna().sum())
+print('=== describe ===')
+print(df.describe())
+print('=== overdue rate ===', df['overdue'].mean())
+"
+=== missing ===
+case_no             0
+pages               0
+past_ontime_pct     0
+past_avg_days       0
+commute_min         0
+account_age_days    0
+book_age_years      0
+overdue             0
+dtype: int64
+=== describe ===
+          case_no       pages  ...  book_age_years     overdue
+count  900.000000  900.000000  ...      900.000000  900.000000
+mean   450.500000  350.654444  ...       12.084778    0.078889
+std    259.951919   71.302077  ...        3.069253    0.269715
+min      1.000000   95.000000  ...        1.900000    0.000000
+25%    225.750000  302.000000  ...       10.000000    0.000000
+50%    450.500000  350.500000  ...       12.000000    0.000000
+75%    675.250000  398.250000  ...       14.400000    0.000000
+max    900.000000  568.000000  ...       20.800000    1.000000
+
+[8 rows x 8 columns]
+=== overdue rate === 0.07888888888888888
+$ uv run python -c "
+import pandas as pd
+df = pd.read_csv('data/loans_new_batch.csv')
+print(df.shape)
+print(df.dtypes)
+print(df.isna().sum())
+print(df.head())
+"
+(300, 8)
+case_no               int64
+pages                 int64
+past_ontime_pct     float64
+past_avg_days       float64
+commute_min         float64
+account_age_days      int64
+book_age_years      float64
+overdue               int64
+dtype: object
+case_no             0
+pages               0
+past_ontime_pct     0
+past_avg_days       0
+commute_min         0
+account_age_days    0
+book_age_years      0
+overdue             0
+dtype: int64
+   case_no  pages  ...  book_age_years  overdue
+0      901    368  ...             5.6        0
+1      902    358  ...            11.4        0
+2      903    249  ...            18.9        0
+3      904    454  ...            10.4        0
+4      905    396  ...            10.4        0
+
+[5 rows x 8 columns]
+> build · big-pickle
+→ Read . 
+> build · big-pickle
+→ Read lab2_auc.py 
+> build · big-pickle
+資料確認：`loans.csv` 900 筆、`loans_new_batch.csv` 300 筆，都沒有缺值，欄位相同。我照專案慣例寫成一支腳本 `lab3_loans_reminder.py`。
+← Write lab3_loans_reminder.py
+Created file successfully: lab3_loans_reminder.py
+> build · big-pickle
+修正一下 docstring 開頭打錯的字：
+← Edit lab3_loans_reminder.py
+Index: lab3_loans_reminder.py
+===================================================================
+--- lab3_loans_reminder.py
++++ lab3_loans_reminder.py
+@@ -1,6 +1,6 @@
+ # -*- coding: utf-8 -*-
+-"""lab3_loans_remreminder.py 的正式名稱見檔名 lab3_loans_reminder.py — 逾期預測與提醒門檻比較。
++"""lab3_loans_reminder.py — 逾期預測與提醒門檻比較。
+ 
+ 流程：
+ 1. 用 data/loans.csv（900 筆）訓練 logistic 迴歸，data/loans_new_batch.csv（300 筆）只拿來驗收。
+ 2. 特徵：pages、past_ontime_pct、past_avg_days、commute_min、account_age_days、book_age_years。
+
+> build · big-pickle
+$ uv run python lab3_loans_reminder.py
+訓練：900 筆 x 6 特徵；逾期 71 筆（7.9%）
+新批：300 筆；逾期 13 筆（4.3%）
+特徵：['pages', 'past_ontime_pct', 'past_avg_days', 'commute_min', 'account_age_days', 'book_age_years']
+寄信上限：每 300 筆最多 40 封
+
+訓練資料 5 折折外 AUC：0.9606
+新批 AUC：0.9534
+
+   門檻 |     >門檻筆數 |     提醒數(上限40) |   抓到 |   漏掉 |   白提醒 |     抓到/逾期
+-------------------------------------------------------------------
+ 0.50 |        11 |            11 |    5 |    8 |     6 |    38.5%
+ 0.30 |        26 |            26 |   10 |    3 |    16 |    76.9%
+ 0.20 |        34 |            34 |   11 |    2 |    23 |    84.6%
+ 0.10 |        51 |            40 |   11 |    2 |    29 |    84.6%
+ 0.05 |        76 |            40 |   11 |    2 |    29 |    84.6%
+> build · big-pickle
+跑完了，模型在新批的 AUC ≈ 0.95，看起來有學到東西。再幫你確認一個事實：逾期案件在機率排序中的名次（這會影響「寄滿 40 封能抓到多少」的天花板）。
+$ uv run python -c "
+import pandas as pd, numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+tr = pd.read_csv('data/loans.csv'); nw = pd.read_csv('data/loans_new_batch.csv')
+feats = [c for c in tr.columns if c not in ('case_no','overdue')]
+pipe = Pipeline([('s',StandardScaler()),('c',LogisticRegression(max_iter=1000))]).fit(tr[feats], tr['overdue'])
+p = pipe.predict_proba(nw[feats])[:,1]
+y = nw['overdue'].to_numpy()
+ranks = pd.Series(p).rank(ascending=False, method='min').to_numpy().astype(int)
+od = np.where(y==1)[0]
+print('逾期案件 (機率, 名次):')
+for i in sorted(od, key=lambda i:-p[i]): print(f'  p={p[i]:.4f}  rank={ranks[i]}')
+print('前40名中逾期數:', int(y[np.argsort(-p)[:40]].sum()))
+print('若寄45封可抓到:', int(y[np.argsort(-p)[:45]].sum()), ' 寄60封:', int(y[np.argsort(-p)[:60]].sum()))
+print('第40名的機率:', np.sort(p)[::-1][39])
+"
+逾期案件 (機率, 名次):
+  p=0.9261  rank=1
+  p=0.8416  rank=4
+  p=0.7886  rank=6
+  p=0.7593  rank=7
+  p=0.7425  rank=8
+  p=0.4775  rank=13
+  p=0.4557  rank=15
+  p=0.4534  rank=16
+  p=0.4108  rank=19
+  p=0.3764  rank=20
+  p=0.2777  rank=28
+  p=0.0897  rank=55
+  p=0.0599  rank=73
+前40名中逾期數: 11
+若寄45封可抓到: 11  寄60封: 12
+第40名的機率: 0.16378780923046427
+> build · big-pickle
+完成。模型與結果如下。
+
+## 門檻比較（新批 300 筆，逾期 13 筆）
+
+| 門檻 | 超過門檻筆數 | 提醒數（上限 40） | 抓到 | 漏掉 | 白提醒 | 抓到率 |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0.50 | 11 | 11 | 5 | 8 | 6 | 38.5% |
+| 0.30 | 26 | 26 | 10 | 3 | 16 | 76.9% |
+| 0.20 | 34 | 34 | 11 | 2 | 23 | 84.6% |
+| 0.10 | 51 | **40（截到前 40 高）** | 11 | 2 | 29 | 84.6% |
+| 0.05 | 76 | **40（截到前 40 高）** | 11 | 2 | 29 | 84.6% |
+
+幾個事實（不替你選，僅供判斷）：
+
+- **0.1 和 0.05 實際寄出名單完全相同**：超過門檻的筆數都超出 40 封上限，所以都是寄「機率最高的前 40 筆」，兩列數字才會一樣。
+- 在「40 封上限」下，這個模型的抓到天花板就是 **11/13**：沒被寄到的 2 筆逾期，機率只有 0.090（排序第 55 名）和 0.060（第 73 名），要抓到第 12 筆得寄至少 55 封，超過上限。
+- 門檻 0.2 和 0.1/0.05 同樣抓到 11 筆，但 0.2 只寄 34 封（少 6 封白提醒）。
+- 體檢數字：訓練資料 5 折折外 AUC = 0.9606，新批 AUC = 0.9534，沒有明顯退化。新批逾期率 4.3%，低於訓練的 7.9%。
+
+## 我替你做的每個決定
+
+**丟掉的欄位**
+- `case_no`：流水號，照你的指示不當特徵（也不拿來做任何轉換）。
+- `overdue`：它是標籤，自然不進特徵；其餘 6 個數值欄位全部保留，沒有另做篩選。
+
+**前處理**
+- 兩份檔案都**沒有缺值**，所以沒有做任何填補或刪列（這是「檢查後決定不動」，不是遺漏）。
+- 特徵做 `StandardScaler` 標準化，**只用訓練資料 fit** 再套到新批。理由：各欄位尺度差很大（如 `account_age_days` 上千、`past_ontime_pct` 介於 0–1），而 L2 正規化的懲罰對尺度敏感。
+- 沒有做分箱、交互作用、或非線性轉換，6 個特徵原樣進模型。
+
+**模型準則**
+- `LogisticRegression` 全預設：L2 懲罰、C=1.0、lbfgs 求解器，只把 `max_iter` 提到 1000 確保收斂。
+- **沒有**做 `class_weight="balanced"`、重取樣或調整 C——訓練集逾期率 7.9% 雖不平衡，但我維持無權重，讓門檻比較在「原始機率」上進行。
+- 訓練/評估方式：**全部 900 筆**訓練，新批 300 筆純驗收，訓練過程完全沒碰新批。訓練集上另做 5 折分層 CV（`random_state=0`、shuffle）算折外 AUC，只當體檢，最終模型仍是全量訓練的那顆。
+- 沒有調任何超參數，也沒有依結果回頭改模型。
+
+**門檻與寄信規則**
+- 陽性判定：機率 **≥ 門檻**（含等於）。
+- 上限規則：超過門檻筆數若多於 40，只寄**機率最高的 40 筆**；機率同分時用原列順序（`case_no` 遞增）當 tie-break，確保結果可重現。
+- 指標定義：抓到 = 逾期且寄到；漏掉 = 逾期但沒寄到；白提醒 = 寄到但其實沒逾期。
+
+腳本在 `lab3_loans_reminder.py`，重跑指令：`uv run python lab3_loans_reminder.py`。

@@ -1,0 +1,1026 @@
+
+> build · big-pickle
+→ Read data/shops_daily.csv [limit=15]
+$ uv run python -c "import pandas, sklearn, matplotlib; print(pandas.__version__, sklearn.__version__, matplotlib.__version__)"
+3.1.1 1.9.1 3.11.2
+> build · big-pickle
+$ uv run python -c "
+import pandas as pd
+df = pd.read_csv('data/shops_daily.csv')
+print(df.shape)
+print(df.describe().T[['mean','std','min','max']])
+print(df.dtypes)
+print('unique counts:')
+print(df.nunique())
+"
+(723, 8)
+                        mean          std        min        max
+revenue_ntd     43075.135546  9310.344792  29147.000  57612.000
+cups_sold         647.520055   129.210486    358.000    832.000
+topping_share       0.292297     0.070094      0.143      0.452
+wait_min            8.773154     1.976261      5.010     12.480
+delivery_share      0.349173     0.115800      0.145      0.530
+rating              4.232071     0.137932      3.877      4.456
+open_hours         12.000000     0.000000     12.000     12.000
+menu_version        3.000000     0.000000      3.000      3.000
+revenue_ntd         int64
+cups_sold           int64
+topping_share     float64
+wait_min          float64
+delivery_share    float64
+rating            float64
+open_hours          int64
+menu_version        int64
+dtype: object
+unique counts:
+revenue_ntd       709
+cups_sold         315
+topping_share     192
+wait_min          422
+delivery_share    280
+rating            297
+open_hours          1
+menu_version        1
+dtype: int64
+> build · big-pickle
+資料有 723 列、8 欄。`open_hours` 和 `menu_version` 標準差為 0（依你的規則要拿掉），剩 6 個數值欄位。現在寫 `lab1_cluster.py`：
+← Write lab1_cluster.py
+Created file successfully: lab1_cluster.py
+> build · big-pickle
+$ uv run python lab1_cluster.py
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+findfont: Font family 'SimHei' not found.
+資料：723 列 x 8 欄
+丟掉的欄位（std = 0）：['open_hours', 'menu_version']
+保留欄位（6 個）：['revenue_ntd', 'cups_sold', 'topping_share', 'wait_min', 'delivery_share', 'rating']
+
+各 k 的指標與各群筆數：
+  k | silhouette |       CH |     DB | 各群筆數
+-------------------------------------------
+  2 |     0.4212 |    502.5 |  1.110 | 409,314
+  3 |     0.4569 |    480.8 |  0.941 | 350,237,136
+  4 |     0.5356 |    574.4 |  0.803 | 285,237,136,65
+  5 |     0.5747 |    629.3 |  0.703 | 237,228,136,65,57
+  6 |     0.6156 |    778.6 |  0.643 | 228,147,136,90,65,57
+  7 |     0.6702 |   1048.3 |  0.598 | 159,147,126,90,77,65,59
+  8 |     0.7470 |   1880.7 |  0.474 | 159,126,92,90,77,65,59,55
+  9 |     0.7942 |   4726.1 |  0.274 | 159,92,90,77,69,65,59,57,55
+ 10 |     0.7252 |   4956.0 |  0.404 | 92,90,85,77,74,69,65,59,57,55
+ 11 |     0.6407 |   4561.7 |  0.698 | 90,85,77,74,69,65,59,57,55,48,44
+ 12 |     0.6110 |   4228.9 |  0.843 | 92,77,71,69,65,60,59,57,55,55,35,28
+
+silhouette 最大：k = 9（0.7942）
+Calinski-Harabasz 最大：k = 10（4956.0）
+Davies-Bouldin 最小：k = 9（0.274）
+
+圖已存到 figs/lab1_k_selection.png
+> build · big-pickle
+執行成功。檢查一下圖的中文字有没有正常顯示：
+→ Read figs/lab1_k_selection.png 
+> build · big-pickle
+模型無法直接讀圖，改用程式確認字型是否找得到：
+$ uv run python -c "
+from matplotlib import font_manager
+names = {f.name for f in font_manager.fontManager.ttflist}
+for n in ['Microsoft JhengHei', 'SimHei', 'Microsoft YaHei', 'Noto Sans CJK TC']:
+    print(n, '->', 'OK' if n in names else 'missing')
+"
+Microsoft JhengHei -> OK
+SimHei -> missing
+Microsoft YaHei -> OK
+Noto Sans CJK TC -> missing
+> build · big-pickle
+微軟正黑體找得到，中文有正常渲染（警告只是來自備用字型 SimHei）。把備用字型清掉讓輸出乾淨：
+← Edit lab1_cluster.py
+Index: lab1_cluster.py
+===================================================================
+--- lab1_cluster.py
++++ lab1_cluster.py
+@@ -33,9 +33,9 @@
+ N_INIT = 10
+ OUT_FIG = "figs/lab1_k_selection.png"
+ 
+ # Windows 上的中文字型（微軟正黑體），找不到就退回預設字型
+-plt.rcParams["font.family"] = ["Microsoft JhengHei", "SimHei", "DejaVu Sans"]
++plt.rcParams["font.family"] = ["Microsoft JhengHei", "Microsoft YaHei", "DejaVu Sans"]
+ plt.rcParams["axes.unicode_minus"] = False
+ 
+ 
+ def main():
+
+> build · big-pickle
+$ uv run python lab1_cluster.py
+資料：723 列 x 8 欄
+丟掉的欄位（std = 0）：['open_hours', 'menu_version']
+保留欄位（6 個）：['revenue_ntd', 'cups_sold', 'topping_share', 'wait_min', 'delivery_share', 'rating']
+
+各 k 的指標與各群筆數：
+  k | silhouette |       CH |     DB | 各群筆數
+-------------------------------------------
+  2 |     0.4212 |    502.5 |  1.110 | 409,314
+  3 |     0.4569 |    480.8 |  0.941 | 350,237,136
+  4 |     0.5356 |    574.4 |  0.803 | 285,237,136,65
+  5 |     0.5747 |    629.3 |  0.703 | 237,228,136,65,57
+  6 |     0.6156 |    778.6 |  0.643 | 228,147,136,90,65,57
+  7 |     0.6702 |   1048.3 |  0.598 | 159,147,126,90,77,65,59
+  8 |     0.7470 |   1880.7 |  0.474 | 159,126,92,90,77,65,59,55
+  9 |     0.7942 |   4726.1 |  0.274 | 159,92,90,77,69,65,59,57,55
+ 10 |     0.7252 |   4956.0 |  0.404 | 92,90,85,77,74,69,65,59,57,55
+ 11 |     0.6407 |   4561.7 |  0.698 | 90,85,77,74,69,65,59,57,55,48,44
+ 12 |     0.6110 |   4228.9 |  0.843 | 92,77,71,69,65,60,59,57,55,55,35,28
+
+silhouette 最大：k = 9（0.7942）
+Calinski-Harabasz 最大：k = 10（4956.0）
+Davies-Bouldin 最小：k = 9（0.274）
+
+圖已存到 figs/lab1_k_selection.png
+> build · big-pickle
+結果出來了。在回答 A、B 之前，我先私下檢查一下資料結構（超出 2–12 的範圍、以及各群中心的分離度），確認 9/10 附近的訊號是真的結構而不是刚好落在邊界：
+$ uv run python -c "
+import numpy as np, pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+df = pd.read_csv('data/shops_daily.csv')
+X = StandardScaler().fit_transform(df.drop(columns=['open_hours','menu_version']))
+
+# 檢查 k 超過 12 之後指標怎麼走（僅供判讀，不放进正式結果）
+for k in range(9, 21):
+    km = KMeans(n_clusters=k, random_state=0, n_init=10)
+    lab = km.fit_predict(X)
+    print(k, round(silhouette_score(X,lab),4), round(calinski_harabasz_score(X,lab),1), round(davies_bouldin_score(X,lab),3))
+
+# k=10 各中心之間最近的距離（標準化空間）
+km10 = KMeans(n_clusters=10, random_state=0, n_init=10).fit(X)
+from itertools import combinations
+C = km10.cluster_centers_
+d = sorted(np.linalg.norm(C[i]-C[j]) for i,j in combinations(range(10),2))
+print('k=10 最近中心距離：', [round(x,2) for x in d])
+km9 = KMeans(n_clusters=9, random_state=0, n_init=10).fit(X)
+C9 = km9.cluster_centers_
+d9 = sorted(np.linalg.norm(C9[i]-C9[j]) for i,j in combinations(range(9),2))
+print('k=9  最近中心距離：', [round(x,2) for x in d9])
+p = PCA(2).fit(X).explained_variance_ratio_
+print('PCA 前兩成分解釋變異：', p.round(3))
+"
+9 0.7942 4726.1 0.274
+10 0.7252 4956.0 0.404
+11 0.6407 4561.7 0.698
+12 0.611 4228.9 0.843
+13 0.5439 3952.6 1.146
+14 0.4563 3736.6 1.268
+15 0.4002 3565.4 1.395
+16 0.3246 3348.6 1.592
+17 0.3332 3209.2 1.511
+18 0.3382 3051.2 1.638
+19 0.2858 2959.6 1.628
+20 0.2481 2821.3 1.731
+k=10 最近中心距離： [np.float64(0.55), np.float64(1.69), np.float64(1.86), np.float64(2.14), np.float64(2.32), np.float64(2.39), np.float64(2.53), np.float64(2.59), np.float64(2.85), np.float64(2.91), np.float64(2.94), np.float64(2.97), np.float64(2.97), np.float64(3.07), np.float64(3.2), np.float64(3.31), np.float64(3.32), np.float64(3.42), np.float64(3.46), np.float64(3.5), np.float64(3.65), np.float64(3.68), np.float64(3.71), np.float64(3.73), np.float64(3.74), np.float64(3.75), np.float64(3.78), np.float64(3.87), np.float64(3.92), np.float64(3.98), np.float64(3.98), np.float64(3.98), np.float64(4.0), np.float64(4.13), np.float64(4.15), np.float64(4.2), np.float64(4.28), np.float64(4.42), np.float64(4.49), np.float64(4.52), np.float64(4.66), np.float64(4.66), np.float64(4.85), np.float64(4.9), np.float64(4.95)]
+k=9  最近中心距離： [np.float64(1.77), np.float64(2.14), np.float64(2.32), np.float64(2.39), np.float64(2.53), np.float64(2.59), np.float64(2.85), np.float64(2.94), np.float64(2.97), np.float64(2.97), np.float64(2.97), np.float64(3.2), np.float64(3.31), np.float64(3.32), np.float64(3.42), np.float64(3.5), np.float64(3.65), np.float64(3.68), np.float64(3.7), np.float64(3.71), np.float64(3.75), np.float64(3.78), np.float64(3.86), np.float64(3.95), np.float64(3.98), np.float64(3.98), np.float64(4.13), np.float64(4.15), np.float64(4.2), np.float64(4.28), np.float64(4.42), np.float64(4.57), np.float64(4.66), np.float64(4.69), np.float64(4.9), np.float64(4.95)]
+PCA 前兩成分解釋變異： [0.47  0.252]
+> build · big-pickle
+9–10 附近確實是峰值（k 超過 12 之後三個指標一路變差，2–12 的範圍沒漏掉更好的 k）。還有一個重要線索：k=10 時有一對群中心只差 0.55，其他任兩群都至少差 1.69 —— k=10 是把某一群再切一半。我再確認那一大群（159 筆）切開後是「真的兩種店」還是「同一型的隨機切半」：
+$ uv run python -c "
+import numpy as np, pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv('data/shops_daily.csv')
+cols = [c for c in df.columns if df[c].std() > 0]
+X = StandardScaler().fit_transform(df[cols])
+
+# k=9 下最大群（159 筆）內部再切 2，看兩半的樣子
+km9 = KMeans(n_clusters=9, random_state=0, n_init=10).fit(X)
+lab9 = km9.labels_
+big = np.unique(lab9, return_counts=True)
+big_id = big[0][np.argmax(big[1])]
+idx = np.where(lab9 == big_id)[0]
+print('最大群筆數：', len(idx))
+
+sub = KMeans(n_clusters=2, random_state=0, n_init=10).fit(X[idx])
+s_lab = sub.labels_
+print('切成兩半筆數：', np.bincount(s_lab))
+
+# 兩半在各欄位的平均差（標準化單位）
+m0 = X[idx][s_lab==0].mean(axis=0)
+m1 = X[idx][s_lab==1].mean(axis=0)
+for c, a, b in zip(cols, m0, m1):
+    print(f'{c:>15}: {a:+.2f} vs {b:+.2f}  (差 {a-b:+.2f} 個標準差)')
+print('兩半中心距離：', round(np.linalg.norm(m0-m1),3))
+print('其他群中心間距最小值(k=9)：1.77')
+
+# 穩定性：不同 random_state 的 k=10 是否都切出同樣的一對近群
+from itertools import combinations
+for rs in [1, 7, 42]:
+    km = KMeans(n_clusters=10, random_state=rs, n_init=10).fit(X)
+    C = km.cluster_centers_
+    d = min(np.linalg.norm(C[i]-C[j]) for i,j in combinations(range(10),2))
+    print(f'random_state={rs}: 最近中心距離 = {d:.3f}, 最小群 = {np.bincount(km.labels_).min()}')
+"
+最大群筆數： 159
+切成兩半筆數： [85 74]
+    revenue_ntd: +1.11 vs +0.99  (差 +0.12 個標準差)
+      cups_sold: +0.80 vs +0.83  (差 -0.03 個標準差)
+  topping_share: -0.21 vs -0.40  (差 +0.19 個標準差)
+       wait_min: +1.55 vs +1.25  (差 +0.29 個標準差)
+ delivery_share: +1.14 vs +1.28  (差 -0.14 個標準差)
+         rating: -0.78 vs -0.40  (差 -0.38 個標準差)
+兩半中心距離： 0.554
+其他群中心間距最小值(k=9)：1.77
+random_state=1: 最近中心距離 = 0.554, 最小群 = 55
+random_state=7: 最近中心距離 = 0.554, 最小群 = 55
+random_state=42: 最近中心距離 = 0.554, 最小群 = 55
+> build · big-pickle
+關鍵證據：把 159 筆那大群切兩半後，兩半在每個特徵上平均只差 0.03–0.38 個標準差、中心距離 0.55（真正的群間距至少 1.77）——k=10 是把「同一型」切兩半，不是多分出一種店。再看 k=9→8 時被合併的那對（69+57→126）差多少，確認 9 是不是不能少：
+$ uv run python -c "
+import numpy as np, pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from itertools import combinations
+
+df = pd.read_csv('data/shops_daily.csv')
+cols = [c for c in df.columns if df[c].std() > 0]
+X = StandardScaler().fit_transform(df[cols])
+
+km9 = KMeans(n_clusters=9, random_state=0, n_init=10).fit(X)
+C = km9.cluster_centers_
+counts = np.bincount(km9.labels_)
+
+# 找 k=9 中最近的兩群，看他們的輪廓差多少
+i, j = min(combinations(range(9),2), key=lambda p: np.linalg.norm(C[p[0]]-C[p[1]]))
+print(f'最近的兩群：#{i}（{counts[i]} 筆）和 #{j}（{counts[j]} 筆），中心距離 {np.linalg.norm(C[i]-C[j]):.2f}')
+print(f'{\"欄位\":>15} | 群#{i:>2} | 群#{j:>2} | 差（標準差）')
+for n, c in enumerate(cols):
+    print(f'{c:>15} | {C[i][n]:+.2f} | {C[j][n]:+.2f} | {C[i][n]-C[j][n]:+.2f}')
+
+# k=9 每群的筆數與輪廓（標準化前的原始平均，方便敘述）
+orig = df[cols]
+print()
+print('k=9 各群原始平均（前3欄）：')
+for g in range(9):
+    m = orig[km9.labels_==g].mean()
+    print(f'群{g}: n={counts[g]:>3}, revenue={m[\"revenue_ntd\"]:>7.0f}, cups={m[\"cups_sold\"]:.0f}, wait={m[\"wait_min\"]:.1f}')
+"
+最近的兩群：#1（159 筆）和 #8（69 筆），中心距離 1.77
+             欄位 | 群# 1 | 群# 8 | 差（標準差）
+    revenue_ntd | +1.05 | +1.11 | -0.06
+      cups_sold | +0.81 | +1.14 | -0.32
+  topping_share | -0.30 | +0.16 | -0.45
+       wait_min | +1.41 | +0.16 | +1.25
+ delivery_share | +1.20 | +0.19 | +1.01
+         rating | -0.60 | -0.14 | -0.46
+
+k=9 各群原始平均（前3欄）：
+群0: n= 65, revenue=  46842, cups=699, wait=6.2
+群1: n=159, revenue=  52882, cups=752, wait=11.6
+群2: n= 77, revenue=  33807, cups=545, wait=9.2
+群3: n= 92, revenue=  31351, cups=611, wait=5.7
+群4: n= 57, revenue=  55207, cups=670, wait=10.1
+群5: n= 90, revenue=  35091, cups=392, wait=8.3
+群6: n= 55, revenue=  39235, cups=552, wait=7.6
+群7: n= 59, revenue=  34827, cups=784, wait=8.5
+群8: n= 69, revenue=  53409, cups=794, wait=9.1
+> build · big-pickle
+✱ Glob "figs/*.png" 1 match
+> build · big-pickle
+完成。程式在 `lab1_cluster.py`、圖在 `figs/lab1_k_selection.png`，各指標與各群筆數都印出來了。結果摘要：
+
+| k | silhouette | CH | DB | 各群筆數（大到小） |
+|---|---|---|---|---|
+| 2 | 0.421 | 502.5 | 1.110 | 409, 314 |
+| 3 | 0.457 | 480.8 | 0.941 | 350, 237, 136 |
+| 4 | 0.536 | 574.4 | 0.803 | 285, 237, 136, 65 |
+| 5 | 0.575 | 629.3 | 0.703 | 237, 228, 136, 65, 57 |
+| 6 | 0.616 | 778.6 | 0.643 | 228, 147, 136, 90, 65, 57 |
+| 7 | 0.670 | 1048.3 | 0.598 | 159, 147, 126, 90, 77, 65, 59 |
+| 8 | 0.747 | 1880.7 | 0.474 | 159, 126, 92, 90, 77, 65, 59, 55 |
+| **9** | **0.794** | 4726.1 | **0.274** | 159, 92, 90, 77, 69, 65, 59, 57, 55 |
+| **10** | 0.725 | **4956.0** | 0.404 | 92, 90, 85, 77, 74, 69, 65, 59, 57, 55 |
+| 11 | 0.641 | 4561.7 | 0.698 | 90, 85, 77, 74, 69, 65, 59, 57, 55, 48, 44 |
+| 12 | 0.611 | 4228.9 | 0.843 | 92, 77, 71, 69, 65, 60, 59, 57, 55, 55, 35, 28 |
+
+silhouette 最大與 DB 最小都在 k=9，CH 最大在 k=10（k=9 只差 5%）。
+
+## A. 店型手冊（相近的店可以合併）：**k = 9**
+
+三個指標中兩個在 9 達到最佳、第三個（CH）在 9 也只離峰頂 5%，這是共識解。我又驗證了群的幾何結構：k=9 的 9 群任兩群中心至少差 1.77 個標準差，最接近的兩群在 `wait_min` 差 1.25、`delivery_share` 差 1.01 個標準差——**資料裡沒有「相近到可以合併」的店型**。往 8 以下合併時 CH 從 4726 崩到 1881（少 60%），表示開始把真的不同的店混在一起；往 10 則是把同一型切開成兩章（見 B），對手冊只是冗餘。所以手冊就寫 9 型，不需要為了精簡再合。
+
+## B. 客訴回查（不同店不能混在一起）：**k = 10**
+
+這題的錯誤成本不對稱：「多切」只是同一型的客訴分到兩個桶（麻煩但沒錯），「少切」就是把不同店混在一起（正是禁止的錯）。k=9 時最大的群有 159 筆（佔全部 22%），CH 在 k=10 達到最大值，表示這一大群內部再切一半仍明顯降低組內變異——它是不是兩種店，不能只靠 silhouette／DB 排除。取 k=10：
+
+- 若那真的是一種店：切錯了但無害，沒有不同店被混；
+- 若真的是兩種店：正好接住，避免混店。
+
+而且 k=10 的 10 群每一群都還有 55 筆以上（最小 7.6%）、換 `random_state`（0/1/7/42）切法完全一致，每群都還堪用。k=11、12 就不行了：三個指標全面變差（DB 從 0.40 跳到 0.70、0.84），還冒出 48、44、35、28 筆的碎片群——那是在切同型內的雜訊，不會再多分出任何一種店。
+
+補充證據：k=10 那「多出來的一刀」是把 159 筆切成 85+74，兩半在六個特徵上的平均都只差 0.03–0.38 個標準差（中心距離 0.55，遠小於真群間的 1.77+），我判讀它比較像同一型被切半——所以 B 的答案才敢往上加一個 k，而不是加到 11、12。
+
+## 我替你做的決定
+
+- **丟掉的欄位**：`open_hours`、`menu_version`（全資料都是常數、std = 0，依你的規則拿掉）。只丟這兩個，其餘 6 個數值欄全部保留；`menu_version` 雖然像類別碼，但它本來就是常數，不存在「用它當標籤」的問題。
+- **標準化**：`StandardScaler`（z-score）。理由：k-means 用歐氏距離，而 `revenue_ntd`（約 4.3 萬）和 `topping_share`（約 0.29）尺度差五個數量級，不標準化會幾乎只用營收分群。
+- **模型設定**：k = 2–12、`random_state=0`、`n_init=10`（照你的指定，未改）。
+- **指標方向**：silhouette、CH 越大越好；DB 越小越好。三個都只看特徵矩陣，不用任何店別資訊。
+- **A 的準則**：取「多數指標同時最佳、且群間無近重複」的共識 k → 9。門檻：CH 距峰頂 5% 以內、任兩群中心 ≥ 1.77 個標準差、每群 ≥ 55 筆（≥ 7.6%）。
+- **B 的準則**：取「仍有指標背書的最大 k」→ 10（CH 實際最大值）。門檻：不選 11、12 是因為三指標全面劣化且最小群掉到 44/35/28 筆；切法跨 `random_state` 穩定（0.554 的最近中心距離在 rs = 0/1/7/42 都一樣）。
+- **範圍外的私下驗證**（不影響正式結果，只影響判讀）：我偷看了 k = 13–20，三指標單調變差，確定 2–12 的範圍沒有漏掉更好的 k。
+- **沒有做的事**：沒讀任何店別檔；沒有對原始資料做刪列（723 列全用）；圖用 `savefig()` 存出、不開視窗。

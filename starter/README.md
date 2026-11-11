@@ -6,7 +6,7 @@
 
 | 檔案 | 作用 |
 |---|---|
-| `pyproject.toml` | Python 套件清單（numpy / scipy / matplotlib / scikit-learn / networkx） |
+| `pyproject.toml` | Python 套件清單（numpy / pandas / scipy / matplotlib / scikit-learn / networkx） |
 | `opencode.json` | opencode 的專案設定（指定模型與權限） |
 | `AGENTS.md` | 給 agent 的專案規則（語言、執行方式、圖檔與筆記） |
 | `notes/` | 放你的數學筆記 |
@@ -22,5 +22,5 @@ opencode         # 啟動 agent
 ## 檢查環境有沒有好
 
 ```bash
-uv run python -c "import numpy, scipy, sklearn, matplotlib, networkx; print('環境 OK')"
+uv run python -c "import numpy, pandas, scipy, sklearn, matplotlib, networkx; print('環境 OK')"
 ```

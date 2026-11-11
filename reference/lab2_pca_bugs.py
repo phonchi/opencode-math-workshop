@@ -9,8 +9,18 @@ import numpy as np
 from sklearn.decomposition import PCA
 
 K, TOL = 4, 1e-6
-DATA = Path(__file__).resolve().parents[1] / "assets" / "data"
-X = np.genfromtxt(DATA / "orders.csv", delimiter=",", skip_header=1)
+
+
+def data_file(name, reveal=False):
+    """先找學生專案的 data/，再找教材 repo 的 assets/data/。"""
+    repo = Path(__file__).resolve().parents[1] / "assets" / "data"
+    for p in (Path("data") / name, (repo / "reveal" if reveal else repo) / name):
+        if p.exists():
+            return p
+    raise FileNotFoundError(f"找不到 {name}，請先把它下載到 data/")
+
+
+X = np.genfromtxt(data_file("orders.csv"), delimiter=",", skip_header=1)
 # 只除以標準差、不減平均，中心化留給 PCA 本身，「忘記中心化」才測得出來。
 X = X / X.std(0)
 n = len(X)

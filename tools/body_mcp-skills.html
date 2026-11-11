@@ -122,7 +122,7 @@ explore (subagent)
 general (subagent)</code></pre>
 <p>（另外還有 <code>compaction</code>、<code>summary</code>、<code>title</code> 等內部用的，不用管。）</p>
 <ul>
-<li><strong>primary agent</strong> 是你直接對話的對象，在介面裡按 <strong>Tab</strong> 切換。本課程用 <code>build</code> 執行任務，改檔與執行依專案的 <code>ask</code> 設定詢問；<code>plan</code> 適合先分析步驟。實際限制會受版本與專案設定影響，請查看權限要求。</li>
+<li><strong>primary agent</strong> 是你直接對話的對象，在介面裡按 <strong>Shift+Tab</strong> 切換。本課程用 <code>build</code> 執行任務，改檔與執行依專案的 <code>ask</code> 設定詢問；<code>plan</code> 適合先分析步驟。實際限制會受版本與專案設定影響，請查看權限要求。</li>
 <li><strong>subagent</strong> 是被主 agent 呼叫去做特定工作的。<code>explore</code> 唯讀探索程式碼，<code>general</code> 通用。</li>
 </ul>
 <p><strong>自訂 agent 就是自己定義一個</strong>，給它專屬的系統提示、溫度和權限。</p>
@@ -188,7 +188,7 @@ opencode debug agent math-reviewer     # 看解析後的完整設定</code></pre
 <pre class="out"><code>@math-reviewer 檢查 lab2_pca.py 的手刻 PCA 有沒有問題</code></pre>
 <p>主 agent 也可能根據 <code>description</code> 自動判斷要不要叫它，所以 <code>description</code> 要寫清楚這個 agent 適合做什麼。</p>
 <h3>frontmatter 可用的欄位</h3>
-<div class="tw"><table><tr><th>欄位</th><th>說明</th></tr><tr><td><code>description</code></td><td>這個 agent 做什麼。<strong>主 agent 靠它判斷要不要呼叫</strong>，要寫清楚</td></tr><tr><td><code>mode</code></td><td><code>subagent</code>（被呼叫）或 <code>primary</code>（Tab 切換）</td></tr><tr><td><code>model</code></td><td>指定模型。<strong>這門課請省略</strong>，省略就沿用目前選的模型</td></tr><tr><td><code>temperature</code></td><td>0 到 1。驗證、審查類的工作用低值（0.1），創意類用高值</td></tr><tr><td><code>prompt</code></td><td>不用寫在這裡：<code>.md</code> agent 的系統提示就是 frontmatter 下方的正文。要用 <code>{file:./prompts/xxx.txt}</code> 讀外部檔案，請改寫在 <code>opencode.json</code> 的 agent 設定</td></tr><tr><td><code>permission</code></td><td>權限覆寫，會蓋過全域設定</td></tr><tr><td><code>disable</code></td><td>設 <code>true</code> 暫時停用</td></tr></table></div>
+<div class="tw"><table><tr><th>欄位</th><th>說明</th></tr><tr><td><code>description</code></td><td>這個 agent 做什麼。<strong>主 agent 靠它判斷要不要呼叫</strong>，要寫清楚</td></tr><tr><td><code>mode</code></td><td><code>subagent</code>（被呼叫）或 <code>primary</code>（<code>Shift+Tab</code> 切換）</td></tr><tr><td><code>model</code></td><td>指定模型。<strong>這門課請省略</strong>，省略就沿用目前選的模型</td></tr><tr><td><code>temperature</code></td><td>0 到 1。驗證、審查類的工作用低值（0.1），創意類用高值</td></tr><tr><td><code>prompt</code></td><td>不用寫在這裡：<code>.md</code> agent 的系統提示就是 frontmatter 下方的正文。要用 <code>{file:./prompts/xxx.txt}</code> 讀外部檔案，請改寫在 <code>opencode.json</code> 的 agent 設定</td></tr><tr><td><code>permission</code></td><td>權限覆寫，會蓋過全域設定</td></tr><tr><td><code>disable</code></td><td>設 <code>true</code> 暫時停用</td></tr></table></div>
 <div class="box tip"><p><strong>關於 <code>model</code> 欄位的提醒</strong>：官方文件和中文教學站的範例幾乎都寫 <code>model: anthropic/claude-sonnet-4-...</code>。<strong>照抄會壞掉</strong>，因為那些模型需要付費帳號，這門課用的是免費模型。<strong>直接把 <code>model</code> 那行刪掉</strong>，agent 就會沿用你在 <code>opencode.json</code> 設的模型。上面的範例就是這樣寫的。</p></div>
 <h3>也可以寫在 opencode.json 裡</h3>
 <p>不想開新檔案的話，也可以定義在 <code>opencode.json</code> 的 <code>agent</code> 區塊：</p>

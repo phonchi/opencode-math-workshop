@@ -1,0 +1,153 @@
+
+> build · big-pickle
+→ Read . 
+✱ Glob "data/*" 5 matches
+> build · big-pickle
+→ Read lab2_auc.py 
+$ head -5 data/orders.csv && wc -l data/orders.csv
+amount_ntd,distance_km,prep_min,ride_min,handoff_min,tip_ntd,package_g,shop_rating,drop_offset_km,pause_ratio,rider_odometer_m
+249,2.37,17.6,19.3,2.17,11.9,629,4.21,0.0359,0.0412,1696442
+205,2.16,17.8,17.3,1.84,15.0,594,4.28,0.0262,0.0623,1393473
+209,2.34,17.1,14.8,1.98,13.0,673,4.30,0.0374,0.0495,1840028
+179,1.59,16.7,6.1,1.76,10.3,745,4.32,0.0358,0.0482,1532543
+801 data/orders.csv
+> build · big-pickle
+→ Read lab1_check_stores.py 
+$ uv run python -c "
+import pandas as pd
+df = pd.read_csv('data/orders.csv')
+print(df.dtypes)
+print(df.isna().sum().sum(), 'NaNs')
+print(df.describe().T[['mean','std','min','max']])
+"
+amount_ntd            int64
+distance_km         float64
+prep_min            float64
+ride_min            float64
+handoff_min         float64
+tip_ntd             float64
+package_g             int64
+shop_rating         float64
+drop_offset_km      float64
+pause_ratio         float64
+rider_odometer_m      int64
+dtype: object
+0 NaNs
+                          mean            std          min           max
+amount_ntd        2.286750e+02      51.592893      77.0000  4.320000e+02
+distance_km       2.495437e+00       0.319162       1.5900  3.770000e+00
+prep_min          1.791875e+01       4.015732       6.2000  3.080000e+01
+ride_min          1.983563e+01       4.009522       6.1000  3.590000e+01
+handoff_min       2.002712e+00       0.318274       1.0800  2.900000e+00
+tip_ntd           1.485737e+01       3.869650       2.5000  2.780000e+01
+package_g         6.028038e+02      55.820248     356.0000  7.850000e+02
+shop_rating       4.299663e+00       0.085202       4.0500  4.560000e+00
+drop_offset_km    3.228500e-02       0.009862       0.0087  7.060000e-02
+pause_ratio       5.457363e-02       0.019690       0.0068  1.359000e-01
+rider_odometer_m  1.516336e+06  301043.514856  641458.0000  2.475997e+06
+> build · big-pickle
+資料確認乾淨（800 列 × 11 個數值欄、無 NaN）。先探一下手刻 eigh 和 sklearn 的實際數值差異量級，用來訂合理的門檻：
+$ uv run python -c "
+import numpy as np, pandas as pd
+from sklearn.decomposition import PCA
+X = pd.read_csv('data/orders.csv').to_numpy(float)
+Xs = X / X.std(axis=0, ddof=0)
+n = len(Xs)
+Xc = Xs - Xs.mean(axis=0)
+C = Xc.T @ Xc / (n - 1)
+w, V = np.linalg.eigh(C)
+idx = np.argsort(w)[::-1]
+w, V = w[idx], V[:, idx]
+k = 4
+pca = PCA(n_components=k, svd_solver='full').fit(Xs)
+print('eig diff      ', np.abs(w[:k] - pca.explained_variance_).max())
+print('ratio diff    ', np.abs(w[:k]/w.sum() - pca.explained_variance_ratio_).max())
+print('sval diff     ', np.abs(np.sqrt(w[:k]*(n-1)) - pca.singular_values_).max())
+sgn = np.sign(np.sum(pca.components_.T * V[:, :k], axis=0))
+Va = V[:, :k] * sgn
+print('comp diff     ', np.abs(Va - pca.components_.T).max())
+S = Xc @ Va
+print('score diff    ', np.abs(S - pca.transform(Xs)).max())
+print('score max mag ', np.abs(S).max())
+print('VtV-I         ', np.abs(Va.T @ Va - np.eye(k)).max())
+Sc = (S - S.mean(0)) / (n - 1) @ np.eye(k)
+print('offdiag cov   ', np.abs(np.cov(S.T, ddof=1) - np.diag(w[:k])).max())
+R = Xc - S @ Va.T
+print('recon resid   ', np.abs(np.sum(R**2) - (n-1)*w[k:].sum()), (n-1)*w[k:].sum())
+print('trace diff    ', np.abs(w.sum() - np.var(Xc, axis=0, ddof=1).sum()))
+print('eigs          ', w[:k])
+"
+eig diff       3.552713678800501e-15
+ratio diff     2.7755575615628914e-16
+sval diff      3.552713678800501e-14
+comp diff      2.7408630920433552e-15
+score diff     1.8540724511240114e-14
+score max mag  8.793445153811616
+VtV-I          8.881784197001252e-16
+offdiag cov    8.881784197001252e-16
+recon resid    1.3642420526593924e-12 1419.6555843437898
+trace diff     1.7763568394002505e-15
+eigs           [3.52024042 2.25741719 1.8223136  1.63700553]
+> build · big-pickle
+差異都在 1e-14 以下（機器精度級），足夠訂門檻了。寫 `lab2_pca.py`：
+← Write lab2_pca.py
+Created file successfully: lab2_pca.py
+> build · big-pickle
+$ uv run python lab2_pca.py
+資料：800 列 x 11 個特徵欄位（data/orders.csv）
+
+前 4 個主成分（手刻 eigh vs sklearn）：
+ # |       特徵值(手刻) |    特徵值(sklearn) |      解釋比(手刻) |   解釋比(sklearn)
+--------------------------------------------------------------------
+ 1 |      3.520240 |        3.520240 |     31.9622% |       31.9622%
+ 2 |      2.257417 |        2.257417 |     20.4963% |       20.4963%
+ 3 |      1.822314 |        1.822314 |     16.5458% |       16.5458%
+ 4 |      1.637006 |        1.637006 |     14.8633% |       14.8633%
+累積變異（前 4 個）：手刻 83.87%，sklearn 83.87%
+
+檢查（11 欄標準化後、取前 4 個主成分）：
+  [PASS] 1. 特徵值 vs sklearn explained_variance_（前 4 個，max |diff|）
+         實際 3.553e-15，門檻 < 1e-10
+  [PASS] 2. 變異解釋比 vs sklearn explained_variance_ratio_（max |diff|）
+         實際 2.776e-16，門檻 < 1e-12
+  [PASS] 3. 主成分向量 vs sklearn components_（符號對齊後，max |diff|）
+         實際 2.741e-15，門檻 < 1e-12
+  [PASS] 4. 投影分數 vs sklearn transform()（符號對齊後，max |diff|）
+         實際 1.854e-14，門檻 < 1e-10
+  [PASS] 5. 主成分單正交：max |V^T V - I|
+         實際 8.882e-16，門檻 < 1e-12
+  [PASS] 6. 分數去相關：max |cov(S) - diag(前 k 個特徵值)|
+         實際 8.882e-16，門檻 < 1e-12
+  [PASS] 7. Eckart-Young：||Xc - S V^T||_F^2 = (n-1) * 第 5 個起特徵值和（相對誤差）
+         實際 9.610e-16，門檻 < 1e-10
+  [PASS] 8. 總變異守恆：|sum(所有特徵值) - 各欄變異( ddof=1)總和|
+         實際 1.776e-15，門檻 < 1e-12
+
+全部 8 項檢查 PASS：手刻 eigh PCA 與 sklearn 一致（在門檻內）。
+> build · big-pickle
+跑完了，`lab2_pca.py` 已存好，`uv run python lab2_pca.py` 全部 8 項檢查 PASS。前 4 個主成分累積變異 83.87%，手刻和 sklearn 完全一致（誤差都在 1e-14 以下，機器精度級）。
+
+## 我替你做的每個決定
+
+**前處理**
+- 只做「每欄除以標準差」，不減平均（照你的指示）；中心化放在 `pca_eigh()` 函式內部做，和 sklearn `PCA.fit()` 內部減平均的行為對齊。
+- 標準差用 **ddof=0**（母體標準差，numpy 預設、和 `StandardScaler` 同慣例）。因為兩邊吃同一份縮放後矩陣，這個選擇不影響對照一致性，只影響絕對尺度。
+- 全份 800 列一次處理，**沒有**交叉驗證切分——目的是數值驗證不是預測（防�漏版在 `lab2_auc.py` 做過了）。
+
+**丟掉的欄位**
+- **沒有丟任何欄位**：沿用 lab1 的 `std == 0` 防呆（這份資料沒觸發），11 欄全數值、無 NaN、std 全 > 0。
+- `rider_odometer_m`（騎士累計里程）我**保留**了：它是騎士屬性而非訂單屬性，建模時值得考慮丟掉，但這次的目的是驗證 PCA 實作，不動它。
+
+**準則（手刻的數學選擇）**
+- 共變異數矩陣 `C = Xc.T @ Xc / (n-1)`：分母用 n−1，對齊 sklearn `explained_variance_` 的定義（若用 n 會差約 0.1% 的尺度因子）。
+- `eigh` 原生回傳升冪，`argsort` 反轉成降冪再取前 4 個。
+- 特徵向量符號本來就不唯一（eigh 和 SVD 各自決定），比對前先用內積符號把兩邊對齊成同號，投影分數跟著一起翻。
+- 對照組固定 `PCA(n_components=4, svd_solver='full')`，不加 random_state（full SVD 無隨機性）。
+
+**門檻**
+- 先用一次試跑量測實際誤差量級（全部 ≤ 2e-14），再訂門檻，比實際誤差寬約兩個數量級、但仍緊到能抓出真正的錯（中心化錯、ddof 錯、排序錯、符號沒對齊都會差 1e-2 以上）：
+  - 帶尺度量（特徵值、投影分數、重構殘差）：`1e-10`
+  - 無因次量（解釋比、正交性、去相關、總變異）：`1e-12`
+
+**檢查設計（8 項）**
+- 第 1–4 項對照 sklearn（特徵值、解釋比、主成分向量、投影分數）；第 5–8 項是不依賴 sklearn 的數學自證（單正交、分數共變異 = diag(λ)、Eckart–Young 重構殘差、總變異守恆），就算 sklearn 壞了也能驗證手刻版正確。
