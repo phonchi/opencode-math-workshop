@@ -53,3 +53,19 @@
 ## 旁證
 
 `hc ls` 列出講師自己在 app 開的分頁 t4、t5、t7，三個都是 `bash.exe`，cwd 都停在 `C:\Users\User`，其中一個 space 名稱是 `~`。可見 app 的分頁也套用 `config.toml` 的 shell，#5958 的現象在 app 裡同樣存在。
+
+## Agent 互相派工（2026-11-16 晚間至 11-17）
+
+用 `hc` 在講師的 core 開背景終端機，送出學生會貼的提示詞。權限詢問由測試腳本代按 Allow once，遇到 `hc keys` 則選 Reject。用的模型是 big-pickle，測試專案放在 `Documents\herdr-a2a-test`，內容是 Lab 3 的參考程式，加上故意寫錯的 `notes/logistic.md`（抓到 12、漏掉 1，與 decision.md 的 11 矛盾；「不能證明什麼」一段混入「保證」句）。測完已刪除。逐行輸出在 `run.log`、`a2a-e2e.log`、`a2a-guide*.log`。`hc --skill`、OpenCode V2 help 與 herdr-app 指令清單在 `hc-docs/` 和 `herdr-app-commands.txt`。
+
+| 項目 | 結果 |
+|---|---|
+| OpenCode 的 bash 工具 | Windows 上用 Git Bash，繼承 `HC_TERMINAL_ID`，`hc`、`opencode` 都找得到 |
+| 子 agent 回報 | 以 `<hc from="t16 review">…</hc>` 打進主 agent 的輸入框，並自動送出；主 agent 會接著整理 |
+| 父子關係 | 子終端機的 `parent` 是主 agent；主 agent 結束時子 agent 一起結束 |
+| 指定指令的提示詞（A2A-6） | 能完成派工與回報，但主 agent 曾用 `hc keys` 替 reviewer 按下同意 |
+| 共用背景服務（A2A-7、A2A-9） | OpenCode V2 預設連同一個背景服務，終端機會回報服務裡所有 session 的狀態。主 agent 等權限時，reviewer 也顯示 blocked，`hc send` 被拒。被 kill 的 session 若卡在權限詢問，之後在同一資料夾開的 OpenCode 一啟動就是 blocked。後者在 OpenCode 裡切到該 session 選 Reject 就清掉（`opencode service restart` 被本機權限規則擋下，沒有使用）。`--standalone` 可以隔開狀態（A2A-8） |
+| **guide 風格提示詞（A2A-11，章節採用）** | 只叫主 agent 讀 `~/.config/herdr-app/AGENTS.md` 與 `hc --skill`，再用自然語言請它開 reviewer。主 agent 自己查 `opencode --help`，用 `hc run --bg --name review … opencode --prompt "…"` 開 reviewer；約 4 分 40 秒收到回報，兩個植入錯誤都被抓到。補問時，主 agent 把問題寫成檔案交給 reviewer，再讀它的畫面回答；最後依「收工」指示 `hc kill`、`hc rm`。全程約 15 分鐘、16 次權限詢問，主 agent context 用到 34%。沒有出現狀態互相干擾 |
+| A2A-10（guide 風格前一次） | 主 agent 先試 `opencode "<任務>"` 失敗：V2 把位置參數當資料夾，出現 ENAMETOOLONG；之後自己改成先開再送。reviewer 卡在權限，主 agent 依指示沒有代按、請使用者處理。測試腳本漏抓子終端機，所以沒走完 |
+
+未測：學生機器的 Windows PATH 沒有 `.opencode\bin` 時，主 agent 直接 `hc run … opencode` 會不會找不到程式。講師機器剛好有，測不出差別。章節的常見問題列了對應說法。

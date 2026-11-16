@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>用 Herdr 顧著 OpenCode｜OpenCode × AI-Math 工作坊</title>
-<meta name="description" content="用 Herdr 桌面 app 看 OpenCode 的狀態，關掉視窗也不中斷，旁邊再開一個終端機跑指令。">
+<title>用 Herdr 讓 OpenCode 找幫手｜OpenCode × AI-Math 工作坊</title>
+<meta name="description" content="讓 OpenCode 自己開另一個 OpenCode 當 reviewer，交代工作、收回報，你在側欄看得到每一步。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2213%22%20fill%3D%22%23191922%22%2F%3E%3Cpath%20d%3D%22M16%2020l12%2012-12%2012%22%20fill%3D%22none%22%20stroke%3D%22%23e3c273%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Crect%20x%3D%2233%22%20y%3D%2240%22%20width%3D%2217%22%20height%3D%226%22%20rx%3D%223%22%20fill%3D%22%23b8503c%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -717,14 +717,15 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 </li>
 <li><a class="chapter-link" href="local-models.html">本地模型</a>
 </li>
-<li><a class="chapter-link" href="herdr.html" aria-current="page">用 Herdr 顧著 OpenCode</a>
+<li><a class="chapter-link" href="herdr.html" aria-current="page">用 Herdr 讓 OpenCode 找幫手</a>
 <ul class="section-nav" aria-label="本章內容">
 <li><a href="#section-安裝">安裝</a></li>
-<li><a href="#section-認識畫面">認識畫面</a></li>
-<li><a href="#section-練習-左邊-opencode-右邊跑指令">練習：左邊 OpenCode，右邊跑指令</a></li>
+<li><a href="#section-第一次打開">第一次打開</a></li>
+<li><a href="#section-練習-請-opencode-找一個-reviewer">練習：請 OpenCode 找一個 reviewer</a></li>
+<li><a href="#section-兩個-agent-不共用記憶">兩個 agent 不共用記憶</a></li>
+<li><a href="#section-再試試其他說法">再試試其他說法</a></li>
 <li><a href="#section-關掉視窗-關掉分頁-重新開機">關掉視窗、關掉分頁、重新開機</a></li>
 <li><a href="#section-常見問題">常見問題</a></li>
-<li><a href="#section-想再多玩一點">想再多玩一點</a></li>
 <li><a href="#section-參考資料">參考資料</a></li>
 </ul>
 </li>
@@ -769,14 +770,15 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 </li>
 <li><a class="chapter-link" href="local-models.html">本地模型</a>
 </li>
-<li><a class="chapter-link" href="herdr.html" aria-current="page">用 Herdr 顧著 OpenCode</a>
+<li><a class="chapter-link" href="herdr.html" aria-current="page">用 Herdr 讓 OpenCode 找幫手</a>
 <ul class="section-nav" aria-label="本章內容">
 <li><a href="#section-安裝">安裝</a></li>
-<li><a href="#section-認識畫面">認識畫面</a></li>
-<li><a href="#section-練習-左邊-opencode-右邊跑指令">練習：左邊 OpenCode，右邊跑指令</a></li>
+<li><a href="#section-第一次打開">第一次打開</a></li>
+<li><a href="#section-練習-請-opencode-找一個-reviewer">練習：請 OpenCode 找一個 reviewer</a></li>
+<li><a href="#section-兩個-agent-不共用記憶">兩個 agent 不共用記憶</a></li>
+<li><a href="#section-再試試其他說法">再試試其他說法</a></li>
 <li><a href="#section-關掉視窗-關掉分頁-重新開機">關掉視窗、關掉分頁、重新開機</a></li>
 <li><a href="#section-常見問題">常見問題</a></li>
-<li><a href="#section-想再多玩一點">想再多玩一點</a></li>
 <li><a href="#section-參考資料">參考資料</a></li>
 </ul>
 </li>
@@ -797,16 +799,13 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 
 <div class="pagehead">
   <div class="kicker"><span class="badge after">課後選修</span></div>
-  <h1>用 Herdr 顧著 OpenCode</h1>
+  <h1>用 Herdr 讓 OpenCode 找幫手</h1>
 </div>
 
-<p>Herdr 是一個專門用來跑 coding agent 的終端機 app。OpenCode 照原本的方式執行，Herdr 只多做兩件事：</p>
-<ul>
-<li>側欄標出 OpenCode 正在工作、在等你回答，還是已經做完。</li>
-<li>關掉視窗後，裡面的程式繼續在背景跑，重新打開就接回原本的畫面。</li>
-</ul>
-<p>現場只開一個 OpenCode 時，用原本的終端機就夠了。等你開始一邊讓 OpenCode 做事、一邊在旁邊跑程式或看檔案，Herdr 會比較方便。它不會增加模型額度，也不會改變 OpenCode 回答的品質。</p>
-<p>這一章用 Herdr 的桌面 app。三個平台的畫面和操作都一樣，只有 Windows 安裝時多一步設定；快捷鍵在 macOS 用 <code>Cmd</code>，Windows 和 Linux 用 <code>Ctrl</code>。</p>
+<p>Herdr 是一個專門用來跑 coding agent 的終端機 app。它最特別的地方是：<strong>agent 可以自己開另一個 agent 當幫手</strong>，交代工作、等它回報，再把結果整理給你。</p>
+<p>OpenCode 內建的 subagent 也能分派子任務，但過程藏在對話裡，你只看得到最後的摘要。Herdr 開出來的幫手是一個真的終端機，你在側欄看得到它正在工作、在等你，還是已經做完，也可以隨時點進去看它讀了什麼、卡在哪裡。</p>
+<p>這些事不用自己記指令。Herdr 寫了一份給 agent 看的說明書，官方教學只有一句話：先叫 agent 讀它，再直接說你想要什麼。</p>
+<p>兩個 agent 同時工作，大約會用掉兩倍的模型額度。這一章請在課後、自己的網路下做，不要在教室共用網路時做。</p>
 <details class="bg"><summary>哪些情況先跳過這一章</summary><div class="bg-body"><ul>
 <li><strong>Intel 晶片的 Mac</strong>：目前沒有安裝檔，只能自己從原始碼編譯。</li>
 <li><strong>在 WSL 裡跑 OpenCode 的同學</strong>：Herdr 預設不會進到 WSL，設定方式和本章不同。</li>
@@ -814,57 +813,65 @@ footer{max-width:var(--shell-width);margin:56px auto 0;}
 </ul></div></details>
 <h2 id="section-安裝">安裝</h2>
 <h3>Windows</h3>
-<p>打開 Git Bash，貼上這一行。它會呼叫 PowerShell 執行官方安裝程式，裝好後開始選單會出現 Herdr：</p>
-<pre class="cmd" data-lang="bash"><code><span class="ln">powershell -c "irm https://releases.herdr.dev/app/install.ps1 | iex"</span></code></pre>
-<p>接著把 Herdr 裡的終端機改成 Git Bash。Herdr 在 Windows 預設開 PowerShell，課前安裝的 opencode 和 uv 卻是登記在 Git Bash 裡。在同一個 Git Bash 視窗執行：</p>
+<p>從開始選單打開 PowerShell，貼上官方的安裝指令。裝好後開始選單會出現 Herdr：</p>
+<pre class="cmd" data-lang="powershell"><code><span class="ln">irm https://releases.herdr.dev/app/install.ps1 | iex</span></code></pre>
+<p>接著把 Herdr 裡的終端機改成 Git Bash。Herdr 在 Windows 預設開 PowerShell，課前安裝的 opencode 和 uv 卻是登記在 Git Bash 裡。打開 Git Bash 執行：</p>
 <pre class="cmd" data-lang="bash"><code><span class="ln">mkdir -p "$APPDATA/herdr-core"
 </span><span class="ln">cat &gt; "$APPDATA/herdr-core/config.toml" &lt;&lt;'EOF'
 </span><span class="ln">shell = ['C:\Program Files\Git\bin\bash.exe', '--login', '-i']
 </span><span class="ln">EOF</span></code></pre>
-<p>這會建立一個只有這一行的設定檔，重複執行也沒關係。不用重開 Herdr，之後新開的終端機就是 Git Bash；設定前已經開著的終端機不會變。</p>
+<p>這會建立一個只有這一行的設定檔，之後新開的終端機就是 Git Bash。如果你以前自己改過這個檔案，不要執行上面的指令，改用記事本打開它，加上 <code>shell = …</code> 那一行。</p>
 <h3>macOS（Apple 晶片）</h3>
 <p>到 <a class="ext" href="https://herdr.dev/download/" target="_blank" rel="noopener">Herdr 下載頁</a> 下載 <code>Herdr.dmg</code>，打開後把 Herdr 拖進「應用程式」資料夾。</p>
 <h3>Linux</h3>
 <p>在終端機執行官方安裝指令，裝好後應用程式選單會出現 Herdr：</p>
 <pre class="cmd" data-lang="bash"><code><span class="ln">curl -fsSL https://releases.herdr.dev/app/install.sh | sh</span></code></pre>
 <h3>使用統計</h3>
-<p>桌面 app 預設每天送出一次匿名使用統計，內容是用了哪些 agent、開了幾個分頁這類計數，不會送出終端機內容、檔名或提示詞。不想送出的話，打開 Herdr 後點左下角的 Settings（或按 <code>Ctrl+,</code>，macOS 是 <code>Cmd+,</code>），在左邊選 Privacy 關掉。</p>
-<h2 id="section-認識畫面">認識畫面</h2>
-<p>Herdr 的畫面分三層：</p>
-<div class="tw"><table><tr><th>名稱</th><th>是什麼</th><th>本章的用法</th></tr><tr><td>space</td><td>一個專案的工作區，列在左側欄</td><td>工作坊專案 <code>ai-math-lab</code> 用一個 space</td></tr><tr><td>tab（分頁）</td><td>space 裡的一件工作</td><td>先只用一個分頁</td></tr><tr><td>pane（窗格）</td><td>分頁切出來的一塊，每塊都是一個終端機</td><td>左邊跑 OpenCode，右邊跑一般指令</td></tr></table></div>
-<p>本章會用到的按鍵：</p>
-<div class="tw"><table><tr><th>動作</th><th>Windows、Linux</th><th>macOS</th></tr><tr><td>往右切出新窗格</td><td><code>Ctrl+Shift+O</code></td><td><code>Cmd+D</code></td></tr><tr><td>打開設定</td><td><code>Ctrl+,</code></td><td><code>Cmd+,</code></td></tr><tr><td>指令面板</td><td><code>Ctrl+Shift+P</code></td><td><code>Cmd+Shift+P</code></td></tr></table></div>
-<p>按鍵記不住時就打開指令面板，輸入關鍵字找動作，旁邊也會列出快捷鍵。</p>
-<h2 id="section-練習-左邊-opencode-右邊跑指令">練習：左邊 OpenCode，右邊跑指令</h2>
-<p>這個練習只請 OpenCode 做一件很小的事，用掉的額度很少。</p>
-<p><strong>第 1 步</strong>：打開 Herdr，畫面上已經有一個終端機。進入工作坊專案，啟動 OpenCode：</p>
+<p>桌面 app 預設每天送出一次匿名使用統計，內容是用了哪些 agent、開了幾個分頁這類計數，不會送出終端機內容、檔名或提示詞。不想送出的話，點左下角的 Settings，在左邊選 Privacy 關掉。</p>
+<h2 id="section-第一次打開">第一次打開</h2>
+<p>打開 Herdr，畫面上已經有一個終端機。進入工作坊專案，啟動 OpenCode：</p>
 <pre class="cmd" data-lang="bash"><code><span class="ln">cd ~/Documents/ai-math-lab
 </span><span class="ln">opencode</span></code></pre>
-<p>以後要開 OpenCode，都像這樣先開一般的終端機，再自己輸入 <code>opencode</code>。</p>
-<p><strong>第 2 步</strong>：按 <code>Ctrl+Shift+O</code>（macOS 是 <code>Cmd+D</code>）往右切開。右邊會出現一個新的終端機，它不一定在專案資料夾，先進去：</p>
-<pre class="cmd" data-lang="bash"><code><span class="ln">cd ~/Documents/ai-math-lab</span></code></pre>
-<p><strong>第 3 步</strong>：點一下左邊的窗格回到 OpenCode，送出：</p>
-<pre class="cmd" data-lang="text"><code><span class="ln">請在 notes/ 新增 herdr-test.md，內容只寫一行：Herdr 練習。</span></code></pre>
-<p><strong>第 4 步</strong>：OpenCode 要寫檔時會停下來問你。先不要回答，看左側欄下方的 Agents：這個 agent 出現在紅色的 Needs you 底下，窗格右上角也會標出 Needs you。回到 OpenCode，選 <code>Allow once</code> 按 Enter，它會接著做完。你一直看著這個窗格的話，做完後顯示 Idle；如果你那時切到別的 space，會顯示 Done，右下角也會跳出完成通知。</p>
-<p><strong>第 5 步</strong>：點右邊的窗格，確認檔案真的寫出來了：</p>
-<pre class="cmd" data-lang="bash"><code><span class="ln">cat notes/herdr-test.md</span></code></pre>
-<p><strong>第 6 步</strong>：關掉 Herdr 的視窗（macOS 可以直接按 <code>Cmd+Q</code> 結束），再從開始選單或應用程式重新打開。左右兩個窗格都還在，OpenCode 的對話也還在。</p>
-<p>側欄的狀態是 OpenCode 自己回報的。版本太舊的 OpenCode 不會回報，側欄就看不到狀態，但照樣可以使用。顯示做完也不代表結果正確，還是要像第 5 步一樣自己檢查。</p>
+<p>之後要開 OpenCode，都是先開終端機再輸入 <code>opencode</code>，不要從分頁列的 <code>+</code> 選單選。</p>
+<p>左邊的側欄有兩區。上面的 Spaces 是工作區，一個專案用一個；下面的 Agents 列出正在跑的 agent，依狀態分組：</p>
+<div class="tw"><table><tr><th>狀態</th><th>意思</th><th>你要做什麼</th></tr><tr><td>Needs you（紅色）</td><td>在等你回答，通常是權限詢問</td><td>點過去看清楚再回答</td></tr><tr><td>Working</td><td>正在工作</td><td>不用管它</td></tr><tr><td>Done（藍色）</td><td>你沒在看的時候做完了，右下角也會跳通知</td><td>點過去看結果</td></tr><tr><td>Idle</td><td>做完了，或在等你下新的指令</td><td>不用管它</td></tr></table></div>
+<h2 id="section-練習-請-opencode-找一個-reviewer">練習：請 OpenCode 找一個 reviewer</h2>
+<p>Lab 3 最後要你自己核對 <code>notes/logistic.md</code>：每個數字對不對得上、有沒有哪句話說得比證據更滿。這次先請另一個 OpenCode 審一次，再由你判斷它說得對不對。整個練習請預留約 15 分鐘。</p>
+<p><strong>第 0 步</strong>：先在 <code>notes/logistic.md</code> 故意改錯一個數字，例如門檻 0.2 抓到的逾期數，記住你改了哪裡，看等一下 reviewer 抓不抓得到。練習完記得改回來。</p>
+<p><strong>第 1 步</strong>：在 Herdr 裡打開 OpenCode（做法見上一節），貼上：</p>
+<pre class="cmd" data-lang="text"><code><span class="ln">請先讀 ~/.config/herdr-app/AGENTS.md 和 hc --skill，了解怎麼在 Herdr 裡開另一個 agent。
+</span><span class="ln">
+</span><span class="ln">然後開一個 OpenCode 當 reviewer，請它只讀不改，檢查 notes/logistic.md 的數字和結論，是否對得上 notes/decision.md 和 lab3_logistic.py，有沒有哪句話說得比證據更滿。它做完回報給你，你再整理給我。它要權限時不要替我按，告訴我。</span></code></pre>
+<p><strong>第 2 步</strong>：接下來幾分鐘，它會讀說明、開幫手。過程中 OpenCode 會停下來問你很多次能不能執行某個指令，多半是 <code>hc</code> 開頭的。<code>hc</code> 是 Herdr 用來開終端機、傳話給別的 agent 的工具，你不用記它，只要看懂它想做什麼，再選 <code>Allow once</code>。如果它要傳給 reviewer 的只是 y、Enter 這類按鍵，那是想替你回答 reviewer 的問題，選 Reject，自己過去看。</p>
+<p><strong>第 3 步</strong>：reviewer 開起來後，會出現在側欄的 Agents。它要回報時，同樣會停下來問你，側欄會出現紅色的 Needs you。點過去看清楚它要做的事，再決定要不要同意，然後點側欄回到原本的 OpenCode。</p>
+<p><strong>第 4 步</strong>：reviewer 的回報會直接出現在原本那個 OpenCode 的對話裡，開頭標著 <code>&lt;hc from="…"&gt;</code>。原本的 OpenCode 收到後會整理重點給你。</p>
+<p><strong>第 5 步</strong>：自己核對。請原本的 OpenCode 重跑 <code>lab3_logistic.py</code>，拿印出來的門檻表逐項對照 reviewer 說的問題。reviewer 常常只能說「兩個地方對不上」，哪一個才對要你決定。也看看它有沒有抓到你在第 0 步改錯的數字。</p>
+<p><strong>第 6 步</strong>：想補問，直接跟原本的 OpenCode 說，例如：</p>
+<pre class="cmd" data-lang="text"><code><span class="ln">請 reviewer 再看一下 notes/logistic.md 的「不能證明什麼」那段：每一句真的都是在說不能證明嗎？有沒有提到新一批只有 13 個逾期？</span></code></pre>
+<p><strong>第 7 步</strong>：看完結果，跟它說「收工，把 reviewer 關掉」。</p>
+<h2 id="section-兩個-agent-不共用記憶">兩個 agent 不共用記憶</h2>
+<p>reviewer 只知道傳給它的那段話，不知道你們之前聊過什麼。要交代的事如果很長，請 agent 先寫成檔案，再叫 reviewer 去讀，就像<a href="agent-workflows.html">讓 agent 把工作做完整</a>裡的 <code>notes/progress.md</code>。</p>
+<h2 id="section-再試試其他說法">再試試其他說法</h2>
+<p>學會上面的流程後，可以換別的說法：</p>
+<ul>
+<li>「開一個 reviewer，先不要給任務。等我在它的窗格用 <code>/models</code> 換成別的模型，再把任務傳過去。」不同模型看問題的角度不一樣，常會抓到不同的問題。可用的免費模型見<a href="prep.html#backup-keys">課前準備的備案</a>。</li>
+<li>「幫我做一個版面，把我的 agent 排成三欄：Needs you、Working、Done。」這是官方教學的例子，agent 會照說明書改 Herdr 的介面，做好後用 <code>Ctrl+Shift+L</code>（macOS 是 <code>Cmd+Shift+L</code>）切換版面。</li>
+</ul>
+<p>reviewer 的窗格也可以直接點進去，自己打字跟它對話。</p>
 <h2 id="section-關掉視窗-關掉分頁-重新開機">關掉視窗、關掉分頁、重新開機</h2>
-<div class="tw"><table><tr><th>你做的事</th><th>裡面的程式</th></tr><tr><td>關掉 Herdr 視窗，或 Herdr 自動更新</td><td>繼續在背景跑，重新打開就接回</td></tr><tr><td>關掉某個窗格或分頁</td><td>那裡面的程式跟著結束</td></tr><tr><td>電腦重新開機</td><td>程式都停了。窗格會回來，但只剩一個新的終端機。先 <code>cd</code> 到專案資料夾，再啟動 <code>opencode</code>，用 <code>/sessions</code> 找回對話</td></tr></table></div>
-<p>關掉視窗不等於停止。OpenCode 還在做事時關掉視窗，它會繼續執行，也繼續使用模型額度。真的要停，回到那個窗格讓 OpenCode 停下，或關掉那個窗格。</p>
+<div class="tw"><table><tr><th>你做的事</th><th>裡面的程式</th></tr><tr><td>關掉 Herdr 視窗，或 Herdr 自動更新</td><td>繼續在背景跑，重新打開就接回</td></tr><tr><td>關掉某個窗格或分頁</td><td>那裡面的程式跟著結束</td></tr><tr><td>關掉原本那個 OpenCode</td><td>它開的 reviewer 也跟著結束</td></tr><tr><td>電腦重新開機</td><td>程式都停了。窗格會回來，但只剩一個新的終端機。先 <code>cd</code> 到專案資料夾，再啟動 <code>opencode</code>，用 <code>/sessions</code> 找回對話</td></tr></table></div>
+<p>關掉視窗不等於停止。OpenCode 還在做事時關掉視窗，它會繼續執行，也繼續使用模型額度。</p>
 <h2 id="section-常見問題">常見問題</h2>
-<div class="tw"><table><tr><th>狀況</th><th>怎麼處理</th></tr><tr><td>Windows 打 <code>opencode</code> 找不到指令（<code>command not found</code>，或「無法辨識」的紅字）</td><td>出現紅字表示還在用 PowerShell。檢查 <code>config.toml</code> 有沒有寫好，再開一個新的分頁試</td></tr><tr><td>Windows 新開的窗格不在專案資料夾，space 名稱也一直是 <code>~</code></td><td>用 Git Bash 時 Herdr 追不到你 <code>cd</code> 去哪裡，這是已知問題。每個新窗格先 <code>cd ~/Documents/ai-math-lab</code></td></tr><tr><td>側欄看不到狀態</td><td>更新 OpenCode；看不到狀態也能正常使用</td></tr><tr><td>貼不上文字</td><td>Windows 用 <code>Ctrl+V</code> 或 <code>Ctrl+Shift+V</code>，Linux 用 <code>Ctrl+Shift+V</code> 或 <code>Shift+Insert</code>，macOS 用 <code>Cmd+V</code></td></tr></table></div>
-<h2 id="section-想再多玩一點">想再多玩一點</h2>
-<p>Herdr 還能讓一個 agent 開另一個 agent 幫忙審查，也能用 Mods 改介面。多開 agent 會更快用完免費額度；Mods 可以執行任意程式，安裝前要先看過內容。有興趣再看官方說明。</p>
+<div class="tw"><table><tr><th>狀況</th><th>怎麼處理</th></tr><tr><td>側欄沒有出現 reviewer</td><td>它可能改用了內建的 subagent。跟它說「請用 Herdr 的 hc 開，不要用內建 subagent」</td></tr><tr><td>reviewer 開不起來，說找不到 opencode</td><td>跟它說「先開一個終端機，再在裡面執行 opencode」</td></tr><tr><td>側欄顯示 Needs you，畫面上卻沒有詢問</td><td>同一個資料夾的 OpenCode 對話會互相影響。看畫面上方哪個對話分頁標著 <code>!</code>，切過去回答</td></tr><tr><td>補問傳不過去，說 reviewer 在等權限</td><td>先把所有 Needs you 處理完，再請它重送</td></tr><tr><td>Windows 打 <code>opencode</code> 找不到指令（<code>command not found</code>，或「無法辨識」的紅字）</td><td>出現紅字表示還在用 PowerShell。檢查 <code>config.toml</code> 有沒有寫好，再開一個新的分頁試</td></tr><tr><td>Windows 新開的窗格不在專案資料夾，space 名稱也一直是 <code>~</code></td><td>用 Git Bash 時 Herdr 追不到你 <code>cd</code> 去哪裡，這是已知問題。每個新窗格先 <code>cd ~/Documents/ai-math-lab</code></td></tr><tr><td>貼不上文字</td><td>Windows 用 <code>Ctrl+V</code> 或 <code>Ctrl+Shift+V</code>，Linux 用 <code>Ctrl+Shift+V</code> 或 <code>Shift+Insert</code>，macOS 用 <code>Cmd+V</code></td></tr></table></div>
 <h2 id="section-參考資料">參考資料</h2>
 <ul>
 <li><a class="ext" href="https://herdr.dev/" target="_blank" rel="noopener">Herdr 官方網站</a></li>
-<li><a class="ext" href="https://github.com/herdrdev/herdr-app" target="_blank" rel="noopener">Herdr 桌面 app 說明（GitHub）</a></li>
-<li><a class="ext" href="https://github.com/herdrdev/herdr-core" target="_blank" rel="noopener">herdr-core 設定說明（GitHub）</a>：預設 shell 與 <code>config.toml</code></li>
+<li><a class="ext" href="https://herdr.dev/guide/" target="_blank" rel="noopener">Herdr 官方教學</a>：「Ask your agent」，列出更多可以直接對 agent 說的話</li>
+<li><a class="ext" href="https://github.com/herdrdev/herdr-app/blob/master/defaults/AGENTS.md" target="_blank" rel="noopener">Herdr 寫給 agent 的說明書（GitHub）</a></li>
+<li><a class="ext" href="https://github.com/herdrdev/herdr-core" target="_blank" rel="noopener">herdr-core 說明（GitHub）</a>：<code>hc</code> 指令與 <code>config.toml</code></li>
 <li><a class="ext" href="https://herdr.dev/privacy/" target="_blank" rel="noopener">Herdr 隱私說明</a></li>
-<li>延伸觀看：<a class="ext" href="https://www.youtube.com/watch?v=C2zXbxPzqu4" target="_blank" rel="noopener">摸摸說門道：Herdr 好用嗎？</a>，介紹桌面版、hc 指令與 Mods</li>
-<li>延伸觀看：<a class="ext" href="https://www.youtube.com/watch?v=OVl3fFSHxqY" target="_blank" rel="noopener">AI懶人報 EP459：Herdr，AI agent 時代的 tmux</a>，以終端機版（TUI）示範，按鍵與桌面 app 不同</li>
+<li>延伸觀看：<a class="ext" href="https://www.youtube.com/watch?v=C2zXbxPzqu4" target="_blank" rel="noopener">摸摸說門道：Herdr 好用嗎？</a>，介紹桌面版、hc 的四個常見情境與 Mods</li>
+<li>延伸觀看：<a class="ext" href="https://www.youtube.com/watch?v=OVl3fFSHxqY" target="_blank" rel="noopener">AI懶人報 EP459：Herdr，AI agent 時代的 tmux</a>，第四段示範讓 agent 自己派工、互相 review；片中用的是終端機版（TUI），按鍵與桌面 app 不同</li>
 </ul>
 
 </div>

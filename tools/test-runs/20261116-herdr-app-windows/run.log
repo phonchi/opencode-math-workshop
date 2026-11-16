@@ -345,3 +345,725 @@ reopened after 1s
   "ok": true
 }
 {"hidden_finished":2,"terminals":[{"address":"t4","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":10,"where":"BigPickle / 1"},{"address":"t5","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":11,"where":"GLM / 1"},{"address":"t7","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":0,"where":"~ / 1"}]}
+### A2A-1 2026-11-16T23:07:47+08:00 quoted command shell
+'tr' 不是內部或外部命令、可執行的程式或批次檔。
+[hc] t13 exited (exit 255)
+{"removed":"t13"}
+### ai-math-lab exists?
+AGENTS.md
+figs
+notes
+opencode.json
+pyproject.toml
+uv.lock
+### A2A-2 2026-11-16T23:08:05+08:00 debug config in real ai-math-lab
+{"address":"t14","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User\\Documents\\ai-math-lab","name":"cfgtest","state":"live","turn":0}
+{"started":null,"status":null,"turn":0}
+{"children":[],"ended":true,"exit_code":null,"reason":"output","signal":null,"status":null,"terminal":"t14","turn":0}
+User@<machine> MINGW64 C:\Users\User\Documents\ai-math-lab
+$ opencode debug config 2>&1 | grep -n -E "\"path\"|permission|\"edit\"|big-pickle"; echo CFG-END
+4:    "path": "C:\\Users\\User\\.config\\opencode\\opencode.jsonc",
+11:    "path": "C:\\Users\\User\\.config\\opencode"
+15:    "path": "C:\\Users\\User\\Documents\\ai-math-lab\\opencode.json",
+20:        "model": "big-pickle"
+22:      "permissions": [
+29:          "action": "edit",
+46:    "path": "C:\\Users\\User\\.opencode"
+CFG-END
+User@<machine> MINGW64 C:\Users\User\Documents\ai-math-lab
+$
+{"address":"t14","argv":["C:\\Program Files\\Git\\bin\\bash.exe","--login","-i"],"cols":200,"created_ms":1794841685399,"cwd":"C:\\Users\\User\\Documents\\ai-math-lab","die_with_parent":false,"exit_code":1,"finished_ms":1794841687068,"identity":"ghostty","keep":false,"labels":{},"name":"cfgtest","notify":true,"parent":null,"pid":39272,"reason":"killed","reported":false,"rm":false,"rows":120,"screen":"exact","signal":null,"state":"finished","status":null,"status_ms":null,"template":null,"title":"MINGW64:C:\\Users\\User\\Documents\\ai-math-lab","turn":0}
+{"removed":"t14"}
+### A2A-3 2026-11-16T23:09:12+08:00 main agent A
+{"address":"t15","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User\\Documents\\herdr-a2a-test","name":"a2a-main","state":"live","turn":0}
+{"started":null,"status":null,"turn":0}
+status {'app': 'opencode', 'state': 'idle'}
+                                                               ┃  Build · Big Pickle OpenCode
+### A2A-4 2026-11-16T23:09:35+08:00 env check via A's bash tool
+{"started":true,"status":"idle","turn":0}
+23:09:36 working
+23:09:51 blocked
+  ┃
+  ┃  ⠋ echo "ID=$HC_TERMINAL_ID SHELL0=$0"; command -v hc opencode
+  ┃
+  ┃  △ Permission required
+  ┃
+  ┃  $ echo "ID=$HC_TERMINAL_ID SHELL0=$0"; command -v hc opencode
+  ┃
+  ┃   Allow once   Always allow   Reject                                                                       ctrl+f fullscreen  ⇆ select  enter confirm
+  ┃                                                                                                                                                             ~/Documents/herdr-a2a-test
+  ···········▏ 0% — 0 │ ⧉ 0.0% — 0 │ ···········▏ ↯ 0.0 tok/s │ 15s
+{"status":"blocked","turn":1}
+state=idle
+  ┃  /c/Users/User/.opencode/bin/opencode
+  ┃
+     指令輸出如下（原樣）：
+     ID=t15 SHELL0=/usr/bin/bash
+     /c/Users/User/AppData/Local/Programs/herdr-core/hc
+     /c/Users/User/.opencode/bin/opencode
+     Build · Big Pickle · 27.7s · 7.4 tok/s
+  ┃
+  ┃
+  ┃
+  ┃  Build · Big Pickle OpenCode
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+  ~/Documents/herdr-a2a-test                                                                                                      6.3K (3%)  ctrl+p commands    ~/Documents/herdr-a2a-test
+  ▍··········▏ 3% — 6.3k │ ⧉ 97.0% — 6.1k │ █··········▏ ↯  28 · μ 273 tok/s │ 28s
+### A2A-5 2026-11-16T23:10:23+08:00 delegate via two-step
+{"started":true,"status":"idle","turn":2}
+23:10:24 main=working review=none
+--- 23:10:38 a2a-main BLOCKED:
+ ! 查詢 HC_TERMINAL_ID 與 hc     +
+  ┃  請執行這個指令並把輸出原樣貼給我：echo "ID=$HC_TERMINAL_ID SHELL0=$0"; command -v hc opencode
+  ┃  $ echo "ID=$HC_TERMINAL_ID SHELL0=$0"; command -v hc opencode
+  ┃  請用 hc 找一個幫手。照這三步做：
+  ┃  1. 執行 hc run --bg --name review --cwd . 開一個終端機。
+  ┃  2. 執行 hc send review "opencode --prompt '...'"，在裡面啟動另一個 OpenCode。交給它的任務是：只讀不改任何檔案，不要開其他 agent；讀 AGENTS.md，用三點
+23:10:39 main=blocked review=none
+--- 23:10:43 a2a-main BLOCKED:
+ ! 查詢 HC_TERMINAL_ID 與 hc     +
+  ┃  請執行這個指令並把輸出原樣貼給我：echo "ID=$HC_TERMINAL_ID SHELL0=$0"; command -v hc opencode
+  ┃  $ echo "ID=$HC_TERMINAL_ID SHELL0=$0"; command -v hc opencode
+  ┃  請用 hc 找一個幫手。照這三步做：
+  ┃  1. 執行 hc run --bg --name review --cwd . 開一個終端機。
+  ┃  2. 執行 hc send review "opencode --prompt '...'"，在裡面啟動另一個 OpenCode。交給它的任務是：只讀不改任何檔案，不要開其他 agent；讀 AGENTS.md，用三點
+23:10:44 main=working review=none
+--- 23:10:48 a2a-main BLOCKED:
+ ! 查詢 HC_TERMINAL_ID 與 hc     +
+  ┃  請執行這個指令並把輸出原樣貼給我：echo "ID=$HC_TERMINAL_ID SHELL0=$0"; command -v hc opencode
+  ┃  $ echo "ID=$HC_TERMINAL_ID SHELL0=$0"; command -v hc opencode
+  ┃  請用 hc 找一個幫手。照這三步做：
+  ┃  1. 執行 hc run --bg --name review --cwd . 開一個終端機。
+  ┃  2. 執行 hc send review "opencode --prompt '...'"，在裡面啟動另一個 OpenCode。交給它的任務是：只讀不改任何檔案，不要開其他 agent；讀 AGENTS.md，用三點
+23:10:48 main=working review=None
+--- 23:11:11 a2a-main BLOCKED:
+ ! 查詢 HC_TERMINAL_ID 與 hc     +
+  ┃  請執行這個指令並把輸出原樣貼給我：echo "ID=$HC_TERMINAL_ID SHELL0=$0"; command -v hc opencode
+  ┃  $ echo "ID=$HC_TERMINAL_ID SHELL0=$0"; command -v hc opencode
+  ┃  請用 hc 找一個幫手。照這三步做：
+  ┃  1. 執行 hc run --bg --name review --cwd . 開一個終端機。
+  ┃  2. 執行 hc send review "opencode --prompt '...'"，在裡面啟動另一個 OpenCode。交給它的任務是：只讀不改任何檔案，不要開其他 agent；讀 AGENTS.md，用三點
+23:11:12 main=working review=None
+23:11:16 main=working review=working
+--- 23:11:25 a2a-main BLOCKED:
+ ! 查詢 HC_TERMINAL_ID 與 hc     ! Summarize AGENTS.md for t15   +
+  ┃  請用 hc 找一個幫手。照這三步做：
+  ┃  1. 執行 hc run --bg --name review --cwd . 開一個終端機。                                                                                                   Context
+  ┃  2. 執行 hc send review "opencode --prompt '...'"，在裡面啟動另一個 OpenCode。交給它的任務是：只讀不改任何檔案，不要開其他 agent；讀 AGENTS.md，用三點      11,986 tokens
+  ┃  摘要它要求 agent 遵守的規則；做完執行 hc send 你的位址 回報摘要。你的位址是 $HC_TERMINAL_ID 的值，請先查出來再寫進任務。                                   6% used
+  ┃  $ hc --help 2>&1 | head -60
+--- 23:11:26 review BLOCKED:
+ ⠴ 查詢 HC_TERMINAL_ID 與 hc     ! Summarize AGENTS.md for t15   +
+  ┃  唯讀任務：不要修改或建立任何檔案，也不要開其他 agent 或終端機。請讀取本目錄的 AGENTS.md，用三個重點摘要它要求 agent 遵守的規則。做完後執行 hc send
+     → Explored: 1 read
+  ┃  ⠇ hc send t15 "1) 語言與回覆：一律用台灣繁體中文，程式碼/變數/套件名稱保留英文。2) 執行與產出規範：用 uv 執行（uv run python / uv add），圖檔存 figs
+  ┃  △ Permission required
+  ┃  $ hc send t15 "1) 語言與回覆：一律用台灣繁體中文，程式碼/變數/套件名稱保留英文。2) 執行與產出規範：用 uv 執行（uv run python / uv add），圖檔存 figs
+23:11:27 main=working review=working
+23:11:45 main=idle review=idle
+report arrived
+### A2A-5 result screens
+  ┃    ▍··········▏ 3% — 5.7k │ ⧉ 89.6% — 5.1k │ ···········▏ ↯ 0.0 · μ  54 tok/s │ 16s
+  ┃
+  ┃
+  ┃  <hc from="t16 review">1) 語言與回覆：一律用台灣繁體中文，程式碼/變數/套件名稱保留英文。2) 執行與產出規範：用 uv 執行（uv run python / uv add），圖檔
+  ┃  存 figs 並用 savefig 不用 plt.show，筆記寫 notes 且數學式用 $...$/2195...2195。3) 行為限制與規劃：Plan 模式先逐題詢問（最多3題）再列計畫；除非明講不
+  ┃  要 git commit/push，也不要刪除 figs/notes 既有檔案。</hc>
+  ┃
+     + Thought · 1.7s
+  ┃
+  ┃  $ hc get review 2>&1
+  ┃
+  ┃  {"address":"t16","argv":["C:\\Program Files\\Git\\bin\\bash.exe","--login","-i"],"cols":200,"created_ms":1794841848501,"cwd":"C:\\Users\\User\\
+  ┃  Documents\\herdr-a2a-test\\.","die_with_parent":true,"exit_code":null,"finished_ms":null,"foreground":{"argv":["C:\\Program Files\\Git\\bin\\bash.
+  ┃  exe","--login","-i"],"cwd":"C:\\Users\\User\\Documents\\herdr-a2a-test","name":"bash.exe","pid":53428},"identity":"ghostty","keep":false,"labels":{},
+  ┃  "name":"review","notify":true,"parent":"t15","pid":53428,"reason":null,"records":{"ses_e1b16788affe8GwcToO6fTjBJa":{"app":"opencode","state":
+  ┃  "working","title":"Summarize AGENTS.md for t15"},"ses_e1b17f124ffeN1QPXmi26BHLar":{"app":"opencode","state":"working","title":"查詢 HC_TERMINAL_ID 與
+  ┃  hc"}},"reported":true,"rm":false,"rows":120,"screen":"exact","signal":null,"state":"live","status":{"app":"opencode","msg":"2 sessions working",
+  ┃  "state":"working"},"status_ms":1794841896750,"template":null,"title":"OC | Summarize AGENTS.md for t15","turn":6}
+  ┃
+     + Thought · 7.1s
+     助手（終端機 t16，名稱 review）已經回報了。以下是它讀完 AGENTS.md 後整理出的三點摘要：
+     1. 語言：全程使用台灣繁體中文回覆；程式碼、變數名稱、套件名稱保留英文。
+     2. 執行與產出規範
+        - Python 一律透過 uv 執行（uv run python <檔案>），不要用 python／python3／pip install；新增套件用 uv add。
+        - 圖檔一律存到 figs/，用 savefig()，不要用 plt.show()。
+        - 筆記寫在 notes/ 的 .md 檔，數學式用 $...$ 與 $$...$$。
+     3. 行為限制與規劃
+        - Plan 模式：一次只問一個問題（附建議答案、最多 3 題），問清楚後才列計畫與你替我做的決定。
+        - 未明講就不要 git commit／git push；不要刪除 figs/ 或 notes/ 裡既有的檔案。
+     兩點補充：
+     - 它回報的內容裡，$$...$$ 被寫成 2195...2195 — 這是因為摘要指令走 bash 時 $$ 被展開成 PID（2195），原文意思應為 $$...$$。
+     - t16 目前還開著（裡面有 opencode 在跑，hc get 顯示兩個 session 在 working）。要我幫你 hc kill review 收掉嗎？
+     Build · Big Pickle · 1m 20s · 78.4 tok/s
+  ┃
+  ┃
+  ┃
+  ┃  Build · Big Pickle OpenCode
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+  ~/Documents/herdr-a2a-test                                                                                                     14.9K (7%)  ctrl+p commands    ~/Documents/herdr-a2a-test
+  ▉··········▏ 7% — 14.9k │ ⧉ 91.0% — 13.6k │ ···········▏ ↯ 0.0 · μ 114 tok/s │ 2m45s
+--- review
+{'address': 't16', 'parent': 't15', 'status': {'app': 'opencode', 'state': 'idle'}, 'state': 'live', 'argv': ['C:\\Program Files\\Git\\bin\\bash.exe', '--login', '-i']}
+{"hidden_finished":2,"terminals":[{"address":"t4","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":10,"where":"BigPickle / 1"},{"address":"t5","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":11,"where":"GLM / 1"},{"address":"t7","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":0,"where":"~ / 1"},{"address":"t15","agent":"opencode","cwd":"C:\\Users\\User\\Documents\\herdr-a2a-test","name":"a2a-main","state":"live","status":"idle","turn":12},{"address":"t16","agent":"opencode","cwd":"C:\\Users\\User\\Documents\\herdr-a2a-test\\.","name":"review","parent":"t15","state":"live","status":"idle","turn":7}]}
+### A2A-5 cleanup
+{"address":"t15","argv":["C:\\Program Files\\Git\\bin\\bash.exe","--login","-i"],"cols":200,"created_ms":1794841752301,"cwd":"C:\\Users\\User\\Documents\\herdr-a2a-test","die_with_parent":false,"exit_code":1,"finished_ms":1794841992429,"identity":"ghostty","keep":false,"labels":{},"name":"a2a-main","notify":true,"parent":null,"pid":57084,"reason":"killed","reported":true,"rm":false,"rows":120,"screen":"exact","signal":null,"state":"finished","status":null,"status_ms":1794841992429,"template":null,"title":"OC | 查詢 HC_TERMINAL_ID 與 hc","turn":12}
+{"hidden_finished":4,"terminals":[{"address":"t4","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":10,"where":"BigPickle / 1"},{"address":"t5","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":11,"where":"GLM / 1"},{"address":"t7","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":0,"where":"~ / 1"}]}
+### A2A-6 2026-11-16T23:13:58+08:00 Lab3 student prompt E2E
+{"address":"t17","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User\\Documents\\herdr-a2a-test","name":"a2a-main","state":"live","turn":0}
+{"started":null,"status":null,"turn":0}
+main start: idle
+{"started":true,"status":"idle","turn":0}
+23:14:11 main=working review=None
+--- 23:14:15 a2a-main BLOCKED #1:
+  ┃  △ Permission required
+  ┃  $ echo $HC_TERMINAL_ID
+23:14:15 main=blocked review=None
+--- 23:14:19 a2a-main BLOCKED #2:
+  ┃  $ echo $HC_TERMINAL_ID
+  ┃  △ Permission required
+  ┃  $ hc run --bg --name review --cwd .
+23:14:20 main=working review=None
+--- 23:14:32 a2a-main BLOCKED #3:
+  ┃  $ hc run --bg --name review --cwd .
+  ┃  △ Permission required
+  ┃  $ hc send review "opencode --prompt \"你是審查者，只讀不改。請讀 notes/logistic.md、notes/decision.md 和 lab3_logistic.py，檢查筆記裡的數字和結論是
+23:14:33 main=working review=None
+23:14:37 main=working review=working
+--- 23:14:41 a2a-main BLOCKED #4:
+  ┃  $ hc --help 2>&1 | head -40
+  ┃  △ Permission required
+  ┃  $ hc read review 2>&1 | tail -60
+23:14:42 main=working review=working
+--- 23:14:50 a2a-main BLOCKED #5:
+  ┃  $ hc wait review --timeout 180 2>&1 || echo "---wait-exit-$?---"
+  ┃  △ Permission required
+  ┃  $ sleep 15 && hc read review 2>&1 | tail -80
+23:14:51 main=working review=working
+--- 23:15:08 a2a-main BLOCKED #6:
+  ┃  $ hc read review 2>&1 | tail -60
+  ┃  $ hc wait review --timeout 180 2>&1 || echo "---wait-exit-$?---"
+  ┃  $ sleep 15 && hc read review 2>&1 | tail -80
+--- 23:15:08 review BLOCKED #7:
+  ┃  △ Permission required
+  ┃  $ hc send t17 "審查結果：
+23:15:08 main=working review=working
+23:15:13 main=blocked review=blocked
+--- 23:15:17 a2a-main BLOCKED #8:
+  ┃  $ hc keys review enter
+  ┃  △ Permission required
+  ┃  $ sleep 5 && hc read review 2>&1 | tail -40
+23:15:17 main=working review=working
+23:15:39 main=idle review=idle
+report arrived; approvals=8
+### A2A-6 screens
+  ┃  $ hc run --bg --name review --cwd .
+  ┃  $ hc send review "opencode --prompt \"你是審查者，只讀不改。請讀 notes/logistic.md、notes/decision.md 和 lab3_logistic.py，檢查筆記裡的數字和結論是否
+  ┃  $ hc --help 2>&1 | head -40
+  ┃  $ hc read review 2>&1 | tail -60
+  ┃  $ hc wait review --timeout 180 2>&1 || echo "---wait-exit-$?---"
+  ┃  $ hc keys review enter
+--- report + summary
+  ┃  <hc from="t18 review">審查結果：
+  ┃  1. notes/decision.md：「我選的門檻：0.2，理由：抓到 11 個逾期，提醒 37 封，還在 40 封以內。」— 與 notes/logistic.md 記載同門檻下「抓到 12 個逾期、漏
+  ┃  掉 1 個」不一致，抓到/漏掉數字無法互相印證。
+  ┃  2. notes/logistic.md：「門檻 0.2 時，下一批提醒 37 封，抓到 12 個逾期，漏掉 1 個。」— 與 notes/decision.md 的「抓到 11 個逾期」矛盾，在未執行程式核對
+  ┃  輸出的情況下，無法判定哪一筆記錄正確。
+  ┃  3. notes/logistic.md：「依 notes/decision.md，我選門檻 0.2，因為漏掉逾期的代價高，且提醒數在 40 封以內。」— 雖引用 decision.md，但 decision.md 給出的
+  ┃  理由數字（抓到 11 個）與本筆記所述（抓到 12 個、漏掉 1 個）不同，決策依據的描述前後不一致。</hc>
+  ┃
+     + Thought: Reporting issues clearly · 11.2s
+     已依指定流程完成審查派工（未修改任何檔案）：
+     - 步驟 1：本終端機編號為 t17（echo $HC_TERMINAL_ID）。
+     - 步驟 2：已以 hc run --bg --name review --cwd . 開啟審查終端機 t18。
+     - 步驟 3：已透過 hc send review 派送 opencode --prompt 任務給 t18，並指定回報目標為 t17。
+     - 步驟 4：t18 執行回報指令時曾因權限請求而卡住（需在 t18 窗格允許 shell 指令）；已協助核准後收到回報。
+     - 步驟 5：review（t18）回報的問題整理如下：
+     審查結果（來自 t18）
+     1. notes/decision.md：「我選的門檻：0.2，理由：抓到 11 個逾期，提醒 37 封，還在 40 封以內。」
+        - 與 notes/logistic.md 記載同門檻下「抓到 12 個逾期、漏掉 1 個」不一致，抓到／漏掉數字無法互相印證。
+     2. notes/logistic.md：「門檻 0.2 時，下一批提醒 37 封，抓到 12 個逾期，漏掉 1 個。」
+        - 與 notes/decision.md 的「抓到 11 個逾期」矛盾；在未執行程式核對輸出的情況下，無法判定哪一筆記錄正確。
+     3. notes/logistic.md：「依 notes/decision.md，我選門檻 0.2，因為漏掉逾期的代價高，且提醒數在 40 封以內。」
+        - 雖引用 decision.md，但 decision.md 給出的理由數字（抓到 11 個）與本筆記所述（抓到 12 個、漏掉 1 個）不同，決策依據的描述前後不一致。
+     │ 註：以上為審查者依檔案內容比對的結果；我未執行程式驗證，也未修改任何檔案。
+     Build · Big Pickle · 1m 25s · 37.2 tok/s
+  ┃
+  ┃
+  ┃
+  ┃  Build · Big Pickle OpenCode
+  ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+  ~/Documents/herdr-a2a-test                                                                                                     11.1K (6%)  ctrl+p commands    ~/Documents/herdr-a2a-test
+  ▋··········▏ 6% — 11.1k │ ⧉ 83.0% — 9.2k │ ···········▏ ↯ 0.0 · μ 119 tok/s │ 2m00s
+### A2A-7 2026-11-16T23:16:33+08:00 follow-up via hc send
+{"started":true,"status":"idle","turn":7}
+--- 23:16:42 a2a-main BLOCKED #1:   ┃  $ hc wait review 2>&1 || echo "---wait-exit-$?---"
+--- 23:16:47 a2a-main BLOCKED #2:   ┃  $ hc wait review 2>&1 || echo "---"
+--- 23:19:53 a2a-main BLOCKED #3:   ┃  $ hc get review 2>&1
+--- 23:20:02 a2a-main BLOCKED #4:   ┃  $ sleep 20 && hc read review 2>&1 | tail -80
+=== a2a-main
+{
+ "status": {
+  "app": "opencode",
+  "state": "idle"
+ },
+ "records": null,
+ "title": "OC | hc 審查 notes/logistic.md"
+}
+=== review
+{
+ "status": {
+  "app": "opencode",
+  "state": "idle"
+ },
+ "records": null,
+ "title": "OC | lab3_logistic.py 筆記對照"
+}
+### A2A-8 2026-11-16T23:24:21+08:00 --standalone isolation
+{"address":"t18","argv":["C:\\Program Files\\Git\\bin\\bash.exe","--login","-i"],"cols":200,"created_ms":1794842059828,"cwd":"C:\\Users\\User\\Documents\\herdr-a2a-test\\.","die_with_parent":true,"exit_code":1,"finished_ms":1794842661933,"identity":"ghostty","keep":false,"labels":{},"name":"review","notify":true,"parent":"t17","pid":44800,"reason":"killed","reported":true,"rm":false,"rows":120,"screen":"exact","signal":null,"state":"finished","status":null,"status_ms":1794842661933,"template":null,"title":"OC | lab3_logistic.py 筆記對照","turn":11}
+{"removed":"t18"}
+{"address":"t19","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User\\Documents\\herdr-a2a-test","name":"review2","state":"live","turn":0}
+{"started":null,"status":null,"turn":0}
+review2: idle | None | records: []
+--- make A blocked (do not approve)
+{"error":{"hint":"typing would answer its dialog; read its screen first (hc read t17), or --force","kind":"blocked","message":"t17 is blocked (permission)"}}
+A: blocked | Permission needs input | records: [{'app': 'opencode', 'kind': 'permission', 'msg': 'Permission needs input', 'state': 'blocked', 'title': 'hc 審查 notes/logistic.md'}]
+review2 while A blocked: idle | None | records: []
+{"started":true,"status":"idle","turn":0}
+review2 after send: idle | None | records: []
+     收到                                                                                                                                                       3% used
+     Build · Big Pickle · 4.7s · 2.8 tok/s
+  ┃  Build · Big Pickle OpenCode
+--- approve A
+{"status":"blocked","turn":14}
+### A2A-9 2026-11-16T23:25:29+08:00 full student flow with --standalone
+{"error":{"hint":"typing would answer its dialog; read its screen first (hc read t1b), or --force","kind":"blocked","message":"t1b is blocked (permission)"}}
+23:25:41 a2a-main allow: 
+23:25:46 a2a-main allow: 
+23:25:51 a2a-main allow: 
+23:25:56 a2a-main allow: 
+23:26:01 a2a-main allow: 
+23:26:06 a2a-main allow: 
+23:26:10 a2a-main allow: 
+23:26:15 a2a-main allow: 
+23:26:20 a2a-main allow: 
+23:26:25 a2a-main allow: 
+23:26:30 a2a-main allow: 
+23:26:35 a2a-main allow: 
+23:26:39 a2a-main allow: 
+23:26:44 a2a-main allow: 
+23:26:49 a2a-main allow: 
+23:26:54 a2a-main allow: 
+23:26:59 a2a-main allow: 
+23:27:04 a2a-main allow: 
+23:27:09 a2a-main allow: 
+23:27:13 a2a-main allow: 
+23:27:18 a2a-main allow: 
+23:27:23 a2a-main allow: 
+23:27:28 a2a-main allow: 
+23:27:33 a2a-main allow: 
+23:27:38 a2a-main allow: 
+23:27:43 a2a-main allow: 
+23:27:48 a2a-main allow: 
+23:27:52 a2a-main allow: 
+23:27:57 a2a-main allow: 
+23:28:02 a2a-main allow: 
+23:28:07 a2a-main allow: 
+23:28:12 a2a-main allow: 
+23:28:17 a2a-main allow: 
+23:28:21 a2a-main allow: 
+23:28:26 a2a-main allow: 
+23:28:31 a2a-main allow: 
+23:28:36 a2a-main allow: 
+23:28:41 a2a-main allow: 
+23:28:46 a2a-main allow: 
+23:28:51 a2a-main allow: 
+23:28:55 a2a-main allow: 
+23:29:00 a2a-main allow: 
+23:29:05 a2a-main allow: 
+23:29:11 a2a-main allow: 
+23:29:16 a2a-main allow: 
+23:29:21 a2a-main allow: 
+23:29:26 a2a-main allow: 
+23:29:31 a2a-main allow: 
+23:29:36 a2a-main allow: 
+23:29:41 a2a-main allow: 
+23:29:46 a2a-main allow: 
+23:29:51 a2a-main allow: 
+23:29:55 a2a-main allow: 
+23:30:00 a2a-main allow: 
+23:30:05 a2a-main allow: 
+23:30:10 a2a-main allow: 
+23:30:14 a2a-main allow: 
+23:30:19 a2a-main allow: 
+23:30:24 a2a-main allow: 
+23:30:29 a2a-main allow: 
+23:30:34 a2a-main allow: 
+23:30:38 a2a-main allow: 
+23:30:44 a2a-main allow: 
+23:30:49 a2a-main allow: 
+23:30:54 a2a-main allow: 
+23:30:58 a2a-main allow: 
+23:31:03 a2a-main allow: 
+23:31:08 a2a-main allow: 
+23:31:13 a2a-main allow: 
+23:31:18 a2a-main allow: 
+23:31:22 a2a-main allow: 
+23:31:27 a2a-main allow: 
+23:31:32 a2a-main allow: 
+23:31:37 a2a-main allow: 
+23:31:42 a2a-main allow: 
+23:31:46 a2a-main allow: 
+23:31:51 a2a-main allow: 
+23:31:56 a2a-main allow: 
+23:32:01 a2a-main allow: 
+23:32:05 a2a-main allow: 
+23:32:10 a2a-main allow: 
+23:32:15 a2a-main allow: 
+23:32:20 a2a-main allow: 
+23:32:24 a2a-main allow: 
+23:32:29 a2a-main allow: 
+23:32:34 a2a-main allow: 
+23:32:39 a2a-main allow: 
+23:32:44 a2a-main allow: 
+23:32:49 a2a-main allow: 
+23:32:54 a2a-main allow: 
+23:32:58 a2a-main allow: 
+23:33:03 a2a-main allow: 
+23:33:08 a2a-main allow: 
+23:33:13 a2a-main allow: 
+23:33:17 a2a-main allow: 
+23:33:22 a2a-main allow: 
+23:33:27 a2a-main allow: 
+23:33:32 a2a-main allow: 
+23:33:37 a2a-main allow: 
+23:33:42 a2a-main allow: 
+23:33:46 a2a-main allow: 
+23:33:51 a2a-main allow: 
+23:33:56 a2a-main allow: 
+23:34:01 a2a-main allow: 
+23:34:06 a2a-main allow: 
+23:34:11 a2a-main allow: 
+23:34:15 a2a-main allow: 
+23:34:20 a2a-main allow: 
+23:34:25 a2a-main allow: 
+23:34:30 a2a-main allow: 
+23:34:35 a2a-main allow: 
+23:34:40 a2a-main allow: 
+23:34:45 a2a-main allow: 
+23:34:49 a2a-main allow: 
+23:34:54 a2a-main allow: 
+23:34:59 a2a-main allow: 
+23:35:04 a2a-main allow: 
+23:35:09 a2a-main allow: 
+23:35:14 a2a-main allow: 
+23:35:19 a2a-main allow: 
+23:35:24 a2a-main allow: 
+23:35:28 a2a-main allow: 
+23:35:33 a2a-main allow: 
+23:35:38 a2a-main allow: 
+TIMEOUT waiting for: idle_both && [ $(reports) -ge 1 ]
+--- phase1 done at 614s approvals=124 rejects=0
+--- phase2 follow-up
+{"error":{"hint":"typing would answer its dialog; read its screen first (hc read t1b), or --force","kind":"blocked","message":"t1b is blocked (permission)"}}
+23:35:43 a2a-main allow: 
+23:35:48 a2a-main allow: 
+23:35:53 a2a-main allow: 
+23:35:58 a2a-main allow: 
+23:36:03 a2a-main allow: 
+23:36:08 a2a-main allow: 
+23:36:13 a2a-main allow: 
+23:36:17 a2a-main allow: 
+23:36:22 a2a-main allow: 
+23:36:27 a2a-main allow: 
+23:36:32 a2a-main allow: 
+23:36:37 a2a-main allow: 
+23:36:42 a2a-main allow: 
+23:36:46 a2a-main allow: 
+23:36:51 a2a-main allow: 
+23:36:56 a2a-main allow: 
+23:37:01 a2a-main allow: 
+23:37:06 a2a-main allow: 
+23:37:11 a2a-main allow: 
+23:37:16 a2a-main allow: 
+23:37:20 a2a-main allow: 
+23:37:25 a2a-main allow: 
+23:37:30 a2a-main allow: 
+23:37:35 a2a-main allow: 
+23:37:39 a2a-main allow: 
+23:37:44 a2a-main allow: 
+23:37:50 a2a-main allow: 
+23:37:55 a2a-main allow: 
+23:38:00 a2a-main allow: 
+23:38:05 a2a-main allow: 
+23:38:10 a2a-main allow: 
+23:38:15 a2a-main allow: 
+23:38:20 a2a-main allow: 
+23:38:25 a2a-main allow: 
+23:38:30 a2a-main allow: 
+23:38:34 a2a-main allow: 
+23:38:39 a2a-main allow: 
+23:38:44 a2a-main allow: 
+23:38:49 a2a-main allow: 
+23:38:54 a2a-main allow: 
+23:38:58 a2a-main allow: 
+23:39:03 a2a-main allow: 
+23:39:08 a2a-main allow: 
+23:39:13 a2a-main allow: 
+23:39:18 a2a-main allow: 
+23:39:22 a2a-main allow: 
+23:39:27 a2a-main allow: 
+23:39:32 a2a-main allow: 
+23:39:37 a2a-main allow: 
+23:39:42 a2a-main allow: 
+23:39:47 a2a-main allow: 
+23:39:51 a2a-main allow: 
+23:39:56 a2a-main allow: 
+23:40:01 a2a-main allow: 
+23:40:06 a2a-main allow: 
+23:40:11 a2a-main allow: 
+23:40:16 a2a-main allow: 
+23:40:20 a2a-main allow: 
+23:40:25 a2a-main allow: 
+23:40:30 a2a-main allow: 
+23:40:35 a2a-main allow: 
+23:40:40 a2a-main allow: 
+23:40:45 a2a-main allow: 
+23:40:49 a2a-main allow: 
+23:40:54 a2a-main allow: 
+23:40:59 a2a-main allow: 
+23:41:04 a2a-main allow: 
+23:41:09 a2a-main allow: 
+23:41:14 a2a-main allow: 
+23:41:18 a2a-main allow: 
+23:41:23 a2a-main allow: 
+23:41:28 a2a-main allow: 
+23:41:33 a2a-main allow: 
+23:41:38 a2a-main allow: 
+23:41:43 a2a-main allow: 
+23:41:48 a2a-main allow: 
+23:41:53 a2a-main allow: 
+23:41:57 a2a-main allow: 
+23:42:02 a2a-main allow: 
+23:42:07 a2a-main allow: 
+23:42:12 a2a-main allow: 
+23:42:17 a2a-main allow: 
+23:42:22 a2a-main allow: 
+23:42:27 a2a-main allow: 
+23:42:32 a2a-main allow: 
+23:42:36 a2a-main allow: 
+23:42:41 a2a-main allow: 
+23:42:46 a2a-main allow: 
+23:42:51 a2a-main allow: 
+23:42:56 a2a-main allow: 
+23:43:01 a2a-main allow: 
+23:43:05 a2a-main allow: 
+23:43:10 a2a-main allow: 
+23:43:15 a2a-main allow: 
+23:43:20 a2a-main allow: 
+23:43:25 a2a-main allow: 
+23:43:30 a2a-main allow: 
+23:43:34 a2a-main allow: 
+23:43:39 a2a-main allow: 
+23:43:44 a2a-main allow: 
+23:43:49 a2a-main allow: 
+23:43:54 a2a-main allow: 
+23:43:58 a2a-main allow: 
+23:44:03 a2a-main allow: 
+23:44:08 a2a-main allow: 
+23:44:13 a2a-main allow: 
+23:44:18 a2a-main allow: 
+23:44:24 a2a-main allow: 
+23:44:29 a2a-main allow: 
+23:44:34 a2a-main allow: 
+23:44:39 a2a-main allow: 
+23:44:44 a2a-main allow: 
+23:44:49 a2a-main allow: 
+23:44:53 a2a-main allow: 
+23:44:58 a2a-main allow: 
+23:45:03 a2a-main allow: 
+23:45:08 a2a-main allow: 
+23:45:13 a2a-main allow: 
+23:45:17 a2a-main allow: 
+23:45:22 a2a-main allow: 
+23:45:27 a2a-main allow: 
+23:45:32 a2a-main allow: 
+23:45:37 a2a-main allow: 
+23:45:41 a2a-main allow: 
+TIMEOUT waiting for: idle_both && [ $(reports) -ge 2 ]
+--- phase2 done at 1217s approvals=248 rejects=0
+--- phase3 cleanup
+{"error":{"hint":"typing would answer its dialog; read its screen first (hc read t1b), or --force","kind":"blocked","message":"t1b is blocked (permission)"}}
+23:45:46 a2a-main allow: 
+23:45:51 a2a-main allow: 
+23:45:56 a2a-main allow: 
+23:46:01 a2a-main allow: 
+23:46:06 a2a-main allow: 
+23:46:10 a2a-main allow: 
+23:46:15 a2a-main allow: 
+23:46:20 a2a-main allow: 
+23:46:25 a2a-main allow: 
+23:46:29 a2a-main allow: 
+23:46:34 a2a-main allow: 
+23:46:39 a2a-main allow: 
+23:46:44 a2a-main allow: 
+23:46:48 a2a-main allow: 
+23:46:53 a2a-main allow: 
+23:46:58 a2a-main allow: 
+23:47:03 a2a-main allow: 
+23:47:08 a2a-main allow: 
+23:47:13 a2a-main allow: 
+23:47:17 a2a-main allow: 
+23:47:22 a2a-main allow: 
+23:47:27 a2a-main allow: 
+23:47:32 a2a-main allow: 
+23:47:37 a2a-main allow: 
+23:47:42 a2a-main allow: 
+23:47:47 a2a-main allow: 
+23:47:52 a2a-main allow: 
+23:47:56 a2a-main allow: 
+23:48:01 a2a-main allow: 
+23:48:06 a2a-main allow: 
+23:48:11 a2a-main allow: 
+23:48:16 a2a-main allow: 
+23:48:21 a2a-main allow: 
+23:48:25 a2a-main allow: 
+23:48:30 a2a-main allow: 
+23:48:35 a2a-main allow: 
+23:48:40 a2a-main allow: 
+23:48:45 a2a-main allow: 
+23:48:50 a2a-main allow: 
+23:48:55 a2a-main allow: 
+23:49:00 a2a-main allow: 
+23:49:04 a2a-main allow: 
+23:49:10 a2a-main allow: 
+23:49:14 a2a-main allow: 
+23:49:19 a2a-main allow: 
+23:49:24 a2a-main allow: 
+23:49:29 a2a-main allow: 
+23:49:34 a2a-main allow: 
+23:49:39 a2a-main allow: 
+23:49:44 a2a-main allow: 
+23:49:48 a2a-main allow: 
+23:49:53 a2a-main allow: 
+23:49:58 a2a-main allow: 
+23:50:03 a2a-main allow: 
+23:50:08 a2a-main allow: 
+23:50:12 a2a-main allow: 
+23:50:17 a2a-main allow: 
+23:50:22 a2a-main allow: 
+23:50:27 a2a-main allow: 
+23:50:32 a2a-main allow: 
+23:50:37 a2a-main allow: 
+23:50:41 a2a-main allow: 
+TIMEOUT waiting for: [ "$(gs a2a-main)" = idle ] && [ "$(gs review)" = none ]
+--- phase3 done at 1517s approvals=310 rejects=0
+{"hidden_finished":4,"terminals":[{"address":"t4","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":10,"where":"BigPickle / 1"},{"address":"t5","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":11,"where":"GLM / 1"},{"address":"t7","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":0,"where":"~ / 1"},{"address":"t1b","agent":"opencode","cwd":"C:\\Users\\User\\Documents\\herdr-a2a-test","name":"a2a-main","state":"live","status":"blocked","turn":1}]}
+### A2A-9 end 2026-11-16T23:50:46+08:00
+### A2A-10 2026-11-16T23:52:20+08:00 guide-style prompt (agent reads AGENTS.md + hc --skill)
+23:52:41 a2a-main allow:   ┃  $ hc --skill
+23:52:46 a2a-main allow:   ┃  $ type "%USERPROFILE%\.config\herdr-app\AGENTS.md"
+23:52:54 a2a-main allow:   ┃  $ hc templates
+23:52:59 a2a-main allow:   ┃  $ hc ls
+23:53:03 a2a-main allow:   ┃  $ find . -name "logistic*" -o -name "decision*" -o -name "lab3*" 2>&1 | head -40
+23:53:16 a2a-main allow:   ┃  $ hc run --bg --name reviewer --cwd "C:\Users\User\Documents\herdr-a2a-test" opencode "你是 reviewer，只讀不改。請檢查 notes/logistic.md 的�
+23:53:25 a2a-main allow:   ┃  $ hc wait t1f
+23:53:34 a2a-main allow:   ┃  $ hc rm t1f
+23:53:39 a2a-main allow:   ┃  $ hc run --bg --name reviewer --cwd "C:\Users\User\Documents\herdr-a2a-test" opencode
+23:53:52 a2a-main allow:   ┃  $ hc read --lines 60 t1g
+TIMEOUT waiting for: idle_both && [ $(reports) -ge 1 ]
+kids: t1g
+--- phase1 done at 615s approvals=10 rejects=0
+--- phase2 follow-up
+TIMEOUT waiting for: idle_both && [ $(reports) -ge 2 ]
+--- phase2 done at 1225s approvals=10 rejects=0
+--- phase3 cleanup
+00:12:55 a2a-main allow:   ┃  $ hc rm t1g
+--- phase3 done at 1244s approvals=11 rejects=0
+{"hidden_finished":4,"terminals":[{"address":"t4","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":10,"where":"BigPickle / 1"},{"address":"t5","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":11,"where":"GLM / 1"},{"address":"t7","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":0,"where":"~ / 1"},{"address":"t1d","agent":"opencode","cwd":"C:\\Users\\User\\Documents\\herdr-a2a-test","name":"a2a-main","state":"live","status":"idle","turn":11}]}
+### A2A-10 end 2026-11-17T00:13:04+08:00
+### A2A-11 2026-11-17T00:14:28+08:00 guide-style prompt (agent reads AGENTS.md + hc --skill)
+00:14:40 main=working
+00:14:44 a2a-main allow:   ┃  $ cat ~/.config/herdr-app/AGENTS.md
+00:14:45 main=blocked
+00:14:49 a2a-main allow:   ┃  $ hc --skill 2>&1 | head -200
+00:14:49 main=working
+00:15:02 a2a-main allow:   ┃  $ head -230 ~/.config/herdr-app/AGENTS.md
+00:15:03 main=blocked
+00:15:07 a2a-main allow:   ┃  $ hc templates; echo "---"; hc ls
+00:15:07 main=working
+00:15:11 a2a-main allow:   ┃  $ ls -la; echo ---; ls -la notes figs 2>&1
+00:15:12 main=blocked
+00:15:16 a2a-main allow:   ┃  $ hc run --help 2>&1 | head -60
+00:15:16 main=working
+00:15:34 a2a-main allow:   ┃  $ echo "ID=$HC_TERMINAL_ID"; which opencode; opencode --version 2>&1 | head -3
+00:15:34 main=blocked
+00:15:39 a2a-main allow:   ┃  $ opencode --help 2>&1 | head -40
+00:15:39 main=working
+00:15:52 a2a-main allow:   ┃  $ opencode --help 2>&1 | sed -n '40,120p'; echo ===; opencode run --help 2>&1 | head -40
+00:16:01 a2a-main allow:   ┃  $ ls "C:/Users/User/Documents/assets/data" 2>&1 | head; ls "C:/Users/User/Documents/assets/data/reveal" 2>&1 | head
+00:16:01 main=blocked
+00:16:05 a2a-main allow:   ┃  $ cat pyproject.toml
+00:16:06 main=working
+00:16:23 a2a-main allow:   ┃  $ cat pyproject.toml
+00:16:28 a2a-main allow:   ┃  $ cd "C:/Users/User/Documents/herdr-a2a-test" && hc run --bg --name review --cwd "C:/Users/User/Documents/herdr-a2a-test" opencode --prompt "$(cat
+00:16:28 main=working t1k=None
+00:16:33 main=working t1k=working
+00:17:56 a2a-main allow:   ┃  $ hc read --lines 60 review 2>&1 | tail -60
+00:17:56 t1k allow:   ┃  $ hc send t1j '【審查回報：notes/logistic.md】
+00:18:56 main=idle t1k=idle
+kids: t1k
+--- phase1 done at 284s approvals=15 rejects=0
+  ┃  <hc from="t1k review">【審查回報：notes/logistic.md】
+  ┃  審查範圍：notes/logistic.md（14 行）、notes/decision.md（3 行）、lab3_logistic.py（79 行）。唯讀，未改任何檔案。全專案無任何 .csv（已確認），data/ 與      OpenCode 核對 logistic 筆記
+  ┃  assets/data 都不存在，程式跑不起來；以下數字一律是「依程式邏輯應為」的推論，非實跑結果。
+  ┃                                                                                                                                                             Context
+  ┃  一、可對上的部分                                                                                                                                           52,071 tokens
+  ┃  1. 數字出處正確。lab3_logistic.py:57-59 會逐特徵組印「{name} {tag}: 準確率 … recall …」。logistic.md:5 的 0.933 來自「不含 case_no／測試集」，0.538        26% used
+  ┃  來自「不含 case_no／下一批」。但兩者是不同資料集的不同指標，並列容易被讀成同一次評估。
+  ┃  2. 37 封一致。門檻表在 lab3_logistic.py:73-79，輸出「警報／抓到／漏掉／誤報」，不印準確率。decision.md:3 與 logistic.md:6 的 37 封相同。
+  ┃  3. 特徵切片內部一致。slice(1, None) 排除第 0 欄，程式自己的標籤也宣稱第 0 欄是 case_no（:51）；下一批用 N[:, :-1][:, c]（:53）與 N[:, 1:-1]（:72），
+  ┃  與訓練／測試同一組欄位，且 y 取 N[:, -1]（:57、:72）。正確。
+  ┃  4. 標準化統計量正確。mu, sd 取自 Xtr（:52、:62），只用訓練集估計，再套到測試集與下一批，沒有 leakage；np.std 預設 ddof=0，兩處一致。                       OpenCode 核對 logistic 筆記
+  ┃  5. 程式小瑕疵（非筆記錯誤）：:58 用 > 0.5，:77 用 >= t，同一個 0.5 在兩處語意不同。因特徵連續，p 恰為 0.5 幾乎不可能，實務影響可忽略，但嚴格說是不一
+  ┃  致。                                                                                                                                                       Context
+  ┃                                                                                                                                                             52,071 tokens
+  ┃  二、對不上／需要修                                                                                                                                         26% used
+  ┃  1. 抓到逾期數 11 vs 12（最重要，必有一處錯）
+  ┃     - decision.md:3：「抓到 11 個逾期」
+  ┃     - logistic.md:6：「抓到 12 個逾期，漏掉 1 個」
+  ┃     - 程式邏輯：抓到 + 漏掉 = 下一批逾期總數（:77-78）。若總數 13，則 12+1 自洽；11+1=12 少 1，必定有一份寫錯。
+  ┃     - 旁證（推論，非確定）：0.538 ≈ 7/13 = 0.53846，暗示下一批逾期 13 筆、門檻 0.5 抓到 7 筆、漏 6 筆。若成立，門檻 0.2 應是抓到 12、漏 1，decision.md      OpenCode 核對 logistic 筆記
+  ┃  的 11 是錯的。但也可能是 14/26 等比例，故只能說「偏向 12」。
+  ┃     - 不管哪個對，兩份筆記目前互相矛盾，這是必修正項。                                                                                                      Context
+  ┃  2. 「提醒 37 封」不等於「在預算內」                                                                                                                        52,071 tokens
+  ┃     - decision.md:1 的限制是「每 300 筆最多 40 封」，但程式算的是整個下一批的警報數（:78），下一批幾筆無法從現有檔案得知（沒有 loans_new_batch.csv）。      26% used
+  ┃     - 若下一批不是 300 筆，37 與 40 不是同一單位。logistic.md:9「提醒數在 40 封以內」是拿不同基準相比，屬 overclaim；而且 37/40 只剩 3 封餘裕，換一批
+  ┃  就會破。
+  ┃  3. 漏報最關鍵的數字：誤報。程式會印「誤報」（:78），兩份筆記都沒寫。依程式邏輯應為 37 − 12 = 24 封誤報（若 decision 的 11 為真則 26）。也就是
+  ┃  precision 約 12/37 ≈ 32%，每 3 封提醒約 2 封是誤報。只寫「抓到 12、漏掉 1」會讓讀者嚴重高估模型，屬選擇性揭露。
+  ┃  4. 沒有跟「永遠猜不會逾期」的基準比。lab3_logistic.py:50 特地先印這個基準，正是本 lab 的重點。logistic.md:5 只寫 0.933，:14 又說「準確率高」，卻沒給       OpenCode 核對 logistic 筆記
+  ┃  基準。逾期是少數類，沒有基準就無法判斷 0.933 有多少是「本來就會對」。基準值我無法得知（不能執行）。
+  ┃  5. 選 0.2 的理由不完整。:74 會跑 0.5/0.3/0.2/0.1/0.05 五個門檻，筆記只報 0.2。logistic.md:9 說「漏掉代價高」，但 0.2 仍漏 1 筆；沒有 0.1 的警報數，就      Context
+  ┃  無法回答「有沒有可能在 40 封內全部抓到」。現有理由只支持「0.2 比 0.5 好」，不支持「0.2 是最適門檻」。                                                      52,071 tokens
+  ┃                                                                                                                                                             26% used
+  ┃  三、overclaim／把不能證明寫成已證明
+  ┃  1. 最嚴重：標題與內容矛盾。logistic.md:12 標題「## 不能證明什麼」，:13 卻寫「門檻 0.2 保證以後每一批都能抓到大部分逾期。」這是肯定句＋保證句，正好是
+  ┃  任務要抓的 overclaim，還與 :14 自己打臉，也與 13 筆單一批次的事實不符。應改成「不能證明門檻 0.2 在以後每一批都還抓得到大部分逾期；13 筆單一批次的結果
+  ┃  不是保證」。
+  ┃  2. :14「測試集準確率高，不代表換一批資料也一樣好。」句子本身是對的限制句，但放在「不能證明什麼」標題下，應改寫成「不能證明換一批資料也一樣好」；另         OpenCode 核對 logistic 筆記
+  ┃  外「準確率高」缺基準（見二.4）。
+  ┃  3. :10「case_no 是補登順序，不當特徵」是需求給的前提（decision.md:1），程式沒有驗證；docstring :3 還說 case_no 的產生方式只在揭曉時提供。寫成「決          Context
+--- phase2 follow-up
+00:19:15 main=working t1k=working
+00:19:28 a2a-main allow:   ┃  $ hc ls 2>&1; echo ---; hc get review 2>&1 | head -c 1200
+00:26:40 main=idle t1k=idle
+TIMEOUT waiting for: idle_both && [ $(reports) -ge 2 ]
+--- phase2 done at 890s approvals=16 rejects=0
+--- phase3 cleanup
+00:29:20 main=working t1k=working
+00:29:25 main=working
+00:29:33 main=idle
+--- phase3 done at 906s approvals=16 rejects=0
+{"hidden_finished":4,"terminals":[{"address":"t4","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":10,"where":"BigPickle / 1"},{"address":"t5","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":11,"where":"GLM / 1"},{"address":"t7","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":0,"where":"~ / 1"},{"address":"t1j","agent":"opencode","cwd":"C:\\Users\\User\\Documents\\herdr-a2a-test","name":"a2a-main","state":"live","status":"idle","turn":29}]}
+### A2A-11 end 2026-11-17T00:29:34+08:00

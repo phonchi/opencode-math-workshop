@@ -69,3 +69,23 @@
 ## 順帶發現（與 Herdr 無關）
 
 在暫存資料夾裡，OpenCode V2 的 `debug config` 沒有讀到專案的 `opencode.json`，所以 `ask` 權限沒有生效。建議另外確認學生專案的設定有被讀到。
+
+## 改版：重點放在 agent 互相派工（2026-11-17）
+
+講師認為第一版只寫了「看狀態、關視窗再接回」，太淺；這一章的重點應該是 agent to agent。第一版只動這個選修章，工作坊主線不變。
+
+- **寫法**：照官方 guide（https://herdr.dev/guide/）的做法，學生只請 agent 先讀 `~/.config/herdr-app/AGENTS.md` 和 `hc --skill`，再用自然語言說要做什麼。講師明確要求：不讓學生記指令，也不在提示詞裡寫死 `hc` 指令。
+- **主練習**：請 OpenCode 開另一個 OpenCode 當 reviewer，審 Lab 3 的 `notes/logistic.md`。練習開始前，學生先在筆記裡故意改錯一個數字，看 reviewer 抓不抓得到；最後由學生自己核對。
+- **三方意見**：
+  - 第四輪設計討論：Astra、Fable、Gemini 都建議簡化，並改用檔案交接。Fable 建議改審 Lab 3。
+  - 第五輪審查後的修正：
+    - Windows 改成在 PowerShell 直接安裝。
+    - 補上 `config.toml` 已存在時的處理方式。
+    - 讀檔不需要權限，刪掉相關說法。
+    - 加上第 0 步，故意改錯一個數字。
+    - 門檻表改成請 agent 重跑。
+    - Gemini 額度改連課前備案。
+    - 刪掉「接手 reviewer」「跑很久的程式」兩個例子，改用官方的看板例子。
+  - 不採用的意見：Gemini 說下載頁是 404（實測 200），以及 `Ctrl+S`（沒有驗證）。
+- **實測**：細節見 test-run README 的「Agent 互相派工」一節。guide 風格提示詞在 Windows 上完整跑通：派工、回報、補問、收工，約 15 分鐘。
+- **未測**：學生機器 Windows PATH 沒有 `.opencode\bin` 的情況。

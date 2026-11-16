@@ -1,0 +1,85 @@
+### A2A-11 2026-11-17T00:14:28+08:00 guide-style prompt (agent reads AGENTS.md + hc --skill)
+00:14:40 main=working
+00:14:44 a2a-main allow:   ┃  $ cat ~/.config/herdr-app/AGENTS.md
+00:14:45 main=blocked
+00:14:49 a2a-main allow:   ┃  $ hc --skill 2>&1 | head -200
+00:14:49 main=working
+00:15:02 a2a-main allow:   ┃  $ head -230 ~/.config/herdr-app/AGENTS.md
+00:15:03 main=blocked
+00:15:07 a2a-main allow:   ┃  $ hc templates; echo "---"; hc ls
+00:15:07 main=working
+00:15:11 a2a-main allow:   ┃  $ ls -la; echo ---; ls -la notes figs 2>&1
+00:15:12 main=blocked
+00:15:16 a2a-main allow:   ┃  $ hc run --help 2>&1 | head -60
+00:15:16 main=working
+00:15:34 a2a-main allow:   ┃  $ echo "ID=$HC_TERMINAL_ID"; which opencode; opencode --version 2>&1 | head -3
+00:15:34 main=blocked
+00:15:39 a2a-main allow:   ┃  $ opencode --help 2>&1 | head -40
+00:15:39 main=working
+00:15:52 a2a-main allow:   ┃  $ opencode --help 2>&1 | sed -n '40,120p'; echo ===; opencode run --help 2>&1 | head -40
+00:16:01 a2a-main allow:   ┃  $ ls "C:/Users/User/Documents/assets/data" 2>&1 | head; ls "C:/Users/User/Documents/assets/data/reveal" 2>&1 | head
+00:16:01 main=blocked
+00:16:05 a2a-main allow:   ┃  $ cat pyproject.toml
+00:16:06 main=working
+00:16:23 a2a-main allow:   ┃  $ cat pyproject.toml
+00:16:28 a2a-main allow:   ┃  $ cd "C:/Users/User/Documents/herdr-a2a-test" && hc run --bg --name review --cwd "C:/Users/User/Documents/herdr-a2a-test" opencode --prompt "$(cat
+00:16:28 main=working t1k=None
+00:16:33 main=working t1k=working
+00:17:56 a2a-main allow:   ┃  $ hc read --lines 60 review 2>&1 | tail -60
+00:17:56 t1k allow:   ┃  $ hc send t1j '【審查回報：notes/logistic.md】
+00:18:56 main=idle t1k=idle
+kids: t1k
+--- phase1 done at 284s approvals=15 rejects=0
+  ┃  <hc from="t1k review">【審查回報：notes/logistic.md】
+  ┃  審查範圍：notes/logistic.md（14 行）、notes/decision.md（3 行）、lab3_logistic.py（79 行）。唯讀，未改任何檔案。全專案無任何 .csv（已確認），data/ 與      OpenCode 核對 logistic 筆記
+  ┃  assets/data 都不存在，程式跑不起來；以下數字一律是「依程式邏輯應為」的推論，非實跑結果。
+  ┃                                                                                                                                                             Context
+  ┃  一、可對上的部分                                                                                                                                           52,071 tokens
+  ┃  1. 數字出處正確。lab3_logistic.py:57-59 會逐特徵組印「{name} {tag}: 準確率 … recall …」。logistic.md:5 的 0.933 來自「不含 case_no／測試集」，0.538        26% used
+  ┃  來自「不含 case_no／下一批」。但兩者是不同資料集的不同指標，並列容易被讀成同一次評估。
+  ┃  2. 37 封一致。門檻表在 lab3_logistic.py:73-79，輸出「警報／抓到／漏掉／誤報」，不印準確率。decision.md:3 與 logistic.md:6 的 37 封相同。
+  ┃  3. 特徵切片內部一致。slice(1, None) 排除第 0 欄，程式自己的標籤也宣稱第 0 欄是 case_no（:51）；下一批用 N[:, :-1][:, c]（:53）與 N[:, 1:-1]（:72），
+  ┃  與訓練／測試同一組欄位，且 y 取 N[:, -1]（:57、:72）。正確。
+  ┃  4. 標準化統計量正確。mu, sd 取自 Xtr（:52、:62），只用訓練集估計，再套到測試集與下一批，沒有 leakage；np.std 預設 ddof=0，兩處一致。                       OpenCode 核對 logistic 筆記
+  ┃  5. 程式小瑕疵（非筆記錯誤）：:58 用 > 0.5，:77 用 >= t，同一個 0.5 在兩處語意不同。因特徵連續，p 恰為 0.5 幾乎不可能，實務影響可忽略，但嚴格說是不一
+  ┃  致。                                                                                                                                                       Context
+  ┃                                                                                                                                                             52,071 tokens
+  ┃  二、對不上／需要修                                                                                                                                         26% used
+  ┃  1. 抓到逾期數 11 vs 12（最重要，必有一處錯）
+  ┃     - decision.md:3：「抓到 11 個逾期」
+  ┃     - logistic.md:6：「抓到 12 個逾期，漏掉 1 個」
+  ┃     - 程式邏輯：抓到 + 漏掉 = 下一批逾期總數（:77-78）。若總數 13，則 12+1 自洽；11+1=12 少 1，必定有一份寫錯。
+  ┃     - 旁證（推論，非確定）：0.538 ≈ 7/13 = 0.53846，暗示下一批逾期 13 筆、門檻 0.5 抓到 7 筆、漏 6 筆。若成立，門檻 0.2 應是抓到 12、漏 1，decision.md      OpenCode 核對 logistic 筆記
+  ┃  的 11 是錯的。但也可能是 14/26 等比例，故只能說「偏向 12」。
+  ┃     - 不管哪個對，兩份筆記目前互相矛盾，這是必修正項。                                                                                                      Context
+  ┃  2. 「提醒 37 封」不等於「在預算內」                                                                                                                        52,071 tokens
+  ┃     - decision.md:1 的限制是「每 300 筆最多 40 封」，但程式算的是整個下一批的警報數（:78），下一批幾筆無法從現有檔案得知（沒有 loans_new_batch.csv）。      26% used
+  ┃     - 若下一批不是 300 筆，37 與 40 不是同一單位。logistic.md:9「提醒數在 40 封以內」是拿不同基準相比，屬 overclaim；而且 37/40 只剩 3 封餘裕，換一批
+  ┃  就會破。
+  ┃  3. 漏報最關鍵的數字：誤報。程式會印「誤報」（:78），兩份筆記都沒寫。依程式邏輯應為 37 − 12 = 24 封誤報（若 decision 的 11 為真則 26）。也就是
+  ┃  precision 約 12/37 ≈ 32%，每 3 封提醒約 2 封是誤報。只寫「抓到 12、漏掉 1」會讓讀者嚴重高估模型，屬選擇性揭露。
+  ┃  4. 沒有跟「永遠猜不會逾期」的基準比。lab3_logistic.py:50 特地先印這個基準，正是本 lab 的重點。logistic.md:5 只寫 0.933，:14 又說「準確率高」，卻沒給       OpenCode 核對 logistic 筆記
+  ┃  基準。逾期是少數類，沒有基準就無法判斷 0.933 有多少是「本來就會對」。基準值我無法得知（不能執行）。
+  ┃  5. 選 0.2 的理由不完整。:74 會跑 0.5/0.3/0.2/0.1/0.05 五個門檻，筆記只報 0.2。logistic.md:9 說「漏掉代價高」，但 0.2 仍漏 1 筆；沒有 0.1 的警報數，就      Context
+  ┃  無法回答「有沒有可能在 40 封內全部抓到」。現有理由只支持「0.2 比 0.5 好」，不支持「0.2 是最適門檻」。                                                      52,071 tokens
+  ┃                                                                                                                                                             26% used
+  ┃  三、overclaim／把不能證明寫成已證明
+  ┃  1. 最嚴重：標題與內容矛盾。logistic.md:12 標題「## 不能證明什麼」，:13 卻寫「門檻 0.2 保證以後每一批都能抓到大部分逾期。」這是肯定句＋保證句，正好是
+  ┃  任務要抓的 overclaim，還與 :14 自己打臉，也與 13 筆單一批次的事實不符。應改成「不能證明門檻 0.2 在以後每一批都還抓得到大部分逾期；13 筆單一批次的結果
+  ┃  不是保證」。
+  ┃  2. :14「測試集準確率高，不代表換一批資料也一樣好。」句子本身是對的限制句，但放在「不能證明什麼」標題下，應改寫成「不能證明換一批資料也一樣好」；另         OpenCode 核對 logistic 筆記
+  ┃  外「準確率高」缺基準（見二.4）。
+  ┃  3. :10「case_no 是補登順序，不當特徵」是需求給的前提（decision.md:1），程式沒有驗證；docstring :3 還說 case_no 的產生方式只在揭曉時提供。寫成「決          Context
+--- phase2 follow-up
+00:19:15 main=working t1k=working
+00:19:28 a2a-main allow:   ┃  $ hc ls 2>&1; echo ---; hc get review 2>&1 | head -c 1200
+00:26:40 main=idle t1k=idle
+TIMEOUT waiting for: idle_both && [ $(reports) -ge 2 ]
+--- phase2 done at 890s approvals=16 rejects=0
+--- phase3 cleanup
+00:29:20 main=working t1k=working
+00:29:25 main=working
+00:29:33 main=idle
+--- phase3 done at 906s approvals=16 rejects=0
+{"hidden_finished":4,"terminals":[{"address":"t4","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":10,"where":"BigPickle / 1"},{"address":"t5","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":11,"where":"GLM / 1"},{"address":"t7","agent":"C:\\Program Files\\Git\\bin\\bash.exe","cwd":"C:\\Users\\User","state":"live","turn":0,"where":"~ / 1"},{"address":"t1j","agent":"opencode","cwd":"C:\\Users\\User\\Documents\\herdr-a2a-test","name":"a2a-main","state":"live","status":"idle","turn":29}]}
+### A2A-11 end 2026-11-17T00:29:34+08:00

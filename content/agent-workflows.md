@@ -108,7 +108,7 @@ ls
 
 壓縮會把舊內容整理成摘要，可能省去細節。檔案裡保存的公式、參數與結果，才是下一次可以重新讀取的依據。
 
-想讓 OpenCode 在關掉視窗後繼續跑，或一邊讓它做事、一邊在旁邊跑指令，可以看選修章節[用 Herdr 顧著 OpenCode](herdr.html)。
+想讓 OpenCode 自己找另一個 OpenCode 幫忙審查，而且兩個都看得到在做什麼，可以看選修章節[用 Herdr 讓 OpenCode 找幫手](herdr.html)。
 
 ## 續作練習：保存 notes/progress.md
 
