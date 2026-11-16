@@ -54,7 +54,7 @@ curl -fsSL https://releases.herdr.dev/app/install.sh | sh
 
 ### 使用統計
 
-桌面 app 預設每天送出一次匿名使用統計，內容是用了哪些 agent、開了幾個分頁這類計數，不會送出終端機內容、檔名或提示詞。不想送出的話，打開 Herdr 後按 `Ctrl+,`（macOS 是 `Cmd+,`）打開設定，到 Privacy 關掉。
+桌面 app 預設每天送出一次匿名使用統計，內容是用了哪些 agent、開了幾個分頁這類計數，不會送出終端機內容、檔名或提示詞。不想送出的話，打開 Herdr 後點左下角的 Settings（或按 `Ctrl+,`，macOS 是 `Cmd+,`），在左邊選 Privacy 關掉。
 
 ## 認識畫面
 
@@ -101,7 +101,7 @@ cd ~/Documents/ai-math-lab
 請在 notes/ 新增 herdr-test.md，內容只寫一行：Herdr 練習。
 ```
 
-**第 4 步**：OpenCode 要寫檔時會停下來問你。先不要回答，看左側欄：這個 agent 的狀態變成 Blocked，意思是在等你。回到 OpenCode，選 `Allow once` 按 Enter，狀態會變成 Working，做完後變成 Done 或 Idle。
+**第 4 步**：OpenCode 要寫檔時會停下來問你。先不要回答，看左側欄下方的 Agents：這個 agent 出現在紅色的 Needs you 底下，窗格右上角也會標出 Needs you。回到 OpenCode，選 `Allow once` 按 Enter，它會接著做完。你一直看著這個窗格的話，做完後顯示 Idle；如果你那時切到別的 space，會顯示 Done，右下角也會跳出完成通知。
 
 **第 5 步**：點右邊的窗格，確認檔案真的寫出來了：
 

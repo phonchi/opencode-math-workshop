@@ -21,13 +21,34 @@
 | T6：寫入 `config.toml` 的指令 | 用假的 `APPDATA` 測 `mkdir -p` 加 `cat >`。跑兩次後檔案仍只有一行，`tomllib` 解析成 `['C:\\Program Files\\Git\\bin\\bash.exe', '--login', '-i']` |
 | 清理 | 測試用的 t8、t9 已 kill 並 rm，暫存專案已刪除。講師原本的 t4、t5、t7 沒有動 |
 
-## 未測，需要在 GUI 確認
+## GUI 實測（講師同意後操作 app）
 
-- 預設按鍵改查 `herdr-app/defaults/keys.json` 與 `keys.macos.json`：往右切開是 `ctrl-shift-o`／`cmd-d`，設定是 `ctrl-,`／`cmd-,`，貼上是 `ctrl-shift-v`、`shift-insert`／`cmd-v`。按鍵是否實際生效、設定裡 Privacy 的位置，沒有在 GUI 確認。
-- 側欄實際顯示的文字：做完後是 Done 還是 Idle。core 只收到 `idle`，Done 可能是 app 依「沒看過」另外標示的。
-- 關掉視窗再打開後，窗格與 OpenCode 對話都還在。官方 README 有寫，但這次沒有在 GUI 實測。
-- 從 Git Bash 執行 `powershell -c "irm …/install.ps1 | iex"` 安裝。講師已經裝好，為了不動到正在跑的 core，這次沒有重裝。只讀過 `install.ps1`：它安裝 app、加開始選單與使用者 PATH，沒有 core 時再裝 core；不會自動打開 app，也不寫 `config.toml`。
-- `+` 選單直接啟動 agent 時的 PATH。講師的 Windows 使用者 PATH 已含 `.opencode\bin`，無法代表學生的情況。
+用 `herdr-app do <command>` 操作、`herdr-app shot` 截圖，沒有模擬按鍵。截圖在 `gui/`（含講師的機器名稱，與 2026-09-12 的紀錄相同）。
+
+| 項目 | 結果 | 截圖 |
+|---|---|---|
+| 啟動 app | 第一個終端機是 Git Bash（`bash ~`）。左下角有 Settings | `gui/00-start.png` |
+| 新 space | 名稱顯示 `~`；`cd` 之後窗格標題仍是 `~`（#5958） | `gui/02-newspace.png`、`gui/04-bigpickle.png` |
+| `pane.split right`（講師安裝版 `keys.json` 綁在 `ctrl-shift-o`） | 新窗格開在 `C:\Users\User`，不在專案資料夾 | `gui/03-split.png` |
+| 側欄 Agents | OpenCode 啟動後列在 Idle；離開 OpenCode 後從清單消失 | `gui/03-split.png`、`gui/04-bigpickle.png` |
+| 等使用者回答（OpenCode 提問工具） | 側欄分組是紅色 **Needs you**，窗格右上角標 Needs you，分頁有紅點，狀態列寫 `1 needs you`。app 不用 Blocked 這個字 | `gui/07-blocked.png` |
+| 看著窗格時做完 | 側欄顯示 Idle | `gui/05-blocked.png` |
+| 切到別的 space 時做完 | 側欄顯示藍色 **Done**，右下角跳出 `OpenCode finished` | `gui/08-away.png` |
+| 設定 | `app.settings` 打開後，左側有 Look、Machines、Alerts、Updates、Privacy | `gui/09-settings.png` |
+| 關掉視窗再開 | `window.close` 後 app 的 socket 關閉，core 裡 t11（opencode）、t12 仍是 live；重開後同一個 space 的兩個窗格與對話都在 | `gui/10-reopened.png` |
+| 清理 | 測試 space 已關閉，畫面切回講師原本的 `~` space；暫存專案已刪除 | `gui/11-after-cleanup.png` |
+
+### 測試中的意外
+
+- OpenCode 啟動時預設模型是講師最近用的「Auto · GitHub Copilot」。為了不動用講師的 Copilot 額度，用 `/models` 換成 Big Pickle。V2 沒有 `-m` 參數。
+- 這次寫檔與 `ls` 都沒有跳出權限詢問。`opencode debug config` 只列出全域設定，沒有讀到暫存專案的 `opencode.json`，加了 `git init` 也一樣。T3 那次的編輯詢問可能是 V2 的預設行為，而按 Enter 選到了 Always allow。11/11 在正式專案資料夾實測時有讀到專案設定，這次的原因沒有再追。**這件事與 Herdr 無關，但值得另外確認學生專案的 `opencode.json` 有被讀到。**
+- 所以改用 OpenCode 的提問工具觸發等待狀態。
+
+## 仍未測
+
+- 從 Git Bash 執行 `powershell -c "irm …/install.ps1 | iex"` 安裝（只讀過腳本）。
+- 用全新的 Windows 帳號從頭安裝。
+- 實際按下 `Ctrl+Shift+O`、`Ctrl+,` 按鍵（只確認了綁定與對應指令）。
 
 ## 旁證
 

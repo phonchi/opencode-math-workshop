@@ -54,10 +54,18 @@
 
 在講師的 Windows 上，用 `hc` 從背景開終端機實測，沒有操作 GUI。結果與未測項目見 `tools/test-runs/20261116-herdr-app-windows/README.md`。
 
-## 尚待 GUI 確認
+## GUI 實測（講師同意後）
 
-- 預設按鍵（`Ctrl+Shift+O`／`Cmd+D` 往右切開、`Ctrl+,`／`Cmd+,` 設定）是從 `defaults/keys*.json` 查到的，還沒有在 GUI 按過。
-- 側欄顯示 Done 或 Idle。
-- 關掉視窗再打開後，窗格與對話是否都還在。
-- 從 Git Bash 呼叫 PowerShell 安裝。`install.ps1` 只讀過內容，沒有重跑。
-- 用全新 Windows 帳號從頭安裝。T1b 已確認 Herdr 的 bash 會讀 `.bash_profile`，所以只登記在 profile 的 opencode 也找得到。
+- 側欄的等待狀態寫的是 Needs you，不是 Blocked。看著窗格時做完顯示 Idle，在別的 space 時做完顯示 Done 並跳通知。
+- 關掉視窗再打開，窗格與對話都還在。Settings 在左下角，Privacy 在設定的左側列表。
+- 細節與截圖見 test-run README。
+
+## 仍未測
+
+- 從 Git Bash 呼叫 PowerShell 安裝。
+- 用全新的 Windows 帳號從頭安裝。
+- 實際按下快捷鍵。
+
+## 順帶發現（與 Herdr 無關）
+
+在暫存資料夾裡，OpenCode V2 的 `debug config` 沒有讀到專案的 `opencode.json`，所以 `ask` 權限沒有生效。建議另外確認學生專案的設定有被讀到。
