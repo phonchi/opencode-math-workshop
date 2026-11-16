@@ -113,3 +113,5 @@ A=(0,1)、B=(1,2)、C=(1,0)、D=(2,1)、E=(3,1)。
 如需對照，可閱讀[參考程式](reference/math_extensions.py)。先完成自己的版本，再比較驗證方式；不要只比程式長得像不像。
 
 想把這題接回課本或文獻，可以繼續做[課後補充：整理數學文獻與筆記](research-notes.html)，練習把來源、自己的推導與 Lab 結果分開記錄。
+
+這三題都是用程式和數值檢查 agent 的答案。想再進一步，讓證明本身也能被電腦逐步檢查，可以看 [Lean × AI：從數學想法到可檢查的證明](https://phonchi.github.io/lean-ai-learning/)。前五章只需要 VS Code 和 Lean；第 6、7 章示範如何讓 Claude Code 或 Codex 協助形式化，並檢查它有沒有偷改題目。
