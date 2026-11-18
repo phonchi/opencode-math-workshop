@@ -10,6 +10,7 @@ Three.js 以 importmap 釘版載入，integrity 涵蓋每一個會被抓的模�
 """
 import html
 import json
+import re
 import struct
 import sys
 import urllib.parse
@@ -53,6 +54,14 @@ GUIDE_FACE = ('<circle cx="24" cy="24" r="23" fill="#e6efe4"/>'
               '<path d="M11.5 24 Q11.5 9 24 9 Q36.5 9 36.5 24" stroke="#2f4566" stroke-width="2" fill="none"/>'
               '<rect x="9.5" y="21" width="4" height="7" rx="2" fill="#2f4566"/><rect x="34.5" y="21" width="4" height="7" rx="2" fill="#2f4566"/>'
               '<path d="M11.5 27 Q13 32 19 31.5" stroke="#2f4566" stroke-width="1.3" fill="none"/>')
+
+
+def site_icon() -> str:
+    """沿用主站 _head.fragment 的 favicon（data URL），兩邊不會不同步；少了它瀏覽器會去要網域根目錄的 /favicon.ico 而 404。"""
+    m = re.search(r'<link rel="icon"[^>]*>', (ROOT / "tools" / "_head.fragment").read_text(encoding="utf-8"))
+    if not m:
+        raise SystemExit("tools/_head.fragment 裡找不到 <link rel=\"icon\">")
+    return m.group(0)
 
 
 def esc(s: str) -> str:
@@ -253,6 +262,7 @@ def build() -> str:
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="OpenCode × AI-Math 工作坊的 3D 課程島：用一座島看完 {len(recs)} 個單元，點地標前往教材，也能先猜一題、做完 Lab 再對照參考結果。">
 <title>{TITLE} — OpenCode × AI-Math 工作坊</title>
+{site_icon()}
 <script>
 /* 有 WebGL 的瀏覽器先排 3D 版面並顯示載入中，避免 2D 卡片閃一下再切換；失敗時 island.js 會移除 */
 if (window.WebGLRenderingContext) document.documentElement.classList.add('gl-pending');
