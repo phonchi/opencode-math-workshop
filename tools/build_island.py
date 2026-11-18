@@ -41,7 +41,7 @@ CORE_REMAP = {f"{_CDN}/build/three.core.js": f"{_CDN}/build/three.core.min.js"}
 # 網頁字型只保留頂列標題：用 text= 只下載這幾個字；其餘一律用系統字型。
 TITLE = "工作坊課程島"
 FONTS = ("https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&display=swap&text="
-         + urllib.parse.quote(TITLE))
+         + urllib.parse.quote("".join(sorted(set(TITLE + M.SHOW["title"])))))   # 頂列標題＋投影版標題卡的字
 
 # 面板上阿卡的頭像：青綠外套、耳機，腰間三張卡（需求卡金、驗收卡綠、決策卡紅），與 island-scene.js 的 3D 嚮導同色
 GUIDE_FACE = ('<circle cx="24" cy="24" r="23" fill="#e6efe4"/>'
@@ -62,6 +62,22 @@ def site_icon() -> str:
     if not m:
         raise SystemExit("tools/_head.fragment 裡找不到 <link rel=\"icon\">")
     return m.group(0)
+
+
+def og_tags(title: str, description: str) -> str:
+    """LINE 與社群預覽：圖是 island/og.png（node tools/make_island_og.js 由實際 3D 全景產生），全站共用。"""
+    return "\n".join([
+        '<meta property="og:type" content="website">',
+        '<meta property="og:locale" content="zh_TW">',
+        f'<meta property="og:title" content="{esc(title)}">',
+        f'<meta property="og:description" content="{esc(description)}">',
+        f'<meta property="og:url" content="{M.SITE_URL}island/">',
+        f'<meta property="og:image" content="{M.SITE_URL}island/og.png">',
+        '<meta property="og:image:width" content="1200">',
+        '<meta property="og:image:height" content="630">',
+        f'<meta property="og:image:alt" content="{esc(TITLE)}：3D 全景">',
+        '<meta name="twitter:card" content="summary_large_image">',
+    ])
 
 
 def esc(s: str) -> str:
@@ -252,6 +268,11 @@ def build() -> str:
     preload = "\n".join(f'<link rel="modulepreload" href="{u}" integrity="{h}" crossorigin="anonymous">'
                         for u, h in THREE_SRI.items())
     sections = "\n".join(isle_section(g, recs) for g in M.ISLES)
+    desc = f"OpenCode × AI-Math 工作坊的 3D 課程島：用一座島看完 {len(recs)} 個單元，點地標前往教材，也能先猜一題、做完 Lab 再對照參考結果。"
+    qr = ROOT / "island" / "qr.png"
+    if not qr.exists():
+        raise SystemExit("缺 island/qr.png：跑 uv run --with segno python tools/make_island_qr.py")
+    qr_w = struct.unpack(">I", qr.read_bytes()[16:20])[0]
     jumps = "\n".join(f'      <button type="button" class="isl-jump-btn" data-grp="{g}">{esc(v["name"])}</button>'
                       for g, v in M.ISLES.items() if g != "ref")
     return f"""<!DOCTYPE html>
@@ -260,10 +281,13 @@ def build() -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="OpenCode × AI-Math 工作坊的 3D 課程島：用一座島看完 {len(recs)} 個單元，點地標前往教材，也能先猜一題、做完 Lab 再對照參考結果。">
+<meta name="description" content="{esc(desc)}">
+{og_tags(f"{TITLE}｜OpenCode × AI-Math 工作坊", desc)}
 <title>{TITLE} — OpenCode × AI-Math 工作坊</title>
 {site_icon()}
 <script>
+/* ?show 是會場投影版：只留慢慢轉的島、站名、標題卡和 QR code（連到工作坊總覽首頁） */
+if (/[?&]show(=|&|$)/.test(location.search)) document.documentElement.classList.add('show-mode');
 /* 有 WebGL 的瀏覽器先排 3D 版面並顯示載入中，避免 2D 卡片閃一下再切換；失敗時 island.js 會移除 */
 if (window.WebGLRenderingContext) document.documentElement.classList.add('gl-pending');
 </script>
@@ -368,6 +392,11 @@ if (window.WebGLRenderingContext) document.documentElement.classList.add('gl-pen
   <div class="cmp-body" id="cmpBody"></div>
   <p class="cmp-note" id="cmpNote"></p>
 </dialog>
+<div class="show-title" aria-hidden="true"><b>{esc(M.SHOW["title"])}</b><span>{esc(M.SHOW["sub"])}</span></div>
+<aside class="show-card" aria-label="用手機掃描 QR code，打開工作坊教材">
+  <img src="qr.png" width="{qr_w}" height="{qr_w}" alt="工作坊總覽首頁的 QR code" loading="lazy">
+  <p>{esc(M.SHOW["qr_caption"])}</p>
+</aside>
 <script type="application/json" id="island-data">
 {data_json}
 </script>

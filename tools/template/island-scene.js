@@ -11,6 +11,7 @@
 function buildWorld(THREE, addons, renderer, stage, canvas) {
   const { OrbitControls, RoundedBoxGeometry } = addons;
   const motion = () => !reduceMotion.matches;
+  const SHOW = document.documentElement.classList.contains('show-mode');   // 會場投影版：沒有人操作
   const narrow = () => stage.clientWidth < 768;
   const rnd = mulberry32(208);
   const SQ = Math.SQRT1_2;
@@ -1336,6 +1337,9 @@ function buildWorld(THREE, addons, renderer, stage, canvas) {
   controls.minZoom = .7; controls.maxZoom = 7;
   controls.enableDamping = motion(); controls.dampingFactor = .08;
   controls.rotateSpeed = .6; controls.zoomSpeed = 1.1;
+  // 會場投影版沒有人操作，讓島慢慢轉；不動畫偏好優先
+  controls.autoRotate = SHOW && motion();
+  controls.autoRotateSpeed = .35;
   controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_ROTATE };
   camera.position.set(HOME.x + Math.sin(POLAR) * Math.sin(FACE) * DIST, Math.cos(POLAR) * DIST, HOME.z + Math.sin(POLAR) * Math.cos(FACE) * DIST);
   camera.lookAt(HOME); camera.updateMatrixWorld();
@@ -1360,6 +1364,7 @@ function buildWorld(THREE, addons, renderer, stage, canvas) {
   }
   controls.target.copy(HOME);
   camera.position.copy(HOME).addScaledVector(FV, -DIST); camera.lookAt(HOME);
+  if (SHOW) { camera.zoom = .8; camera.updateProjectionMatrix(); }   // 投影版：島群縮小一點，留出左上標題卡與右下 QR 卡的位置
   guideSpot(guideHomeStem, guide.position); faceCamera();
   // 視錐：寬度涵蓋整個群島（約 ±36），窄螢幕略裁兩翼
   function resize() {
@@ -1547,7 +1552,7 @@ function buildWorld(THREE, addons, renderer, stage, canvas) {
   const DPRS = narrow() ? [1.25, 1] : [1.5, 1.25, 1];
   const IDLE_MS = () => window.__islandIdleMs || 45000;          // 檢查腳本可以把門檻調短
   let last = performance.now(), lastDraw = 0, lastInput = performance.now(), sampleT = 0, sampleN = 0, fastWin = 0;
-  const idle = () => performance.now() - lastInput > IDLE_MS();
+  const idle = () => !SHOW && performance.now() - lastInput > IDLE_MS();   // 投影版沒人操作，不能轉一會兒就停
   const animating = () => motion() && onScreen && document.visibilityState === 'visible' && !idle();
   function wake() { const was = idle(); lastInput = performance.now(); if (was) requestRender(); }
   ['pointerdown', 'pointermove', 'wheel', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, wake, { passive: true }));
@@ -1557,7 +1562,8 @@ function buildWorld(THREE, addons, renderer, stage, canvas) {
   function frame(now) {
     raf = 0; if (!alive) return;
     const dt = Math.min(.1, (now - last) / 1000); last = now;
-    const flying = stepFly(now), hopping = stepGuide(now), moved = controls.update(), anim = animating();
+    // 投影版的自轉依實際經過的時間：軟體算圖或慢機器上轉速也一樣（約 170 秒一圈）
+    const flying = stepFly(now), hopping = stepGuide(now), moved = controls.update(SHOW ? dt : null), anim = animating();
     let fading = false;
     if (night !== nightTarget) {
       night = motion() ? (nightTarget > night ? Math.min(nightTarget, night + dt / 1.2) : Math.max(nightTarget, night - dt / 1.2)) : nightTarget;

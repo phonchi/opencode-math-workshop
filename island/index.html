@@ -5,14 +5,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="OpenCode × AI-Math 工作坊的 3D 課程島：用一座島看完 15 個單元，點地標前往教材，也能先猜一題、做完 Lab 再對照參考結果。">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:title" content="工作坊課程島｜OpenCode × AI-Math 工作坊">
+<meta property="og:description" content="OpenCode × AI-Math 工作坊的 3D 課程島：用一座島看完 15 個單元，點地標前往教材，也能先猜一題、做完 Lab 再對照參考結果。">
+<meta property="og:url" content="https://phonchi.github.io/opencode-math-workshop/island/">
+<meta property="og:image" content="https://phonchi.github.io/opencode-math-workshop/island/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="工作坊課程島：3D 全景">
+<meta name="twitter:card" content="summary_large_image">
 <title>工作坊課程島 — OpenCode × AI-Math 工作坊</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2213%22%20fill%3D%22%23191922%22%2F%3E%3Cpath%20d%3D%22M16%2020l12%2012-12%2012%22%20fill%3D%22none%22%20stroke%3D%22%23e3c273%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Crect%20x%3D%2233%22%20y%3D%2240%22%20width%3D%2217%22%20height%3D%226%22%20rx%3D%223%22%20fill%3D%22%23b8503c%22%2F%3E%3C%2Fsvg%3E">
 <script>
+/* ?show 是會場投影版：只留慢慢轉的島、站名、標題卡和 QR code（連到工作坊總覽首頁） */
+if (/[?&]show(=|&|$)/.test(location.search)) document.documentElement.classList.add('show-mode');
 /* 有 WebGL 的瀏覽器先排 3D 版面並顯示載入中，避免 2D 卡片閃一下再切換；失敗時 island.js 會移除 */
 if (window.WebGLRenderingContext) document.documentElement.classList.add('gl-pending');
 </script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&display=swap&text=%E5%B7%A5%E4%BD%9C%E5%9D%8A%E8%AA%B2%E7%A8%8B%E5%B3%B6" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&display=swap&text=%20AIegnt%C3%97%E4%BD%9C%E5%9D%8A%E5%AD%B8%E5%B3%B6%E5%B7%A5%E6%95%B8%E7%A8%8B%E8%AA%B2" rel="stylesheet">
 <style>
 /* island/index.html 專用（3D 課程島）。色票取自網站 tools/_head.fragment：墨 #1b1b2b、米白 #f6f2e9、深藍 #2a3c78、
    磚紅 #b8503c；島上另用森林綠 #1a6b4a、金 #f5b82e。
@@ -285,6 +297,27 @@ code{font-family:var(--mono);font-size:.92em;}
 .cmp-actions{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin:.7rem 0 .3rem;}
 .cmp-after{font-size:.88rem;line-height:1.8;color:var(--fg2);margin-top:.5rem;text-wrap:pretty;}
 .cmp-after:empty{display:none;}
+
+/* ── 會場投影版（?show）：只留慢慢轉的島、站名、標題卡和 QR code ── */
+.show-title,.show-card{display:none;}
+.show-mode body,.show-mode #islCanvas{cursor:none;}
+.show-mode body{overflow:hidden;background:#a2dbe6;}
+.show-mode .isl-bar,.show-mode .isl-list,.show-mode .isl-jumps,.show-mode .isl-hint,.show-mode .isl-bubble,
+.show-mode .isl-night,.show-mode .isl-panel,.show-mode .cmp{display:none !important;}
+.show-mode .isl-main,.show-mode .isl-stage{display:block !important;width:100vw;height:100vh !important;}
+.show-mode .isl-tag{font-size:clamp(1.05rem,1.2vw,1.55rem);pointer-events:none;}
+.show-mode .isl-tag-num{min-width:2.3rem;font-size:1.05rem;}
+.show-title{position:fixed;z-index:6;left:3vw;top:4vh;padding:1.6vh 1.8vw;border-radius:10px;color:#fff;background:rgba(27,27,43,.88);}
+.show-title b{display:block;font:900 clamp(2rem,4.4vw,4.8rem)/1.2 'Noto Serif TC',var(--sans);letter-spacing:.06em;}
+.show-title span{display:block;font-size:clamp(.95rem,1.5vw,1.8rem);}
+.show-card{position:fixed;z-index:6;right:3vw;bottom:4vh;flex-direction:column;align-items:center;gap:1vh;padding:1.6vh;border-radius:10px;background:#fff;box-shadow:0 8px 28px rgba(27,27,43,.35);}
+.show-card img{display:block;width:min(30vh,22vw);height:auto;image-rendering:pixelated;}
+.show-card p{max-width:min(30vh,22vw);text-align:center;font-weight:900;font-size:clamp(.95rem,1.35vw,1.6rem);line-height:1.35;}
+.show-mode .show-title{display:block;}
+.show-mode .show-card{display:flex;}
+/* 投影電腦跑不動 3D 時，QR code 放大置中，仍能引導大家掃描 */
+.show-nogl .show-card{right:50%;bottom:45%;transform:translate(50%,50%);}
+.show-nogl .show-card img,.show-nogl .show-card p{width:min(45vh,36vw);max-width:none;}
 
 /* ── 手機 ─────────────────────────────────────────── */
 @media (max-width:767px){
@@ -608,6 +641,11 @@ code{font-family:var(--mono);font-size:.92em;}
   <div class="cmp-body" id="cmpBody"></div>
   <p class="cmp-note" id="cmpNote"></p>
 </dialog>
+<div class="show-title" aria-hidden="true"><b>AI Agent × 數學</b><span>OpenCode 體驗工作坊 · 國立中山大學人工智慧與數學整合學程</span></div>
+<aside class="show-card" aria-label="用手機掃描 QR code，打開工作坊教材">
+  <img src="qr.png" width="444" height="444" alt="工作坊總覽首頁的 QR code" loading="lazy">
+  <p>掃一下，打開今天的教材</p>
+</aside>
 <script type="application/json" id="island-data">
 {
  "isles": [
@@ -1670,8 +1708,16 @@ function hasWebGL() {
     return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
   } catch (e) { return false; }
 }
+/* 會場投影版：盡量不讓投影電腦進入螢幕保護；瀏覽器不支援就略過 */
+const SHOW_MODE = document.documentElement.classList.contains('show-mode');
+if (SHOW_MODE && navigator.wakeLock) {
+  const keepAwake = () => { if (!document.hidden) navigator.wakeLock.request('screen').catch(() => {}); };
+  keepAwake();
+  document.addEventListener('visibilitychange', keepAwake);
+}
 function fallback2D(reason) {
   document.documentElement.classList.remove('gl-pending');
+  if (SHOW_MODE) document.documentElement.classList.add('show-nogl');   // 投影版跑不動 3D：QR code 放大置中
   document.body.classList.remove('webgl-ready');
   $('islStage').hidden = true; $('islReset').hidden = true;
   scene = null;
@@ -1681,6 +1727,7 @@ if (hasWebGL()) {
   initScene().catch(err => fallback2D(err && err.message ? err.message : String(err)));
 } else {
   document.documentElement.classList.remove('gl-pending');
+  if (SHOW_MODE) document.documentElement.classList.add('show-nogl');
   console.info('3D 課程島未啟用，改用 2D 地圖：瀏覽器沒有 WebGL');
 }
 
@@ -1728,7 +1775,7 @@ async function initScene() {
   // 課程島淡入後，阿卡冒出來打招呼；過一陣子縮成小按鈕
   bubble.setAttribute('aria-label', '請' + TOUR.name + '帶路');
   setTimeout(() => {
-    if (!scene) return;
+    if (!scene || SHOW_MODE) return;
     bubble.hidden = false;
     setTimeout(shrinkBubble, 8000);
   }, 1500);
@@ -1916,6 +1963,7 @@ function renderPanelCompare(stem) {
 function buildWorld(THREE, addons, renderer, stage, canvas) {
   const { OrbitControls, RoundedBoxGeometry } = addons;
   const motion = () => !reduceMotion.matches;
+  const SHOW = document.documentElement.classList.contains('show-mode');   // 會場投影版：沒有人操作
   const narrow = () => stage.clientWidth < 768;
   const rnd = mulberry32(208);
   const SQ = Math.SQRT1_2;
@@ -3241,6 +3289,9 @@ function buildWorld(THREE, addons, renderer, stage, canvas) {
   controls.minZoom = .7; controls.maxZoom = 7;
   controls.enableDamping = motion(); controls.dampingFactor = .08;
   controls.rotateSpeed = .6; controls.zoomSpeed = 1.1;
+  // 會場投影版沒有人操作，讓島慢慢轉；不動畫偏好優先
+  controls.autoRotate = SHOW && motion();
+  controls.autoRotateSpeed = .35;
   controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_ROTATE };
   camera.position.set(HOME.x + Math.sin(POLAR) * Math.sin(FACE) * DIST, Math.cos(POLAR) * DIST, HOME.z + Math.sin(POLAR) * Math.cos(FACE) * DIST);
   camera.lookAt(HOME); camera.updateMatrixWorld();
@@ -3265,6 +3316,7 @@ function buildWorld(THREE, addons, renderer, stage, canvas) {
   }
   controls.target.copy(HOME);
   camera.position.copy(HOME).addScaledVector(FV, -DIST); camera.lookAt(HOME);
+  if (SHOW) { camera.zoom = .8; camera.updateProjectionMatrix(); }   // 投影版：島群縮小一點，留出左上標題卡與右下 QR 卡的位置
   guideSpot(guideHomeStem, guide.position); faceCamera();
   // 視錐：寬度涵蓋整個群島（約 ±36），窄螢幕略裁兩翼
   function resize() {
@@ -3452,7 +3504,7 @@ function buildWorld(THREE, addons, renderer, stage, canvas) {
   const DPRS = narrow() ? [1.25, 1] : [1.5, 1.25, 1];
   const IDLE_MS = () => window.__islandIdleMs || 45000;          // 檢查腳本可以把門檻調短
   let last = performance.now(), lastDraw = 0, lastInput = performance.now(), sampleT = 0, sampleN = 0, fastWin = 0;
-  const idle = () => performance.now() - lastInput > IDLE_MS();
+  const idle = () => !SHOW && performance.now() - lastInput > IDLE_MS();   // 投影版沒人操作，不能轉一會兒就停
   const animating = () => motion() && onScreen && document.visibilityState === 'visible' && !idle();
   function wake() { const was = idle(); lastInput = performance.now(); if (was) requestRender(); }
   ['pointerdown', 'pointermove', 'wheel', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, wake, { passive: true }));
@@ -3462,7 +3514,8 @@ function buildWorld(THREE, addons, renderer, stage, canvas) {
   function frame(now) {
     raf = 0; if (!alive) return;
     const dt = Math.min(.1, (now - last) / 1000); last = now;
-    const flying = stepFly(now), hopping = stepGuide(now), moved = controls.update(), anim = animating();
+    // 投影版的自轉依實際經過的時間：軟體算圖或慢機器上轉速也一樣（約 170 秒一圈）
+    const flying = stepFly(now), hopping = stepGuide(now), moved = controls.update(SHOW ? dt : null), anim = animating();
     let fading = false;
     if (night !== nightTarget) {
       night = motion() ? (nightTarget > night ? Math.min(nightTarget, night + dt / 1.2) : Math.max(nightTarget, night - dt / 1.2)) : nightTarget;

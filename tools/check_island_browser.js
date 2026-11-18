@@ -392,6 +392,48 @@ const KEY = k => 'aimath-island:' + k;
     await page.close();
   }
 
+  /* ═ (show) 會場投影版：?show ═ */
+  console.log('(show) 會場投影版');
+  {
+    const { page, errors } = await open('gl');
+    await page.setViewport({ width: 1920, height: 1080 });
+    await page.evaluateOnNewDocument(() => { window.__islandIdleMs = 1500; });   // 閒置門檻調短：投影版要照樣一直轉
+    await page.goto(URL_ + '?show', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForSelector('body.webgl-ready', { timeout: 40000 }).catch(() => note('投影版沒有進入 3D'));
+    await page.waitForFunction(() => !document.documentElement.classList.contains('gl-pending'), { timeout: 40000 }).catch(() => {});
+    await sleep(2500);
+    const v = await page.evaluate(() => {
+      const vis = s => { const e = document.querySelector(s); return !!e && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0; };
+      const st = document.getElementById('islStage').getBoundingClientRect();
+      return { bar: vis('.isl-bar'), list: vis('.isl-list'), bubble: vis('#islBubble'), night: vis('#islNight'), title: vis('.show-title'), card: vis('.show-card'),
+        qr: document.querySelector('.show-card img').naturalWidth, full: Math.round(st.width) === innerWidth && Math.round(st.height) === innerHeight };
+    });
+    if (v.bar || v.list || v.bubble || v.night) note(`投影版還看得到操作介面：${JSON.stringify(v)}`);
+    if (!v.title || !v.card || !v.qr || !v.full) note(`投影版的標題卡、QR 或全螢幕舞台不對：${JSON.stringify(v)}`);
+    else ok('投影版：只留全螢幕的島、標題卡和 QR code');
+    const p0 = await page.evaluate(() => window.__island.screenPos('index'));
+    await sleep(3000);                                   // 已超過調短的閒置門檻
+    const p1 = await page.evaluate(() => window.__island.screenPos('index'));
+    if (Math.hypot(p1.x - p0.x, p1.y - p0.y) < 15) note('投影版沒有自己慢慢轉，或閒置後停了'); else ok(`投影版：沒人操作也一直慢慢轉（3 秒移動 ${Math.round(Math.hypot(p1.x - p0.x, p1.y - p0.y))} px）`);
+    await page.screenshot({ path: path.join(SHOT_DIR, 'show_1920.png') });
+    errors.forEach(e => note('投影版 console：' + e));
+    await page.close();
+  }
+  {
+    const { page, errors } = await open('nogl');
+    await page.setViewport({ width: 1920, height: 1080 });
+    await page.goto(URL_ + '?show', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await sleep(1500);
+    const r = await page.evaluate(() => {
+      const b = document.querySelector('.show-card').getBoundingClientRect();
+      return { nogl: document.documentElement.classList.contains('show-nogl'), cx: (b.left + b.right) / 2 / innerWidth, w: b.width / innerWidth };
+    });
+    if (!r.nogl || Math.abs(r.cx - .5) > .05 || r.w < .25) note(`投影版跑不動 3D 時，QR 沒有放大置中：${JSON.stringify(r)}`); else ok('投影版跑不動 3D 時，QR code 放大置中');
+    await page.screenshot({ path: path.join(SHOT_DIR, 'show_nogl.png') });
+    errors.forEach(e => note('投影版（無 WebGL）console：' + e));
+    await page.close();
+  }
+
   /* ═ 代表圖深連結的落點 ═ */
   console.log('(deep links)');
   {

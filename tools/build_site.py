@@ -327,7 +327,10 @@ def compose_page(slug, source, config, head, tail, root=ROOT):
     body = expand_assets(remove_legacy_pagers(source[metadata.end():]), root)
     body, headings = add_heading_ids(body)
     body = split_cmd_lines(body)
-    for key, value in [('__TITLE__', title), ('__DESC__', description)]:
+    # 連結預覽：全站共用課程島的 3D 全景 island/og.png（tools/make_island_og.js 產生）
+    site = config['site_url']
+    og = [('__OG_URL__', site if slug == 'index' else f'{site}{slug}.html'), ('__OG_IMAGE__', f'{site}island/og.png')]
+    for key, value in [('__TITLE__', title), ('__DESC__', description), *og]:
         head = head.replace(key, html.escape(value, quote=True))
     head = head.replace('__SITE_CSS__', (root / 'tools/site-layout.css').read_text(encoding='utf-8'))
     tail = tail.replace('__SITE_JS__', (root / 'tools/site-navigation.js').read_text(encoding='utf-8'))

@@ -11,6 +11,7 @@ import base64
 import hashlib
 import json
 import re
+import struct
 import sys
 import urllib.request
 from html.parser import HTMLParser
@@ -90,7 +91,7 @@ def main():
                 fail(f"{p['stem']} 的深連結 #{fid} 不存在")
     # 外部資源只能是 Three.js（釘版）與 Google Fonts
     for u in set(re.findall(r'https?://[^\s"\'<>)]+', src)):
-        if not (u.startswith(I._CDN) or u.startswith("https://fonts.g") or u.startswith("http://www.w3.org")):
+        if not (u.startswith(I._CDN) or u.startswith("https://fonts.g") or u.startswith("http://www.w3.org") or u.startswith(I.M.SITE_URL)):
             fail(f"未允許的外部資源 {u}")
     m = re.search(r'<script type="importmap">\n(.*?)\n</script>', src, re.S)
     assert m, "找不到 importmap"
@@ -132,6 +133,33 @@ def main():
         for n in c["nums"]:
             if "." in n and n in shown:
                 fail(f"參考數字 {n} 出現在學生一進來就看得到的文字裡")
+    # 會場投影版：QR code 要能解碼回工作坊總覽首頁（有 OpenCV 才解碼；沒有就只檢查檔案）
+    qr = ROOT / "island" / "qr.png"
+    if not qr.exists() or qr.read_bytes()[:4] != b"\x89PNG":
+        fail("缺投影版的 island/qr.png")
+    else:
+        try:
+            import cv2  # noqa: PLC0415
+            got = cv2.QRCodeDetector().detectAndDecode(cv2.imread(str(qr)))[0]
+            if got != I.M.SHOW["qr_url"]:
+                fail(f"qr.png 解碼是「{got}」，不是 {I.M.SHOW['qr_url']}（跑 uv run --with segno python tools/make_island_qr.py）")
+        except ImportError:
+            print("· 沒有 OpenCV，略過 QR 解碼")
+    for cls in ('class="show-title"', 'class="show-card"', 'src="qr.png"'):
+        if cls not in src:
+            fail(f"投影版少了 {cls}")
+    # 連結預覽：island/og.png 1200×630、300 KB 以內；每一頁都有 og 標籤且指向它
+    og = ROOT / "island" / "og.png"
+    if not og.exists():
+        fail("缺 island/og.png：跑 node tools/make_island_og.js")
+    else:
+        w, h = struct.unpack(">II", og.read_bytes()[16:24])
+        if (w, h) != (1200, 630) or og.stat().st_size > 300 * 1024:
+            fail(f"og.png 應為 1200×630、300 KB 以內，現在 {w}×{h}、{og.stat().st_size // 1024} KB")
+    for page in ["island/index"] + [f"{p}" for p in ["index"] + order]:
+        html_ = (ROOT / f"{page}.html").read_text(encoding="utf-8")
+        if f'<meta property="og:image" content="{I.M.SITE_URL}island/og.png">' not in html_:
+            fail(f"{page}.html 沒有指向 island/og.png 的 og:image")
     # 總覽 hero 與每頁側欄的入口
     for page in ["index"] + order:
         html = (ROOT / f"{page}.html").read_text(encoding="utf-8")

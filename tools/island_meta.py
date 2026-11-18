@@ -10,6 +10,7 @@ build_island.py 會比對：pages.json 的每一頁都要有 STOPS、GUIDE、QUI
   FIGS    — 三個 Lab 的代表互動圖（教材頁裡 explorer 的標題 id；截圖取 explorer 的預設狀態）
   GUIDE   — 阿卡到每一站說的話，最後一句固定是「我替你做的決定：…」
   TOUR    — 路線與台詞
+  SHOW    — 會場投影版的標題卡與 QR code
   QUIZ    — 先猜：每頁一題「答案確定、而且不是該頁動手觀察點」的機制題；answer 是選項索引，正解位置要平衡
   COMPARE — 「做完再對照」的兩種面板，按「我做完這一關了」才展開
 
@@ -29,6 +30,16 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = json.loads((ROOT / "tools" / "pages.json").read_text(encoding="utf-8"))
+
+SITE_URL = CONFIG["site_url"]
+
+# 會場投影版（island/?show）：只留慢慢轉的島、站名、標題卡和 QR code。QR 連到工作坊總覽首頁（開場時學生要用教材）
+SHOW = dict(
+    title="AI Agent × 數學",
+    sub="OpenCode 體驗工作坊 · 國立中山大學人工智慧與數學整合學程",
+    qr_url=SITE_URL,
+    qr_caption="掃一下，打開今天的教材",
+)
 
 GROUPS = {
     "開始之前": "start",

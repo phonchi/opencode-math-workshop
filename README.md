@@ -48,6 +48,10 @@
 | 場景與地標動畫 | `tools/template/island-scene.js`；列表、面板、導覽在 `island.js`，對照面板在 `island-compare.js`，樣式在 `island.css` |
 | 三個 Lab 的代表圖縮圖 | `node tools/build_island_figs.js`，教材的 explorer 改版後重跑並 commit |
 
+**會場投影版**是 `island/?show`：只留慢慢轉的島、站名、左上的標題卡和右下的 QR code，給開場與收尾投影用；沒人操作也不會停，跑不動 3D 時 QR code 會放大置中。QR code 連到工作坊總覽首頁，圖檔 `island/qr.png` 由 `uv run --with segno python tools/make_island_qr.py` 產生，網址（`pages.json` 的 `site_url`）沒變就不必重產。
+
+**連結預覽**：全站各頁的 og 標籤共用 `island/og.png`（1200×630），標題與說明用各頁自己的。島的構圖或地標改了，跑 `node tools/make_island_og.js`，再用 `pngquant --force --skip-if-larger --quality 70-90 --output island/og.png island/og.png` 壓縮後 commit。這兩張 PNG 在 `.gitignore` 裡另外放行。
+
 改完：`python3 tools/build_island.py` → `python3 tools/check_island.py --net` → `node tools/check_island_browser.js`。產生器會確認每題猜題的出處片語、對照面板的每個數字都還在教材原文裡，教材改了數字而島沒跟上就會報錯。地標的動畫分兩段：沒選取時輪播的 idle 不能露出結果，答完猜題才播完整的 pose。足跡、導覽進度與「我做完這一關了」只存在該裝置的 localStorage（`aimath-island:*`），「清除足跡」會一併清掉。
 
 ## 維護檢查

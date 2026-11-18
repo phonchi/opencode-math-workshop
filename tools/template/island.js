@@ -294,8 +294,16 @@ function hasWebGL() {
     return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
   } catch (e) { return false; }
 }
+/* 會場投影版：盡量不讓投影電腦進入螢幕保護；瀏覽器不支援就略過 */
+const SHOW_MODE = document.documentElement.classList.contains('show-mode');
+if (SHOW_MODE && navigator.wakeLock) {
+  const keepAwake = () => { if (!document.hidden) navigator.wakeLock.request('screen').catch(() => {}); };
+  keepAwake();
+  document.addEventListener('visibilitychange', keepAwake);
+}
 function fallback2D(reason) {
   document.documentElement.classList.remove('gl-pending');
+  if (SHOW_MODE) document.documentElement.classList.add('show-nogl');   // 投影版跑不動 3D：QR code 放大置中
   document.body.classList.remove('webgl-ready');
   $('islStage').hidden = true; $('islReset').hidden = true;
   scene = null;
@@ -305,6 +313,7 @@ if (hasWebGL()) {
   initScene().catch(err => fallback2D(err && err.message ? err.message : String(err)));
 } else {
   document.documentElement.classList.remove('gl-pending');
+  if (SHOW_MODE) document.documentElement.classList.add('show-nogl');
   console.info('3D 課程島未啟用，改用 2D 地圖：瀏覽器沒有 WebGL');
 }
 
@@ -352,7 +361,7 @@ async function initScene() {
   // 課程島淡入後，阿卡冒出來打招呼；過一陣子縮成小按鈕
   bubble.setAttribute('aria-label', '請' + TOUR.name + '帶路');
   setTimeout(() => {
-    if (!scene) return;
+    if (!scene || SHOW_MODE) return;
     bubble.hidden = false;
     setTimeout(shrinkBubble, 8000);
   }, 1500);

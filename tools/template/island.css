@@ -270,6 +270,27 @@ code{font-family:var(--mono);font-size:.92em;}
 .cmp-after{font-size:.88rem;line-height:1.8;color:var(--fg2);margin-top:.5rem;text-wrap:pretty;}
 .cmp-after:empty{display:none;}
 
+/* ── 會場投影版（?show）：只留慢慢轉的島、站名、標題卡和 QR code ── */
+.show-title,.show-card{display:none;}
+.show-mode body,.show-mode #islCanvas{cursor:none;}
+.show-mode body{overflow:hidden;background:#a2dbe6;}
+.show-mode .isl-bar,.show-mode .isl-list,.show-mode .isl-jumps,.show-mode .isl-hint,.show-mode .isl-bubble,
+.show-mode .isl-night,.show-mode .isl-panel,.show-mode .cmp{display:none !important;}
+.show-mode .isl-main,.show-mode .isl-stage{display:block !important;width:100vw;height:100vh !important;}
+.show-mode .isl-tag{font-size:clamp(1.05rem,1.2vw,1.55rem);pointer-events:none;}
+.show-mode .isl-tag-num{min-width:2.3rem;font-size:1.05rem;}
+.show-title{position:fixed;z-index:6;left:3vw;top:4vh;padding:1.6vh 1.8vw;border-radius:10px;color:#fff;background:rgba(27,27,43,.88);}
+.show-title b{display:block;font:900 clamp(2rem,4.4vw,4.8rem)/1.2 'Noto Serif TC',var(--sans);letter-spacing:.06em;}
+.show-title span{display:block;font-size:clamp(.95rem,1.5vw,1.8rem);}
+.show-card{position:fixed;z-index:6;right:3vw;bottom:4vh;flex-direction:column;align-items:center;gap:1vh;padding:1.6vh;border-radius:10px;background:#fff;box-shadow:0 8px 28px rgba(27,27,43,.35);}
+.show-card img{display:block;width:min(30vh,22vw);height:auto;image-rendering:pixelated;}
+.show-card p{max-width:min(30vh,22vw);text-align:center;font-weight:900;font-size:clamp(.95rem,1.35vw,1.6rem);line-height:1.35;}
+.show-mode .show-title{display:block;}
+.show-mode .show-card{display:flex;}
+/* 投影電腦跑不動 3D 時，QR code 放大置中，仍能引導大家掃描 */
+.show-nogl .show-card{right:50%;bottom:45%;transform:translate(50%,50%);}
+.show-nogl .show-card img,.show-nogl .show-card p{width:min(45vh,36vw);max-width:none;}
+
 /* ── 手機 ─────────────────────────────────────────── */
 @media (max-width:767px){
   :root{--bar-h:54px;}
