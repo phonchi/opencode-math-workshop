@@ -277,6 +277,9 @@ def navigation(config, current, headings):
                 items.append('</ul>')
             items.append('</li>')
         items.append('</ul></div>')
+    # 3D 課程島不是章節（不在 pages.json），只在側欄最後放一個入口
+    items.append('<div class="nav-group"><p class="nav-group-title">地圖</p><ul>'
+                 '<li><a class="chapter-link" href="island/index.html">3D 課程島</a></li></ul></div>')
     items.append('</nav>')
     return '\n'.join(items)
 
